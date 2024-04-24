@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+namespace hospitalApiProject.Models;
+
+public partial class Option
+{
+    public int OptionId { get; set; }
+
+    public int? QuestionId { get; set; }
+
+    public string OptionText { get; set; } = null!;
+
+    public int MapQuestionId { get; set; }
+
+    public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
+
+    public virtual Question? Question { get; set; }
+}
