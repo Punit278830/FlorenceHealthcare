@@ -1,0 +1,58 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.departmentList">Department </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Edit Department</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="depForm" (ngSubmit)="editDepartment(depForm)">
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="departmet">Department Name <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="departmentName" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="departmet">Department Status <span
+                                                class="login-danger">*</span></label>
+                                        <mat-select formControlName="departmentStatus" class="form-control select">
+
+                                            <mat-option *ngFor="let data of depStatus"
+                                                [value]="data.value">{{data.value}}</mat-option>
+                                        </mat-select>
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-10">
+                                    <div class="doctor-submit text-end">
+                                        <button type="submit" class="btn btn-primary submit-form me-2">Update
+                                            Department</button>
+                                        <button type="button" class="btn btn-primary cancel-form"
+                                            (click)="cancleUpdate()">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

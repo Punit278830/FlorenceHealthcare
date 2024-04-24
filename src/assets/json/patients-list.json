@@ -1,0 +1,95 @@
+{
+    "data": [
+        {
+            "name" : "Prabhat jain",
+            "department" : "Otolaryngology",
+            "specialization" : "Infertility",
+            "degree" : "MBBS, MS",
+            "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-01.jpg"
+        },
+        {
+            "name" : "Dr. Arvind pant",
+            "department" : "Urology",
+            "specialization" : "Prostate",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-02.jpg"
+        },
+        {
+            "name" : "Malay Sharma",
+            "department" : "Otolaryngology",
+            "specialization" : "Infertility",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-03.jpg"
+        },
+        {
+            "name" : "Dr. vipul kirat",
+            "department" : "Radiology",
+            "specialization" : "Cancer",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-04.jpg"
+        },
+        {
+            "name" : "Dr. Ashish Gupta",
+            "department" : "Dentist",
+            "specialization" : "Prostate",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-05.jpg"
+        },
+        {
+            "name" : "Dr. Swati Garg",
+            "department" : "Gynocolgy",
+            "specialization" : "Prostate",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-06.jpg"
+        },
+        {
+            "name" : "Dr. Monika Singh",
+            "department" : "Gynocolgy",
+            "specialization" : "Prostate",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-07.jpg"
+        },
+        {
+            "name" : "Dr. Nilesh Lamba",
+            "department" : "Otolaryngology",
+            "specialization" : "Infertility",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-08.jpg"
+        },
+        {
+            "name" : " Dr. Varun Bhatnagar",
+            "department" : "Urology",
+            "specialization" : "Prostate",
+            "degree" : "MBBS, MS",
+             "mobile" : "+91 8588823232",
+            "email" : "example@email.com",
+            "joiningDate" : "01.10.2022",
+            "img" : "assets/img/profiles/avatar-09.jpg"
+        }
+    ],
+    "totalData":9
+}

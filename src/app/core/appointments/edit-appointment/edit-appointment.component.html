@@ -1,0 +1,279 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <ngx-spinner bdColor="rgba(20,20,20,0.6)" size="medium" color="#AAA"
+                type="line-spin-clockwise-fade-rotating">
+                <p style="font-size: 20px; color: white">Loading...</p>
+            </ngx-spinner>
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.appointmentList">Appointment </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Book Appointment</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+        <div class="row">
+            <!-- <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <div class="page-table-header mb-2">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="doctor-table-blk">
+                                        <h3>Search Patient</h3>
+                                        <div class="doctor-search-blk">
+                                            <div class="top-nav-search table-search-blk">
+                                                <input #searchDataValue type="text" class="form-control"
+                                                    placeholder="Search Patient"
+                                                    (keyup)="searchData(searchDataValue.value)">
+                                                <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
+                                            </div>
+                                            <div class="add-group">
+                                                <a [routerLink]="routes.addPatient"
+                                                    class="btn btn-primary add-pluss ms-2"><img
+                                                        src="assets/img/icons/plus.svg" alt=""></a>
+                                                <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2"><img
+                                                        src="assets/img/icons/re-fresh.svg" alt=""></a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+            <div class="card">
+                <div class="card-body">
+                    <div class="page-table-header mb-2">
+                        <!-- <div class="table-responsive">
+                            <table matSort class="table border-0 custom-table comman-table datatable mb-0">
+                                <thead>
+                                    <tr>
+                                        <th mat-sort-header="checkbox">
+                                            <div class="form-check check-tables">
+                                                <input class="form-check-input" type="checkbox" value="something">
+                                            </div>
+                                        </th>
+                                        <th mat-sort-header="name">Name</th>
+                                        <th mat-sort-header="department">Date of birth</th>
+                                        <th mat-sort-header="specialization">Mobile</th>
+                                        <th mat-sort-header="degree">Email</th>
+                                        <th mat-sort-header="mobile">Gender</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let data of searchResults">
+                                        <td>
+                                            <div class="form-check check-tables">
+                                                <input class="form-check-input" type="checkbox" value="something">
+                                            </div>
+                                        </td>
+                                        <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
+                                            (keydown.enter)="postDatatoAppointment(data.patientId)" tabindex="0">
+                                            <img width="28" height="28" class="rounded-circle m-r-5"
+                                                alt="">{{data.firstName}} {{data.lastName}}
+                                        </td>
+                                        <td>{{data.dob}}</td>
+                                        <td><a href="javascript:;">{{data.mobile}}</a></td>
+                                        <td>{{data.email}}</td>
+                                        <td>{{data.gender}}</td>
+                                        <td class="text-end">
+                                                                                    </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+
+
+
+                        </div> -->
+                        <form [formGroup]="bookappointment" (ngSubmit)="updateBookAppointment(bookappointment)">
+                            <!-- <div class="row">
+                                <div class="col-12">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Patient Name</th>
+                                                <th scope="col">Age</th>
+                                                <th scope="col">Mobile</th>
+                                                <th scope="col">Gender</th>
+                                                <th scope="col">Email</th>
+                                                 Add more headers based on your patient details 
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{appointment.firstName}} {{appointment.lastName}}</td>
+                                                <td>{{appointment.ageinYear}}</td>
+                                                <td>{{appointment.mobile}}</td>
+                                                <td>{{appointment.gender}}</td>
+                                                <td>{{appointment.email}}</td>
+                                                Add more cells based on your patient details
+                                            </tr>
+                                            Add more rows for additional patients
+                                        </tbody>
+                                    </table> -->
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-heading">
+                                        <h4>Appointment Details</h4>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="Date">Date of Appointment <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control  datetimepicker" formControlName="date" type="text"
+                                            matInput [matDatepicker]="picker"
+                                            (ngModelChange)="updateFormattedDateTime()">
+                                        <mat-datepicker #picker></mat-datepicker>
+                                        <mat-datepicker-toggle matIconSuffix [for]="
+                                                picker"></mat-datepicker-toggle>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Department</label>
+                                        <mat-select formControlName="departmentId" class="form-control select"
+                                            placeholder="Select Department" (selectionChange)="loadDoctorData($event)">
+                                            <mat-option *ngFor="let data of departmentList" [value]="data.departmentId">
+                                                {{data.departmentName}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Consulting Doctor</label>
+                                        <mat-select formControlName="doctorId" formControlName="doctorId"
+                                            class="form-control select" placeholder="Select Doctor"
+                                            (selectionChange)="addFee($event)">
+                                            <mat-option *ngFor="let data of doctorList" [value]="data.staffId">
+                                                {{data.firstName}} {{data.lastName}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Appointment Status</label>
+                                        <mat-select formControlName="doctorId" formControlName="appointmentStatus"
+                                            class="form-control select" placeholder="Appointment Status">
+                                            <mat-option *ngFor="let data of appointmentStatusData" [value]="data.value">
+                                                {{data.value}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Identity Proof</label>
+                                        <mat-select formControlName="doctorId" formControlName="IdentiyName"
+                                            class="form-control select" placeholder="Select Identity">
+                                            <mat-option *ngFor="let data of IdentityDocNumber" [value]="data.value">
+                                                {{data.value}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="lastname">Identity Number <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="IdentiyNumber" type="text"
+                                            placeholder="Enter Identity doc Number">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-sm-12">
+                                    <div class="form-group local-forms">
+                                        <label for="Notes">Notes <span class="login-danger">*</span></label>
+                                        <textarea class="form-control" formControlName="notes" rows="3"
+                                            cols="30"></textarea>
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <div class="doctor-submit text-end">
+                                        <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
+                                        <button type="submit" class="btn btn-primary cancel-form"
+                                            (click)="navigation()">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- </div>
+                            </div> -->
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="col-12 col-md-6 col-xl-6">
+                            <div class="form-group local-top-form">
+                                <label for="Avatar" class="local-top">Upload documents <span
+                                        class="login-danger">*</span></label>
+                                <div class="settings-btn upload-files-avator">
+                                    <input type="file" class="hide-input" id="file" (change)=onFileSelected($event)>
+                                    <button for="file" type="submit" class="upload">Upload
+                                        File</button>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- <div *ngFor="let doc of downLoadList">
+                    <a [href]="doc.downloadLink">{{ doc.fileName }}</a>
+                   
+                </div> -->
+            </div>
+            <div *ngIf="downLoadList.length>0" class="col-12">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">FileName</th>
+                            <th scope="col">Download</th>
+
+                            <!-- Add more headers based on your patient details -->
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let doc of downLoadList">
+                            <td>{{doc.fileName}}</td>
+                            <td><a [href]="doc.downloadLink">Download</a></td>
+                            <!-- <td>{{appointment.firstName}} {{appointment.lastName}}</td>
+                                                            <td>{{appointment.ageinYear}}</td>
+                                                            <td>{{appointment.mobile}}</td>
+                                                            <td>{{appointment.gender}}</td>
+                                                            <td>{{appointment.email}}</td> -->
+                            <!-- Add more cells based on your patient details -->
+                        </tr>
+                        <!-- Add more rows for additional patients -->
+                    </tbody>
+                </table>
+            </div>
+
+
+
+        </div>
+    </div>

@@ -1,0 +1,146 @@
+<div class="page-wrapper">
+    <div class="content">
+
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a>Doctor Schedule </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Schedule List</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="scheduleGroup" (ngSubmit)="submitschedule(scheduleGroup)">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-heading">
+                                        <h4>Adjust Schedule</h4>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-2">
+                                    <div class="form-group local-forms">
+                                        <label for="department">Apply Leave <span class="login-danger">*</span></label>
+                                        <mat-select formControlName="leaveStatus"
+                                            (selectionChange)="setLeaveValue($event)" class="form-control select">
+                                            <mat-option *ngFor="let data of leaveOption " [value]="data.value">
+                                                {{data.key}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="Date">Adjust schedule <span class="login-danger">*</span></label>
+                                        <input class="form-control  datetimepicker" formControlName="scheduleDate"
+                                            readonly type="text" placeholder="MM/DD/YYYY" matInput [matDatepicker]="picker"
+                                            [matDatepickerFilter]="dateFilter" (dateChange)="onDateChange($event)">
+                                        <mat-datepicker #picker></mat-datepicker>
+                                        <mat-datepicker-toggle matIconSuffix [for]="
+                                                                        picker"></mat-datepicker-toggle>
+                                    </div>
+                                </div>
+                                <ng-container *ngIf="!leaveCheckBoxStatus">
+                                    <div class="col-12 col-md-4 col-xl-1">
+                                        <div class="form-group local-forms">
+                                            <label for="Consulting">From</label>
+                                            <mat-select class="form-control select" formControlName="fromTime"
+                                                placeholder="From">
+                                                <mat-option *ngFor="let data of DayTime" [value]="data">
+                                                    {{data}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4 col-xl-1">
+                                        <div class="form-group local-forms">
+                                            <label for="Consulting">AM/PM</label>
+                                            <mat-select class="form-control select" formControlName="fromPostfix">
+                                                <mat-option *ngFor="let data of postFix" [value]="data">
+                                                    {{data}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-xl-1">
+                                        <div class="form-group local-forms">
+                                            <label for="Consulting">To</label>
+                                            <mat-select class="form-control select" formControlName="toTime"
+                                                placeholder="TO">
+                                                <mat-option *ngFor="let data of DayTime" [value]="data">
+                                                    {{data}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-4 col-xl-1">
+                                        <div class="form-group local-forms">
+                                            <label for="Consulting">AM/PM</label>
+                                            <mat-select class="form-control select" formControlName="toPostfix">
+                                                <mat-option *ngFor="let data of postFix" [value]="data">
+                                                    {{data}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </div>
+                                </ng-container>
+                                <!-- <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group select-gender">
+                                        <label for="leaveStatus" class="gen-label">Apply leave<span
+                                                class="login-danger">*</span></label>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" (click)="setLeaveValue(false)" formControlName="
+                                                    leaveStatus" class="form-check-input" [value]="1">No
+                                            </label>
+                                        </div>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" (click)="setLeaveValue(true)"
+                                                    formControlName="leaveStatus" class="form-check-input"
+                                                    [value]="2">Yes
+                                            </label>
+
+                                        </div>
+
+                                    </div>
+                                </div> -->
+
+
+                                <div class="col-12">
+                                    <div class="doctor-submit text-end">
+                                        <span *ngIf="!enableEdit"><button type="submit"
+                                                class="btn btn-primary submit-form me-2">Submit
+                                            </button></span>
+                                        <span *ngIf="enableEdit"><button type="button" (click)="updateScheduleentry()"
+                                                class="btn btn-primary submit-form me-2">Update
+                                            </button></span>
+
+                                        <button type="button" (click)="Cancel()"
+                                            class="btn btn-primary cancel-form">Cancel</button>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </form>
+
+
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+       
+        
+    </div>
+</div>

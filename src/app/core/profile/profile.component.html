@@ -1,0 +1,943 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <div class="row">
+
+            <div class="col-sm-7 col-6">
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a [routerLink]="routes.adminDashboard">Dashboard </a></li>
+                    <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                    <li class="breadcrumb-item active">Patient Profile</li>
+                </ul>
+            </div>
+
+            <div class="col-sm-5 col-6 text-end m-b-30">
+                <a [routerLink]="routes.editProfile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit
+                    Profile</a>
+            </div>
+        </div>
+        <div class="card-box profile-header">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="profile-view">
+                        <div class="profile-img-wrap">
+                            <div class="profile-img">
+                                <a href="javascript:void(0);"><img class="avatar" src="assets/img/doctor-03.jpg"
+                                        alt=""></a>
+                            </div>
+                        </div>
+                        <div class="profile-basic">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="profile-info-left" *ngIf="patientInfo">
+                                        <h3 class="user-name m-t-0 mb-0">{{patientInfo.firstName}}
+                                            {{patientInfo.lastName}}</h3>
+                                        <small class="text-muted">Patient</small>
+                                        <div class="staff-id">Patient ID : P-{{patientInfo.patientId}}</div>
+                                        <div class="staff-msg"><a [routerLink]="routes.chat"
+                                                class="btn btn-primary">Send Message</a></div>
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <ul class="personal-info">
+                                        <li>
+                                            <span class="title">Phone:</span>
+                                            <span class="text"><a href="">{{patientInfo?patientInfo.mobile:''}}</a></span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Email:</span>
+                                            <span class="text"><a href="">{{patientInfo.email?patientInfo.email :''}}</a></span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Date of Birth:</span>
+                                            <span class="text">{{patientInfo.dob}}</span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Address:</span>
+                                            <span class="text">{{patientInfo.address}}</span>
+                                        </li>
+
+                                        <li>
+                                            <span class="title">Regestration Date:</span>
+                                            <span class="text">{{patientInfo.regstrationDate}}</span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Gender:</span>
+                                            <span class="text">{{patientInfo.gender}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="profile-tabs">
+            <ul class="nav nav-tabs nav-tabs-bottom">
+                <li class="nav-item"><a class="nav-link active" href="#history" data-bs-toggle="tab">Medical
+                        History</a>
+                </li>
+                <li class="nav-item"><a class="nav-link" href="#Questionary" data-bs-toggle="tab">Questionary</a></li>
+               
+                <li *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'" class="nav-item"><a class="nav-link" href="#Prescription" data-bs-toggle="tab">Prescription</a></li>
+                <li class="nav-item"><a class="nav-link" href="#Preview" data-bs-toggle="tab">Preview</a></li>
+            </ul>
+
+            <div class="tab-content">
+                <div class="tab-pane show active" id="history">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card-box">
+                                <h3 class="card-title">Appointment List</h3>
+
+                                <div class="col-12 col-md-6 col-xl-2" [formGroup]="profileForm">
+
+                                    <div class="form-group local-forms">
+                                        <label for="AppointmentYear">Appointment Year <span
+                                                class="login-danger">*</span></label>
+                                        <mat-select formControlName="appointYear"
+                                            (selectionChange)="callloadAppointment($event)" class="form-control select">
+                                            <mat-option *ngFor="let data of appointmentYears" [value]="data">
+                                                {{data}}
+                                            </mat-option>
+                                        </mat-select>
+                                    </div>
+
+                                </div>
+
+                                <!-- <div class="experience-box">
+                                    <ul class="experience-list">
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#/" class="name">International College of Medical Science
+                                                        (UG)</a>
+                                                    <div>MBBS</div>
+                                                    <span class="time">2001 - 2003</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#/" class="name">International College of Medical Science
+                                                        (PG)</a>
+                                                    <div>MD - Medicen</div>
+                                                    <span class="time">1997 - 2001</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div> -->
+                            </div>
+                            <div class="card-box ">
+                                <!-- <h3 class="card-title">Experience</h3>
+                                <div class="experience-box">
+                                    <ul class="experience-list">
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#/" class="name">Consultant Physican</a>
+                                                    <span class="time">Jan 2014 - Present (4 years 8 months)</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#/" class="name">Consultant Physican</a>
+                                                    <span class="time">Jan 2009 - Present (6 years 1 month)</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <div class="experience-user">
+                                                <div class="before-circle"></div>
+                                            </div>
+                                            <div class="experience-content">
+                                                <div class="timeline-content">
+                                                    <a href="#/" class="name">Consultant Physican</a>
+                                                    <span class="time">Jan 2004 - Present (5 years 2 months)</span>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div> -->
+                                <div *ngIf="appointmentList.length>0" class="form-check check-tables2">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Appointment Date</th>
+                                                <th scope="col">Appointment Number</th>
+                                                <th scope="col">Action</th>
+
+                                                <!-- Add more headers based on your patient details -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr *ngFor="let data of appointmentList">
+                                                <td>{{data.date | date:'dd-MMM-yyyy' | uppercase}}</td>
+                                                <td><a  href="javascript:void(0);" (click)="updateAppointmentId(data.id)" >{{data.id}}</a></td>
+                                                <td><button class=" custom-badge status-gray" type="button"
+                                                        (click)="showAppointmentData(data.id)">View</button></td>
+                                            </tr>
+                                            <ng-container *ngIf="downLoadList.length>0">
+                                                <tr *ngFor="let data of downLoadList">
+                                                    <td>{{data.fileName}}</td>
+                                                    <!-- <td colspan="2"><a [href]="data.downloadLink">download</a></td> -->
+                                                    <td colspan="2">
+                                                        <a href="javascript:void(0);"
+                                                            (click)="loadPdf(data.downloadLink)">View file</a>
+                                                    </td>
+
+
+                                            </ng-container>
+                                            <!-- Add more rows for additional patients -->
+                                        </tbody>
+                                    </table>
+                                    <div *ngIf="pdfUrl">
+                                        <button type="button" (click)="closePdfView()">Close</button>
+                                        <ngx-extended-pdf-viewer [src]="pdfUrl"
+                                            [height]="'500px'"></ngx-extended-pdf-viewer>
+                                        <script>console.log("PDF url-----" + pdfUrl)</script>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane" id="Questionary">
+                    <!-- <div class="tab-content">
+                        <div class="tab-pane show active" id="history">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-box">
+                                        <form>
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <div class="form-heading">
+                                                        <h4>Patient Questionary</h4>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="name">Blood Presser <span
+                                                                class="login-danger">*</span></label>
+                                                        <input class="form-control" type="text">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="Height">Height <span
+                                                                class="login-danger">*</span></label>
+                                                        <input class="form-control" type="text">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="Weight">Weight <span
+                                                                class="login-danger">*</span></label>
+                                                        <input class="form-control" type="text">
+                                                    </div>
+                                                </div>
+
+
+
+
+                                                <div class="col-12 col-md-6 col-xl-12">
+                                                    <div class="form-group select-gender">
+                                                        <label for="gender" class="gen-label">Do you have alergy from
+                                                            any Medicen<span class="login-danger">*</span></label>
+                                                        <div class="form-check-inline">
+                                                            <label class="form-check-label">
+                                                                <input type="radio" class="form-check-input"
+                                                                    value="Male">yes
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check-inline">
+                                                            <label class="form-check-label">
+                                                                <input type="radio" class="form-check-input"
+                                                                    value="Female">No
+                                                            </label>
+
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-6 col-xl-12">
+                                                    <div class="form-group select-gender">
+                                                        <label for="Status" class="gen-label">Status <span
+                                                                class="login-danger">*</span></label>
+                                                        <div class="form-check-inline">
+                                                            <label class="form-check-label">
+                                                                <input type="radio" class="form-check-input" value=1>Yes
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check-inline">
+                                                            <label class="form-check-label">
+                                                                <input type="radio" class="form-check-input" value=2>No
+                                                            </label>
+                                                        </div>
+
+                                                    </div>
+                                                </div>
+
+
+
+
+
+                                                <div class="col-12 col-sm-12">
+                                                    <div class="form-group local-forms">
+                                                        <label for="comment">Comment <span
+                                                                class="login-danger">*</span></label>
+                                                        <textarea class="form-control" rows="3" cols="30"></textarea>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <div class="doctor-submit text-end">
+                                                        <button type="submit"
+                                                            class="btn btn-primary submit-form me-2">Submit</button>
+                                                        <button type="submit"
+                                                            class="btn btn-primary cancel-form">Cancel</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div> -->
+                    <div class="card" *ngIf="vitalSubmitted">
+                        <div class="card-body">
+                            <div class="row">
+                               
+                                <div *ngFor="let data of questionnaireDto" class="col-12 col-md-12  col-xl-3"><a
+                                        href="javascript:void(0);"
+                                        (click)="mapQuestionAndOptions(data.questionnaireId)"><strong>{{data.questionnaireName}}</strong></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" *ngIf="displayVitalCard">
+
+                        <div class="col-sm-12">
+                            <!-- <div class="card">
+                                <div class="card-body">
+                                    <canvas  #canvas width="800" height="600"></canvas>
+                                </div>
+                            </div> -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="col-12">
+                                        <div class="form-heading">
+                                            <h4>Vitals</h4>
+                                        </div>
+                                       
+                                    </div>
+                                    <div class="col-12 col-md-12  col-xl-8">
+                                        <form [formGroup]="vitalForm" (ngSubmit)="saveVItals(vitalForm) ">
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="bp">BP</label>
+                                                        <input type="text" class="form-control" formControlName="bp">
+                                                    </div>
+
+
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="height">Height</label>
+                                                        <input type="text" class="form-control" formControlName="height"
+                                                            placeholder="cm">
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="weight">Weight</label>
+                                                        <input type="text" class="form-control" formControlName="weight"
+                                                            placeholder="kg">
+
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="pulse">Pulse</label>
+                                                        <input type="text" class="form-control" formControlName="pulse">
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="tempurature">Temprature</label>
+                                                        <input type="text" class="form-control"
+                                                            formControlName="tempurature">
+
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-4">
+                                                    <div class="form-group local-forms">
+                                                        <label for="oxigenLevel">Oxygen Level</label>
+                                                        <input type="text" class="form-control"
+                                                            formControlName="oxigenLevel">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-6 col-xl-8" *ngIf="appointmentStatus">
+                                                    <ng-container *ngIf="!vitalSubmitted">
+                                                        <button type="submit"
+                                                            class="btn btn-primary submit-form me-2">Submit
+                                                        </button>
+                                                    </ng-container>
+                                                    <ng-container *ngIf="vitalSubmitted">
+                                                        <button type="button" (click)="updateVitals()"
+                                                            class="btn btn-primary submit-form me-2">Update
+                                                        </button>
+                                                    </ng-container>
+                                                    <button type="button"
+                                                        class="btn btn-primary submit-form me-2">Cancel
+                                                    </button>
+
+
+
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row" *ngIf="combindQuestionOption.length>0">
+
+                        <div class="col-sm-12">
+
+                            <div class="card">
+                                <div class="card-body">
+                                    <div class="col-12">
+                                        <div class="form-heading">
+                                            <h4>Questions</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-12  col-xl-8">
+                                        <form (ngSubmit)="saveAnswer(answer) " #answer="ngForm">
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-12">
+                                                    <div *ngIf="currentQuestionData.questionType===2">
+                                                        <label for="questionText">
+                                                            <h4>{{currentQuestionData.questionText}}</h4>
+                                                        </label>
+                                                        <input type="text" class="form-control"
+                                                            name="{{currentQuestionData.questionId}}" ngModel>
+                                                    </div>
+                                                    <div *ngIf="currentQuestionData.questionType===1">
+                                                        <label for="questionText">
+                                                            <h4>{{currentQuestionData.questionText}}</h4>
+                                                        </label>
+                                                        <br>
+                                                        <ng-container *ngFor="let data of currentQuestionData.options">
+                                                            <span> &nbsp;&nbsp;<h4>{{data.optionText}}</h4>
+                                                                &nbsp;&nbsp;</span>
+                                                            <input type="radio" [value]="data.optionId"
+                                                                class="form-check-input"
+                                                                name="{{currentQuestionData.questionId}}" ngModel>
+                                                        </ng-container>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-6 col-xl-8">
+
+
+                                                    <ng-container *ngIf="!finishQuestionniary">
+                                                        <button type="submit"
+                                                            class="btn btn-lg btn-primary submit-form me-2">next
+                                                        </button>
+                                                    </ng-container>
+                                                    <ng-container *ngIf="finishQuestionniary">
+                                                        <button type="button" (click)="submitAnswers()"
+                                                            class="btn btn-primary submit-form me-2">Submit Answer
+                                                        </button>
+                                                    </ng-container>
+
+
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="tab-pane" id="Prescription">
+                    <!--Below code are for Prescription paper-->
+
+
+                    <div class="row">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-top-form">
+                                        <label for="Avatar" class="local-top">Upload documents <span
+                                                class="login-danger">*</span></label>
+                                        <div class="settings-btn upload-files-avator">
+                                            <input type="file" class="hide-input" id="file"
+                                                (change)=onFileSelected($event)>
+                                            <button for="file" type="submit" class="upload">Upload
+                                                File</button>
+
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <!-- Medicine serch form start from here -->
+                                <div class="top-nav-search mob-view" *ngIf="!toggalUi">
+                                    <form>
+                                        <input type="text" class="form-control" #searchValue
+                                            (keyup)="searchMedicine(searchValue.value)" placeholder="search Medicien">
+
+                                    </form>
+
+                                </div>
+                                <!-- Medicine serch form end here -->
+                                <!-- Medicine serch option visible table code start from here -->
+                                <ng-container *ngIf="appointmentStatus">
+                                    <div *ngIf="SearchMedicineList.length>0" class="table-responsive">
+                                        <table class="table border-0 custom-table comman-table datatable mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th mat-sort-header="name">Medicine Name</th>
+                                                    <th mat-sort-header="consultingDoctor">Type</th>
+                                                    <th mat-sort-header="treatment">Generic Name</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let data of SearchMedicineList; let i=index">
+
+                                                    <td class="profile-image"><a href="javascript:void(0);"
+                                                            (click)="selectMedicine(i)">
+                                                            {{data.medName}}
+                                                        </a></td>
+                                                    <td>{{data.medType}}</td>
+                                                    <td>{{data.genericName}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </ng-container>
+                                <!-- Medicine serch option visible table code  end here -->
+                            </div>
+                            <!-- Selected medicine visible in form code start from here-->
+                            <div class="card">
+                                <form [formGroup]="prescribeMedForm"
+                                    (ngSubmit)="submitPrescribeMedicine(prescribeMedForm)">
+                                    <div class="col-12 col-md-6 col-xl-12" formArrayName="medicine">
+                                        <div class="row" *ngFor="let control of medicine.controls; let i = index"
+                                            formGroupName="{{i}}">
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+
+                                                    <input class="form-control" formControlName="medName" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+
+                                                    <input class="form-control" formControlName="medType" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+                                                    <label for="dose">Dose<span class="login-danger">*</span></label>
+                                                    <input class="form-control" formControlName="dose" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="dose">Frequency<span
+                                                            class="login-danger">*</span></label>
+                                                    <mat-select formControlName="frequency" class="form-control select">
+                                                        <mat-option *ngFor="let data of frequencyData" [value]="data">
+                                                            {{data}}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="timing">Timing<span
+                                                            class="login-danger">*</span></label>
+                                                    <mat-select formControlName="timing" class="form-control select">
+                                                        <mat-option *ngFor="let data of timingData"
+                                                            [value]="data">{{data}}</mat-option>
+                                                    </mat-select>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+                                                    <label for="duration">Duration<span
+                                                            class="login-danger">*</span></label>
+                                                    <input class="form-control" formControlName="duration" type="text"
+                                                        placeholder="days">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="instruction">Instruction<span
+                                                            class="login-danger">*</span></label>
+                                                    <input class="form-control" formControlName="instruction"
+                                                        type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="removeDynamicControl(i)">Remove</button>
+                                            </div>
+
+                                        </div>
+
+
+
+                                        <div class="col-12" *ngIf="medicine.controls.length>0 && appointmentStatus">
+                                            <div class="doctor-submit text-end">
+
+                                                <button type="submit"
+                                                    class="btn btn-primary submit-form me-2">Submit</button>
+
+                                                <!-- <button type="button"
+                                                    class="btn btn-primary cancel-form">Cancel</button> -->
+                                            </div>
+                                        </div>
+
+
+
+                                    </div>
+                                </form>
+                                <!-- Consultation form code start from here-->
+                                <div class="card-body" *ngIf="toggalUi">
+                                    <form [formGroup]="consultForm" (ngSubmit)="submitConsultation(consultForm)">
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Examination Note<span
+                                                            class="login-danger">*</span></label>
+                                                    <textarea class="form-control" formControlName="examinationNote"
+                                                        rows="6" cols="30"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Advice<span class="login-danger">*</span></label>
+                                                    <textarea class="form-control" formControlName="advice" rows="6"
+                                                        cols="30"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Diffrencial dignosis<span
+                                                            class="login-danger">*</span></label>
+                                                    <textarea class="form-control" formControlName="diffDiagnosis"
+                                                        rows="6" cols="30"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Final dignosis<span
+                                                            class="login-danger">*</span></label>
+                                                    <textarea class="form-control" formControlName="finalDiagnosis"
+                                                        rows="6" cols="30"></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Pre Define Dignosis<span
+                                                            class="login-danger">*</span></label>
+                                                    <mat-select class="form-control"
+                                                        (selectionChange)="addPreDefineDiagnosis($event)">
+                                                        <mat-option *ngFor="let data of preDiagnosis"
+                                                            [value]="data.diagnosText">{{data.diagnosName}}</mat-option>
+                                                    </mat-select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="name">Followup After<span
+                                                            class="login-danger">*</span></label>
+                                                    <input class="form-control" formControlName="followupDate">
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-12" *ngIf="appointmentStatus">
+                                                <div class="doctor-submit text-end">
+
+                                                    <button type="submit"
+                                                        class="btn btn-primary submit-form me-2">Submit</button>
+
+                                                    <button type="submit"
+                                                        class="btn btn-primary cancel-form">Cancel</button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </form>
+
+                                </div>
+                                <!-- Consultation form code end here-->
+
+
+                            </div>
+                            <!-- Selected medicine visible in form code end here-->
+                        </div>
+
+                    </div>
+                </div>
+                <!-- Preview section start from here -->
+                <div class="tab-pane" id="Preview">
+                    <div class="tab-content">
+                        <div class="tab-pane show active" id="pdfview" #printview>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="card-box">
+
+                                        <div class="col-12 border border-dark border-4">
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-10">
+
+                                                    <h2 class="text-center">Florence HealthCare</h2>
+                                                    <h4 class="text-center">Florence Healthcare, Kheri Road, Kheri,
+                                                        Lakhimpur
+                                                        Kheri - 262701 (Near By Don Bosco School)</h4>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-2">
+
+                                                    <img src=".././assets/img/logo.png" alt="logo">
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <ng-container *ngIf="_doctorDto">
+                                                    <div class="col-12 col-md-6 col-xl-6">
+                                                        <h4><strong>Doctor Name:</strong> {{_doctorDto.firstName}}</h4>
+                                                        <h4><strong>Degree:</strong> {{_doctorDto.education}}</h4>
+                                                        <h4><strong>Designation:</strong>{{_doctorDto.designation}}</h4>
+                                                        <h4><strong>Email:</strong>{{_doctorDto.email}}</h4>
+                                                    </div>
+                                                </ng-container>
+                                                <ng-container *ngIf="patientInfo">
+                                                    <div class="col-12 col-md-6 col-xl-4">
+                                                   
+
+                                                        <h4><strong>Patient Name:</strong>{{patientInfo.firstName}}</h4>
+                                                        <h4><strong>Age:</strong> {{patientAge}}</h4>
+                                                        <h4><strong>Gender:</strong>{{patientInfo.gender}}</h4>
+                                                        <h4><strong>HUID/ID
+                                                                proof:</strong>{{_appointmentDto ? _appointmentDto.identiyNumber : 'N/A' }}</h4>
+                                                                <h4><strong>Appointment Date:</strong>{{ _appointmentDto.date | date:'dd-MM-yyyy' || null }}</h4>
+
+                                                        <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
+                                                    </div>
+                                                    </ng-container>
+                                                </div>
+                                                <hr>
+
+                                                <div class="row">
+                                                    <div class="col-12" *ngIf="questionData.length>0">
+
+                                                        <ul *ngFor="let item of questionData">
+                                                            <ng-container *ngIf="item.answerText">
+                                                            <li>{{item.questionText}}-<strong>{{item.answerText}}</strong>
+                                                            </li>
+                                                        </ng-container>
+                                                        <ng-container *ngIf="item.optionText">
+                                                            <li>{{item.questionText}}-<strong>{{item.optionText}}</strong>
+                                                            </li>
+                                                        </ng-container>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                                <div></div>
+                                                <div class="row" *ngIf="vitalDto">
+                                                    <!-- <div class="col-12" > -->
+                                                    <div class="col-12 col-md-6 col-xl-2">
+
+                                                    </div>
+                                                    <h4><strong>Examination:</strong></h4>
+                                                    <div class="col-12 col-md-6 col-xl-6 ml-3">
+                                                        <ul class="list-unstyled invoice-clinic mt-2 ">
+                                                            <li><strong>BP:{{vitalDto.bp}} /mmHg</strong></li>
+                                                            <li><strong>Weight:{{vitalDto.weight}} Kg</strong></li>
+                                                            <li><strong>Height:{{vitalDto.height}} CM</strong>
+                                                            </li>
+                                                        </ul>
+                                                        <!-- <h4><strong></strong>BP:{{vitalDto.bp}} /mmHg</strong></h4>
+                                                        <h3><strong>Weight:{{vitalDto.weight}} Kg</strong></h3>
+                                                        <h5>Height:<strong>{{vitalDto.height}} CM</strong></h5> -->
+
+
+                                                    </div>
+                                                    <div class="col-12 col-md-6 col-xl-6">
+
+                                                        <ul class="list-unstyled invoice-clinic mt-2 ">
+                                                            <li><strong>Pulse:{{vitalDto.pulse}} /mmHg</strong>
+                                                            </li>
+                                                            <li><strong>Tempurature:{{vitalDto.tempurature}} Kg</strong>
+                                                            </li>
+                                                            <li><strong>OxigenLevel:{{vitalDto.oxigenLevel}}
+                                                                    CM</strong></li>
+                                                        </ul>
+
+                                                        <!-- <h5>Pulse:<strong>{{vitalDto.pulse}} /min</strong></h5>
+                                                        <h5>Tempurature:<strong>{{vitalDto.tempurature}}F</strong>
+                                                        </h5>
+
+                                                        <h5>OxigenLevel:<strong>{{vitalDto.oxigenLevel}} %</strong>
+                                                        </h5> -->
+
+
+                                                    </div>
+                                                    <!-- </div> -->
+                                                </div>
+                                                <div></div>
+
+                                               
+                                                    <div class="row">
+                                                        <ng-container *ngIf="displayImage.length>0">
+                                                        <div class="col-12 col-sm-6" *ngFor="let image of displayImage">
+                                                            <h3>{{getFileNameWithoutExtension(image.fileName)}}</h3>
+                                                            <img [src]="image.fileData" height="150" width="150" alt=""
+                                                                style="border: 2px solid #000" />
+                                                        </div>
+                                                        </ng-container>
+
+                                                        <ng-container *ngIf="_consultationDto">
+                                                        <div class="col-12" *ngIf="_consultationDto.examinationNote">
+                                                            <div style="border: 2px solid black;">
+                                                                <h4><strong>Note:</strong>{{_consultationDto.examinationNote}}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" *ngIf="_consultationDto.advice">
+                                                            <div style="border: 2px solid black;">
+                                                                <h4><strong>Advice:</strong>{{_consultationDto.advice}}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" *ngIf="_consultationDto.diffDiagnosis">
+                                                            <div style="border: 2px solid black;">
+                                                                <h4><strong>Differential
+                                                                        diagnosis:</strong>{{_consultationDto.diffDiagnosis}}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-12" *ngIf="_consultationDto.finalDiagnois">
+                                                            <div style="border: 2px solid black;">
+                                                                <h4><strong>Final
+                                                                        Diagnosis:</strong>{{_consultationDto.finalDiagnois}}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-12" *ngIf="_consultationDto.followupDate">
+                                                            <div style="border: 2px solid black;">
+                                                                <h4><strong>Follow up
+                                                                        Date:</strong>{{_consultationDto.followupDate}}
+                                                                </h4>
+                                                            </div>
+                                                        </div>
+                                                    </ng-container>
+
+                                                        <!-- display prescription Medicine code start from here -->
+                                                        <div class="table-responsive" *ngIf="medicineDto.length>0">
+                                                            <table
+                                                                class="table border-0 custom-table comman-table datatable mb-0">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th mat-sort-header="name">Medicine Name</th>
+                                                                        <th mat-sort-header="consultingDoctor">Type</th>
+                                                                        <th mat-sort-header="name">Dose</th>
+                                                                        <th mat-sort-header="consultingDoctor">Frequency
+                                                                        </th>
+                                                                        <th mat-sort-header="treatment">Timing</th>
+                                                                        <th mat-sort-header="treatment">Duration</th>
+                                                                        <th mat-sort-header="treatment">Instruction</th>
+                                                                        <th></th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    <tr *ngFor="let data of medicineDto">
+
+                                                                        <td>{{data.medName}}</td>
+                                                                        <td>{{data.medType}}</td>
+                                                                        <td>{{data.dose}}</td>
+                                                                        <td>{{data.frequency}}</td>
+                                                                        <td>{{data.timing}}</td>
+                                                                        <td>{{data.duration}}</td>
+                                                                        <td>{{data.instruction}}</td>
+
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+
+                                                    </div>
+                                                
+
+                                            </div>
+
+                                        </div>
+
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-primary m-2" (click)="exportConsultationToPdf()">Export to
+                            PDF</button>
+                            <button type="button" class="btn btn-primary m-2 " (click)="print()">Print</button>
+                            
+
+                            
+                    </div>
+                    
+                </div>
+                <!-- Preview section end here -->
+
+                
+            </div>
+        </div>
+    </div>
