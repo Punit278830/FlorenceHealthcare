@@ -45,10 +45,7 @@ namespace hospitalApiProject.Services
         string expiresIn = jObject["expiresIn"].ToString();
 
         _tokenService.SaveTokenInCache(token, expiresIn);
-        //return token;
       }
-
-      //return null;
     }
   }
 }

@@ -1,3 +1,4 @@
+using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Shared;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.Text.Json;
@@ -12,23 +13,23 @@ namespace hospitalApiProject.Services
     protected readonly string _token;
     public ABHAService(ITokenService tokenService, IAuthService authService) : base(tokenService, authService)
     {
-      _baseUrl = "https://dev.abdm.gov.in/gateway/v0.5";
+      _baseUrl = "https://abhasbx.abdm.gov.in/abha";
     }
 
     public Task<string> GenerateOtp(string aadhar)
     {
-      var jsonContent = new
+      var jsonContent = new AbhaRequestModel
       {
         txnId = "",
-        scope = new[] {
-        "abha-enrol" },
+        scope = [
+        "abha-enrol" ],
         loginHint = "aadhaar",
         loginId = aadhar,
         otpSystem = "aadhaar"
       };
 
       var json = JsonSerializer.Serialize(jsonContent);
-      var result = ExecutePost("https://abhasbx.abdm.gov.in/abha/api/v3/enrollment/request", "otp", json);
+      var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);
       return Task.FromResult(result);
     }
   }
