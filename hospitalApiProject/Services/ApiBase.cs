@@ -1,22 +1,35 @@
+using Microsoft.Extensions.Configuration;
+using System.Configuration;
 using System.Text;
+using System.Net.Http.Headers;
+using Azure;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
+using hospitalApiProject.Services.Shared;
+using NuGet.Common;
+using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
+using System.Globalization;
 
 namespace hospitalApiProject.Services
 {
   public class ApiBase
   {
-    protected readonly string _clientId;
-    protected readonly string _clientSecret;
+    protected ITokenService _tokenService;
+    protected readonly IAuthService _authService;
+    protected string _token;
+
     public string URL { get; set; }
 
-    public ApiBase(string clientId, string clientSecret, string baseUrl)
+    public ApiBase(ITokenService tokenService, IAuthService authService)
     {
-      _clientId = clientId;
-      _clientSecret = clientSecret;
-      URL = baseUrl;
+      _tokenService = tokenService;
+      _authService = authService;
+      GetAuthToken();
     }
 
-    public virtual string ExecuteGet()
+    public virtual string ExecuteGet(string baseUrl, string api)
     {
+      URL = string.Format("{0}/{1}", baseUrl, api);
       var client = GetClient();
 
       var response = client.GetAsync(URL).Result;
@@ -29,8 +42,9 @@ namespace hospitalApiProject.Services
       return string.Format("Status code: {0}, Reason: {1}", (int)response.StatusCode, response.ReasonPhrase);
     }
 
-    protected virtual string ExecutePost(string content)
+    protected virtual string ExecutePost(string baseUrl, string api, string content)
     {
+      URL = string.Format("{0}/{1}", baseUrl, api);
       var client = GetClient();
 
       var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
@@ -48,8 +62,20 @@ namespace hospitalApiProject.Services
     {
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
-
+      client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
       return client;
+    }
+
+    private void GetAuthToken()
+    {
+      _token = _tokenService.GetTokenFromCache();
+      if (_token == null)
+      {
+        _authService.GenerateAuthToken();
+        _token = _tokenService.GetTokenFromCache();
+      }      
     }
   }
 }

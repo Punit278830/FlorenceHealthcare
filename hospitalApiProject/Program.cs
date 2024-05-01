@@ -1,8 +1,10 @@
-﻿
+
 using hospitalApiProject;
 using hospitalApiProject.Models;
 using hospitalApiProject.Repository;
 using hospitalApiProject.Repository.Interface;
+using hospitalApiProject.Services;
+using hospitalApiProject.Services.Shared;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
@@ -30,6 +32,12 @@ builder.Services.AddCors(options =>
     .AllowAnyHeader());
 
 });
+
+// Add services to the container
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IAbhaService, ABHAService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 
