@@ -1,14 +1,6 @@
-using Microsoft.Extensions.Configuration;
-using System.Configuration;
-using System.Text;
-using System.Net.Http.Headers;
-using Azure;
-using System.Text.Json;
-using Newtonsoft.Json.Linq;
 using hospitalApiProject.Services.Shared;
-using NuGet.Common;
-using Microsoft.AspNetCore.DataProtection.AuthenticatedEncryption;
-using System.Globalization;
+using System.Net.Http.Headers;
+using System.Text;
 
 namespace hospitalApiProject.Services
 {
@@ -27,10 +19,15 @@ namespace hospitalApiProject.Services
       GetAuthToken();
     }
 
-    public virtual string ExecuteGet(string baseUrl, string api)
+    public virtual string ExecuteGet(string baseUrl, string api, string additionalData)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
       var client = GetClient();
+
+      if (additionalData != null)
+      {
+        client.DefaultRequestHeaders.Add("TRANSACTION_ID", additionalData);
+      }
 
       var response = client.GetAsync(URL).Result;
 
