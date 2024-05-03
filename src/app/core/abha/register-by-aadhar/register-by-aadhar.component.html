@@ -1,0 +1,67 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaDashboard">Abha </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Register by Aadhar</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-heading">
+                                        <h4>Create ABHA Number Using Aadhaar</h4>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="name">Aadhar Number <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="aadharNumber" type="text"
+                                            placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div>
+                                    <span>Terms and Conditions</span>
+                                    <span>I, hereby declare that I am voluntarily sharing my Aadhaar number and demographic information issued by UIDAI, with National Health Authority (NHA) for the sole purpose of creation of ABHA number.......</span>
+                                    <label class="custom_check w-100">
+                                        <input type="checkbox" id="chkConsent" name="consent">
+                                        <span class="checkmark"></span> I agree<span class="login-danger">*</span>
+                                    </label>
+                                </div>
+                                
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div>
+                                    <button class="btn btn-primary submit-form me-2" type="button">Generate OTP</button>
+                                    <button class="btn btn-primary submit-form me-2" type="button">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

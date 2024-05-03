@@ -449,7 +449,20 @@ export class DataService {
           ],
         },
 
-
+        {
+          menuValue: 'ABHA',
+            hasSubRoute: true,
+            showSubRoute: false,
+            base: 'ABHA',
+            img: 'assets/img/icons/menu-icon-15.svg', //todo : change icon
+            subMenus: [
+              {
+                menuValue: 'Dashboard',
+                route: routes.abhaDashboard,
+                base: routes.abhaDashboard,
+              },
+            ],
+          },
         // {
         //   menuValue: 'Invoice',
         //   hasSubRoute: true,

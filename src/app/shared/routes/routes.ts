@@ -367,5 +367,11 @@ export class routes {
   }
   public static get error500(): string {
     return this.baseUrl + '/error/error500';
+  }  
+  public static get abhaDashboard(): string {
+    return this.baseUrl + '/abha/abha-dashboard';
+  }
+  public static get abhaRegisterByAadhar(): string {
+    return this.baseUrl + '/abha/register/byAadhar';
   }
 }
