@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RegisterCopyComponent } from './register-copy.component';
+import { AbhaConfirmOtpComponent } from './abha-confirm-otp.component';
 
 
 describe('RegisterByAadharComponent', () => {
-  let component: RegisterCopyComponent;
-  let fixture: ComponentFixture<RegisterCopyComponent>;
+  let component: AbhaConfirmOtpComponent;
+  let fixture: ComponentFixture<AbhaConfirmOtpComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RegisterCopyComponent]
+      declarations: [AbhaConfirmOtpComponent]
     });
-    fixture = TestBed.createComponent(RegisterCopyComponent);
+    fixture = TestBed.createComponent(AbhaConfirmOtpComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

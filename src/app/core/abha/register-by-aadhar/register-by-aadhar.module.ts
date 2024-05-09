@@ -4,9 +4,7 @@ import { CommonModule } from '@angular/common';
 import { RegisterByAadharRoutingModule } from './register-by-aadhar-routing.module';
 import { RegisterByAadharComponent } from './register-by-aadhar.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ConfirmOTPModule } from '../confirm-otp/confirm-otp.module';
-import { RegisterCopyModule } from '../register-copy/register-copy.module';
-
+import { AbhaConfirmOtpModule } from '../abha-confirm-otp/abha-confirm-otp.module';
 
 @NgModule({
   declarations: [
@@ -16,8 +14,7 @@ import { RegisterCopyModule } from '../register-copy/register-copy.module';
     CommonModule,
     RegisterByAadharRoutingModule,
     ReactiveFormsModule,
-    ConfirmOTPModule,
-    RegisterCopyModule
+    AbhaConfirmOtpModule
   ]
 })
 export class RegisterByAadharModule { }

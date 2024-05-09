@@ -10,11 +10,11 @@ import { routes } from 'src/app/shared/routes/routes';
 
 
 @Component({
-  selector: 'app-register-copy',
-  templateUrl: './register-copy.component.html',
-  styleUrls: ['./register-copy.component.scss']
+  selector: 'app-abha-confirm-otp',
+  templateUrl: './abha-confirm-otp.component.html',
+  styleUrls: ['./abha-confirm-otp.component.scss']
 })
-export class RegisterCopyComponent {
+export class AbhaConfirmOtpComponent {
   public routes = routes;
   message!: string;
   modalHeader!:string;
