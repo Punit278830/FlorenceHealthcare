@@ -15,6 +15,21 @@ const routes: Routes = [
       loadChildren: () =>
         import('./register-by-aadhar/register-by-aadhar.module').then((m) => m.RegisterByAadharModule),
     },
+    {
+      path: 'register/byAadhar/confirmOTP1',
+      loadChildren: () =>
+        import('./confirm-otp/confirm-otp.module').then((m) => m.ConfirmOTPModule),
+    },
+    {
+      path: 'confirmAadharOtp',
+      loadChildren: () =>
+        import('./register-copy/register-copy.module').then((m) => m.RegisterCopyModule),
+    },
+    {
+      path: 'profile',
+      loadChildren: () =>
+        import('./abha-profile/abha-profile.module').then((m) => m.AbhaProfileModule),
+    },
   ]
 }
 ];

@@ -1,3 +1,4 @@
+using hospitalApiProject.Models;
 using hospitalApiProject.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,27 +17,27 @@ namespace hospitalApiProject.Controllers
 
     [HttpPost]
     [Route("GenerateAadharOtp")]
-    public async Task<IActionResult> GenerateAadharOtp(string aadhar)
+    public async Task<IActionResult> GenerateAadharOtp([FromBody] EncryptedDataModel aadhar)
     {
       if (aadhar == null)
       {
         return BadRequest();
       }
 
-      var result = await _service.GenerateOtp(aadhar);
+      var result = await _service.GenerateOtp(aadhar.EncryptedData);
       return Ok(result);
     }
 
     [HttpPost]
     [Route("EnrollByAadhaar")]
-    public async Task<IActionResult> EnrollByAadhaar(string txnId, string otp, string mobileNumber)
+    public async Task<IActionResult> EnrollByAadhaar([FromBody] EnrollByAadharModel data)
     {
-      if (txnId == null || otp == null || mobileNumber == null)
+      if (data.TxnId == null || data.EncryptedData == null || data.MobileNumber == null)
       {
         return BadRequest();
       }
 
-      var result = await _service.EnrollByAadhaar(txnId, otp, mobileNumber);
+      var result = await _service.EnrollByAadhaar(data.TxnId, data.EncryptedData, data.MobileNumber);
       return Ok(result);
     }
 

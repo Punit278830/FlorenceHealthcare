@@ -20,6 +20,7 @@
             "outputPath": "dist/preclinic-angular",
             "index": "src/index.html",
             "main": "src/main.ts",
+            "allowedCommonJsDependencies": ["process"],
             "polyfills": [
               "zone.js"
             ],

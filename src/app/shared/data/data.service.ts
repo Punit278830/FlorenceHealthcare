@@ -461,6 +461,11 @@ export class DataService {
                 route: routes.abhaDashboard,
                 base: routes.abhaDashboard,
               },
+              {
+                menuValue: 'Register By Aadhar',
+                route: routes.abhaRegisterByAadhar,
+                base: routes.abhaRegisterByAadhar,
+              }
             ],
           },
         // {

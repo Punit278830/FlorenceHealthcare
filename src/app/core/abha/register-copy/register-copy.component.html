@@ -1,0 +1,90 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaDashboard">Abha </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaRegisterByAadhar">Register by Aadhar</a>
+                        </li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Confirm OTP</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="enrollForm">
+                            <div class="row">
+                                <div class="form-group local-forms status-green">
+                                    <h4>{{message}}</h4>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="otp">OTP <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="otp" type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="mobileNumber">Mobile Number <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="mobileNumber" type="text"
+                                        placeholder="">
+                                </div>
+                                <h5>This mobile number will be used for all the communications related to ABHA.</h5>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <p>
+
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row"> 
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <button class="btn btn-primary submit-form me-2" data-bs-toggle="modal" data-bs-target="#abha_id_modal" type="button" (click)="confirmOtp()">Submit</button> <!-- data-bs-toggle="modal" data-bs-target="#abha_id_modal" -->
+                                    <button class="btn btn-primary submit-form me-2" type="button">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Save Invoices Modal -->
+<div class="modal custom-modal modal-bg fade" id="abha_id_modal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-header">
+                    <h3>{{modalHeader}}</h3>
+                    <p>Your Abha Number is {{abhaNumber}}.</p>
+                </div>
+                <div class="modal-btn delete-action">
+                    <div class="row">
+                        <div class="col-6">
+                            <a data-bs-dismiss="modal" [routerLink]="routes.abhaProfile"
+                                class="btn btn-primary paid-continue-btn">View Profile</a>
+                        </div>
+                        <div class="col-6">
+                            <a [routerLink]="routes.abhaProfile" data-bs-dismiss="modal"
+                                class="btn btn-primary paid-cancel-btn">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- /Save Invoices Modal -->
