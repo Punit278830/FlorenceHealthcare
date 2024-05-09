@@ -4,8 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AbhaDataService } from 'src/app/shared/Services/abha/abha-data.service';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
-//import { EncryptionService } from 'src/app/shared/encrypt/encryption.service';
-import { EncryptionServiceForge } from 'src/app/shared/encrypt/encryption.service copy'; //todo
 import { routes } from 'src/app/shared/routes/routes';
 
 
@@ -24,7 +22,6 @@ export class AbhaProfileComponent {
   constructor(private route: ActivatedRoute,
     private fb: FormBuilder,
     private abhaService: AbhaService,
-    private encryptionService: EncryptionServiceForge,
     private abhaDataService: AbhaDataService,
     private toster:ToastrService,
   ) { }
