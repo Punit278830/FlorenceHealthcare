@@ -1,10 +1,10 @@
 import { Component, Input } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AbhaDataService } from 'src/app/shared/Services/abha/abha-data.service';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
-import { EncryptionService } from 'src/app/shared/encrypt/encryption.service';
+import { EncryptionService } from 'src/app/shared/encrypt/encryption.service'; 
 import { routes } from 'src/app/shared/routes/routes';
 
 

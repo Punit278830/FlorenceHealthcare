@@ -13,7 +13,8 @@ const routes: Routes = [
     {
       path: 'register/byAadhar',
       loadChildren: () =>
-        import('./register-by-aadhar/register-by-aadhar.module').then((m) => m.RegisterByAadharModule),
+        // import('./register-by-aadhar/register-by-aadhar.module').then((m) => m.RegisterByAadharModule),
+      import('./register-by-aadhar-stepper/register-by-aadhar-stepper.module').then((m) => m.RegisterByAadharStepperModule),
     },
     {
       path: 'confirmAadharOtp',

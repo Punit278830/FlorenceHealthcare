@@ -6,10 +6,12 @@ import { AbhaComponent } from './abha.component';
 
 
 @NgModule({
-  declarations: [AbhaComponent],
+  declarations: [
+    AbhaComponent,
+  ],
   imports: [
     CommonModule,
-    AbhaRoutingModule
+    AbhaRoutingModule,
   ]
 })
 export class AbhaModule { }
