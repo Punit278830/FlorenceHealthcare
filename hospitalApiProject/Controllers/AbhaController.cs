@@ -1,6 +1,7 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace hospitalApiProject.Controllers
 {
@@ -29,6 +30,19 @@ namespace hospitalApiProject.Controllers
     }
 
     [HttpPost]
+    [Route("GenerateOtherOtp")]
+    public async Task<IActionResult> GenerateOtherOtp([FromBody] GenerateOtherOtp data)
+    {
+      if (data == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.GenerateOtherOtp(data.EncryptedData, data.TxnId);
+      return Ok(result);
+    }
+
+    [HttpPost]
     [Route("EnrollByAadhaar")]
     public async Task<IActionResult> EnrollByAadhaar([FromBody] EnrollByAadharModel data)
     {
@@ -38,6 +52,19 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.EnrollByAadhaar(data.TxnId, data.EncryptedData, data.MobileNumber);
+      return Ok(result);
+    }
+
+    [HttpPost]
+    [Route("EnrollByAbdm")]
+    public async Task<IActionResult> EnrollByAbdm([FromBody] EnrollByAadharModel data)
+    {
+      if (data.TxnId == null || data.EncryptedData == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.EnrollByAbdm(data.TxnId, data.EncryptedData);
       return Ok(result);
     }
 
@@ -65,6 +92,19 @@ namespace hospitalApiProject.Controllers
 
       var result = await _service.CreateAbhaAddress(txnId, abhaAddress, isPreferred);
       return Ok(result);
+    }
+
+    [HttpGet]
+    [Route("DownloadAbhaCard")]
+    public async Task<IActionResult> DownloadAbhaCard([FromHeader] string xToken)
+    {
+      if (xToken == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.DownloadAbhaCard(xToken);
+      return new FileContentResult(result, "application/pdf");
     }
   }
 }

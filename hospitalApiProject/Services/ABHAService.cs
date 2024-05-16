@@ -1,6 +1,8 @@
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Shared;
+using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Services
 {
@@ -24,6 +26,24 @@ namespace hospitalApiProject.Services
         loginHint = "aadhaar",
         loginId = aadhar,
         otpSystem = "aadhaar"
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);
+      return Task.FromResult(result);
+    }
+
+    public Task<string> GenerateOtherOtp(string data, string txnId)
+    {
+      var jsonContent = new AbhaRequestModel
+      {
+        txnId = txnId,
+        scope = [
+        "abha-enrol",
+        "mobile-verify"],
+        loginHint = "mobile",
+        loginId = data,
+        otpSystem = "abdm"
       };
 
       var json = JsonSerializer.Serialize(jsonContent);
@@ -60,6 +80,32 @@ namespace hospitalApiProject.Services
       return Task.FromResult(result);
     }
 
+    public Task<string> EnrollByAbdm(string txnId, string otp)
+    {
+      var jsonContent = new
+      {
+        scope = new[] { 
+        "abha-enrol",
+        "mobile-verify" },
+
+        authData = new {
+          authMethods = new[] {
+            "otp"
+          },
+          otp = new
+          {
+            timeStamp = DateTime.Now.ToString("YYYY-MM-DD HH:mm:ss"),
+            txnId = txnId,
+            otpValue = otp
+          }
+        }
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = ExecutePost(_baseUrl, "api/v3/enrollment/auth/byAbdm", json);
+      return Task.FromResult(result);
+    }
+
     public Task<string> GetAbhaAddressSuggestion(string txnId)
     {
       var result = ExecuteGet(_baseUrl, "api/v3/enrollment/enrol/suggestion", txnId);
@@ -77,6 +123,13 @@ namespace hospitalApiProject.Services
 
       var json = JsonSerializer.Serialize(jsonContent);
       var result = ExecutePost(_baseUrl, "api/v3/enrollment/enrol/abha-address", json);
+      return Task.FromResult(result);
+    }
+
+    public Task<byte[]> DownloadAbhaCard(string xToken)
+    {
+      var result = ExecuteGetForCard("https://healthidsbx.abdm.gov.in", "api/v1/account/getCard", xToken);
+
       return Task.FromResult(result);
     }
   }

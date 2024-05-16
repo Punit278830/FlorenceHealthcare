@@ -22,9 +22,9 @@ namespace hospitalApiProject.Services
     public virtual string ExecuteGet(string baseUrl, string api, string additionalData)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
-      var client = GetClient();
+      var client = api == "api/v1/account/getCard" ? GetV1Client(additionalData) :GetClient();
 
-      if (additionalData != null)
+      if (additionalData != null && api != "api/v1/account/getCard")
       {
         client.DefaultRequestHeaders.Add("TRANSACTION_ID", additionalData);
       }
@@ -37,6 +37,21 @@ namespace hospitalApiProject.Services
       }
 
       return string.Format("Status code: {0}, Reason: {1}", (int)response.StatusCode, response.ReasonPhrase);
+    }
+
+    public virtual byte[] ExecuteGetForCard(string baseUrl, string api, string additionalData)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetV1Client(additionalData);
+
+      var response = client.GetAsync(URL).Result;
+
+      if (response != null && response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsByteArrayAsync().Result;
+      }
+
+      return default;
     }
 
     protected virtual string ExecutePost(string baseUrl, string api, string content)
@@ -65,6 +80,17 @@ namespace hospitalApiProject.Services
       return client;
     }
 
+    private HttpClient GetV1Client(string xToken)
+    {
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("accept", "*/*");
+      client.DefaultRequestHeaders.Add("Accept-Language", "en-US");
+      client.DefaultRequestHeaders.Add("X-Token", xToken);
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      return client;
+    }
+
     private void GetAuthToken()
     {
       _token = _tokenService.GetTokenFromCache();
@@ -72,7 +98,7 @@ namespace hospitalApiProject.Services
       {
         _authService.GenerateAuthToken();
         _token = _tokenService.GetTokenFromCache();
-      }      
+      }
     }
   }
 }
