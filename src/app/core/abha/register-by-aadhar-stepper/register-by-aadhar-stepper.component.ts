@@ -1,9 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, Validators, FormsModule, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 import { EncryptionService } from 'src/app/shared/encrypt/encryption.service';
 import { routes } from 'src/app/shared/routes/routes';
 import { ToastrService } from 'ngx-toastr';
+import { MatStepper } from '@angular/material/stepper';
 
 @Component({
   selector: 'app-register-by-aadhar-stepper',
@@ -30,6 +31,8 @@ export class RegisterByAadharStepperComponent {
   formCommunicationDetailsGroup!: FormGroup;
   formAbhaProfileGroup!: FormGroup;
   completed: boolean = true;
+
+  @ViewChild('stepper') stepper!: MatStepper;
 
   constructor(
     private fb: FormBuilder,
@@ -114,31 +117,38 @@ export class RegisterByAadharStepperComponent {
   }
 
   confirmCommDetails() {
-    if (!this.formCommunicationDetailsGroup.valid || (this.isDifferentMobile && !this.showOtp)) { //todo - validate codition
+    if (!this.formCommunicationDetailsGroup.valid ||
+      (this.isDifferentMobile && !this.showOtp) ||
+      (this.isDifferentMobile && this.showOtp && this.formCommunicationDetailsGroup.value.otp == '')) { //todo - validate codition
       this.toster.error("Please complete your mobile verification first!");
       return;
     }
-
-    if (this.isDifferentMobile) {
-      let data = this.encryptionService.encrypt(this.formCommunicationDetailsGroup.value.otp);
-      this.abhaService.confirmOtherOtp(data, this.txnId, this.formAadharAuthGroup.value.mobileNumber).subscribe(
-        res => {
-          if (res && res.error) {
-            this.toster.error("Some error has ocurred please try after some time!");
-            return;
-          }
-
-          this.txnId = res.txnId;
-          this.isMobileVerified = true;
-          this.toster.success(res.message);
-          console.log(res);
-          return;
-        }
-      );
+    else if (this.formCommunicationDetailsGroup.valid && !this.isDifferentMobile) {
+      this.toster.success(this.messageStep2);
+      this.stepper.next();
+      return;
     }
 
-    this.toster.success(this.messageStep2);
-    return;
+    let data = this.encryptionService.encrypt(this.formCommunicationDetailsGroup.value.otp);
+    this.abhaService.confirmOtherOtp(data, this.txnId, this.formAadharAuthGroup.value.mobileNumber).subscribe(
+      res => {
+        if ((res && res.authResult == "Failed")) {
+          this.toster.error(res.message);
+          return;
+        }
+        else if ((res && res.error)) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.txnId = res.txnId;
+        this.isMobileVerified = true;
+        this.toster.success(res.message);
+        console.log(res);
+
+        this.stepper.next();
+      }
+    );
   }
 
   verifyMobile() {

@@ -31,3 +31,12 @@ p {
   background-color: lightblue;
   color: black;
 }
+
+input.ng-invalid.ng-touched {
+  border: red 1px solid;
+}
+
+.invalid-input {
+  border: 1px solid red;
+  display: inline-block;
+}

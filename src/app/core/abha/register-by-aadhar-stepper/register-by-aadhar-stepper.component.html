@@ -37,17 +37,10 @@
                                                     <input class="form-control" formControlName="aadharNumber"
                                                         type="text" placeholder="">
                                                 </div>
-                                                <!-- <span class="star-red" *ngIf="aadharNumber?.invalid && aadharNumber?.touched">
-                                                    Invalid Aadhar number.
-                                                </span>  -->
-                                                <span class="error"
-                                                    *ngIf="formAadharGroup.controls['aadharNumber'].hasError('pattern')">Invalid
-                                                    Aadhaar Number.</span>
-                                                <!-- <mat-form-field>
-                                                    <mat-label>Aadhar Number</mat-label>
-                                                    <input matInput placeholder="" formControlName="aadharNumber"
-                                                        required>
-                                                </mat-form-field> -->
+                                                <!-- <span class="error"
+                                                    *ngIf="formAadharGroup.controls['aadharNumber'].hasError('pattern')">
+                                                    Invalid Aadhaar Number.
+                                                </span> -->
                                             </div>
                                         </div>
                                         <div class="row">
@@ -64,17 +57,14 @@
                                                         number.......</span>
                                                 </div>
                                                 <div class="col-12 col-md-6 col-xl-10">
-                                                    <label class="custom_check w-100">
-                                                        <!-- <mat-form-field> -->
-                                                        <input type="checkbox" id="consent" formControlName="consent">
-                                                        <span class="checkmark"></span> I agree<span
-                                                            class="login-danger">*</span>
-                                                        <!-- <mat-error
-                                                                *ngIf="formAadharGroup.controls['consent'].hasError('required')">
-                                                                Please provide your consent!
-                                                            </mat-error>
-                                                        </mat-form-field> -->
-                                                    </label>
+                                                    <div [class.invalid-input]="formAadharGroup.controls['consent'].invalid && formAadharGroup.controls['consent'].touched">
+                                                        <label class="custom_check w-100">
+                                                            <input type="checkbox" id="consent"
+                                                                formControlName="consent">
+                                                            <span class="checkmark"></span> I agree<span
+                                                                class="login-danger">*</span>
+                                                        </label>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -92,7 +82,7 @@
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formAadharAuthGroup" label="Aadhar Authentication">
+                            <mat-step [stepControl]="formAadharAuthGroup" label="Aadhar Authentication" [editable]="false">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formAadharAuthGroup">
                                         <div class="row">
@@ -143,7 +133,7 @@
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formCommunicationDetailsGroup" label="Communication Details">
+                            <mat-step [stepControl]="formCommunicationDetailsGroup" label="Communication Details" [editable]="false">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formCommunicationDetailsGroup">
                                         <div class="row" *ngIf="abhaProfile != undefined">
@@ -168,7 +158,7 @@
                                                     value="{{formAadharAuthGroup.value.mobileNumber}}">
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-6" *ngIf="isDifferentMobile">
-                                                <button mat-raised-button color="primary" matStepperNext
+                                                <button mat-raised-button color="primary"
                                                     (click)="verifyMobile()" [disabled]="showOtp">Verify</button>
                                             </div>
                                         </div>
@@ -182,13 +172,13 @@
                                         <br />
                                         <!-- </div> -->
                                         <br />
-                                        <button mat-raised-button color="primary" matStepperNext
-                                            (click)="confirmCommDetails()" [disabled]="!isMobileVerified">Next</button>
+                                        <button mat-raised-button color="primary"
+                                            (click)="confirmCommDetails()">Next</button>
                                     </form>
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formAbhaProfileGroup" label="View Profile">
+                            <mat-step [stepControl]="formAbhaProfileGroup" label="View Profile" [editable]="false">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formAbhaProfileGroup">
                                         <div *ngIf="abhaProfile != undefined">
@@ -284,10 +274,11 @@
                                             </mat-form-field> -->
                                         </div>
                                         <br />
-                                        <button mat-raised-button color="primary" matStepperNext (click)="downloadABHACard()">Next</button>
+                                        <button mat-raised-button color="primary" matStepperNext
+                                            (click)="downloadABHACard()">Next</button>
                                     </form>
                                 </div>
-                                
+
                             </mat-step>
                             <mat-step>
                                 <ng-template matStepLabel>Review</ng-template>
