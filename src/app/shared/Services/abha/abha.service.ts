@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
 import { Observable } from 'rxjs/internal/Observable';
-import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { blob } from 'stream/consumers';
-import { map } from 'rxjs';
+import { catchError, map, retry, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -25,7 +25,9 @@ export class AbhaService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }
 
-    return this.http.post(this.apiUrl + 'Abha/GenerateAadharOtp', JSON.stringify(data), httpOptions)
+    return this.http.post(this.apiUrl + 'Abha/GenerateAadharOtp', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   generateOtherOtp(mobile: string, txnId: string): Observable<any> {
@@ -38,7 +40,9 @@ export class AbhaService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }
 
-    return this.http.post(this.apiUrl + 'Abha/GenerateOtherOtp', JSON.stringify(data), httpOptions)
+    return this.http.post(this.apiUrl + 'Abha/GenerateOtherOtp', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   confirmOtp(otp: string, txnId: string, mobileNumber: string): Observable<any> {
@@ -52,7 +56,9 @@ export class AbhaService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }
 
-    return this.http.post(this.apiUrl + 'Abha/EnrollByAadhaar', JSON.stringify(data), httpOptions)
+    return this.http.post(this.apiUrl + 'Abha/EnrollByAadhaar', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   confirmOtherOtp(otp: string, txnId: string, mobileNumber: string): Observable<any> {
@@ -66,7 +72,9 @@ export class AbhaService {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }
 
-    return this.http.post(this.apiUrl + 'Abha/EnrollByAbdm', JSON.stringify(data), httpOptions)
+    return this.http.post(this.apiUrl + 'Abha/EnrollByAbdm', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   downloadCard(xToken: string): Observable<any> {
@@ -74,5 +82,9 @@ export class AbhaService {
       .set('xToken', xToken);
 
     return this.http.get(this.apiUrl + 'Abha/DownloadAbhaCard', { headers: authReq, responseType: "blob" });
+  }
+
+  private handleError(err: HttpErrorResponse): Observable<never> {
+    return throwError(() => err.error);
   }
 }

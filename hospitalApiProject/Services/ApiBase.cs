@@ -1,10 +1,11 @@
+using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
 using System.Net.Http.Headers;
 using System.Text;
 
 namespace hospitalApiProject.Services
 {
-  public class ApiBase
+  public class ApiBase : SimpleServiceBase
   {
     protected ITokenService _tokenService;
     protected readonly IAuthService _authService;
@@ -36,7 +37,9 @@ namespace hospitalApiProject.Services
         return response.Content.ReadAsStringAsync().Result;
       }
 
-      return string.Format("Status code: {0}, Reason: {1}", (int)response.StatusCode, response.ReasonPhrase);
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
     }
 
     public virtual byte[] ExecuteGetForCard(string baseUrl, string api, string additionalData)
@@ -67,7 +70,9 @@ namespace hospitalApiProject.Services
         return response.Content.ReadAsStringAsync().Result;
       }
 
-      return response.ToString();
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
     }
 
     private HttpClient GetClient()

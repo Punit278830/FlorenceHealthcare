@@ -82,8 +82,11 @@ export class RegisterByAadharStepperComponent {
         this.messageStep1 = res.message;
         this.toster.success(res.message);
         console.log(res);
-      }
-    );
+        this.stepper.next();
+      },
+      error => {
+        this.toster.error(error);
+      });
   }
 
   confirmOtp() {
@@ -95,7 +98,11 @@ export class RegisterByAadharStepperComponent {
     let data = this.encryptionService.encrypt(this.formAadharAuthGroup.value.otp);
     this.abhaService.confirmOtp(data, this.txnId, this.formAadharAuthGroup.value.mobileNumber).subscribe(
       res => {
-        if (res && res.error) {
+        if ((res && res.authResult == "Failed")) {
+          this.toster.error(res.message);
+          return;
+        }
+        else if (res && res.error) {
           this.toster.error("Some error has ocurred please try after some time!");
           return;
         }
@@ -108,10 +115,13 @@ export class RegisterByAadharStepperComponent {
         this.messageStep3 = this.isDifferentMobile ?
           "The mobile provided for communication is not linked to Aadhar, Kindly verify this number!"
           : "Aadhar authentication completed successfully! You can skip to next step";
-        //this.toster.success(res.message);
         this.isMobileVerified = !this.isDifferentMobile;
         this.xToken = "Bearer " + res.tokens.token;
         console.log(res);
+        this.stepper.next();
+      },
+      error => {
+        this.toster.error(error);
       }
     );
   }
@@ -147,6 +157,9 @@ export class RegisterByAadharStepperComponent {
         console.log(res);
 
         this.stepper.next();
+      },
+      error => {
+        this.toster.error(error);
       }
     );
   }
@@ -163,6 +176,9 @@ export class RegisterByAadharStepperComponent {
         this.txnId = res.txnId;
         this.showOtp = true;
         console.log(res);
+      },
+      error => {
+        this.toster.error(error);
       }
     );
   }

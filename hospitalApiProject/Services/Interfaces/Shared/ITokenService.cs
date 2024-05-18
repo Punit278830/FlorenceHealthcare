@@ -1,5 +1,4 @@
-
-namespace hospitalApiProject.Services.Shared
+namespace hospitalApiProject.Services.Interfaces.Shared
 {
   public interface ITokenService
   {

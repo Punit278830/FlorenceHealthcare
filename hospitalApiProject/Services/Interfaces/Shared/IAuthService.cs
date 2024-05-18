@@ -1,4 +1,4 @@
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Interfaces.Shared
 {
   public interface IAuthService
   {

@@ -1,3 +1,4 @@
+using hospitalApiProject.Services.Interfaces.Shared;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace hospitalApiProject.Services.Shared

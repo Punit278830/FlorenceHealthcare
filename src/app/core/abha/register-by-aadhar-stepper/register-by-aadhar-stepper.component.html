@@ -76,8 +76,7 @@
                                 </div>
                             </div> -->
                                         <br />
-                                        <button mat-raised-button color="primary" matStepperNext
-                                            (click)="generateOtp()">Next</button>
+                                        <button mat-raised-button color="primary" (click)="generateOtp()">Next</button>
                                     </form>
                                 </div>
                             </mat-step>
@@ -86,9 +85,6 @@
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formAadharAuthGroup">
                                         <div class="row">
-                                            <!-- <div class="form-group local-forms status-green">
-                                                <h4>{{messageStep1}}</h4>
-                                            </div> -->
                                             <div class="info-banner">
                                                 <br />
                                                 <h3>{{messageStep1}}</h3>
@@ -116,8 +112,8 @@
                                                 <input class="form-control" formControlName="mobileNumber" type="text"
                                                     placeholder="">
                                             </div>
-                                            <h5>This mobile number will be used for all the communications related to
-                                                ABHA.</h5>
+                                            <span>This mobile number will be used for all the communications related to
+                                                ABHA.</span>
                                             <div class="col-12 col-md-6 col-xl-4">
                                                 <p>
 
@@ -127,8 +123,7 @@
                                         <br />
                                         <!-- <button data-bs-toggle="modal" data-bs-target="#abha-enroll-status" type="button" (click)="confirmOtp()">Submit</button>  -->
 
-                                        <button mat-raised-button color="primary" matStepperNext
-                                            (click)="confirmOtp()">Next</button>
+                                        <button mat-raised-button color="primary" (click)="confirmOtp()">Next</button>
                                     </form>
                                 </div>
                             </mat-step>

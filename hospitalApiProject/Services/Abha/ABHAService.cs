@@ -1,36 +1,51 @@
 using hospitalApiProject.Models.Abha;
-using hospitalApiProject.Services.Shared;
-using Microsoft.AspNetCore.Mvc;
+using hospitalApiProject.Services.Interfaces.Shared;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Abha
 {
   public class ABHAService : ApiBase, IAbhaService
   {
     protected readonly string _baseUrl;
     protected readonly IAuthService _authService;
     protected readonly string _token;
+
+    //public string ErrorMessage { get; set; }
+
+    //public bool HasError
+    //{
+    //  get { return !string.IsNullOrEmpty(ErrorMessage); }
+    //}
+
     public ABHAService(ITokenService tokenService, IAuthService authService) : base(tokenService, authService)
     {
       _baseUrl = "https://abhasbx.abdm.gov.in/abha";
     }
 
-    public Task<string> GenerateOtp(string aadhar)
+    public async Task<string> GenerateOtp(string aadhar)
     {
-      var jsonContent = new AbhaRequestModel
+      try
       {
-        txnId = "",
-        scope = [
-        "abha-enrol" ],
-        loginHint = "aadhaar",
-        loginId = aadhar,
-        otpSystem = "aadhaar"
-      };
+        var jsonContent = new AbhaRequestModel
+        {
+          txnId = "",
+          scope = [
+          "abha-enrol" ],
+          loginHint = "aadhaar",
+          loginId = aadhar,
+          otpSystem = "aadhaar"
+        };
 
-      var json = JsonSerializer.Serialize(jsonContent);
-      var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);
-      return Task.FromResult(result);
+        var json = JsonSerializer.Serialize(jsonContent);
+        var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);        
+
+        return result;
+      }
+      catch (Exception ex)
+      {
+        this.ErrorMessage = ex.Message;
+        return default;
+      }
     }
 
     public Task<string> GenerateOtherOtp(string data, string txnId)
@@ -63,7 +78,7 @@ namespace hospitalApiProject.Services
           otp = new
           {
             timeStamp = DateTime.Now.ToString("YYYY-MM-DD HH:mm:ss"),
-            txnId = txnId,
+            txnId,
             otpValue = otp,
             mobile = mobileNumber
           }
@@ -84,18 +99,19 @@ namespace hospitalApiProject.Services
     {
       var jsonContent = new
       {
-        scope = new[] { 
+        scope = new[] {
         "abha-enrol",
         "mobile-verify" },
 
-        authData = new {
+        authData = new
+        {
           authMethods = new[] {
             "otp"
           },
           otp = new
           {
             timeStamp = DateTime.Now.ToString("YYYY-MM-DD HH:mm:ss"),
-            txnId = txnId,
+            txnId,
             otpValue = otp
           }
         }
@@ -116,8 +132,8 @@ namespace hospitalApiProject.Services
     {
       var jsonContent = new
       {
-        txnId = txnId,
-        abhaAddress = abhaAddress,
+        txnId,
+        abhaAddress,
         preferred = isPreferred
       };
 

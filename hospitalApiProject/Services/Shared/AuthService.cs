@@ -1,4 +1,4 @@
-using hospitalApiProject.Services.Shared;
+using hospitalApiProject.Services.Interfaces.Shared;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Text.Json;

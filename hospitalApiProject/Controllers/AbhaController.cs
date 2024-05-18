@@ -1,5 +1,5 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services;
+using hospitalApiProject.Services.Abha;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -26,7 +26,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.GenerateOtp(aadhar.EncryptedData);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
     }
 
     [HttpPost]
@@ -39,7 +44,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.GenerateOtherOtp(data.EncryptedData, data.TxnId);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
     }
 
     [HttpPost]
@@ -52,7 +62,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.EnrollByAadhaar(data.TxnId, data.EncryptedData, data.MobileNumber);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
     }
 
     [HttpPost]
@@ -65,7 +80,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.EnrollByAbdm(data.TxnId, data.EncryptedData);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
     }
 
     [HttpGet]
@@ -78,7 +98,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.GetAbhaAddressSuggestion(txnId);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.OK, result);
     }
 
     [HttpPost]
@@ -91,7 +116,12 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.CreateAbhaAddress(txnId, abhaAddress, isPreferred);
-      return Ok(result);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
     }
 
     [HttpGet]
@@ -104,7 +134,15 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.DownloadAbhaCard(xToken);
+      //if (_service.HasError)
+      //{
+      //  return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      //}
+
+      //var content = new FileContentResult(result, "application/pdf");
+      //return StatusCode((int)HttpStatusCode.OK, content);
       return new FileContentResult(result, "application/pdf");
+
     }
   }
 }
