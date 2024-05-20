@@ -37,10 +37,6 @@
                                                     <input class="form-control" formControlName="aadharNumber"
                                                         type="text" placeholder="">
                                                 </div>
-                                                <!-- <span class="error"
-                                                    *ngIf="formAadharGroup.controls['aadharNumber'].hasError('pattern')">
-                                                    Invalid Aadhaar Number.
-                                                </span> -->
                                             </div>
                                         </div>
                                         <div class="row">
@@ -57,7 +53,8 @@
                                                         number.......</span>
                                                 </div>
                                                 <div class="col-12 col-md-6 col-xl-10">
-                                                    <div [class.invalid-input]="formAadharGroup.controls['consent'].invalid && formAadharGroup.controls['consent'].touched">
+                                                    <div
+                                                        [class.invalid-input]="formAadharGroup.controls['consent'].invalid && formAadharGroup.controls['consent'].touched">
                                                         <label class="custom_check w-100">
                                                             <input type="checkbox" id="consent"
                                                                 formControlName="consent">
@@ -68,20 +65,15 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <!-- <div class="row">
-                                <div>
-                                    <button class="btn btn-primary submit-form me-2" type="button"
-                                        (click)="generateOtp()">Generate OTP</button>
-                                    <button class="btn btn-primary submit-form me-2" type="button">Cancel</button>
-                                </div>
-                            </div> -->
+
                                         <br />
                                         <button mat-raised-button color="primary" (click)="generateOtp()">Next</button>
                                     </form>
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formAadharAuthGroup" label="Aadhar Authentication" [editable]="false">
+                            <mat-step [stepControl]="formAadharAuthGroup" label="Aadhar Authentication"
+                                [editable]="false">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formAadharAuthGroup">
                                         <div class="row">
@@ -128,7 +120,8 @@
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formCommunicationDetailsGroup" label="Communication Details" [editable]="false">
+                            <mat-step [stepControl]="formCommunicationDetailsGroup" label="Communication Details"
+                                [editable]="false">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formCommunicationDetailsGroup">
                                         <div class="row" *ngIf="abhaProfile != undefined">
@@ -153,8 +146,8 @@
                                                     value="{{formAadharAuthGroup.value.mobileNumber}}">
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-6" *ngIf="isDifferentMobile">
-                                                <button mat-raised-button color="primary"
-                                                    (click)="verifyMobile()" [disabled]="showOtp">Verify</button>
+                                                <button mat-raised-button color="primary" (click)="verifyMobile()"
+                                                    [disabled]="showOtp">Verify</button>
                                             </div>
                                         </div>
                                         <div class="row" *ngIf="showOtp">

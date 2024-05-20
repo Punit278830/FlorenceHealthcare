@@ -10,7 +10,6 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 
 
-
 @NgModule({
   declarations: [
     AppComponent
@@ -22,7 +21,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
     SharedModule,
     NgxExtendedPdfViewerModule,
     ToastrModule.forRoot(),
-    NgxSpinnerModule.forRoot(),
+    NgxSpinnerModule.forRoot()
   ],
   providers: [],
   bootstrap: [AppComponent]

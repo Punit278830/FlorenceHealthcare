@@ -376,8 +376,10 @@ export class routes {
   }  
   public static get abhaConfirmAadharOtp(): string {
     return this.baseUrl + '/abha/confirmAadharOtp';
+  } 
+  public static get abhaAddress(): string {
+    return this.baseUrl + '/abha/register/address';
   }
-
   public static get abhaProfile(): string {
     return this.baseUrl + '/abha/profile';
   }

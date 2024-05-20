@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { AbhaRoutingModule } from './abha-routing.module';
 import { AbhaComponent } from './abha.component';
 
-
 @NgModule({
   declarations: [
     AbhaComponent,

@@ -13,19 +13,13 @@ const routes: Routes = [
     {
       path: 'register/byAadhar',
       loadChildren: () =>
-        // import('./register-by-aadhar/register-by-aadhar.module').then((m) => m.RegisterByAadharModule),
       import('./register-by-aadhar-stepper/register-by-aadhar-stepper.module').then((m) => m.RegisterByAadharStepperModule),
     },
     {
-      path: 'confirmAadharOtp',
+      path: 'register/address',
       loadChildren: () =>
-        import('./abha-confirm-otp/abha-confirm-otp.module').then((m) => m.AbhaConfirmOtpModule),
-    },
-    {
-      path: 'profile',
-      loadChildren: () =>
-        import('./abha-profile/abha-profile.module').then((m) => m.AbhaProfileModule),
-    },
+        import('./add-abha-address/add-abha-address.module').then((m) => m.AddAbhaAddressModule),
+    }
   ]
 }
 ];

@@ -465,6 +465,11 @@ export class DataService {
                 menuValue: 'Register By Aadhar',
                 route: routes.abhaRegisterByAadhar,
                 base: routes.abhaRegisterByAadhar,
+              },
+              {
+                menuValue: 'Create Abha Address',
+                route: routes.abhaAddress,
+                base: routes.abhaAddress,
               }
             ],
           },
