@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
+import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
+import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { DataService } from 'src/app/shared/data/data.service';
-import { pageSelection, apiResultFormat, invoices } from 'src/app/shared/models/models';
+import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 interface data {
@@ -16,8 +20,8 @@ interface data {
 export class InvoicesComponent  implements OnInit{
   public routes = routes;
   public selectedValue !: string  ;
-  public invoices: Array<invoices> = [];
-  dataSource!: MatTableDataSource<invoices>;
+  public invoices:any[] = [];
+  dataSource!: MatTableDataSource<Iinvoice>;
 
   public showFilter = false;
   public searchDataValue = '';
@@ -32,20 +36,37 @@ export class InvoicesComponent  implements OnInit{
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
+  public img="assets/img/profiles/avatar-08.jpg";
+  public combinedData:any[]=[];
 
-  constructor(public data : DataService){
+  constructor(public data : DataService,
+    private invoiceService:InvoiceService,
+    private patientService:PatientService,
+    private route:Router){
 
   }
   ngOnInit() {
     this.getTableData();
   }
   private getTableData(): void {
-    this.invoices = [];
-    this.serialNumberArray = [];
+    const invoices$=this.invoiceService.getAllInvoice();
+    const Patients$=this.patientService.getPatientList();
+    forkJoin([invoices$,Patients$]).subscribe(([invoice,patient])=>{
 
-    this.data.getInvoices().subscribe((data: apiResultFormat) => {
-      this.totalData = data.totalData;
-      data.data.map((res: invoices, index: number) => {
+      this.combinedData=invoice.map((invoice:Iinvoice)=>{
+      const patients=patient.find((id:IpatientInfo)=>id.patientId===invoice.patientId);
+return{
+  ...invoice,
+  patientFname: patients? patients.firstName:'Unknon Patients',
+      patientLname: patients? patients.lastName:'Unknon Patients',
+} 
+
+      })
+      this.invoices = [];
+    this.serialNumberArray = [];
+   
+      this.totalData = this.combinedData.length;
+      this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
          
@@ -53,9 +74,13 @@ export class InvoicesComponent  implements OnInit{
           this.serialNumberArray.push(serialNumber);
         }
       });
-      this.dataSource = new MatTableDataSource<invoices>(this.invoices);
+      this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.calculateTotalPages(this.totalData, this.pageSize);
-    });
+      
+    })
+   
+    
+    //});
   }
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
@@ -132,7 +157,20 @@ export class InvoicesComponent  implements OnInit{
   selectedList: data[] = [
     {value: 'Select Payment Status'},
     {value: 'Paid'},
-    {value: 'Un Paid'},
-    {value: 'Partially Paid'},
+    {value: 'Un Paid'},   
   ];
+
+
+  movetoInvoiceView(Id:number)
+  {
+    this.invoiceService.invoiceId=Id;
+    this.route.navigate(['/accounts/invoice-view'])
+  }
+
+  moveToEditInvoice(id:number)
+  {
+    this.invoiceService.invoiceId=id;
+    this.route.navigate(['/invoice/edit-invoice'])
+
+  }
 }

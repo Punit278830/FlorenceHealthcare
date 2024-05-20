@@ -306,6 +306,27 @@ export interface IPredefineDiagnosis
   diagnosStatus:number;
 }
 
+export interface Iinvoice
+{
+  invoiceId:number,
+  appoitmentId:number,
+  patientId:number,
+  createdDate:Date,
+  amount:number,
+  status:string
+}
+
+export interface IinvoiceItem{
+  id:number,
+  invoiceId:number,
+  itemName:string,
+  description:string,
+  discount:number,
+  fee:number,
+  createdBy:number,
+  finalAmount:number,
+  status:string
+}
 
 export interface assetsList {
   assetId: string;
