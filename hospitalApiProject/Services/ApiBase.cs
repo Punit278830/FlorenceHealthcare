@@ -75,6 +75,44 @@ namespace hospitalApiProject.Services
       return ErrorMessage;
     }
 
+    protected async Task<string> ExecutePostAsync(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetClient();
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
+
+    protected async Task<string> ExecutePostV1Async(string baseUrl, string api, string content)
+    {
+      URL = $"{baseUrl}/{api}";
+      using var client = new HttpClient { BaseAddress = new Uri(URL) };
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return await response.Content.ReadAsStringAsync();
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
     private HttpClient GetClient()
     {
       var client = new HttpClient();

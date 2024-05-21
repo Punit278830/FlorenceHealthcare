@@ -87,4 +87,33 @@ export class AbhaService {
   private handleError(err: HttpErrorResponse): Observable<never> {
     return throwError(() => err.error);
   }
+
+  generateOtpforAbhaAddress(keyData: string): Observable<any> {
+    let data = {
+      EncryptedData: keyData,
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/GenerateMobileOtpForAbhaAddress', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  confirmOtpforAbhaAddress(keyData: string, txnId: string): Observable<any> {
+    let data = {
+      EncryptedData: keyData,
+      txnId: txnId
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/ConfirmMobileOtpForAbhaAddress', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
 }

@@ -134,15 +134,44 @@ namespace hospitalApiProject.Controllers
       }
 
       var result = await _service.DownloadAbhaCard(xToken);
-      //if (_service.HasError)
-      //{
-      //  return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
-      //}
-
-      //var content = new FileContentResult(result, "application/pdf");
-      //return StatusCode((int)HttpStatusCode.OK, content);
       return new FileContentResult(result, "application/pdf");
-
     }
+
+    [HttpPost]
+    [Route("GenerateMobileOtpForAbhaAddress")]
+    public async Task<IActionResult> GenerateMobileOtpForAbhaAddress([FromBody] EncryptedDataModel data)
+    {
+      if (data.EncryptedData == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.GenerateMobileOtp(data.EncryptedData);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    [HttpPost]
+    [Route("ConfirmMobileOtpForAbhaAddress")]
+    public async Task<IActionResult> ConfirmMobileOtpForAbhaAddress([FromBody] GenerateOtherOtp data)
+    {
+      if (data.EncryptedData == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.ConfirmMobileOtpForAbhaAddress(data.EncryptedData, data.TxnId);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
   }
 }

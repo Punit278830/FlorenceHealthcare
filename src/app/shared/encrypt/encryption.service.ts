@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { publicKey } from 'config';
+import { publicKey, publicKey_PHR } from 'config';
 import * as forge from 'node-forge';
 
 @Injectable({
@@ -8,6 +8,8 @@ import * as forge from 'node-forge';
 export class EncryptionService {
 
   private publicKeyPem: string;
+  private publicKeyPHRPem: string;
+
   private privateKeyPem: string;
 
   private keyPair: forge.pki.KeyPair;
@@ -15,6 +17,8 @@ export class EncryptionService {
   constructor() {
     this.keyPair = forge.pki.rsa.generateKeyPair(2048);
     this.publicKeyPem = publicKey;
+    this.publicKeyPHRPem = publicKey_PHR;
+
     this.privateKeyPem = "-----BEGIN PUBLIC KEY-----...-----END PUBLIC KEY-----";
   }
 
@@ -39,4 +43,14 @@ export class EncryptionService {
       },
     });
   }
+
+  encryptWithPKCS1(message: string) : string {
+    const publicKey = forge.pki.publicKeyFromPem(this.publicKeyPHRPem);
+    const messageBytes = forge.util.createBuffer(message, 'utf8');
+
+    const encrypted = publicKey.encrypt(messageBytes.getBytes(), 'RSAES-PKCS1-V1_5');
+    const encryptedBase64 = forge.util.encode64(encrypted);
+    return encryptedBase64;
+  }
+
 }

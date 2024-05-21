@@ -23,8 +23,8 @@ export class AddAbhaAddressComponent {
 
   constructor(private route: ActivatedRoute,
     private fb: FormBuilder,
-    // private abhaService: AbhaService,
-    // private encryptionService: EncryptionService,
+    private abhaService: AbhaService,
+    private encryptionService: EncryptionService,
     // private abhaDataService: AbhaDataService,
     private toster: ToastrService,
     // private router: Router,
@@ -38,7 +38,8 @@ export class AddAbhaAddressComponent {
     this.abhaAddressForm = this.fb.group({
       registerVia: ['', Validators.required],
       mobileNumber: ['', Validators.compose([Validators.min(10)])],
-      abhaNumber: ['', Validators.compose([Validators.min(10)])]
+      abhaNumber: ['', Validators.compose([Validators.min(10)])],
+      otp: ['']
     })
   }
 
@@ -47,9 +48,32 @@ export class AddAbhaAddressComponent {
     this.resetForm();
   }
 
-  onRegisterBySubmit() {
+  Submit() {
     if (!this.abhaAddressForm.valid) {
       this.toster.error("Please provide the required fields!");
+      return;
+    }
+
+    if (this.showOtp) {
+      if (this.abhaAddressForm.value.otp == "") {
+        this.toster.error("Please enter the valid OTP.");
+        return;
+      }
+
+      let otpdata = this.encryptionService.encryptWithPKCS1(this.abhaAddressForm.value.otp);
+      this.abhaService.confirmOtpforAbhaAddress(otpdata, this.txnId).subscribe(
+        res => {
+          if (res && res.error) {
+            this.toster.error("Some error has ocurred please try after some time!");
+            return;
+          }
+
+          //this.showOtp = true;
+          console.log(res);
+        },
+        error => {
+          this.toster.error(error);
+        });
       return;
     }
 
@@ -63,12 +87,24 @@ export class AddAbhaAddressComponent {
       return;
     }
 
-    this.showOtp = true;
+    let data = this.encryptionService.encryptWithPKCS1(this.abhaAddressForm.value.mobileNumber);
+    this.abhaService.generateOtpforAbhaAddress(data).subscribe(
+      res => {
+        if (res && res.error) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.showOtp = true;
+        this.txnId = res.transactionId;
+      },
+      error => {
+        this.toster.error(error);
+      });
   }
 
-  resetForm()
-  {
-    this.showOtp= false;
+  resetForm() {
+    this.showOtp = false;
     this.abhaAddressForm.value.mobileNumber = "";
     this.abhaAddressForm.value.abhaNumber = ""
   }

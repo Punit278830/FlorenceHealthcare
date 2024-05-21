@@ -7,19 +7,15 @@ namespace hospitalApiProject.Services.Abha
   public class ABHAService : ApiBase, IAbhaService
   {
     protected readonly string _baseUrl;
+    protected readonly string _phrBaseUrl;
+
     protected readonly IAuthService _authService;
     protected readonly string _token;
-
-    //public string ErrorMessage { get; set; }
-
-    //public bool HasError
-    //{
-    //  get { return !string.IsNullOrEmpty(ErrorMessage); }
-    //}
 
     public ABHAService(ITokenService tokenService, IAuthService authService) : base(tokenService, authService)
     {
       _baseUrl = "https://abhasbx.abdm.gov.in/abha";
+      _phrBaseUrl = "https://phrsbx.abdm.gov.in";
     }
 
     public async Task<string> GenerateOtp(string aadhar)
@@ -147,6 +143,40 @@ namespace hospitalApiProject.Services.Abha
       var result = ExecuteGetForCard("https://healthidsbx.abdm.gov.in", "api/v1/account/getCard", xToken);
 
       return Task.FromResult(result);
+    }
+
+    public async Task<string> GenerateMobileOtp(string mobile)
+    {
+      try
+      {
+        var jsonContent = new
+        {
+          value = mobile
+        };
+
+        var json = JsonSerializer.Serialize(jsonContent);
+        var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/generate/otp", json);
+
+        return result;
+      }
+      catch (Exception ex)
+      {
+        this.ErrorMessage = ex.Message;
+        return default;
+      }
+    }
+
+    public async Task<string> ConfirmMobileOtpForAbhaAddress(string data, string txnId)
+    {
+      var jsonContent = new
+      {
+        otp = data,
+        txnId = txnId
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/verify/otp", json);
+      return result;
     }
   }
 }
