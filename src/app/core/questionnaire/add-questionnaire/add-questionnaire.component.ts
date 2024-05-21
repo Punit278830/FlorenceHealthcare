@@ -131,7 +131,8 @@ export class AddQuestionnaireComponent {
 
   onEditQuestionaire(data:any)
   {
-    console.log("mmm")
+    console.log();
+   
   }
 
 
@@ -173,6 +174,7 @@ get optionControls() {
 
   showaddQuestion(id:number)
   {
+
     this.showAddQuestion=true;
     this.questionnaireId=id;
     this.questionCounter=0;
@@ -291,13 +293,13 @@ get optionControls() {
   addOptions(option:any[])
   {
     this.question.createOption(option).subscribe(res=>{
-      if(res)
-      {
+      
         this.toaster.success("Options added Successfully","Add Optiones")
         this.questionForm.reset();
         this.optionControls.clear();
         this.objectiveType=false;
-      }
+        
+      
     })
   }
 
@@ -382,7 +384,12 @@ get optionControls() {
       }
       this.optionArray.push(optionObject)
     })
-    this.addOptions(this.optionArray)
+    if(this.optionArray.length>0)
+    {
+      this.addOptions(this.optionArray)
+    }
+    
+    this.showaddQuestion(this.questionnaireId)
     this.editQuestion=false;
   }
 //********************question update testing code */
@@ -392,14 +399,14 @@ get optionControls() {
   //    
   //  })
   
-  else{
+  //else{
      this.question.updateQuestion(this.questionId,this._questionDto).subscribe(res=>{
-     if(res)
-      {
+     
         this.toaster.success("Question Updated Successfully","Update Question")
-      }
+        this.showaddQuestion(this.questionnaireId)
+      
     })
-  }
+ // }
   }
 
   //display question one by one on UI to select Answer
