@@ -19,23 +19,23 @@
 
         <div class="row">
 
-            <div class="col-12 col-md-12  col-xl-6">
+            <div class="col-12 col-md-12  col-xl-5">
                 <div class="card">
                     <div class="card-body">
                         <div class="form-heading">
-                            <h4>Add Qustionnaire</h4>
+                            <h4>Add Questionnaire</h4>
                         </div>
 
                         <form [formGroup]="questForm" (ngSubmit)="addQustionnaireName(questForm)">
                             <div class="row">
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="QuestionnairesName">Qustionnaire Name <span
+                                        <label for="QuestionnairesName">Questionnaire Name <span
                                                 class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="questionnaireName" type="text">
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-4">
+                                <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
                                         <label for="departmet">Department Name <span
                                                 class="login-danger">*</span></label>
@@ -48,6 +48,23 @@
 
                                     </div>
                                 </div>
+                            </div>
+                            <!-- <div class="row">
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                        <label for="departmet">Department Name <span
+                                                class="login-danger">*</span></label>
+                                        <mat-select formControlName="questinaryDeptId" class="form-control select">
+
+                                            <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
+                                                {{data.departmentName}}
+                                            </mat-option>
+                                        </mat-select>
+
+                                    </div>
+                                </div>
+                            </div> -->
+                            <div class="row">
                                 <div class="col-12 col-md-6 col-xl-10">
                                     <div class="doctor-submit text-end">
                                         <button type="submit" class="btn btn-primary submit-form me-2">Create
@@ -63,10 +80,30 @@
 
 
 
-            <div class="col-12 col-md-12  col-xl-6" *ngIf="combineData.length>0">
+            <div class="col-12 col-md-12  col-xl-7" *ngIf="combineData.length>0">
 
                 <div class="card">
                     <div class="card-body">
+                        <div class="page-table-header mb-2">
+                            <div class="row">
+                                <div class="col">
+                                    <div class="status-table-blk">
+                                        <h3>Filter by status: </h3>
+                                        <div class="col-12 col-md-4">
+                                            <div>
+                                                <mat-select class="form-control select"
+                                                    (selectionChange)="onStatusChange($event)">
+                                                    <mat-option *ngFor="let qStatus of questionnaireStatuses"
+                                                        [value]="qStatus">
+                                                        {{qStatus}}
+                                                    </mat-option>
+                                                </mat-select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class=" table border-0 custom-table comman-table datatable mb-0">
                                 <thead>
@@ -78,6 +115,7 @@
                                         </th>
                                         <th>Questionare Name</th>
                                         <th>Department Name</th>
+                                        <th>Status</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -97,7 +135,7 @@
                                                     height="28" [src]="img" class="rounded-circle m-r-5" alt="">
                                                 {{data.questionnaireName}}</a></td>
                                         <td>{{data.deptName}}</td>
-
+                                        <td>{{data.isActive ? "Active" : "Inactive"}}</td>
 
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
@@ -105,11 +143,11 @@
                                                     data-bs-toggle="dropdown" aria-expanded="false"><i
                                                         class="fa fa-ellipsis-v"></i></a>
                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                    <a class="dropdown-item" [routerLink]="routes.editStaff"
-                                                        (click)="onEditQuestionaire(data.questinaryDeptId)">
-                                                        <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit</a>
-                                                    <a class="dropdown-item" href="javascript:void(0);"
-                                                        data-bs-toggle="modal" data-bs-target="#delete_patient"><i
+                                                    <a class="dropdown-item"
+                                                        (click)="onEditQuestionaire(data)">
+                                                        <i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle Status</a>
+                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="openModal(data.questionnaireId)"
+                                                        data-bs-toggle="modal" data-bs-target="#delete_ques"><i
                                                             class="fa fa-trash-alt m-r-5"></i>
                                                         Delete</a>
                                                 </div>
@@ -421,5 +459,18 @@
 
 
 
+    </div>
+</div>
+<div id="delete_ques" class="modal fade delete-modal" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <img src="assets/img/sent.png" alt="" width="50" height="46">
+                <h3>Are you sure want to delete this ?</h3>
+                <div class="m-t-20"> <a href="javascript:void(0);" class="btn btn-white me-1" data-bs-dismiss="modal">Close</a>
+                    <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" (click)="confirmDelete()">Delete</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

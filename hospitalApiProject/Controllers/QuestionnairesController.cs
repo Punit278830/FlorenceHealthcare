@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -69,6 +69,7 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
 
+            questionnaire.IsActive = !questionnaire.IsActive;
             _context.Entry(questionnaire).State = EntityState.Modified;
 
             try
@@ -95,6 +96,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<Questionnaire>> PostQuestionnaire(Questionnaire questionnaire)
         {
+            questionnaire.IsActive= true;
             _context.Questionnaires.Add(questionnaire);
             await _context.SaveChangesAsync();
 

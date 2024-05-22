@@ -8,6 +8,7 @@ import { QuestionService } from 'src/app/shared/Services/question/question.servi
 import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } from 'src/app/shared/models/models';
 
 import { routes } from 'src/app/shared/routes/routes';
+import { ModalComponent } from '../../modal/modal.component';
 
 @Component({
   selector: 'app-add-questionnaire',
@@ -47,7 +48,8 @@ export class AddQuestionnaireComponent {
     public finishQuestionniary=false;
     private questionCounter=0;
     
-  
+    questionnaireStatuses: string[] = ['All', 'Active', 'Inactive'];
+    selectedStatus: string = 'All';  
   
   constructor(private fb:FormBuilder,
     private departmentService:DepartmentService,
@@ -117,7 +119,20 @@ export class AddQuestionnaireComponent {
     const questionaire$=this.question.getAllQuestionaireName();
     forkJoin([depName$,questionaire$]).subscribe(([depName,questionaire])=>{
       
-      this.combineData=questionaire.map((questName:any)=>{
+       // Define a lookup object for filter functions
+       const filterFunctions: { [key: string]: (quest: any) => boolean } = {
+        'Active': (quest: any) => quest.isActive,
+        'Inactive': (quest: any) => !quest.isActive,
+        'All': (quest: any) => true  // Assuming 'All' is the value of this.selectedStatus when no filter is applied
+      };
+
+      // Get the appropriate filter function based on this.selectedOption
+      const filterFunction = filterFunctions[this.selectedStatus] || filterFunctions['All'];
+
+      // Filter questionaire using the selected filter function
+      const filteredQuestionaire = questionaire.filter(filterFunction);
+
+      this.combineData = filteredQuestionaire.map((questName: any) => {
         const departmentName=depName.find((dep:any)=>questName.questinaryDeptId===dep.departmentId)
        
         return{
@@ -131,7 +146,13 @@ export class AddQuestionnaireComponent {
 
   onEditQuestionaire(data:any)
   {
-    console.log("mmm")
+    this.question.toggleQuestionaireStatus(data).subscribe(res=>{
+      if(res == null)
+      {
+        this.toaster.success("Questionaire status is updated!")
+        this.getQuestionairewithDepName();
+      }
+    })
   }
 
 
@@ -476,6 +497,24 @@ get optionControls() {
   //   })
   //   this.answerDto=[];
   // }
+  onStatusChange(event: any) {
+    this.selectedStatus = event.value;
+    this.getQuestionairewithDepName();
+  }
+
+  openModal(questionnaireId: number) {
+    this.questionnaireId = questionnaireId;
+  }
+  
+  confirmDelete() {
+    this.question.deleteQuestionaire(this.questionnaireId).subscribe(res=>{
+      if(res == null)
+      {
+        this.toaster.success("Questionaire is deleted!")
+        this.getQuestionairewithDepName();
+      }
+    })
+  }
 
 }
 

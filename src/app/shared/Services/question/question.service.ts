@@ -27,7 +27,15 @@ export class QuestionService {
     return this.http.post(this.apiUrl+'Questionnaires',questName)
    }
 
+   toggleQuestionaireStatus(questName:IQuestionnaires):Observable<any>
+   {
+    return this.http.put(this.apiUrl+'Questionnaires/' + questName.questionnaireId,questName)
+   }
 
+   deleteQuestionaire(id:number):Observable<any>
+   {
+    return this.http.delete(this.apiUrl+'Questionnaires/'+ id)
+   }
    //*********Question Related API calls ******** */
 
    createQuestion(question:Iquestion):Observable<any>
