@@ -3,6 +3,11 @@
 ##
 ## Get latest from `dotnet new gitignore`
 
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
 # dotenv files
 .env
 
@@ -248,6 +253,10 @@ ClientBin/
 *.publishsettings
 orleans.codegen.cs
 
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
 # Including strong name files can present a security risk
 # (https://github.com/github/gitignore/pull/2483#issue-259490424)
 #*.snk
@@ -381,10 +390,19 @@ MigrationBackup/
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
 
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# VS Code files for those working on multiple tools
+# Visual Studio Code
+.vs
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -424,10 +442,19 @@ autom4te.cache/
 tarballs/
 test-results/
 
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
 # Mac bundle stuff
 *.dmg
 *.app
 
+# System files
 # content below from: https://github.com/github/gitignore/blob/master/Global/macOS.gitignore
 # General
 .DS_Store

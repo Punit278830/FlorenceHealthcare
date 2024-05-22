@@ -257,6 +257,7 @@ export interface IQuestionnaires
   questionnaireId:number,
   questionnaireName:string,
   questinaryDeptId:number;
+  isActive:boolean;
 }
 
 export interface Iquestion
