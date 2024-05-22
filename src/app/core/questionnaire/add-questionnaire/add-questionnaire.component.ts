@@ -51,10 +51,7 @@ export class AddQuestionnaireComponent {
     public currentQuestionData:any;
     public finishQuestionniary=false;
     private questionCounter=0;
-    
-    questionnaireStatuses: string[] = ['All', 'Active', 'Inactive'];
-    selectedStatus: string = 'All';  
-  
+      
   constructor(private fb:FormBuilder,
     private departmentService:DepartmentService,
     private question:QuestionService,
@@ -494,12 +491,6 @@ export class AddQuestionnaireComponent {
       }
     })
   }
-
-  onStatusChange(event: any) {
-    this.selectedStatus = event.value;
-    this.getQuestionairewithDepName();
-  }
-
 }
 
 
