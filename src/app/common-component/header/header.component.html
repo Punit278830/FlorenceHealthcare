@@ -8,14 +8,16 @@
             alt=""></a>
     <a (click)="toggleMobileSideBar()" (keyup.enter)="toggleMobileSideBar()" id="mobile_btn"
         class="mobile_btn float-start" tabindex="0"><img src="assets/img/icons/bar-icon.svg" alt=""></a>
-    <div class="top-nav-search mob-view">
+        <!-- DO NOT DELETE -->
+    <!-- <div class="top-nav-search mob-view">
         <form>
             <input type="text" class="form-control" placeholder="Search here">
             <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
-        </form>
-    </div>
+        </form>?
+    </div> -->
     <ul class="nav user-menu float-end">
-        <li class="nav-item dropdown d-none d-sm-block">
+        <!-- DO NOT DELETE -->
+        <!-- <li class="nav-item dropdown d-none d-sm-block">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown"><img
                     src="assets/img/icons/note-icon-02.svg" alt=""><span class="pulse"></span> </a>
             <div class="dropdown-menu notifications">
@@ -98,7 +100,7 @@
                     <a [routerLink]="routes.activities">View all Notifications</a>
                 </div>
             </div>
-        </li>
+        </li> -->
         <li class="nav-item dropdown d-none d-sm-block">
             <a (click)="openBoxFunc()" (keyup.enter)="openBoxFunc()" id="open_msg_box" class="hasnotifications nav-link"
                 tabindex="0"><img src="assets/img/icons/note-icon-01.svg" alt=""><span class="pulse"></span> </a>
@@ -110,7 +112,7 @@
                     <span>{{userRole}}</span>
                 </div>
                 <span class="user-img">
-                    <img src="assets/img/user-06.jpg" alt="Admin">
+                    <img src="../../../assets/icons/profileIcon.jpg" alt="Admin">
                 </span>
             </a>
             <div class="dropdown-menu">
