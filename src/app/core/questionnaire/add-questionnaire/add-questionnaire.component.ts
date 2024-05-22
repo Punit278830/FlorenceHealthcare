@@ -138,8 +138,10 @@ export class AddQuestionnaireComponent {
     })
   }
 
-  onEditQuestionaire(data: any) {
-    console.log("mmm")
+  onEditQuestionaire(data:any)
+  {
+    console.log();
+   
   }
 
 
@@ -288,14 +290,16 @@ export class AddQuestionnaireComponent {
   }
 
 
-  addOptions(option: any[]) {
-    this.question.createOption(option).subscribe(res => {
-      if (res) {
-        this.toaster.success("Options added Successfully", "Add Optiones")
+  addOptions(option:any[])
+  {
+    this.question.createOption(option).subscribe(res=>{
+      
+        this.toaster.success("Options added Successfully","Add Optiones")
         this.questionForm.reset();
         this.optionControls.clear();
-        this.objectiveType = false;
-      }
+        this.objectiveType=false;
+        
+      
     })
   }
 
@@ -370,26 +374,32 @@ export class AddQuestionnaireComponent {
           optionText: data.option,
           mapQuestionId: data.mapQuestionId
 
-        }
-        this.optionArray.push(optionObject)
-      })
+      }
+      this.optionArray.push(optionObject)
+    })
+    if(this.optionArray.length>0)
+    {
       this.addOptions(this.optionArray)
-      this.editQuestion = false;
     }
-    //********************question update testing code */
+    
+    this.showaddQuestion(this.questionnaireId)
+    this.editQuestion=false;
+  }
+//********************question update testing code */
 
-    //   this.question.updateQuestion(this.questionId,this._questionDto).subscribe(res=>{
-    //   const id:number=res.questionId
-    //    
-    //  })
-
-    else {
-      this.question.updateQuestion(this.questionId, this._questionDto).subscribe(res => {
-        if (res) {
-          this.toaster.success("Question Updated Successfully", "Update Question")
-        }
-      })
-    }
+  //   this.question.updateQuestion(this.questionId,this._questionDto).subscribe(res=>{
+  //   const id:number=res.questionId
+  //    
+  //  })
+  
+  //else{
+     this.question.updateQuestion(this.questionId,this._questionDto).subscribe(res=>{
+     
+        this.toaster.success("Question Updated Successfully","Update Question")
+        this.showaddQuestion(this.questionnaireId)
+      
+    })
+ // }
   }
 
   //display question one by one on UI to select Answer
