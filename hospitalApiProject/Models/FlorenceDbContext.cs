@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -333,6 +333,8 @@ public partial class FlorenceDbContext : DbContext
             entity.Property(e => e.QuestionnaireName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+          entity.Property(e => e.IsActive).HasColumnName("isActive");
+
         });
 
         modelBuilder.Entity<StaffInfo>(entity =>
