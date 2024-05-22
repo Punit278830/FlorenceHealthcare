@@ -1,14 +1,9 @@
-﻿
-using hospitalApiProject;
 using hospitalApiProject.Models;
-using hospitalApiProject.Repository;
-using hospitalApiProject.Repository.Interface;
+using hospitalApiProject.Services;
+using hospitalApiProject.Services.Abha;
+using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Shared;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Options;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
-using NuGet.Protocol.Plugins;
-using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,6 +25,12 @@ builder.Services.AddCors(options =>
     .AllowAnyHeader());
 
 });
+
+// Add services to the container
+builder.Services.AddMemoryCache();
+builder.Services.AddScoped<IAbhaService, ABHAService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
 

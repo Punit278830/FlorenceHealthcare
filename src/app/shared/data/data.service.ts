@@ -449,7 +449,30 @@ export class DataService {
           ],
         },
 
-
+        {
+          menuValue: 'ABHA',
+            hasSubRoute: true,
+            showSubRoute: false,
+            base: 'ABHA',
+            img: 'assets/img/icons/menu-icon-15.svg', //todo : change icon
+            subMenus: [
+              {
+                menuValue: 'Dashboard',
+                route: routes.abhaDashboard,
+                base: routes.abhaDashboard,
+              },
+              {
+                menuValue: 'Register By Aadhar',
+                route: routes.abhaRegisterByAadhar,
+                base: routes.abhaRegisterByAadhar,
+              },
+              {
+                menuValue: 'Create Abha Address',
+                route: routes.abhaAddress,
+                base: routes.abhaAddress,
+              }
+            ],
+          },
         // {
         //   menuValue: 'Invoice',
         //   hasSubRoute: true,

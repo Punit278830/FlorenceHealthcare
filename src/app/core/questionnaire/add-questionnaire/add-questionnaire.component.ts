@@ -8,6 +8,7 @@ import { QuestionService } from 'src/app/shared/Services/question/question.servi
 import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } from 'src/app/shared/models/models';
 
 import { routes } from 'src/app/shared/routes/routes';
+import { ModalComponent } from '../../modal/modal.component';
 
 @Component({
   selector: 'app-add-questionnaire',
@@ -31,39 +32,38 @@ export class AddQuestionnaireComponent {
 
 
   //*******varible for question Section *** */
-  public showAddQuestion = false;
-  public questionForm!: FormGroup;
-  private questionnaireId!: number;
-  public _questionDto!: Iquestion;
-  public questiontoDisplay: any[] = [];
-  public objectiveType = false;
-  private optionArray: Ioptions[] = [];
-  public optionObject!: Ioptions;
-  public answerForm!: FormGroup;
-  private loggedInUserId!: Ilogin;
-  private questionId!: number;
-  public editQuestion = false;
-  public currentQuestion = 0;
-  public nextQuestionId = 0;
-  public previousQuestion!: number;
-  private questionLenth = 0;
-  public currentQuestionData: any;
-  public finishQuestionniary = false;
-  private questionCounter = 0;
-
-
-
-  constructor(private fb: FormBuilder,
-    private departmentService: DepartmentService,
-    private question: QuestionService,
-    private toaster: ToastrService) {
-    this.initlizaQuestForm();
-    this.getDepartmentList();
-    this.getQuestionairewithDepName();
-    this.initlizeQuestionForm();
-    this.answerForm = this.fb.group({});
-    this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');
-
+    public showAddQuestion=false;
+    public questionForm!:FormGroup;
+    private questionnaireId!:number;
+    public _questionDto!:Iquestion;
+    public questiontoDisplay:any[]=[];
+    public objectiveType=false;
+    private optionArray:Ioptions[]=[];
+    public optionObject!:Ioptions;
+    public answerForm!: FormGroup;
+    private loggedInUserId!:Ilogin;
+    private questionId!:number;
+    public editQuestion=false;
+    public currentQuestion=0;
+    public nextQuestionId=0;
+    public previousQuestion!:number;
+    private questionLenth=0;
+    public currentQuestionData:any;
+    public finishQuestionniary=false;
+    private questionCounter=0;
+      
+  constructor(private fb:FormBuilder,
+    private departmentService:DepartmentService,
+    private question:QuestionService,
+    private toaster:ToastrService)
+  {
+   this.initlizaQuestForm();
+   this.getDepartmentList();
+   this.getQuestionairewithDepName();
+   this.initlizeQuestionForm();
+   this.answerForm = this.fb.group({});
+   this.loggedInUserId=JSON.parse(localStorage.getItem('data') ||'');
+   
   }
 
 
@@ -107,14 +107,15 @@ export class AddQuestionnaireComponent {
   //   })
   // }
 
-  getQuestionairewithDepName() {
-    this.combineData = [];
-    const depName$ = this.departmentService.getDepartmentList();
-    const questionaire$ = this.question.getAllQuestionaireName();
-    forkJoin([depName$, questionaire$]).subscribe(([depName, questionaire]) => {
-
-      // Define a lookup object for filter functions
-      const filterFunctions: { [key: string]: (quest: any) => boolean } = {
+  getQuestionairewithDepName()
+  {
+    this.combineData=[];
+    const depName$=this.departmentService.getDepartmentList();
+    const questionaire$=this.question.getAllQuestionaireName();
+    forkJoin([depName$,questionaire$]).subscribe(([depName,questionaire])=>{
+      
+       // Define a lookup object for filter functions
+       const filterFunctions: { [key: string]: (quest: any) => boolean } = {
         'Active': (quest: any) => quest.isActive,
         'Inactive': (quest: any) => !quest.isActive,
         'All': (quest: any) => true  // Assuming 'All' is the value of this.selectedStatus when no filter is applied
@@ -127,9 +128,9 @@ export class AddQuestionnaireComponent {
       const filteredQuestionaire = questionaire.filter(filterFunction);
 
       this.combineData = filteredQuestionaire.map((questName: any) => {
-        const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId)
-
-        return {
+        const departmentName=depName.find((dep:any)=>questName.questinaryDeptId===dep.departmentId)
+       
+        return{
           ...questName,
           deptName: departmentName ? departmentName.departmentName : 'Unknown Name',
 
@@ -140,8 +141,13 @@ export class AddQuestionnaireComponent {
 
   onEditQuestionaire(data:any)
   {
-    console.log();
-   
+    this.question.toggleQuestionaireStatus(data).subscribe(res=>{
+      if(res == null)
+      {
+        this.toaster.success("Questionaire status is updated!")
+        this.getQuestionairewithDepName();
+      }
+    })
   }
 
 
@@ -467,12 +473,24 @@ export class AddQuestionnaireComponent {
   //   })
   //   this.answerDto=[];
   // }
-
   onStatusChange(event: any) {
     this.selectedStatus = event.value;
     this.getQuestionairewithDepName();
   }
 
+  openModal(questionnaireId: number) {
+    this.questionnaireId = questionnaireId;
+  }
+  
+  confirmDelete() {
+    this.question.deleteQuestionaire(this.questionnaireId).subscribe(res=>{
+      if(res == null)
+      {
+        this.toaster.success("Questionaire is deleted!")
+        this.getQuestionairewithDepName();
+      }
+    })
+  }
 }
 
 

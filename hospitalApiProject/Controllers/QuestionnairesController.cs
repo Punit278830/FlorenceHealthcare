@@ -69,7 +69,8 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
-      _context.Entry(questionnaire).State = EntityState.Modified;
+            questionnaire.IsActive = !questionnaire.IsActive;
+            _context.Entry(questionnaire).State = EntityState.Modified;
 
       try
       {
@@ -90,14 +91,14 @@ namespace hospitalApiProject.Controllers
       return NoContent();
     }
 
-    // POST: api/Questionnaires
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Questionnaire>> PostQuestionnaire(Questionnaire questionnaire)
-    {
-      questionnaire.IsActive = true;
-      _context.Questionnaires.Add(questionnaire);
-      await _context.SaveChangesAsync();
+        // POST: api/Questionnaires
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Questionnaire>> PostQuestionnaire(Questionnaire questionnaire)
+        {
+            questionnaire.IsActive = true;
+            _context.Questionnaires.Add(questionnaire);
+            await _context.SaveChangesAsync();
 
       return CreatedAtAction("GetQuestionnaire", new { id = questionnaire.QuestionnaireId }, questionnaire);
     }
