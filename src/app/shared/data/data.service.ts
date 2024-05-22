@@ -473,6 +473,26 @@ export class DataService {
               }
             ],
           },
+          {
+            menuValue: 'Invoice',
+            hasSubRoute: true,
+            showSubRoute: false,
+            base: 'invoice',
+            img: 'assets/img/icons/menu-icon-15.svg',
+            subMenus: [
+              {
+                menuValue: 'Invoices List',
+                route: routes.allInvoice,
+                base: routes.allInvoice,
+              },
+              {
+                menuValue: 'Add Invoice Item ',
+                route: routes.addInvoiceItem,
+                base: routes.addInvoiceItem,
+              },
+              
+            ],
+          },
         // {
         //   menuValue: 'Invoice',
         //   hasSubRoute: true,

@@ -27,6 +27,13 @@ const routes: Routes = [
         ),
     },
     {
+      path: 'add-invoice-item',
+      loadChildren: () =>
+        import('./add-invoice-item/add-invoice-item.module').then(
+          (m) => m.AddInvoiceItem
+        ),
+    },
+    {
       path: 'edit-invoices',
       loadChildren: () =>
         import('./edit-invoices/edit-invoices.module').then(
