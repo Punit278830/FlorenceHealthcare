@@ -57,6 +57,21 @@ namespace hospitalApiProject.Services
       return default;
     }
 
+    public virtual string ExecuteGet1(string baseUrl, string api, string additionalData)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetV1Client(additionalData);
+
+      var response = client.GetAsync(URL).Result;
+
+      if (response != null && response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      return default;
+    }
+
     protected virtual string ExecutePost(string baseUrl, string api, string content)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);

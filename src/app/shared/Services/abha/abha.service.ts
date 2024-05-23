@@ -105,7 +105,7 @@ export class AbhaService {
   confirmOtpforAbhaAddress(keyData: string, txnId: string): Observable<any> {
     let data = {
       EncryptedData: keyData,
-      txnId: txnId
+      TxnId: txnId
     };
 
     const httpOptions = {
