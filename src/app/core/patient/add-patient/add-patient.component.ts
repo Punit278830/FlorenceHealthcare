@@ -153,4 +153,17 @@ onDobDateChange(event: any): void {
     this.camerastatus='';
 
   }
+
+
+  changedob(year:any)
+  {
+    const currentYear = new Date().getFullYear();
+    const y=currentYear-year;
+   
+    const dob=y+'/01/01'
+    
+    this.patientReg.get('dob')?.patchValue(this.datePipe.transform(dob, 'yyyy-MM-dd'));
+
+
+  }
 }

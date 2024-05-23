@@ -295,4 +295,10 @@ initlizeDateForm()
 
  }
 
+ movetoBookappointment(id:number)
+ {
+  this.patientService.patientId=id;
+  this.route.navigate([routes.addAppointment]);
+ }
+
 }

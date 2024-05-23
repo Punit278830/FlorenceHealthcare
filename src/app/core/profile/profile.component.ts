@@ -775,7 +775,8 @@ print()
 
     window.print();
 
-    document.body.innerHTML = originalContents;  }
+    document.body.innerHTML = originalContents; 
+   }
   
     updateAppointmentId(appointmentId:number)
     {
