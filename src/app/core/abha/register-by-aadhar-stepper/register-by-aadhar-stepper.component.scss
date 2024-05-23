@@ -1,0 +1,42 @@
+p {
+  font-family: Lato;
+}
+
+.example-form {
+  min-width: 150px;
+  max-width: 500px;
+  width: 100%;
+}
+
+.example-full-width {
+  width: 100%;
+}
+
+.success-banner {
+  border: 1px solid gray;
+  padding: 5px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  border-radius: 10px;
+  background-color: lightgreen;
+  color: black;
+}
+
+.info-banner {
+  border: 1px solid gray;
+  padding: 5px;
+  padding-bottom: 20px;
+  padding-left: 20px;
+  border-radius: 10px;
+  background-color: lightblue;
+  color: black;
+}
+
+input.ng-invalid.ng-touched {
+  border: red 1px solid;
+}
+
+.invalid-input {
+  border: 1px solid red;
+  display: inline-block;
+}

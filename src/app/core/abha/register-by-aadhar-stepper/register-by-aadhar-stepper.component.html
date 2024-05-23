@@ -1,0 +1,311 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaDashboard">Abha </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active"><a [routerLink]="routes.abhaRegisterByAadhar">Register by
+                                Aadhar</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <h3>Create ABHA Number Using Aadhaar</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <mat-horizontal-stepper [linear]="isLinear" #stepper labelPosition="bottom">
+                            <mat-step [stepControl]="formAadharGroup" label="Consent Collection">
+                                <ng-template matStepperIcon="done">
+                                    <mat-icon class="green-icon">done</mat-icon>
+                                </ng-template>
+                                <div style="padding-top: 3%;">
+                                    <form [formGroup]="formAadharGroup">
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="aadhar">Aadhar Number
+                                                        <span class="login-danger">*</span>
+                                                    </label>
+                                                    <input class="form-control" formControlName="aadharNumber"
+                                                        type="text" placeholder="">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div>
+                                                <div class="col-12 col-md-6 col-xl-10">
+                                                    <h4><strong>Terms and Conditions</strong></h4>
+                                                    <span>I, hereby declare that I am voluntarily sharing my
+                                                        Aadhaar
+                                                        number and
+                                                        demographic information issued by UIDAI, with National
+                                                        Health
+                                                        Authority (NHA)
+                                                        for the sole purpose of creation of ABHA
+                                                        number.......</span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-xl-10">
+                                                    <div
+                                                        [class.invalid-input]="formAadharGroup.controls['consent'].invalid && formAadharGroup.controls['consent'].touched">
+                                                        <label class="custom_check w-100">
+                                                            <input type="checkbox" id="consent"
+                                                                formControlName="consent">
+                                                            <span class="checkmark"></span> I agree<span
+                                                                class="login-danger">*</span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <br />
+                                        <button mat-raised-button color="primary" (click)="generateOtp()">Next</button>
+                                    </form>
+                                </div>
+                            </mat-step>
+
+                            <mat-step [stepControl]="formAadharAuthGroup" label="Aadhar Authentication"
+                                [editable]="false">
+                                <div style="padding-top: 3%;">
+                                    <form [formGroup]="formAadharAuthGroup">
+                                        <div class="row">
+                                            <div class="info-banner">
+                                                <br />
+                                                <h3>{{messageStep1}}</h3>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-6">
+                                                <div class="form-group local-forms">
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                                <label for="otp">OTP <span class="login-danger">*</span></label>
+                                                <input class="form-control" formControlName="otp" type="text"
+                                                    placeholder="">
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                                <label for="mobileNumber">Mobile Number <span
+                                                        class="login-danger">*</span></label>
+                                                <input class="form-control" formControlName="mobileNumber" type="text"
+                                                    placeholder="">
+                                            </div>
+                                            <span>This mobile number will be used for all the communications related to
+                                                ABHA.</span>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <p>
+
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <!-- <button data-bs-toggle="modal" data-bs-target="#abha-enroll-status" type="button" (click)="confirmOtp()">Submit</button>  -->
+
+                                        <button mat-raised-button color="primary" (click)="confirmOtp()">Next</button>
+                                    </form>
+                                </div>
+                            </mat-step>
+
+                            <mat-step [stepControl]="formCommunicationDetailsGroup" label="Communication Details"
+                                [editable]="false">
+                                <div style="padding-top: 3%;">
+                                    <form [formGroup]="formCommunicationDetailsGroup">
+                                        <div class="row" *ngIf="abhaProfile != undefined">
+                                            <div class="info-banner">
+                                                <br />
+                                                <h3>{{messageStep3}}</h3>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-6">
+                                                <div class="form-group local-forms">
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                                <label for="otherMobile">Mobile Number <span
+                                                        class="login-danger">*</span></label>
+                                                <input class="form-control" formControlName="otherMobile" type="text"
+                                                    placeholder="" readonly
+                                                    value="{{formAadharAuthGroup.value.mobileNumber}}">
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-6" *ngIf="isDifferentMobile">
+                                                <button mat-raised-button color="primary" (click)="verifyMobile()"
+                                                    [disabled]="showOtp">Verify</button>
+                                            </div>
+                                        </div>
+                                        <div class="row" *ngIf="showOtp">
+                                            <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                                <label for="otp">OTP <span class="login-danger">*</span></label>
+                                                <input class="form-control" formControlName="otp" type="text"
+                                                    placeholder="">
+                                            </div>
+                                        </div>
+                                        <br />
+                                        <!-- </div> -->
+                                        <br />
+                                        <button mat-raised-button color="primary"
+                                            (click)="confirmCommDetails()">Next</button>
+                                    </form>
+                                </div>
+                            </mat-step>
+
+                            <mat-step [stepControl]="formAbhaProfileGroup" label="View Profile" [editable]="false">
+                                <div style="padding-top: 3%;">
+                                    <form [formGroup]="formAbhaProfileGroup">
+                                        <div *ngIf="abhaProfile != undefined">
+                                            <div class="row" *ngIf="abhaProfile != undefined">
+                                                <div class="info-banner">
+                                                    <br />
+                                                    <h3>{{messageStep2}}</h3>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-6">
+                                                    <div class="form-group local-forms">
+                                                        <!-- <h4>{{AbhaNumberMessage}}</h4> -->
+                                                        <!-- We have found an ABHA xx-xxxx-xxxx-5209 against the Aadhaar
+                                                        number provided by you. -->
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-6">
+                                                    <div class="form-group local-forms">
+                                                        <label for="AbhaName">Name</label>
+
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfileName}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-6">
+                                                    <!-- <h4></h4>
+                                                    <span>{{abhaProfile.ABHANumber}}</span> -->
+                                                    <div class="form-group local-forms">
+                                                        <label for="AbhaNumber">ABHA Number</label>
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfile.ABHANumber}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-6">
+                                                    <!-- <h4>ABHA Address</h4>
+                                                    {{abhaProfile.phrAddress[0]}} -->
+                                                    <div class="form-group local-forms">
+                                                        <label for="AbhaAddress">ABHA Address</label>
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfile.phrAddress[0]}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-4 col-xl-4">
+                                                    <!-- <h4>Gender</h4>
+                                                    {{abhaProfile.gender}} -->
+                                                    <div class="form-group local-forms">
+                                                        <label for="gender">Gender</label>
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfile.gender}}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-4 col-xl-4">
+                                                    <!-- <h4>Date of birth</h4>
+                                                    {{abhaProfile.dob}} -->
+                                                    <div class="form-group local-forms">
+                                                        <label for="dob">Date of birth</label>
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfile.dob}}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-12 col-md-4 col-xl-4">
+                                                    <!-- <h4>Mobile</h4>
+                                                    {{abhaProfile.mobile}} -->
+                                                    <div class="form-group local-forms">
+                                                        <label for="mobile">Mobile</label>
+                                                        <input class="form-control" type="text" readonly
+                                                            value="{{abhaProfile.mobile}}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- <mat-form-field class="example-full-width">
+                                                <input type="tel" matInput placeholder="Mobile" required
+                                                    formControlName="mobile">
+                                                <mat-error
+                                                    *ngIf="formPhoneGroup.controls['mobile'].hasError('required')">
+                                                    Mobile is required!
+                                                </mat-error>
+                                                <mat-error *ngIf="formPhoneGroup.controls['mobile'].hasError('min')">
+                                                    Mobile No is Wrong!
+                                                </mat-error>
+                                            </mat-form-field> -->
+                                        </div>
+                                        <br />
+                                        <button mat-raised-button color="primary" matStepperNext
+                                            (click)="downloadABHACard()">Next</button>
+                                    </form>
+                                </div>
+
+                            </mat-step>
+                            <mat-step>
+                                <ng-template matStepLabel>Review</ng-template>
+                                <h5>You are now done.</h5>
+                                <div>
+                                    <button mat-raised-button color="primary" matStepperPrevious>Back</button> &nbsp;
+                                    &nbsp;
+                                    <button mat-raised-button color="accent" type="submit">Submit</button> &nbsp; &nbsp;
+                                    <button mat-raised-button color="warn" (click)="stepper.reset()">Reset</button>
+                                </div>
+                            </mat-step>
+                        </mat-horizontal-stepper>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <div *ngIf="showViewProfileModal" class="modal custom-modal modal-bg fade" id="abha-view-profile" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="form-header">
+                    <h3>{{modalHeader}}</h3>
+                    <p>Your Abha Number is {{abhaNumber}}.</p>
+                </div>
+                <div class="modal-btn delete-action">
+                    <div class="row">
+                        <div class="col-6">
+                            <a data-bs-dismiss="modal" [routerLink]="routes.abhaProfile"
+                                class="btn btn-primary paid-continue-btn">View Profile</a>
+                        </div>
+                        <div class="col-6">
+                            <a [routerLink]="routes.abhaProfile" data-bs-dismiss="modal"
+                                class="btn btn-primary paid-cancel-btn">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div> -->

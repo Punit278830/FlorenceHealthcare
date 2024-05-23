@@ -212,6 +212,9 @@ export class routes {
   public static get addInvoice(): string {
     return this.baseUrl + '/invoice/add-invoice';
   }
+  public static get addInvoiceItem(): string {
+    return this.baseUrl + '/invoice/add-invoice-item';
+  }
   public static get createInvoice(): string {
     return this.baseUrl + '/invoice/create-invoice';
   }
@@ -367,5 +370,20 @@ export class routes {
   }
   public static get error500(): string {
     return this.baseUrl + '/error/error500';
+  }  
+  public static get abhaDashboard(): string {
+    return this.baseUrl + '/abha/abha-dashboard';
+  }
+  public static get abhaRegisterByAadhar(): string {
+    return this.baseUrl + '/abha/register/byAadhar';
+  }  
+  public static get abhaConfirmAadharOtp(): string {
+    return this.baseUrl + '/abha/confirmAadharOtp';
+  } 
+  public static get abhaAddress(): string {
+    return this.baseUrl + '/abha/register/address';
+  }
+  public static get abhaProfile(): string {
+    return this.baseUrl + '/abha/profile';
   }
 }

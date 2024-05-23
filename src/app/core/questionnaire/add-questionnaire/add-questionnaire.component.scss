@@ -1,0 +1,21 @@
+.status-table-blk {
+    h3 {
+      font-size: 18px;
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    flex-wrap: wrap;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+  }
+
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -ms-overflow-style: -ms-autohiding-scrollbar;
+  }

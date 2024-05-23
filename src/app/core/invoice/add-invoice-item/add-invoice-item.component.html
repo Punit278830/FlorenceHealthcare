@@ -1,0 +1,73 @@
+<div class="page-wrapper">
+    <div class="content">
+
+         <!-- Page Header  -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a >Invoice Item </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Add Invoice Item</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+         <!-- /Page Header  -->
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="invoiceItem" (ngSubmit)="addInvoiceItem(invoiceItem)">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-heading">
+                                        <h4>Add Invoice Item</h4>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="name">Item name <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="itemName" type="text"
+                                            placeholder="">
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="last">Description <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="description" type="text"
+                                            placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="last">Discount <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="discount" type="text"
+                                            placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="last">Fee <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="fee" type="text" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="doctor-submit text-end">
+
+                                        <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
+
+                                        <button type="submit" class="btn btn-primary cancel-form">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- <h1>hello</h1> -->

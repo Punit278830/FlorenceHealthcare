@@ -1,0 +1,83 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaDashboard">Abha </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active"><a [routerLink]="routes.abhaAddress">Create Abha Address</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="abhaAddressForm">
+                            <div class="row">
+
+                                <div class="form-group select-gender">
+                                    <label for="registerVia" class="gen-label">
+                                        <h2>Create ABHA Address using<span class="login-danger">*</span></h2>
+                                    </label>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" formControlName="registerVia" class="form-check-input"
+                                                value="Mobile" (change)="onRegisterViaChanged($event);">Mobile
+                                        </label>
+                                    </div>
+                                    <div class="form-check-inline">
+                                        <label class="form-check-label">
+                                            <input type="radio" formControlName="registerVia" class="form-check-input"
+                                                value="AbhaNumber" (change)="onRegisterViaChanged($event);">ABHA Number
+                                        </label>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+
+                                </div>
+                            </div>
+                            <div class="row" *ngIf="registerViaMobile != null && registerViaMobile">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="mobileNumber">Mobile Number <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="mobileNumber" type="text"
+                                        placeholder="">
+                                </div>
+                            </div>                            
+                            <div class="row" *ngIf="registerViaMobile != null && !registerViaMobile">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="abhaNumber">ABHA Number <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="abhaNumber" type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row" *ngIf="showOtp">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="otp">OTP <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="otp" type="text"
+                                        placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <button class="btn btn-primary submit-form me-2" type="button" (click)="Submit()">Submit</button>
+                                    <button class="btn btn-primary submit-form me-2" type="button">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

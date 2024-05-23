@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +18,8 @@ public partial class FlorenceDbContext : DbContext
     public virtual DbSet<Answer> Answers { get; set; }
 
     public virtual DbSet<AppointmentInfo> AppointmentInfos { get; set; }
+
+    public virtual DbSet<InvoiceItemMaster> InvoiceItemMaster { get; set; }
 
     public virtual DbSet<ConsultationDatum> ConsultationData { get; set; }
 
@@ -53,6 +55,22 @@ public partial class FlorenceDbContext : DbContext
     => optionsBuilder.UseSqlServer("Server=162.222.225.88;Database=florenceDb;User Id=mohit2024;Password=Spice@1234;TrustServerCertificate=True;");
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<InvoiceItemMaster>(entity =>
+{
+  entity.HasKey(e => e.ItemId).HasName("PK__appointm__3213E83F8234A53E");
+
+  entity.ToTable("InvoiceItemMaster");
+
+  entity.Property(e => e.ItemId).HasColumnName("itemId");
+
+  entity.Property(e => e.ItemName).HasColumnName("itemName");
+  entity.Property(e => e.Description).HasColumnName("description");
+  entity.Property(e => e.Discount).HasColumnName("discount");
+  entity.Property(e => e.Fee).HasColumnName("fee");
+
+});
+
         modelBuilder.Entity<Answer>(entity =>
         {
             entity.HasKey(e => e.AnswerId).HasName("PK__Answers__D48250246664615B");
@@ -333,6 +351,8 @@ public partial class FlorenceDbContext : DbContext
             entity.Property(e => e.QuestionnaireName)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+            entity.Property(e => e.IsActive).HasColumnName("isActive");
+
         });
 
         modelBuilder.Entity<StaffInfo>(entity =>

@@ -108,7 +108,11 @@ const routes: Routes = [
         loadChildren: () =>
           import('./questionnaire/questionnaire.module').then((m) => m.QuestionnaireModule),
       },
-
+      {
+        path: 'abha',
+        loadChildren: () =>
+          import('./abha/abha.module').then((m) => m.AbhaModule),
+      },
       
       {
         path: 'settings',
