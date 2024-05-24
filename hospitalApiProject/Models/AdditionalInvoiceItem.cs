@@ -3,9 +3,11 @@ using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
 
-public partial class InvoiceItemMaster
+public partial class AdditionalInvoiceItem
 {
-    public int ItemId { get; set; }
+    public int Id { get; set; }
+
+    public int? InvoiceId { get; set; }
 
     public string? ItemName { get; set; }
 
@@ -14,4 +16,10 @@ public partial class InvoiceItemMaster
     public int? Discount { get; set; }
 
     public decimal? Fee { get; set; }
+
+    public int? CreatedBy { get; set; }
+
+    public int? FinalAmount { get; set; }
+
+    public string? Status { get; set; }
 }

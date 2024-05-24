@@ -15,7 +15,7 @@
         </div>
         <!-- /Page Header -->
 
-        <div class="row">
+        <div class="row" #printview>
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -23,35 +23,32 @@
                             <div class="row">
                                 <div class="col-12 col-md-6">
                                     <div class="invoice-counts">
-                                        <h4>Invoice <span>#345766</span></h4>
+                                        <h4>Invoice <span>#INV-{{invoiceDetails.invoiceId}}</span></h4>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <div class="invoice-counts float-end">
-                                        <h4>Status: <a href="javascript:;" class="status-green">Success</a></h4>
+                                        <h4>Status: <a href="javascript:;" class="status-green">{{invoiceDetails.status}}</a></h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row custom-invoice">
                             <div class="col-12 col-md-6 m-b-20">
-                                <img src="assets/img/logo.png" width="35" height="35" alt=""> <span>Pre Clinic</span>
+                                <img src="assets/img/logo.png" width="35" height="35" alt=""> <span>Florence Healthcare</span>
                                 <ul class="list-unstyled invoice-clinic mt-2">
-                                    <li>3864 Wave City,
-                                    <li>Ghaziabad 201002</li>
-                                    <li>GST No:2914035</li>
+                                    <li>Kheri Road, Kheri</li>
+                                    <li>Lakhimpur Kheri-262701</li>
+                                    <li>Near By Don Bosco School</li>
                                 </ul>
                             </div>
                             <div class="col-12 col-md-6 m-b-20">
                                 <div class="invoice-details">
                                     <h3>Bill To:</h3>
-                                    <h3>ABC Medicals</h3>
                                     <ul class="list-unstyled invoice-clinic">
-                                        <li>5754 Airport Rd</li>
-                                        <li>Delhi, 1000100</li>
-                                        <li>India</li>
-                                        <li>9696869844</li>
-                                        <li>Example@example.com</li>
+                                        <li>{{patientDetails.firstName}} {{patientDetails.lastName}}</li>
+                                        <li>{{patientDetails.mobile}}</li>
+                                        
                                     </ul>
                                 </div>
                             </div>
@@ -59,10 +56,7 @@
                         <div class="row">
                             <div class="col-sm-6 col-lg-12 m-b-20">
                                 <div class="invoice-details">
-                                    <h4>Invoice Date : <i class="feather icon-calendar me-2"></i><span>03 Oct
-                                            2022</span></h4>
-                                    <h4>Due Date : <i class="feather icon-calendar me-2"></i><span>03 Oct 2022</span>
-                                    </h4>
+                                    <h4>Invoice Date : <i class="feather icon-calendar me-2"></i><span>{{invoiceDetails.createdDate | date:'dd-MMMM-yyyy'}}</span></h4>
                                 </div>
                             </div>
                         </div>
@@ -72,48 +66,45 @@
                                     <tr>
                                         <th>#</th>
                                         <th>Item</th>
-                                        <th>Description</th>
-                                        <th>Quantity</th>
-                                        <th>Unit Cost</th>
-                                        <th>Charges</th>
+                                        <th>Description/Dr. Name</th>
+                                        <th>Fee</th>                                   
                                         <th>Discount</th>
                                         <th>Total</th>
+                                        <th>Status</th>
+                                        <th>Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
                                         <td>1</td>
-                                        <td>Full body checkup</td>
-                                        <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-                                        <td>₹150</td>
-                                        <td>1</td>
-                                        <td>10</td>
-                                        <td>10</td>
-                                        <td>₹150</td>
+                                        <td>Consultation</td>
+                                        <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
+                                        <td>{{appointmentDetails.fee}}</td>
+                                        <td>0</td>
+                                        <td>{{appointmentDetails.fee}}</td>
+                                        <td><button [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}" class="custom-badge">{{invoiceDetails.status}}</button></td>
+                                        
                                     </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td>Blood Test</td>
-                                        <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-                                        <td>₹12</td>
-                                        <td>1</td>
-                                        <td>10</td>
-                                        <td>10</td>
-                                        <td>₹12</td>
+                                    <ng-container *ngIf="addtionalInoiveItem.length>0">
+                                    <tr *ngFor="let data of addtionalInoiveItem; let i=index">
+                                       
+                                        <td>{{i+2}}</td>
+                                        <td>{{data.itemName}}</td>
+                                        <td>{{data.description}}</td>
+                                        <td>{{data.fee}}</td>
+                                        <td>{{data.discount}}</td>
+                                        <td>{{data.finalAmount}}</td>
+                                        <td><button [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}" class="custom-badge">{{data.status}}</button></td>
+                                        <td>
+                                            <button type="button" (click)="paidsubInvoiceItem(data.id)" [disabled]="data.status === 'Paid'"  class="btn btn-primary custom-badge">Paid</button>
+                                          </td>
+                                          
                                     </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td>General checkup</td>
-                                        <td>Lorem ipsum dolor sit amet, consectetur adipiscing elit</td>
-                                        <td>₹100</td>
-                                        <td>1</td>
-                                        <td>10</td>
-                                        <td>10</td>
-                                        <td>₹100</td>
-                                    </tr>
-                                </tbody>
+                                </ng-container>
+                                    </tbody>
                             </table>
                         </div>
+                       
                         <div>
                             <div class="row invoice-payment">
                                 <div class="col-sm-7">
@@ -123,18 +114,18 @@
                                         <div class="table-responsive no-border">
                                             <table class="table mb-0 border-0 custom-table invoices-table total-fonts">
                                                 <tbody>
+                                                    <!-- <tr>
+                                                        <td class="float-end">Subtotal : {{appointmentDetails.fee}}</td>
+                                                    </tr> -->
                                                     <tr>
-                                                        <td class="float-end">Subtotal : ₹2600</td>
+                                                        <td class="float-end">Balance : ₹{{balanceAmount}}</td>
                                                     </tr>
-                                                    <tr>
-                                                        <td class="float-end">Discount : ₹100</td>
-                                                    </tr>
-                                                    <tr>
+                                                    <!-- <tr>
                                                         <td class="float-end">GST (10%) : ₹160</td>
-                                                    </tr>
+                                                    </tr> -->
                                                     <tr class="bold-total-invoice">
                                                         <td class="float-end">
-                                                            <h5>Total : ₹2760</h5>
+                                                            <h5>Total :₹{{totalInvoiceAmount}}</h5>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -150,11 +141,11 @@
                                     aliquam ut a ex. Maecenas sed vehicula dui, ac suscipit lacus.</p>
                             </div>
                         </div>
-                        <div class="col-12">
+                        <div class="col-12" *ngIf="isPaidButtonVisible">
                             <div class="doctor-submit float-end">
-                                <a href="javascript:;" class="btn btn-primary submit-form me-2">Send Invoice</a>
-                                <a href="javascript:;" class="btn btn-primary cancel-form"><i
-                                        class="feather icon-printer me-2"></i>Print</a>
+                                <a href="javascript:;" class="btn btn-primary submit-form me-2" (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
+                                <a href="javascript:;" class="btn btn-primary cancel-form" (click)="print()"><i
+                                        class="feather icon-printer me-2" ></i>Print</a>
                             </div>
                         </div>
                     </div>

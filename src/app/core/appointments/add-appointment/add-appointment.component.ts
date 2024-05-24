@@ -60,12 +60,15 @@ constructor(private patierntService:PatientService,private route:Router,
   private departmentService:DepartmentService,
   private fileUploadService:FileUploadService,
   private staffScheduleService:StaffScheduleService,
-  private toater:ToastrService
+  private toater:ToastrService,
+  private patientService:PatientService
   
   )
 {
  
   this.getDepartmentLits();
+
+
   
 
 }
@@ -75,8 +78,13 @@ ngOnInit()
 {
   this.appointmentFormInitlize();
   this.fileFormInitlize();
+  if(this.patierntService.patientId)
+  {
+    this.postDatatoAppointment(this.patierntService.patientId);
+  }
   //this.updateFormattedDateTime();
   //this.downloadPatientFile();
+  
   
 }
   appointmentStatusData=[
@@ -138,19 +146,34 @@ fileFormInitlize(){
   postDatatoAppointment(id:number)
   {
     this.patientAppointmentData=[];
-   const inputField:HTMLInputElement=this.searchInput.nativeElement;
+   //const inputField:HTMLInputElement=this.searchInput.nativeElement;
      this.patientId=id;
-    this.searchResults.filter(res=>{
-      if(res.patientId==id)
-      {
+     if(this.searchResults.length>0)
+     {
+      this.searchResults.filter(res=>{
+        if(res.patientId==id)
+        {
+          this.age=this.appointmentService.calculateDateDifference(res.dob)
+          res.ageinYear=this.age;
+         this.patientAppointmentData.push(res)
+         
+        }
+      })
+     }
+     else
+     {
+      this.patientService.getPatientData(id).subscribe(res=>{
         this.age=this.appointmentService.calculateDateDifference(res.dob)
-        res.ageinYear=this.age;
-       this.patientAppointmentData.push(res)
-       
-      }
-    })
+          res.ageinYear=this.age;
+         this.patientAppointmentData.push(res)
+      })
+      
+
+     }
+    
+   
     this.searchResults=[];
-   inputField.value=''
+   //inputField.value=''
     console.log(this.patientAppointmentData);
     //this.route.navigate([routes.addAppointment])
 
@@ -181,9 +204,9 @@ fileFormInitlize(){
         this.appointmentDto.scheduledByid=userData.loginId;
     this.appointmentService.createAppointment(this.appointmentDto).subscribe(result=>{
       console.log(result);
-      result?this.toater.success("Appointment booked succesfully","Book Appointment"):null;
-      
-    this.route.navigate([routes.addAppointment])
+      this.toater.success("Appointment booked succesfully","Book Appointment");
+      this.bookappointment.reset();
+    this.route.navigate([routes.invoices])
 
     });
   

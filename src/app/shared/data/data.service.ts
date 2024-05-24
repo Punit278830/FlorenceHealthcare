@@ -932,17 +932,17 @@ export class DataService {
         //     // },
         //   ],
         // },
-        // {
-        //   menuValue: 'Book Appointment',
-        //   hasSubRoute: false,
-        //   showSubRoute: false,
-        //   base: routes.addAppointment,
-        //   route:routes.addAppointment,
-        //   icon: 'fa-columns',
-        //   faIcon: true,
-        //   subMenus: [
-        //   ],
-        // },
+        {
+          menuValue: 'Invoice',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: routes.invoices,
+          route:routes.invoices,
+          icon: 'fa-columns',
+          faIcon: true,
+          subMenus: [
+          ],
+        },
 
         
       ],
