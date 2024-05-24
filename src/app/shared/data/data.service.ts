@@ -9,7 +9,7 @@ import { apiResultFormat } from '../models/models';
   providedIn: 'root',
 })
 export class DataService {
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   public getDoctorsList(): Observable<apiResultFormat> {
     return this.http.get<apiResultFormat>('assets/json/doctors-list.json').pipe(
@@ -224,7 +224,7 @@ export class DataService {
             },
           ],
         },
-        
+
         {
           menuValue: 'Patients',
           hasSubRoute: true,
@@ -276,14 +276,14 @@ export class DataService {
             //   route: routes.editStaff,
             //   base: routes.editStaff,
             // },
-            
+
           ],
         },
         {
-          menuValue:'Appointments',
-          hasSubRoute:true,
-          showSubRoute:false,
-          base:'appointments',
+          menuValue: 'Appointments',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'appointments',
           img: 'assets/img/icons/menu-icon-04.svg',
           subMenus: [
             {
@@ -396,7 +396,7 @@ export class DataService {
         //     // },
         //   ],
         // },
-              
+
         // {
         //   menuValue: 'Call',
         //   hasSubRoute: true,
@@ -409,12 +409,12 @@ export class DataService {
         //       route: routes.voiceCall,
         //       base: routes.voiceCall,
         //     },
-            
-            
+
+
         //   ],
         // },
-            
-       
+
+
         // {
         //   menuValue: 'Reports',
         //   hasSubRoute: true,
@@ -435,7 +435,7 @@ export class DataService {
         //   ],
         // },
         {
-        menuValue: 'questionnaire',
+          menuValue: 'questionnaire',
           hasSubRoute: true,
           showSubRoute: false,
           base: 'questionnaire',
@@ -448,51 +448,72 @@ export class DataService {
             },
           ],
         },
-
+        {
+          menuValue: 'Invoice',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: routes.invoices,
+          route: routes.invoices,
+          icon: 'fa-columns',
+          faIcon: true,
+          subMenus: [
+            {
+              menuValue: 'Invoices List',
+              route: routes.invoices,
+              base: routes.invoices,
+            },
+            {
+              menuValue: 'Add Invoice Item ',
+              route: routes.addInvoiceItem,
+              base: routes.addInvoiceItem,
+            }
+          ],
+        },
         {
           menuValue: 'ABHA',
-            hasSubRoute: true,
-            showSubRoute: false,
-            base: 'ABHA',
-            img: 'assets/img/icons/menu-icon-15.svg', //todo : change icon
-            subMenus: [
-              {
-                menuValue: 'Dashboard',
-                route: routes.abhaDashboard,
-                base: routes.abhaDashboard,
-              },
-              {
-                menuValue: 'Register By Aadhar',
-                route: routes.abhaRegisterByAadhar,
-                base: routes.abhaRegisterByAadhar,
-              },
-              {
-                menuValue: 'Create Abha Address',
-                route: routes.abhaAddress,
-                base: routes.abhaAddress,
-              }
-            ],
-          },
-          {
-            menuValue: 'Invoice',
-            hasSubRoute: true,
-            showSubRoute: false,
-            base: 'invoice',
-            img: 'assets/img/icons/menu-icon-15.svg',
-            subMenus: [
-              {
-                menuValue: 'Invoices List',
-                route: routes.allInvoice,
-                base: routes.allInvoice,
-              },
-              {
-                menuValue: 'Add Invoice Item ',
-                route: routes.addInvoiceItem,
-                base: routes.addInvoiceItem,
-              },
-              
-            ],
-          },
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'ABHA',
+          img: 'assets/img/icons/menu-icon-15.svg', //todo : change icon
+          subMenus: [
+            {
+              menuValue: 'Dashboard',
+              route: routes.abhaDashboard,
+              base: routes.abhaDashboard,
+            },
+            {
+              menuValue: 'Register By Aadhar',
+              route: routes.abhaRegisterByAadhar,
+              base: routes.abhaRegisterByAadhar,
+            },
+            {
+              menuValue: 'Create Abha Address',
+              route: routes.abhaAddress,
+              base: routes.abhaAddress,
+            }
+          ],
+        },
+
+        // {
+        //   menuValue: 'Invoice',
+        //   hasSubRoute: true,
+        //   showSubRoute: false,
+        //   base: 'invoice',
+        //   img: 'assets/img/icons/menu-icon-15.svg',
+        //   subMenus: [
+        //     {
+        //       menuValue: 'Invoices List',
+        //       route: routes.allInvoice,
+        //       base: routes.allInvoice,
+        //     },
+        //     {
+        //       menuValue: 'Add Invoice Item ',
+        //       route: routes.addInvoiceItem,
+        //       base: routes.addInvoiceItem,
+        //     },
+
+        //   ],
+        // },
         // {
         //   menuValue: 'Invoice',
         //   hasSubRoute: true,
@@ -532,7 +553,7 @@ export class DataService {
         //     // },
         //   ],
         // },
-        
+
       ],
     },
     {
@@ -545,10 +566,10 @@ export class DataService {
           hasSubRoute: false,
           showSubRoute: false,
           base: 'components',
-          route:routes.doctorDashboard,
+          route: routes.doctorDashboard,
           img: 'assets/img/icons/menu-icon-02.svg',
           subMenus: [
-            
+
           ],
         },
         {
@@ -570,11 +591,11 @@ export class DataService {
           hasSubRoute: true,
           showSubRoute: false,
           base: 'forms',
-          route:routes.appointmentList,
+          route: routes.appointmentList,
           icon: 'fa-edit',
           faIcon: true,
           subMenus: [
-               {
+            {
               menuValue: 'Appointment List',
               route: routes.appointmentList,
               base: routes.appointmentList,
@@ -635,8 +656,8 @@ export class DataService {
         //     //   route: routes.voiceCall,
         //     //   base: routes.voiceCall,
         //     // },
-            
-            
+
+
         //   ],
         // },
         // {
@@ -648,29 +669,29 @@ export class DataService {
         //   icon: 'fa-edit',
         //   faIcon: true,
         //   subMenus: [
-            // {
-            //   menuValue: 'Scheduled Appointments',
-            //   route: routes.formBasicInputs,
-            //   base: routes.formBasicInputs,
-            // },
-            // {
-            //   menuValue: 'Input Groups',
-            //   route: routes.formInputGroups,
-            //   base: routes.formInputGroups,
-            // },
-            // {
-            //   menuValue: 'Horizontal Form',
-            //   route: routes.formHorizontal,
-            //   base: routes.formHorizontal,
-            // },
-            // {
-            //   menuValue: 'Vertical Form',
-            //   route: routes.formVertical,
-            //   base: routes.formVertical,
-            // },
+        // {
+        //   menuValue: 'Scheduled Appointments',
+        //   route: routes.formBasicInputs,
+        //   base: routes.formBasicInputs,
+        // },
+        // {
+        //   menuValue: 'Input Groups',
+        //   route: routes.formInputGroups,
+        //   base: routes.formInputGroups,
+        // },
+        // {
+        //   menuValue: 'Horizontal Form',
+        //   route: routes.formHorizontal,
+        //   base: routes.formHorizontal,
+        // },
+        // {
+        //   menuValue: 'Vertical Form',
+        //   route: routes.formVertical,
+        //   base: routes.formVertical,
+        // },
         //   ],
         // },
-        
+
         // {
         //   menuValue: 'Reports',
         //   hasSubRoute: false,
@@ -714,7 +735,7 @@ export class DataService {
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.addPatient,
-          route:routes.addPatient,
+          route: routes.addPatient,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
@@ -765,13 +786,13 @@ export class DataService {
             // },
           ],
         },
-       
+
         {
           menuValue: 'Patient List',
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.patientsList,
-          route:routes.patientsList,
+          route: routes.patientsList,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
@@ -782,7 +803,7 @@ export class DataService {
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.addAppointment,
-          route:routes.addAppointment,
+          route: routes.addAppointment,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
@@ -838,13 +859,13 @@ export class DataService {
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.appointmentList,
-          route:routes.appointmentList,
+          route: routes.appointmentList,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
           ],
         },
-        
+
         //  {
         //   menuValue: 'Patients history',
         //   hasSubRoute: false,
@@ -937,42 +958,42 @@ export class DataService {
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.invoices,
-          route:routes.invoices,
+          route: routes.invoices,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
           ],
         },
 
-        
+
       ],
     },
 
-     {
+    {
       tittle: 'nursing',
       showAsTab: false,
       separateRoute: false,
-       menu: [
-        
+      menu: [
+
         {
           menuValue: 'Patient List',
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.patientsList,
-          route:routes.patientsList,
+          route: routes.patientsList,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
           ],
         },
-        
+
 
         {
           menuValue: 'Appointment List',
           hasSubRoute: false,
           showSubRoute: false,
           base: routes.appointmentList,
-          route:routes.appointmentList,
+          route: routes.appointmentList,
           icon: 'fa-columns',
           faIcon: true,
           subMenus: [
@@ -1064,15 +1085,15 @@ export class DataService {
         //   img: 'assets/img/icons/menu-icon-02.svg',
         //   subMenus:[],
         // },
-         
 
-        
+
+
       ],
     },
   ];
 
 
-  
+
   public carousel1 = [
     {
       quantity: '68',
@@ -1137,111 +1158,111 @@ export class DataService {
   ];
   public upcomingAppointments = [
     {
-      "no" : "R00001",
-      "patientName" : "Heena",
-      "doctor" : "Dr.Ankur Lamba",
-      "date" : "12.05.2022 at",
-      "time" : "7.00 PM",
-      "disease" : "Fracture",
-      "img" : "assets/img/profiles/avatar-03.jpg"
-  },
-  {
-      "no" : "R00002",
-      "patientName" : "Shilpa",
-      "doctor" : "Dr.Rivina Raj",
-      "date" : "13.05.2022 at",
-      "time" : "7.00 PM",
-      "disease" : "Fever",
-      "img" : "assets/img/profiles/avatar-05.jpg"
-  },
-  {
-      "no" : "R00003",
-      "patientName" : "Vikram ",
-      "doctor" : "Dr.Amit saini",
-      "date" : "14.05.2022 at",
-      "time" : "7.00 PM",
-      "disease" : "Fracture",
-      "img" : "assets/img/profiles/avatar-04.jpg"
-  },
-  {
-      "no" : "R00004",
-      "patientName" : "Dusyant singh",
-      "doctor" : "Dr. P.K.Garg",
-      "date" : "15.05.2022 at",
-      "time" : "7.00 PM",
-      "disease" : "Fracture",
-      "img" : "assets/img/profiles/avatar-03.jpg"
-  },
-  {
-      "no" : "R00005",
-      "patientName" : "Sunita Sharma",
-      "doctor" : "Dr.Vinay Gupta",
-      "date" : "16.05.2022 at",
-      "time" : "7.00 PM",
-      "disease" : "Fever",
-      "img" : "assets/img/profiles/avatar-02.jpg"
-  }
+      "no": "R00001",
+      "patientName": "Heena",
+      "doctor": "Dr.Ankur Lamba",
+      "date": "12.05.2022 at",
+      "time": "7.00 PM",
+      "disease": "Fracture",
+      "img": "assets/img/profiles/avatar-03.jpg"
+    },
+    {
+      "no": "R00002",
+      "patientName": "Shilpa",
+      "doctor": "Dr.Rivina Raj",
+      "date": "13.05.2022 at",
+      "time": "7.00 PM",
+      "disease": "Fever",
+      "img": "assets/img/profiles/avatar-05.jpg"
+    },
+    {
+      "no": "R00003",
+      "patientName": "Vikram ",
+      "doctor": "Dr.Amit saini",
+      "date": "14.05.2022 at",
+      "time": "7.00 PM",
+      "disease": "Fracture",
+      "img": "assets/img/profiles/avatar-04.jpg"
+    },
+    {
+      "no": "R00004",
+      "patientName": "Dusyant singh",
+      "doctor": "Dr. P.K.Garg",
+      "date": "15.05.2022 at",
+      "time": "7.00 PM",
+      "disease": "Fracture",
+      "img": "assets/img/profiles/avatar-03.jpg"
+    },
+    {
+      "no": "R00005",
+      "patientName": "Sunita Sharma",
+      "doctor": "Dr.Vinay Gupta",
+      "date": "16.05.2022 at",
+      "time": "7.00 PM",
+      "disease": "Fever",
+      "img": "assets/img/profiles/avatar-02.jpg"
+    }
   ];
   public recentPatients = [
     {
-      "no" : "R00001",
-      "patientName" : "Ankit Bhatnagar",
-      "age" : "21",
-      "date" : "12.05.2022 at",
-      "dateOfBirth" : "07 January 2002",
-      "diagnosis" : "Heart attack",
-      "img" : "assets/img/profiles/avatar-02.jpg",
-      "triage" : "Non Urgent"
-  },
-  {
-      "no" : "R00002",
-      "patientName" : "Mayank",
-      "age" : "23",
-      "date" : "13.05.2022 at",
-      "dateOfBirth" : "06 January 2002",
-      "diagnosis" : "Jaundice",
-      "img" : "assets/img/profiles/avatar-03.jpg",
-      "triage" : "Emergency"
-  },
-  {
-      "no" : "R00003",
-      "patientName" : "Vikas",
-      "age" : "25",
-      "date" : "14.05.2022 at",
-      "dateOfBirth" : "10 January 2002",
-      "diagnosis" : "Malaria",
-      "img" : "assets/img/profiles/avatar-04.jpg",
-      "triage" : "Out Patient"
-  },
-  {
-      "no" : "R00004",
-      "patientName" : "Vijay Kumar",
-      "age" : "21",
-      "date" : "15.05.2022 at",
-      "dateOfBirth" : "09 January 2002",
-      "diagnosis" : "Typhoid",
-      "img" : "assets/img/profiles/avatar-05.jpg",
-      "triage" : "Urgent"
-  }
+      "no": "R00001",
+      "patientName": "Ankit Bhatnagar",
+      "age": "21",
+      "date": "12.05.2022 at",
+      "dateOfBirth": "07 January 2002",
+      "diagnosis": "Heart attack",
+      "img": "assets/img/profiles/avatar-02.jpg",
+      "triage": "Non Urgent"
+    },
+    {
+      "no": "R00002",
+      "patientName": "Mayank",
+      "age": "23",
+      "date": "13.05.2022 at",
+      "dateOfBirth": "06 January 2002",
+      "diagnosis": "Jaundice",
+      "img": "assets/img/profiles/avatar-03.jpg",
+      "triage": "Emergency"
+    },
+    {
+      "no": "R00003",
+      "patientName": "Vikas",
+      "age": "25",
+      "date": "14.05.2022 at",
+      "dateOfBirth": "10 January 2002",
+      "diagnosis": "Malaria",
+      "img": "assets/img/profiles/avatar-04.jpg",
+      "triage": "Out Patient"
+    },
+    {
+      "no": "R00004",
+      "patientName": "Vijay Kumar",
+      "age": "21",
+      "date": "15.05.2022 at",
+      "dateOfBirth": "09 January 2002",
+      "diagnosis": "Typhoid",
+      "img": "assets/img/profiles/avatar-05.jpg",
+      "triage": "Urgent"
+    }
   ];
   public patientProfile = [
     {
-      date : "29/09/2022",
-      doctor : "Dr.Ankur Lamba",
-      treatment : "Check up",
-      charges : "₹ 60"
+      date: "29/09/2022",
+      doctor: "Dr.Ankur Lamba",
+      treatment: "Check up",
+      charges: "₹ 60"
     },
     {
-      date : "19/09/2022",
-      doctor : "Lalima Arora",
-      treatment : "	Blood Test",
-      charges : "₹ 50"
+      date: "19/09/2022",
+      doctor: "Lalima Arora",
+      treatment: "	Blood Test",
+      charges: "₹ 50"
     },
     {
-      date : "20/09/2022",
-      doctor : "Dr.Updesh Singh",
-      treatment : "Blood Pressure",
-      charges : "₹ 30"
+      date: "20/09/2022",
+      doctor: "Dr.Updesh Singh",
+      treatment: "Blood Pressure",
+      charges: "₹ 30"
     }
   ];
   public blogs = [
