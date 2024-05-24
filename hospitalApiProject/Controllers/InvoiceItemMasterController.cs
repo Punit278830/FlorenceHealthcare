@@ -28,7 +28,7 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<InvoiceItemMaster>>> GetInvoiceItemInfo()
     {
 
-      var appointmentInfo = await _context.InvoiceItemMaster.ToListAsync();
+      var appointmentInfo = await _context.InvoiceItemMasters.ToListAsync();
 
       return appointmentInfo;
     }
@@ -37,7 +37,7 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<InvoiceItemMaster>> PostInvoiceItem(InvoiceItemMaster InvoiceItemInfo)
     {
 
-      _context.InvoiceItemMaster.Add(InvoiceItemInfo);
+      _context.InvoiceItemMasters.Add(InvoiceItemInfo);
       await _context.SaveChangesAsync();
 
       return Ok(new { message = "Invoice Item Added" });

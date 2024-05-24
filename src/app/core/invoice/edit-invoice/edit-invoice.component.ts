@@ -99,6 +99,7 @@ export class EditInvoiceComponent implements OnInit {
     this.addItemFormGroup.get('description')?.patchValue(data.description);
     this.addItemFormGroup.get('discount')?.patchValue(data.discount);
     this.addItemFormGroup.get('fee')?.patchValue(data.fee);
+    this.updateTotal(data.discount,data.fee);
   }
 
   submitItemToInvoice(formData:FormGroup)

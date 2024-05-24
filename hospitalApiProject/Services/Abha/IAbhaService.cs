@@ -22,5 +22,8 @@ namespace hospitalApiProject.Services.Abha
 
     Task<byte[]> DownloadAbhaCard(string xToken);
 
+    Task<string> GetExistingAbhaAddresses(string phrAddress);
+
+
   }
 }

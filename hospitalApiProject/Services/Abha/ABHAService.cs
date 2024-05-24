@@ -171,12 +171,18 @@ namespace hospitalApiProject.Services.Abha
       var jsonContent = new
       {
         otp = data,
-        txnId = txnId
+        transactionId = txnId
       };
 
       var json = JsonSerializer.Serialize(jsonContent);
       var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/verify/otp", json);
       return result;
+    }
+
+    public Task<string> GetExistingAbhaAddresses(string phrAddress)
+    {
+      var result = ExecuteGet1(_phrBaseUrl, "api/v1/phr/search/isExist", phrAddress);
+      return Task.FromResult(result);
     }
   }
 }

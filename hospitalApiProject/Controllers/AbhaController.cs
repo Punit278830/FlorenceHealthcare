@@ -159,7 +159,7 @@ namespace hospitalApiProject.Controllers
     [Route("ConfirmMobileOtpForAbhaAddress")]
     public async Task<IActionResult> ConfirmMobileOtpForAbhaAddress([FromBody] GenerateOtherOtp data)
     {
-      if (data.EncryptedData == null)
+      if (data == null)
       {
         return BadRequest();
       }
@@ -171,6 +171,24 @@ namespace hospitalApiProject.Controllers
       }
 
       return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    [HttpGet]
+    [Route("GetExistingAbhaAddresses")]
+    public async Task<IActionResult> GetExistingAbhaAddresses(string phrAddress)
+    {
+      if (phrAddress == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.GetExistingAbhaAddresses(phrAddress);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.OK, result);
     }
 
   }
