@@ -45,10 +45,9 @@ export class EditPatientComponent implements OnInit {
     
   }
   selectGender = [
-    
-   
     {value: 'Male'},
     {value: 'Female'},
+    {value: 'Transgender'},
   ];
   selectedList2: data[] = [
     {value: 'Select City'},

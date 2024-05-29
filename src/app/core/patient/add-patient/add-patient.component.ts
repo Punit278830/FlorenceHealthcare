@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { subtract } from 'ngx-bootstrap/chronos';
 import { ToastrService } from 'ngx-toastr';
@@ -12,7 +12,7 @@ import { routes } from 'src/app/shared/routes/routes';
 
 
 interface data {
-  value: string ;
+  value: string;
 }
 @Component({
   selector: 'app-add-patient',
@@ -22,93 +22,101 @@ interface data {
 })
 export class AddPatientComponent implements OnInit {
   public routes = routes;
-  public selectedValue! : string  ;
-  public patientReg!:FormGroup;
-  private _patientDto!:IpatientInfo;
-  public camerastatus:any;
-  public trigger:Subject<void>=new Subject();
-  public previewImage!:string;
-  public btnLable='Capture Image';
-  public RegrestationDate='';
+  public selectedValue!: string;
+  public patientReg!: FormGroup;
+  private _patientDto!: IpatientInfo;
+  public camerastatus: any;
+  public trigger: Subject<void> = new Subject();
+  public previewImage!: string;
+  public btnLable = 'Capture Image';
+  public RegrestationDate = '';
 
-  constructor(private fb:FormBuilder,
-    private patientService:PatientService,
-    private route:Router,private datePipe: DatePipe,
-    private toater:ToastrService)
-  {
-    
-    
+  constructor(private fb: FormBuilder,
+    private patientService: PatientService,
+    private route: Router, private datePipe: DatePipe,
+    private toater: ToastrService) {
+
+
     this.createPatient();
   }
   selectGender = [
-    {value: 'Male'},
-    {value: 'Female'},
-    {value: 'Transgender'},
-   
+    { value: 'Male' },
+    { value: 'Female' },
+    { value: 'Transgender' },
+
   ];
   selectedList2: data[] = [
-    {value: 'Select City'},
-    {value: 'Alaska'},
-    {value: 'Los Angeles'},
+    { value: 'Select City' },
+    { value: 'Alaska' },
+    { value: 'Los Angeles' },
   ];
   selectedList3: data[] = [
-    {value: 'Select Country'},
-    {value: 'Usa'},
-    {value: 'Uk'},
-    {value: 'Italy'},
+    { value: 'Select Country' },
+    { value: 'Usa' },
+    { value: 'Uk' },
+    { value: 'Italy' },
   ];
   selectedList4: data[] = [
-    {value: 'Select State'},
-    {value: 'Alaska'},
-    {value: 'California'},
+    { value: 'Select State' },
+    { value: 'Alaska' },
+    { value: 'California' },
   ];
 
-ngOnInit()
-{
-  const currentDate=this.datePipe.transform(new Date(),'yyyy-MM-dd');
-  this.patientReg.get('regstrationDate')?.setValue(currentDate);
-  
-}
+  ngOnInit() {
+    const currentDate=this.datePipe.transform(new Date(),'yyyy-MM-dd');
+    this.patientReg.get('regstrationDate')?.setValue(currentDate);
 
-  createPatient()
-  {
+  }
+
+  createPatient() {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
-      lastName: [''],
-      dob:[null,],
-      mobile: ['', Validators.required],
+      lastName: ['', [Validators.required]],
+      dob: [null,],
+      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       email: ['', [Validators.email]],
       address: [''],
-      gender:['Male',Validators.required],
-      regstrationDate:[null,Validators.required],
-      
-      
-  })
-}
+      gender: ['Male', Validators.required],
+      regstrationDate: [null, Validators.required],
 
-addPatient(patientData:FormGroup)
-{
- 
-  console.log(patientData.value)
-  this._patientDto=patientData.value;
-  this._patientDto.patientImage=this.previewImage
-  //this._patientDto.regstrationDate=parse(dd ,'yyyy-MM-dd', new Date());
-  this.patientService.CreatePatient(this._patientDto).subscribe(res=>{
-    res?this.toater.success("Patient added successfully","Add Patient"):null;
-    this.resetAddPatientForm();
-    this.route.navigate([routes.addAppointment]);
-  })
-  
-  
-  //this.route.navigate([routes.patientsList]);
-  
-}
 
-resetAddPatientForm(){
-  this.patientReg.reset();
-}
+    })
+  }
+  get mobile(): AbstractControl {
+    return this.patientReg.get('mobile') as AbstractControl;
+  }
 
-onDobDateChange(event: any): void {
+  
+
+  addPatient(patientData: FormGroup) {
+    if (this.patientReg.valid) {
+      console.log(patientData.value)
+      this._patientDto = patientData.value;
+      this._patientDto.patientImage = this.previewImage
+      //this._patientDto.regstrationDate=parse(dd ,'yyyy-MM-dd', new Date());
+      this.patientService.CreatePatient(this._patientDto).subscribe(res => {
+        res ? this.toater.success("Patient added successfully", "Add Patient") : null;
+        this.resetAddPatientForm();
+        this.route.navigate([routes.addAppointment]);
+      })
+
+
+      //this.route.navigate([routes.patientsList]);
+
+    }
+   else {
+      this.patientReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
+    }
+
+
+
+  }
+
+  resetAddPatientForm() {
+    this.patientReg.reset();
+  }
+
+  onDobDateChange(event: any): void {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
@@ -116,52 +124,47 @@ onDobDateChange(event: any): void {
     
     
   }
-  get $trigger(): Observable<void>{
+  get $trigger(): Observable<void> {
     return this.trigger.asObservable();
   }
-  enableCamera()
-  {
+  enableCamera() {
     navigator.mediaDevices.getUserMedia({
-      video:{
-        width:100,
-        height:100
+      video: {
+        width: 100,
+        height: 100
       }
-    }).then((res)=>{
-      this.camerastatus=res;
+    }).then((res) => {
+      this.camerastatus = res;
       console.log(res);
-    }).catch(err=>{
+    }).catch(err => {
       console.log(err);
     })
     //this.camerastatus=!this.camerastatus;
   }
 
-  captureImage()
-  {
+  captureImage() {
     this.trigger.next();
     console.log()
   }
-  snapshot(event:WebcamImage)
-  {
+  snapshot(event: WebcamImage) {
 
-    this.previewImage=event.imageAsDataUrl;
-    this.btnLable='Re Capture Image';
-    this.camerastatus='';
+    this.previewImage = event.imageAsDataUrl;
+    this.btnLable = 'Re Capture Image';
+    this.camerastatus = '';
     console.log(event)
   }
-  cancel()
-  {
-    this.camerastatus='';
+  cancel() {
+    this.camerastatus = '';
 
   }
 
 
-  changedob(year:any)
-  {
+  changedob(year: any) {
     const currentYear = new Date().getFullYear();
-    const y=currentYear-year;
-   
-    const dob=y+'/01/01'
-    
+    const y = currentYear - year;
+
+    const dob = y + '/01/01'
+
     this.patientReg.get('dob')?.patchValue(this.datePipe.transform(dob, 'yyyy-MM-dd'));
 
 
