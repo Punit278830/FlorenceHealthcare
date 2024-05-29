@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { OnInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Sort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { DateTime } from 'luxon';
 import { ToastrService } from 'ngx-toastr';
@@ -10,7 +11,7 @@ import { DepartmentService } from 'src/app/shared/Services/department/department
 import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-upload.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
+import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 interface data {
   value: string ;
@@ -40,6 +41,7 @@ export class AddAppointmentComponent implements OnInit {
   public doctorList:IstaffInfo[]=[];
   public selectedDoctor:IstaffInfo={} as IstaffInfo;
   public departmentList:Idepartment[]=[];
+  public flag:boolean=false;
   // public deleteIcon=false;
   // public selectedFile!:File
   // private FileUploadDto:IfileUpload={}as IfileUpload;
@@ -47,6 +49,19 @@ export class AddAppointmentComponent implements OnInit {
   // public base64StringArray:string[]=[];
   // public downloadLink:any;
   // public downLoadList:IdownloadFile[]=[];
+
+  public lastIndex = 0;
+  public pageSize = 10;
+  public totalData = 0;
+  public skip = 0;
+  public limit: number = this.pageSize;
+  public pageIndex = 0;
+  public serialNumberArray: Array<number> = [];
+  public currentPage = 1;
+  public pageNumberArray: Array<number> = [];
+  public pageSelection: Array<pageSelection> = [];
+   public patientlist: Array<IpatientInfo>=[];
+  public totalPages = 0;
   
   public downlodedFileName!:string
   @ViewChild('searchDataValue') searchInput!: ElementRef;
@@ -67,10 +82,123 @@ constructor(private patierntService:PatientService,private route:Router,
 {
  
   this.getDepartmentLits();
+  this.getTableData()
 
 
   
 
+}
+
+onEditPatient(id:number){
+  this.patientService.patientId=id;
+
+}
+
+private getTableData(): void {
+    
+  this.patientlist = [];
+  this.serialNumberArray = [];
+ 
+    this.patientService.getPatientList().subscribe((data:any)=>{
+       this.totalData=data.length;
+        // this.staffList.push(data);
+           
+            console.log(data)
+            data.map((res: any, index: number) => {
+      const serialNumber = index + 1;
+      if (index >= this.skip && serialNumber <= this.limit) {
+        this.calculateDateDifference(res.dob);
+        res.ageinYear=this.age;
+        
+        this.patientlist.push(res);
+        console.log(res.DOJ)
+        this.serialNumberArray.push(serialNumber);
+      }
+    });
+           
+      this.calculateTotalPages(this.totalData, this.pageSize);
+      
+    })
+
+}
+calculateDateDifference(dob:Date) {
+  const start = new Date(dob);
+  const end = new Date();
+  // Calculate the difference in years
+  const diffInMilliseconds = Math.abs(end.getTime() - start.getTime());
+  const yearsDifference = Math.floor(diffInMilliseconds / (365.25 * 24 * 60 * 60 * 1000));
+  
+  this.age = yearsDifference;
+  
+}
+
+
+
+public sortData(sort: Sort) {
+  const data = this.patientlist.slice();
+
+  if (!sort.active || sort.direction === '') {
+    this.patientlist = data;
+  } else {
+    this.patientlist = data.sort((a, b) => {
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const aValue = (a as any)[sort.active];
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const bValue = (b as any)[sort.active];
+      return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
+    });
+  }
+}
+
+public getMoreData(event: string): void {
+  if (event == 'next') {
+    this.currentPage++;
+    this.pageIndex = this.currentPage - 1;
+    this.limit += this.pageSize;
+    this.skip = this.pageSize * this.pageIndex;
+    this.getTableData();
+  } else if (event == 'previous') {
+    this.currentPage--;
+    this.pageIndex = this.currentPage - 1;
+    this.limit -= this.pageSize;
+    this.skip = this.pageSize * this.pageIndex;
+    this.getTableData();
+  }
+}
+
+public moveToPage(pageNumber: number): void {
+  this.currentPage = pageNumber;
+  this.skip = this.pageSelection[pageNumber - 1].skip;
+  this.limit = this.pageSelection[pageNumber - 1].limit;
+  if (pageNumber > this.currentPage) {
+    this.pageIndex = pageNumber - 1;
+  } else if (pageNumber < this.currentPage) {
+    this.pageIndex = pageNumber + 1;
+  }
+  this.getTableData();
+}
+
+public PageSize(): void {
+  this.pageSelection = [];
+  this.limit = this.pageSize;
+  this.skip = 0;
+  this.currentPage = 1;
+  this.getTableData();
+}
+
+private calculateTotalPages(totalData: number, pageSize: number): void {
+  this.pageNumberArray = [];
+  this.totalPages = totalData / pageSize;
+  if (this.totalPages % 1 != 0) {
+    this.totalPages = Math.trunc(this.totalPages + 1);
+  }
+  /* eslint no-var: off */
+  for (var i = 1; i <= this.totalPages; i++) {
+    var limit = pageSize * i;
+    var skip = limit - pageSize;
+    this.pageNumberArray.push(i);
+    this.pageSelection.push({ skip: skip, limit: limit });
+  }
 }
 
 
@@ -145,6 +273,7 @@ fileFormInitlize(){
 
   postDatatoAppointment(id:number)
   {
+    this.flag=true;
     this.patientAppointmentData=[];
    //const inputField:HTMLInputElement=this.searchInput.nativeElement;
      this.patientId=id;
@@ -174,7 +303,7 @@ fileFormInitlize(){
    
     this.searchResults=[];
    //inputField.value=''
-    console.log(this.patientAppointmentData);
+    console.log("appointmentData",this.patientAppointmentData);
     //this.route.navigate([routes.addAppointment])
 
   }
@@ -407,6 +536,8 @@ fileFormInitlize(){
 
 OnCancel()
 {
+  this.patientAppointmentData=[]
+  this.flag=false
   this.route.navigate([routes.appointmentList])
 }
 }
