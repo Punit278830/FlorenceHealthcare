@@ -173,16 +173,91 @@ namespace hospitalApiProject.Controllers
       return StatusCode((int)HttpStatusCode.Created, result);
     }
 
+    #region Abha Address Creation by Abha Number
+
+    [HttpPost]
+    [Route("SearchUserByHealthId")]
+    public async Task<IActionResult> SearchUserByHealthId([FromBody] string healhtIdNumber)
+    {
+      if (healhtIdNumber == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.SearchUserByHealthId(healhtIdNumber);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    [HttpPost]
+    [Route("AbhaAddressViaAbhaOtp")]
+    public async Task<IActionResult> AbhaAddressViaAbhaOtp([FromBody] AbhaAddressOtpModel data)
+    {
+      if (data.healhtIdNumber == null || data.authMethod == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.AbhaAddressViaAbhaOtp(data.healhtIdNumber, data.authMethod);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+
+      }
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    [HttpPost]
+    [Route("AbhaAddressViaAbhaVerifyOTP")]
+    public async Task<IActionResult> AbhaAddressViaAbhaVerifyOTP([FromBody] GenerateOtherOtp data)
+    {
+      if (data.EncryptedData == null || data.TxnId == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.AbhaAddressViaAbhaVerifyOTP(data.TxnId, data.EncryptedData);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+
+      }
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+
+    [HttpPost]
+    [Route("AbhaAddressSuggestions")]
+    public async Task<IActionResult> AbhaAddressSuggestions([FromBody] GenerateOtherOtp data)
+    {
+      if (data.TxnId == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.AbhaAddressSuggestions(data.TxnId);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+
+      }
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
     [HttpGet]
-    [Route("GetExistingAbhaAddresses")]
-    public async Task<IActionResult> GetExistingAbhaAddresses(string phrAddress)
+    [Route("GetAbhaAddressExists")]
+    public async Task<IActionResult> GetAbhaAddressExists(string phrAddress)
     {
       if (phrAddress == null)
       {
         return BadRequest();
       }
 
-      var result = await _service.GetExistingAbhaAddresses(phrAddress);
+      var result = await _service.GetAbhaAddressExists(phrAddress);
       if (_service.HasError)
       {
         return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
@@ -191,5 +266,25 @@ namespace hospitalApiProject.Controllers
       return StatusCode((int)HttpStatusCode.OK, result);
     }
 
+    [HttpPost]
+    [Route("CreatePHRAddress")]
+    public async Task<IActionResult> CreatePHRAddress([FromBody] NewAbhaAddressModel data)
+    {
+      if (data == null || data.phrAddress == null || data.txnId == null)
+      {
+        return BadRequest();
+      }   
+
+      var result = await _service.CreatePHRAddress(data.phrAddress, data.txnId);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+
+      }
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+    #endregion
+
   }
+
 }

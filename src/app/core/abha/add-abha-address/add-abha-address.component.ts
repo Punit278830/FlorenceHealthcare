@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MatStepper } from '@angular/material/stepper';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AbhaDataService } from 'src/app/shared/Services/abha/abha-data.service';
@@ -19,13 +20,29 @@ export class AddAbhaAddressComponent {
   abhaNumber!: string;
   showOtp: boolean = false;
   registerViaMobile: boolean | null = null;
-  public abhaAddressForm!: FormGroup;
+  validateViaAadharOtp: boolean | null = null;
+  alreadyLinkedAddressesCount: number = 0;
+  linkedAddresses!: string[];
+  suggestionList!: string[];
+  selectedAbhaAddress: string = "";
+
+
+  registrationOptionsForm!: FormGroup;
+  registerViaAbhaForm!: FormGroup;
+  cofirmOTPForm!: FormGroup;
+  linkedAbhaAddressessForm!: FormGroup;
+  createNewAbhaAddressForm!: FormGroup;
+
+  showRegistrationOptionsForm: boolean = true;
+  showRegistrationViaAbhaForm: boolean = false;
+  showConfirmOTPForm: boolean = false;
+  showLinkedAbhaAddressessForm: boolean = false;
+  showCreateNewAbhaAddressForm: boolean = false;
 
   constructor(private route: ActivatedRoute,
     private fb: FormBuilder,
     private abhaService: AbhaService,
     private encryptionService: EncryptionService,
-    // private abhaDataService: AbhaDataService,
     private toster: ToastrService,
     // private router: Router,
   ) { }
@@ -35,12 +52,28 @@ export class AddAbhaAddressComponent {
   }
 
   InitializeForm() {
-    this.abhaAddressForm = this.fb.group({
+    this.registrationOptionsForm = this.fb.group({
       registerVia: ['', Validators.required],
       mobileNumber: ['', Validators.compose([Validators.min(10)])],
       abhaNumber: ['', Validators.compose([Validators.min(10)])],
       otp: ['']
-    })
+    });
+
+    this.registerViaAbhaForm = this.fb.group({
+      validateVia: ['', Validators.required],
+      abhaNumber: ['', Validators.compose([Validators.required, Validators.min(14)])]
+    });
+
+    this.cofirmOTPForm = this.fb.group({
+      otp: ['', Validators.required],
+    });
+
+    this.linkedAbhaAddressessForm = this.fb.group({
+    });
+
+    this.createNewAbhaAddressForm = this.fb.group({
+      newAbhaAddress: ['', Validators.required]
+    });
   }
 
   onRegisterViaChanged(event: any) {
@@ -49,18 +82,18 @@ export class AddAbhaAddressComponent {
   }
 
   Submit() {
-    if (!this.abhaAddressForm.valid) {
+    if (!this.registrationOptionsForm.valid) {
       this.toster.error("Please provide the required fields!");
       return;
     }
 
     if (this.showOtp) {
-      if (this.abhaAddressForm.value.otp == "") {
+      if (this.registrationOptionsForm.value.otp == "") {
         this.toster.error("Please enter the valid OTP.");
         return;
       }
 
-      let otpdata = this.encryptionService.encryptWithPKCS1(this.abhaAddressForm.value.otp);
+      let otpdata = this.encryptionService.encryptWithPKCS1(this.registrationOptionsForm.value.otp);
       this.abhaService.confirmOtpforAbhaAddress(otpdata, this.txnId).subscribe(
         res => {
           if (res && res.error) {
@@ -68,7 +101,8 @@ export class AddAbhaAddressComponent {
             return;
           }
 
-          //this.showOtp = true;
+          this.hideAllForms();
+          this.showRegistrationViaAbhaForm = true;
           console.log(res);
         },
         error => {
@@ -77,17 +111,17 @@ export class AddAbhaAddressComponent {
       return;
     }
 
-    if (this.registerViaMobile && this.abhaAddressForm.value.mobileNumber == "") {
+    if (this.registerViaMobile && this.registrationOptionsForm.value.mobileNumber == "") {
       this.toster.error("Please enter Mobile Number first.");
       return;
     }
 
-    if (!this.registerViaMobile && this.abhaAddressForm.value.abhaNumber == "") {
+    if (!this.registerViaMobile && this.registrationOptionsForm.value.abhaNumber == "") {
       this.toster.error("Please enter ABHA Number first.");
       return;
     }
 
-    let data = this.encryptionService.encryptWithPKCS1(this.abhaAddressForm.value.mobileNumber);
+    let data = this.encryptionService.encryptWithPKCS1(this.registrationOptionsForm.value.mobileNumber);
     this.abhaService.generateOtpforAbhaAddress(data).subscribe(
       res => {
         if (res && res.error) {
@@ -105,7 +139,134 @@ export class AddAbhaAddressComponent {
 
   resetForm() {
     this.showOtp = false;
-    this.abhaAddressForm.value.mobileNumber = "";
-    this.abhaAddressForm.value.abhaNumber = ""
+    this.registrationOptionsForm.value.mobileNumber = "";
+    this.registrationOptionsForm.value.abhaNumber = ""
+  }
+
+  hideAllForms() {
+    this.showRegistrationOptionsForm = false;
+    this.showRegistrationViaAbhaForm = false;
+    this.showConfirmOTPForm = false;
+    this.showLinkedAbhaAddressessForm = false;
+    this.showCreateNewAbhaAddressForm = false;
+  }
+
+  onValidateViaChanged(event: any) {
+    this.validateViaAadharOtp = event.target.value == 'AadharOtp' ? true : false;
+  }
+
+  generateOtpForAddressCreation() {
+    if (!this.registerViaAbhaForm.valid) {
+      this.toster.error("Please provide the required fields!");
+      return;
+    }
+
+    const authMethod = this.validateViaAadharOtp ? 'MOBILE_OTP' : 'MOBILE_OTP'; //todo
+
+    this.abhaService.generateOtpForAddressCreation(this.registerViaAbhaForm.value.abhaNumber, authMethod).subscribe(
+      res => {
+        if (res && res.error) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.txnId = res.transactionId;
+        this.hideAllForms();
+        this.showConfirmOTPForm = true;
+        this.toster.success("OTP sent for verification.");
+        console.log(res);
+      },
+      error => {
+        this.toster.error(error);
+      });
+  }
+
+  verifyOtpForAddressCreation() {
+    if (!this.cofirmOTPForm.valid) {
+      this.toster.error("Please provide the required fields!");
+      return;
+    }
+
+    let otp = this.encryptionService.encryptWithPKCS1(this.cofirmOTPForm.value.otp);
+    this.abhaService.verifyOtpForAddressCreation(this.txnId, otp).subscribe(
+      res => {
+        if (res && res.error) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.txnId = res.transactionId;
+        this.alreadyLinkedAddressesCount = res.linkedPhrAddess;
+        this.linkedAddresses = res.phrAddress;
+
+        this.hideAllForms();
+        this.showLinkedAbhaAddressessForm = true;
+
+        this.toster.success("OTP verified successfully.");
+        console.log(res);
+      },
+      error => {
+        this.toster.error(error);
+      });
+  }
+
+  createNewAddress() {
+    this.abhaService.getAbhaAddressSuggestions(this.txnId).subscribe(
+      res => {
+        if (res && res.error) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.suggestionList = res;
+
+        this.hideAllForms();
+        this.showCreateNewAbhaAddressForm = true;
+        console.log(res);
+      },
+      error => {
+        this.toster.error(error);
+      });
+  }
+
+  submit() {
+    this.hideAllForms();
+    this.showRegistrationViaAbhaForm = true;
+    this.registerViaAbhaForm.patchValue({abhaNumber: this.registrationOptionsForm.value.abhaNumber});
+
+  }
+
+
+
+  selectAbhaAddress(selectedAbhaAddress: string) {
+    this.selectedAbhaAddress = selectedAbhaAddress;
+     this.createNewAbhaAddressForm.patchValue({newAbhaAddress: selectedAbhaAddress});
+
+  }
+
+  submitNewAddress(){
+    if (!this.createNewAbhaAddressForm.valid) {
+      this.toster.error("Please provide the required fields!");
+      return;
+    }
+
+    this.abhaService.createAbhaAddress(this.txnId, this.createNewAbhaAddressForm.value.newAbhaAddress).subscribe(
+      res => {
+        if (res && res.error) {
+          this.toster.error("Some error has ocurred please try after some time!");
+          return;
+        }
+
+        this.txnId = res.transactionId;
+
+        //this.hideAllForms();
+        //this.showCreateNewAbhaAddressForm = true;
+        console.log("Abha address created successfully!");
+        this.toster.success("Abha address created successfully!");
+
+      },
+      error => {
+        this.toster.error(error);
+      });
   }
 }

@@ -23,12 +23,9 @@ namespace hospitalApiProject.Services
     public virtual string ExecuteGet(string baseUrl, string api, string additionalData)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
-      var client = api == "api/v1/account/getCard" ? GetV1Client(additionalData) :GetClient();
+      var client = GetClient();
 
-      if (additionalData != null && api != "api/v1/account/getCard")
-      {
-        client.DefaultRequestHeaders.Add("TRANSACTION_ID", additionalData);
-      }
+      client.DefaultRequestHeaders.Add("TRANSACTION_ID", additionalData);
 
       var response = client.GetAsync(URL).Result;
 
@@ -72,6 +69,21 @@ namespace hospitalApiProject.Services
       return default;
     }
 
+    public async Task<string> ExecutePHRGetAsync(string baseUrl, string api)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetPHRClient();
+
+      var response = client.GetAsync(URL).Result;
+
+      if (response != null && response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      return default;
+    }
+
     protected virtual string ExecutePost(string baseUrl, string api, string content)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
@@ -93,7 +105,7 @@ namespace hospitalApiProject.Services
     protected async Task<string> ExecutePostAsync(string baseUrl, string api, string content)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
-      var client = GetClient();
+      var client = GetPHRClient();
 
       var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
       var response = await client.PostAsync(URL, stringContent);
@@ -102,7 +114,7 @@ namespace hospitalApiProject.Services
       {
         return response.Content.ReadAsStringAsync().Result;
       }
-
+        
       this.ErrorMessage = response.ReasonPhrase;
       this.StatusCode = response.StatusCode;
       return ErrorMessage;
@@ -145,6 +157,15 @@ namespace hospitalApiProject.Services
       client.DefaultRequestHeaders.Add("accept", "*/*");
       client.DefaultRequestHeaders.Add("Accept-Language", "en-US");
       client.DefaultRequestHeaders.Add("X-Token", xToken);
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      return client;
+    }
+
+    private HttpClient GetPHRClient()
+    {
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
       return client;
     }

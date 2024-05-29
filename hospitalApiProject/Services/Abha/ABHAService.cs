@@ -1,6 +1,7 @@
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Interfaces.Shared;
 using System.Text.Json;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Services.Abha
 {
@@ -179,10 +180,84 @@ namespace hospitalApiProject.Services.Abha
       return result;
     }
 
-    public Task<string> GetExistingAbhaAddresses(string phrAddress)
+    public async Task<string> SearchUserByHealthId(string healhtIdNumber)
     {
-      var result = ExecuteGet1(_phrBaseUrl, "api/v1/phr/search/isExist", phrAddress);
-      return Task.FromResult(result);
+      var jsonContent = new
+      {
+        healhtIdNumber = healhtIdNumber
+      };
+      var json = JsonSerializer.Serialize(jsonContent);
+
+      var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/hid/search/auth-methods", json);
+      return result;
+    }
+
+    public async Task<string> AbhaAddressViaAbhaOtp(string healhtIdNumber, string authMethod)
+    {
+      var jsonContent = new
+      {
+        authMethod = authMethod,
+        healhtIdNumber = healhtIdNumber
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+
+      var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/hid/init/transaction", json);
+      return result;
+    }
+
+    public async Task<string> AbhaAddressViaAbhaVerifyOTP(string txnId, string data)
+    {
+      var jsonContent = new
+      {
+        transactionId = txnId,
+        value = data
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/hid/confirm/credential", json);
+      return result;
+    }
+
+    public async Task<string> AbhaAddressSuggestions(string txnId)
+    {
+      var jsonContent = new
+      {
+        transactionId = txnId
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+
+      var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/phr/suggestion", json);
+      return result;
+    }
+
+    public async Task<string> GetAbhaAddressExists(string phrAddress)
+    {
+      var result = await ExecutePHRGetAsync(_phrBaseUrl, "api/v1/phr/search/isExist?phrAddress=" + phrAddress);
+      return result;
+    }
+
+    public async Task<string> CreatePHRAddress(string phrAddress, string txnId)
+    {
+      var exists = await GetAbhaAddressExists(phrAddress);
+
+      if (exists == "true")
+      {
+        this.ErrorMessage = "The PHR address already exists.";
+        return null;
+      }
+
+      var jsonContent = new
+      {
+        password = "",
+        phrAddress = phrAddress,
+        transactionId = txnId
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/hid/create-phr-address", json);
+      return result;
     }
   }
 }
