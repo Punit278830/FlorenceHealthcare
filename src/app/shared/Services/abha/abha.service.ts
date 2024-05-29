@@ -116,4 +116,81 @@ export class AbhaService {
       catchError(this.handleError)
     );
   }
+
+  // ABHA Address creation methods
+
+  generateOtpForAddressCreation(aabha: string, authMethod: string): Observable<any> {
+    let data = {
+      healhtIdNumber: aabha,
+      authMethod: authMethod
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/AbhaAddressViaAbhaOtp', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  verifyOtpForAddressCreation(txnId: string, otp: string): Observable<any> {
+    let data = {
+      EncryptedData: otp,
+      TxnId: txnId
+    };
+
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/AbhaAddressViaAbhaVerifyOTP', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getAbhaAddressSuggestions(txnId: string): Observable<any> {
+    let data = {
+      EncryptedData: "",
+      txnId: txnId
+    };
+
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/AbhaAddressSuggestions', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  checkIfAbhaAddressexists(phrAddress: string): Observable<any> {
+    
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.get(this.apiUrl + 'Abha/AbhaAddressSuggestions?phrAddress=' + phrAddress).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  createAbhaAddress(txnId: string, phrAddress: string): Observable<any> {
+    let data = {
+      phrAddress: phrAddress,
+      txnId: txnId
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/CreatePHRAddress', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+
 }

@@ -1,3 +1,4 @@
+using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces.Shared;
 
 namespace hospitalApiProject.Services.Abha
@@ -22,8 +23,16 @@ namespace hospitalApiProject.Services.Abha
 
     Task<byte[]> DownloadAbhaCard(string xToken);
 
-    Task<string> GetExistingAbhaAddresses(string phrAddress);
+    Task<string> SearchUserByHealthId(string healhtIdNumber);
+    Task<string> AbhaAddressViaAbhaOtp(string healhtIdNumber, string authMethod);
 
+    Task<string> AbhaAddressViaAbhaVerifyOTP(string txnId, string data);
+
+    Task<string> AbhaAddressSuggestions(string txnId);
+
+    Task<string> GetAbhaAddressExists(string phrAddress);
+
+    Task<string> CreatePHRAddress(string phrAddress, string txnId);
 
   }
 }
