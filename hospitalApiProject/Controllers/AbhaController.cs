@@ -1,4 +1,5 @@
 using hospitalApiProject.Models;
+using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Abha;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -106,23 +107,23 @@ namespace hospitalApiProject.Controllers
       return StatusCode((int)HttpStatusCode.OK, result);
     }
 
-    [HttpPost]
-    [Route("CreateAbhaAddress")]
-    public async Task<IActionResult> CreateAbhaAddress(string txnId, string abhaAddress, string isPreferred)
-    {
-      if (txnId == null || abhaAddress == null)
-      {
-        return BadRequest();
-      }
+    //[HttpPost]
+    //[Route("CreateAbhaAddress")]
+    //public async Task<IActionResult> CreateAbhaAddress(string txnId, string abhaAddress, string isPreferred)
+    //{
+    //  if (txnId == null || abhaAddress == null)
+    //  {
+    //    return BadRequest();
+    //  }
 
-      var result = await _service.CreateAbhaAddress(txnId, abhaAddress, isPreferred);
-      if (_service.HasError)
-      {
-        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
-      }
+    //  var result = await _service.CreateAbhaAddress(txnId, abhaAddress, isPreferred);
+    //  if (_service.HasError)
+    //  {
+    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+    //  }
 
-      return StatusCode((int)HttpStatusCode.Created, result);
-    }
+    //  return StatusCode((int)HttpStatusCode.Created, result);
+    //}
 
     [HttpGet]
     [Route("DownloadAbhaCard")]
@@ -136,6 +137,8 @@ namespace hospitalApiProject.Controllers
       var result = await _service.DownloadAbhaCard(xToken);
       return new FileContentResult(result, "application/pdf");
     }
+
+    #region Abha Address Creation by Abha Number
 
     [HttpPost]
     [Route("GenerateMobileOtpForAbhaAddress")]
@@ -172,6 +175,44 @@ namespace hospitalApiProject.Controllers
 
       return StatusCode((int)HttpStatusCode.Created, result);
     }
+
+    [HttpPost]
+    [Route("CreateAbhaDetails")]
+    public async Task<IActionResult> CreateAbhaDetails([FromBody] AbhaDetailsRequest data)
+    {
+      if (data == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.CreateAbhaDetails(data);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    [HttpPost]
+    [Route("CreateAbhaAddressViaMobile")]
+    public async Task<IActionResult> CreateAbhaAddressViaMobile([FromBody] NewAbhaAddressModel data)
+    {
+      if (data == null || data.phrAddress == null || data.txnId == null)
+      {
+        return BadRequest();
+      }
+
+      var result = await _service.CreateAbhaAddressViaMobile(data.phrAddress, data.txnId);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created, result);
+    }
+
+    #endregion
 
     #region Abha Address Creation by Abha Number
 

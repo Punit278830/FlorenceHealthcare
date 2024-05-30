@@ -1,4 +1,5 @@
 using hospitalApiProject.Models;
+using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Interfaces.Shared;
 
 namespace hospitalApiProject.Services.Abha
@@ -19,7 +20,6 @@ namespace hospitalApiProject.Services.Abha
     Task<string> ConfirmMobileOtpForAbhaAddress(string otp, string txnId);
 
     Task<string> GetAbhaAddressSuggestion(string txnId);
-    Task<string> CreateAbhaAddress(string txnId, string abhaAddress, string isPreferred);
 
     Task<byte[]> DownloadAbhaCard(string xToken);
 
@@ -34,5 +34,8 @@ namespace hospitalApiProject.Services.Abha
 
     Task<string> CreatePHRAddress(string phrAddress, string txnId);
 
+    Task<string> CreateAbhaDetails(AbhaDetailsRequest data);
+
+    Task<string> CreateAbhaAddressViaMobile(string phrAddress, string txnId);
   }
 }
