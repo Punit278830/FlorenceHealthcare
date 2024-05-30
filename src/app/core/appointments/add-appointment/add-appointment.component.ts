@@ -235,7 +235,7 @@ appointmentFormInitlize()
   this.bookappointment=this.fb.group({
   date:['',Validators.required],
   doctorId:['',Validators.required],
-  notes:[''],
+  notes:['',Validators.required],
   appointmentStatus:['Active',Validators.required],
   IdentiyNumber:['',Validators.required],
   IdentiyName:['',Validators.required],

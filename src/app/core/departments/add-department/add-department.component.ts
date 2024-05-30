@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup } from '@angular/forms';
-import { Validators } from 'ngx-editor';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { Idepartment } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
@@ -35,15 +34,15 @@ export class AddDepartmentComponent implements OnInit {
 
   initlizeDepartmentForm() {
     this.depForm = this.fb.group({
-      departmentName: ['',[Validators.required]],
+      departmentName: ['',Validators.required],
       departmentStatus: ['Active', Validators.required]
     })
 
   }
 
   addDepartment(dep: FormGroup) {
-    if (dep.valid) {
-      console.log("hello")
+    if (this.depForm.valid) {
+
       this.depDto = dep.value;
       this.departmentService.createDepartment(this.depDto).subscribe(
         res => {
@@ -57,7 +56,7 @@ export class AddDepartmentComponent implements OnInit {
         });
 
     } else {
-      dep.markAllAsTouched()
+      this.depForm.markAllAsTouched()
     }
 
 

@@ -244,8 +244,14 @@
                                     <div class="form-group local-forms">
                                         <label for="confirmpassword">Confirm Password <span
                                                 class="login-danger">*</span></label>
-                                        <input class="form-control" type="password">
+                                        <input class="form-control" type="password"  formControlName="cpassword">
                                         <!-- Add validation messages for confirm password if needed -->
+                                        <div *ngIf="staffReg.get('cpassword')?.invalid && (staffReg.get('cpassword')?.dirty || staffReg.get('cpassword')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('cpassword')?.errors?.['required']">This is
+                                                required.</div>
+                                        </div>
+                                        
                                     </div>
                                 </div>
 

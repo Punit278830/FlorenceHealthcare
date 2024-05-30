@@ -129,6 +129,7 @@ export class AddStaffComponent {
       consultationFee: [0, Validators.required],
       activeStatus: [null, Validators.required],
       password: ['', Validators.required],
+      cpassword: ['', Validators.required],
       education: ['', Validators.required],
       gender: ['', Validators.required],
       dob: ['', Validators.required],

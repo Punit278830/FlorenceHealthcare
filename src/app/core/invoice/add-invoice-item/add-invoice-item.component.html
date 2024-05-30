@@ -28,42 +28,53 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="name">Item name <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="itemName" type="text"
-                                            placeholder="">
+                                        <label for="itemName">Item name <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="itemName" type="text" placeholder="">
+                                        <div *ngIf="invoiceItem.get('itemName')?.invalid && (invoiceItem.get('itemName')?.dirty || invoiceItem.get('itemName')?.touched)" class="text-danger">
+                                            <div *ngIf="invoiceItem.get('itemName')?.errors?.['required']">Item name is required.</div>
+                                        </div>
                                     </div>
                                 </div>
-
+                        
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="last">Description <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="description" type="text"
-                                            placeholder="">
+                                        <label for="description">Description <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="description" type="text" placeholder="">
+                                        <div *ngIf="invoiceItem.get('description')?.invalid && (invoiceItem.get('description')?.dirty || invoiceItem.get('description')?.touched)" class="text-danger">
+                                            <div *ngIf="invoiceItem.get('description')?.errors?.['required']">Description is required.</div>
+                                        </div>
                                     </div>
                                 </div>
+                        
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="last">Discount <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="discount" type="number"
-                                            placeholder="">
+                                        <label for="discount">Discount <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="discount" type="number" placeholder="">
+                                        <div *ngIf="invoiceItem.get('discount')?.invalid && (invoiceItem.get('discount')?.dirty || invoiceItem.get('discount')?.touched)" class="text-danger">
+                                            <div *ngIf="invoiceItem.get('discount')?.errors?.['required']">Discount is required.</div>
+                                        </div>
                                     </div>
                                 </div>
+                        
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="last">Fee <span class="login-danger">*</span></label>
+                                        <label for="fee">Fee <span class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="fee" type="number" placeholder="">
+                                        <div *ngIf="invoiceItem.get('fee')?.invalid && (invoiceItem.get('fee')?.dirty || invoiceItem.get('fee')?.touched)" class="text-danger">
+                                            <div *ngIf="invoiceItem.get('fee')?.errors?.['required']">Fee is required.</div>
+                                        </div>
                                     </div>
                                 </div>
+                        
                                 <div class="col-12">
                                     <div class="doctor-submit text-end">
-
                                         <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
-
-                                        <button type="submit" class="btn btn-primary cancel-form">Cancel</button>
+                                        <button type="button" class="btn btn-primary cancel-form">Cancel</button>
                                     </div>
                                 </div>
                             </div>
                         </form>
+                        
                     </div>
                 </div>
             </div>
