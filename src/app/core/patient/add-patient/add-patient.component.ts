@@ -30,11 +30,13 @@ export class AddPatientComponent implements OnInit {
   public previewImage!: string;
   public btnLable = 'Capture Image';
   public RegrestationDate = '';
+  public maxDate;
 
   constructor(private fb: FormBuilder,
     private patientService: PatientService,
     private route: Router, private datePipe: DatePipe,
     private toater: ToastrService) {
+      this.maxDate = new Date();
 
 
     this.createPatient();
@@ -72,11 +74,11 @@ export class AddPatientComponent implements OnInit {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', [Validators.required]],
-      dob: [null,],
+      dob: [null, [Validators.required]],
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       email: ['', [Validators.email]],
-      address: [''],
-      gender: ['Male', Validators.required],
+      address: ['', [Validators.required]],
+      gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
 
 
@@ -89,7 +91,8 @@ export class AddPatientComponent implements OnInit {
   
 
   addPatient(patientData: FormGroup) {
-    if (this.patientReg.valid) {
+    if (patientData.valid) {
+      console.log("entered")
       console.log(patientData.value)
       this._patientDto = patientData.value;
       this._patientDto.patientImage = this.previewImage
@@ -105,7 +108,7 @@ export class AddPatientComponent implements OnInit {
 
     }
    else {
-      this.patientReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
+      patientData.markAllAsTouched(); // Mark all controls as touched to trigger error display
     }
 
 

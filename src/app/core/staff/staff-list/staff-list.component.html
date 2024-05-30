@@ -42,13 +42,14 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-auto text-end float-end ms-auto download-grp">
+
+                <!-- <div class="col-auto text-end float-end ms-auto download-grp">
                   <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
                   <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-02.svg" alt=""></a>
                   <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
                   <a href="javascript:;"><img src="assets/img/icons/pdf-icon-04.svg" alt=""></a>
 
-                </div>
+                </div> -->
               </div>
             </div>
             <!-- /Table Header -->
@@ -58,11 +59,12 @@
                 class="table border-0 custom-table comman-table datatable mb-0">
                 <thead>
                   <tr>
-                    <th mat-sort-header="checkbox">
+                    <!-- DO NOT DELETE -->
+                    <!-- <th mat-sort-header="checkbox">
                       <div class="form-check check-tables">
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
-                    </th>
+                    </th> -->
                     <th mat-sort-header="name">Name</th>
                     <th mat-sort-header="department">Department</th>
                     <th mat-sort-header="specialization">Designation</th>
@@ -75,11 +77,12 @@
                 </thead>
                 <tbody>
                   <tr *ngFor="let data of staffList">
+                    <!-- DO NOT DELETE
                     <td>
                       <div class="form-check check-tables">
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
-                    </td>
+                    </td> -->
                     <td class="profile-image"><a [routerLink]="routes.profile"><img width="28" height="28" [src]="img"
                           class="rounded-circle m-r-5" alt="">
                         {{data.firstName}} {{ data.lastName}}</a></td>

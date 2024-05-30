@@ -90,13 +90,19 @@ export class AddQuestionnaireComponent {
 
 
   addQustionnaireName(questValue: FormGroup) {
+    if(questValue.valid){
+      this.question.CreateQuestionaireName(questValue.value).subscribe(res => {
+        if (res) {
+          this.toaster.success("Questionaire created ", "Questionaire Name")
+          this.getQuestionairewithDepName();
+        }
+      })
 
-    this.question.CreateQuestionaireName(questValue.value).subscribe(res => {
-      if (res) {
-        this.toaster.success("Questionaire created ", "Questionaire Name")
-        this.getQuestionairewithDepName();
-      }
-    })
+    }else{
+      questValue.markAllAsTouched()
+    }
+
+    
 
   }
 
