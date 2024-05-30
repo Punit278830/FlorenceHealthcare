@@ -14,54 +14,56 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class AddDepartmentComponent implements OnInit {
   public routes = routes;
-  public depForm!:FormGroup;
-  private depDto!:Idepartment
-  public depStatus=[
-{value:'Active'},
-{value:'Inactive'}
+  public depForm!: FormGroup;
+  private depDto!: Idepartment
+  public depStatus = [
+    { value: 'Active' },
+    { value: 'Inactive' }
   ]
-    
-  
-  
-  constructor(private fb:FormBuilder,private departmentService:DepartmentService,private toster:ToastrService)
-  {
+
+
+
+  constructor(private fb: FormBuilder, private departmentService: DepartmentService, private toster: ToastrService) {
 
   }
 
-  ngOnInit()
-  {
+  ngOnInit() {
     this.initlizeDepartmentForm()
   }
 
 
 
-  initlizeDepartmentForm()
-  {
-    this.depForm=this.fb.group({
-      departmentName:['',Validators.required],
-      departmentStatus:['Active',Validators.required]
+  initlizeDepartmentForm() {
+    this.depForm = this.fb.group({
+      departmentName: ['',[Validators.required]],
+      departmentStatus: ['Active', Validators.required]
     })
 
   }
 
-  addDepartment(dep:FormGroup)
-  {
-    
-    this.depDto=dep.value;
-    this.departmentService.createDepartment(this.depDto).subscribe(
-      res=>{
-      console.log(res);
-      res?this.toster.success("Department Added successfully"):null
-      this.resetForm();
-    },
-     error => {
-      this.toster.error(error.statusText,'Error')
-        console.error('Error during post:', error);
-      });
+  addDepartment(dep: FormGroup) {
+    if (dep.valid) {
+      console.log("hello")
+      this.depDto = dep.value;
+      this.departmentService.createDepartment(this.depDto).subscribe(
+        res => {
+          console.log(res);
+          res ? this.toster.success("Department Added successfully") : null
+          this.resetForm();
+        },
+        error => {
+          this.toster.error(error.statusText, 'Error')
+          console.error('Error during post:', error);
+        });
+
+    } else {
+      dep.markAllAsTouched()
+    }
+
+
   }
 
-  resetForm()
-  {
+  resetForm() {
     this.depForm.reset();
   }
 }
