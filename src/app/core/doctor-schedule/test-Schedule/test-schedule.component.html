@@ -41,7 +41,7 @@
                                     <div class="form-group local-forms">
                                         <label for="Date">Adjust schedule <span class="login-danger">*</span></label>
                                         <input class="form-control  datetimepicker" formControlName="scheduleDate"
-                                            readonly type="text" placeholder="MM/DD/YYYY" matInput [matDatepicker]="picker"
+                                            readonly type="text" placeholder="DD/MM/YYYY" matInput [matDatepicker]="picker"
                                             [matDatepickerFilter]="dateFilter" (dateChange)="onDateChange($event)">
                                         <mat-datepicker #picker></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="
