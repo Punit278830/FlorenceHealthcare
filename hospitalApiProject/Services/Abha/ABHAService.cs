@@ -259,5 +259,34 @@ namespace hospitalApiProject.Services.Abha
       var result = await ExecutePostAsync(_phrBaseUrl, "api/v1/phr/registration/hid/create-phr-address", json);
       return result;
     }
+
+    public async Task<string> CreateAbhaDetails(AbhaDetailsRequest data)
+    {      
+      var json = JsonSerializer.Serialize(data);
+      var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/details", json);
+      return result;
+    }
+
+    public async Task<string> CreateAbhaAddressViaMobile(string phrAddress, string txnId)
+    {
+      var exists = await GetAbhaAddressExists(phrAddress);
+
+      if (exists == "true")
+      {
+        this.ErrorMessage = "The PHR address already exists.";
+        return null;
+      }
+
+      var jsonContent = new
+      {
+        password = "",
+        phrAddress = phrAddress,
+        transactionId = txnId
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/create/phr", json);
+      return result;
+    }
   }
 }

@@ -95,8 +95,8 @@
                                     <div class="form-group local-forms">
                                         <label for="Birth">Date Of Birth <span class="login-danger">*</span></label>
                                         <input class="form-control datetimepicker"
-                                            (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text"
-                                            formControlName="dob" matInput [matDatepicker]="dob">
+                                            (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text" formControlName="dob"
+                                            matInput [matDatepicker]="dob">
                                         <mat-datepicker #dob></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
                                         <div *ngIf="staffReg.get('dob')?.invalid && (staffReg.get('dob')?.dirty || staffReg.get('dob')?.touched)"

@@ -2,7 +2,6 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { subtract } from 'ngx-bootstrap/chronos';
 import { ToastrService } from 'ngx-toastr';
 import { WebcamImage } from 'ngx-webcam';
 import { Observable, Subject } from 'rxjs';
@@ -65,7 +64,7 @@ export class AddPatientComponent implements OnInit {
   ];
 
   ngOnInit() {
-    const currentDate=this.datePipe.transform(new Date(),'yyyy-MM-dd');
+    const currentDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
     this.patientReg.get('regstrationDate')?.setValue(currentDate);
 
   }
@@ -84,11 +83,7 @@ export class AddPatientComponent implements OnInit {
 
     })
   }
-  get mobile(): AbstractControl {
-    return this.patientReg.get('mobile') as AbstractControl;
-  }
 
-  
 
   addPatient(patientData: FormGroup) {
     if (patientData.valid) {
@@ -96,23 +91,15 @@ export class AddPatientComponent implements OnInit {
       console.log(patientData.value)
       this._patientDto = patientData.value;
       this._patientDto.patientImage = this.previewImage
-      //this._patientDto.regstrationDate=parse(dd ,'yyyy-MM-dd', new Date());
       this.patientService.CreatePatient(this._patientDto).subscribe(res => {
         res ? this.toater.success("Patient added successfully", "Add Patient") : null;
         this.resetAddPatientForm();
         this.route.navigate([routes.addAppointment]);
       })
-
-
-      //this.route.navigate([routes.patientsList]);
-
     }
-   else {
-      patientData.markAllAsTouched(); // Mark all controls as touched to trigger error display
+    else {
+      this.patientReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
     }
-
-
-
   }
 
   resetAddPatientForm() {
@@ -124,9 +111,8 @@ export class AddPatientComponent implements OnInit {
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     this.patientReg.get('dob')?.setValue(dateOnly);
-    
-    
   }
+
   get $trigger(): Observable<void> {
     return this.trigger.asObservable();
   }

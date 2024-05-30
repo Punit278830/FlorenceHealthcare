@@ -192,5 +192,54 @@ export class AbhaService {
     );
   }
 
+  createAbhaDetails(mobile: string, txnId:string): Observable<any> {
+    let data = {
+      firstName: "Manpreet",
+      middleName: "",
+      lastName: "",
+      
+      dayOfBirth: "",
+      monthOfBirth: "",
+      yearOfBirth: "1989",
+
+      gender: "F",
+      countryCode: "+91",
+      mobile: mobile,
+      
+      email: "",
+      address: "",
+      
+      pinCode: "",
+      stateCode: "",
+      districtCode: "",
+       
+      transactionId: txnId,
+      
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/CreateAbhaDetails', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+
+  createAbhaAddressViaMobile(txnId: string, phrAddress: string): Observable<any> {
+    let data = {
+      phrAddress: phrAddress,
+      txnId: txnId
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/CreateAbhaAddressViaMobile', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
 
 }

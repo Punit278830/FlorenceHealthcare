@@ -76,141 +76,378 @@
                             </div>
                         </form>
                     </div>
-                    <div class="card-body" *ngIf="showRegistrationViaAbhaForm">
 
-                        <form [formGroup]="registerViaAbhaForm">
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="abha">ABHA Number
-                                            <span class="login-danger">*</span>
-                                        </label>
-                                        <input class="form-control" formControlName="abhaNumber" type="text"
-                                            placeholder="" [value]="registrationOptionsForm.value.abhaNumber" readonly>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div>
-                                    <div class="form-group select-auth-type">
-                                        <label for="validateVia" class="gen-label">
-                                            <h2>Validate using<span class="login-danger">*</span>
-                                            </h2>
-                                        </label>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" formControlName="validateVia"
-                                                    class="form-check-input" value="AadharOtp"
-                                                    (change)="onValidateViaChanged($event);">OTP on Mobile
-                                                Number linked with your Aadhaar
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" formControlName="validateVia"
-                                                    class="form-check-input" value="AbhaOtp"
-                                                    (change)="onValidateViaChanged($event);">OTP on mobile
-                                                number linked with your ABHA Address/ ABHA Number
-                                            </label>
+                    <!-- Register via Abha Number -->
+                    <div *ngIf="!registerViaMobile">
+                        <div class="card-body" *ngIf="showRegistrationViaAbhaForm">
 
+                            <form [formGroup]="registerViaAbhaForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="abha">ABHA Number
+                                                <span class="login-danger">*</span>
+                                            </label>
+                                            <input class="form-control" formControlName="abhaNumber" type="text"
+                                                placeholder="" [value]="registrationOptionsForm.value.abhaNumber"
+                                                readonly>
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row">
+                                    <div>
+                                        <div class="form-group select-auth-type">
+                                            <label for="validateVia" class="gen-label">
+                                                <h2>Validate using<span class="login-danger">*</span>
+                                                </h2>
+                                            </label>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="radio" formControlName="validateVia"
+                                                        class="form-check-input" value="AadharOtp"
+                                                        (change)="onValidateViaChanged($event);">OTP on Mobile
+                                                    Number linked with your Aadhaar
+                                                </label>
+                                            </div>
+                                            <div class="form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="radio" formControlName="validateVia"
+                                                        class="form-check-input" value="AbhaOtp"
+                                                        (change)="onValidateViaChanged($event);">OTP on mobile
+                                                    number linked with your ABHA Address/ ABHA Number
+                                                </label>
 
-                                <br />
-                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
-                                    <button class="btn btn-primary submit-form me-2" type="button"
-                                        (click)="generateOtpForAddressCreation()">Continue</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <br />
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="generateOtpForAddressCreation()">Continue</button>
+                                    </div>
                                 </div>
-                            </div>
-                        </form>
+                            </form>
 
+                        </div>
+                        <div class="card-body" *ngIf="showConfirmOTPForm">
+
+                            <form [formGroup]="cofirmOTPForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="otp">OTP
+                                                <span class="login-danger">*</span>
+                                            </label>
+                                            <input class="form-control" formControlName="otp" type="text"
+                                                placeholder="">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <br />
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="verifyOtpForAddressCreation()">Continue</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
+                        <div class="card-body" *ngIf="showLinkedAbhaAddressessForm">
+
+                            <form [formGroup]="linkedAbhaAddressessForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-12 col-xl-12">
+                                        <div class="form-group local-forms">
+                                            <h1>We have found {{alreadyLinkedAddressesCount}}
+                                                ABHA addresses linked to this Mobile.
+                                            </h1>
+                                            <br />
+                                            <li *ngFor="let addr of linkedAddresses">
+                                                {{addr}}
+                                            </li>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <br />
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="createNewAddress()">Create New
+                                            Address</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body" *ngIf="showCreateNewAbhaAddressForm">
+                            <form [formGroup]="createNewAbhaAddressForm">
+                                <h2>Create New ABHA address</h2>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-6">
+                                        <div class="col-12 col-md-6 col-xl-6 form-group local-forms">
+                                            <label for="newAbhaAddress">ABHA Address <span
+                                                    class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="newAbhaAddress" type="text"
+                                                placeholder="" value="{{selectedAbhaAddress}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-12 col-xl-12">
+                                        <h2>Or, you can select any address from below suggestions: </h2>
+                                        <div *ngFor="let item of suggestionList | slice:0:3">
+                                            <a href="javascript:;" (click)="selectAbhaAddress(item)">{{item}}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <br />
+                                    <br />
+
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="submitNewAddress()">Submit</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
                     </div>
-                    <div class="card-body" *ngIf="showConfirmOTPForm">
 
-                        <form [formGroup]="cofirmOTPForm">
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="otp">OTP
-                                            <span class="login-danger">*</span>
-                                        </label>
+                    <!-- Register via Mobile Number -->
+                    <div *ngIf="registerViaMobile">
+                        <!-- <div class="card-body">
+
+                            <form [formGroup]="registerViaMobileForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="mobileNumber">Mobile Number
+                                                <span class="login-danger">*</span>
+                                            </label>
+                                            <input class="form-control" formControlName="mobileNumber" type="text"
+                                                placeholder="" [value]="registrationOptionsForm.value.mobileNumber">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row" *ngIf="showOtp">
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <label for="otp">OTP <span class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="otp" type="text" placeholder="">
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-
-                                <br />
-                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
-                                    <button class="btn btn-primary submit-form me-2" type="button"
-                                        (click)="verifyOtpForAddressCreation()">Continue</button>
-                                </div>
-                            </div>
-
-                        </form>
-                    </div>
-                    <div class="card-body" *ngIf="showLinkedAbhaAddressessForm">
-
-                        <form [formGroup]="linkedAbhaAddressessForm">
-                            <div class="row">
-                                <div class="col-12 col-md-12 col-xl-12">
-                                    <div class="form-group local-forms">
-                                        <h1>We have found {{alreadyLinkedAddressesCount}}
-                                            ABHA addresses linked to this Mobile.
-                                        </h1>
-                                        <br />
-                                        <li *ngFor="let addr of linkedAddresses">
-                                            {{addr}}
-                                        </li>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="generateOtpViaMobile()">Continue</button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
+                            </form>
 
-                                <br />
-                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
-                                    <button class="btn btn-primary submit-form me-2" type="button"
-                                        (click)="createNewAddress()">Create New
-                                        Address</button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                    <div class="card-body" *ngIf="showCreateNewAbhaAddressForm">
-                        <form [formGroup]="createNewAbhaAddressForm">
-                            <h2>Create New ABHA address</h2>
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-xl-6">
-                                    <div class="col-12 col-md-6 col-xl-6 form-group local-forms">
-                                        <label for="newAbhaAddress">ABHA Address <span
-                                                class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="newAbhaAddress" type="text"
-                                            placeholder="" value="{{selectedAbhaAddress}}">
+                        </div> -->
+                        <!-- <div class="card-body" *ngIf="showMobileCofirmOTPForm">  
+
+                            <form [formGroup]="mobileCofirmOTPForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="otp">OTP
+                                                <span class="login-danger">*</span>
+                                            </label>
+                                            <input class="form-control" formControlName="otp" type="text"
+                                                placeholder="">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-12 col-xl-12">
-                                    <h2>Or, you can select any address from below suggestions: </h2>
-                                    <div *ngFor="let item of suggestionList | slice:0:3">
-                                        <a href="javascript:;" (click)="selectAbhaAddress(item)">{{item}}</a>
+                                <div class="row">
+
+                                    <br />
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="verifyOtpViaMobile()">Continue</button>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-xl-6">
-                                    <div class="form-group local-forms">
 
+                            </form>
+                        </div> -->
+                        <div class="card-body" *ngIf="showMobileLinkedAbhaAddressessForm">
+
+                            <form [formGroup]="mobileLinkedAbhaAddressessForm">
+                                <div class="row">
+                                    <div class="col-12 col-md-12 col-xl-12">
+                                        <div class="form-group local-forms">
+                                            <h1>We have found {{alreadyLinkedAddressesCount}}
+                                                ABHA addresses linked to this Mobile.
+                                            </h1>
+                                            <br />
+                                            <li *ngFor="let addr of linkedAddresses">
+                                                {{addr}}
+                                            </li>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
-                                    <button class="btn btn-primary submit-form me-2" type="button"
-                                        (click)="submitNewAddress()">Submit</button>
-                                </div>
-                            </div>
+                                <div class="row">
 
-                        </form>
+                                    <br />
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="showDetailsForm()">Create New
+                                            Address</button>
+                                    </div>
+                                    <!-- <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="getSuggestions()">Get Suggestions</button>
+                                    </div> -->
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-body" *ngIf="showMobileAbhaDetailsForm">  
+                            <form>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="form-heading">
+                                            <h4>Submit Details</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="name">First Name <span class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="firstName" type="text"
+                                                placeholder="">
+                                            <!-- <div *ngIf="patientReg.get('firstName')?.invalid && (patientReg.get('firstName')?.dirty || patientReg.get('firstName')?.touched)"
+                                                class="text-danger">
+                                                <div *ngIf="patientReg.get('firstName')?.errors?.['required']">First name is
+                                                    required.</div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="last">Middle Name <span class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="middleName" type="text"
+                                                placeholder="">
+                                            <!-- <div *ngIf="patientReg.get('lastName')?.invalid && (patientReg.get('lastName')?.dirty || patientReg.get('lastName')?.touched)"
+                                                class="text-danger">
+                                                <div *ngIf="patientReg.get('lastName')?.errors?.['required']">Last name is
+                                                    required.</div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+    
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="last">Last Name <span class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="lastName" type="text"
+                                                placeholder="">
+                                            <!-- <div *ngIf="patientReg.get('lastName')?.invalid && (patientReg.get('lastName')?.dirty || patientReg.get('lastName')?.touched)"
+                                                class="text-danger">
+                                                <div *ngIf="patientReg.get('lastName')?.errors?.['required']">Last name is
+                                                    required.</div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+    
+                                    <!-- <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="name">Age <span class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="age" type="text" placeholder="Age">
+                                        </div>
+                                    </div> -->
+                                    <!-- <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="Birth">Date Of Birth <span class="login-danger">*</span></label>
+                                            <input class="form-control datetimepicker"
+                                                (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text"
+                                                 formControlName="dob" matInput [matDatepicker]="dob">
+                                            <mat-datepicker #dob></mat-datepicker>
+                                            <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
+                                        </div>
+                                    </div> -->
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="mobile">Mobile <span class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="mobile" type="text"
+                                                placeholder="">                                        
+                                            <!-- <div *ngIf="patientReg.controls['mobile'].invalid && (patientReg.controls['mobile'].dirty 
+                                            || patientReg.controls['mobile'].touched)"
+                                                class="text-danger">
+                                                <div *ngIf="patientReg.controls['mobile'].errors?.['required']">
+                                                    Mobile is required.
+                                                </div>
+                                                <div *ngIf="patientReg.controls['mobile'].errors?.['pattern']">
+                                                    Mobile number must be exactly 10 digits.
+                                                </div>
+                                            </div> -->
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="email">Email </label>
+                                            <input class="form-control" formControlName="email" type="email" placeholder="">
+                                        </div>
+                                    </div>
+    
+                                    <!-- <div class="col-12 col-md-6 col-xl-4">
+                                        <div class="form-group local-forms">
+                                            <label for="department">Gender <span class="login-danger">*</span></label>
+                                            <mat-select formControlName="gender" class="form-control select">
+                                                <mat-option *ngFor="let data of selectGender" [value]="data.value">
+                                                    {{data.value}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                    </div> -->
+                                    <div class="col-12 col-sm-8">
+                                        <div class="form-group local-forms">
+                                            <label for="address">Address <span class="login-danger">*</span></label>
+                                            <textarea class="form-control" formControlName="address" rows="6"
+                                                cols="30"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="doctor-submit text-end">
+                                            <button type="button" class="btn btn-primary submit-form me-2"
+                                            (click)="getSuggestions()">Submit</button>
+                                            <!-- <button type="button" class="btn btn-primary cancel-form">Cancel</button> -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <div class="card-body" *ngIf="showMobileCreateNewAbhaAddressForm" >
+                            <form [formGroup]="mobileCreateNewAbhaAddressForm">
+                                <h2>Create New ABHA address</h2>
+                                <div class="row">
+                                    <div class="col-12 col-md-6 col-xl-6">
+                                        <div class="col-12 col-md-6 col-xl-6 form-group local-forms">
+                                            <label for="newAbhaAddress">ABHA Address <span
+                                                    class="login-danger">*</span></label>
+                                            <input class="form-control" formControlName="newAbhaAddress" type="text"
+                                                placeholder="" value="{{selectedAbhaAddress}}">
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-md-12 col-xl-12">
+                                        <h2>Or, you can select any address from below suggestions: </h2>
+                                        <div *ngFor="let item of suggestionList | slice:0:3">
+                                            <a href="javascript:;" (click)="selectAbhaAddress(item)">{{item}}</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <br />
+                                    <br />
+
+                                    <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                        <button class="btn btn-primary submit-form me-2" type="button"
+                                            (click)="submitNewAddressViaMobile()">Submit</button>
+                                    </div>
+                                </div>
+
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>

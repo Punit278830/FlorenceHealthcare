@@ -12,6 +12,9 @@ import { HttpClientModule } from '@angular/common/http';
 import { DataService } from './data/data.service';
 import { MatSortModule } from '@angular/material/sort';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
+import { CustomDateAdapter } from 'src/app/shared/utility/CustomDateAdapter';
+import { MY_DATE_FORMATS } from 'src/app/shared/utility/MY_DATE_FORMATS';
 
 
 
@@ -67,6 +70,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
   ],
   providers: [
     DataService,
+    { provide: DateAdapter, useClass: CustomDateAdapter, deps: [MAT_DATE_LOCALE] },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS }
   ]
 })
 export class SharedModule { }
