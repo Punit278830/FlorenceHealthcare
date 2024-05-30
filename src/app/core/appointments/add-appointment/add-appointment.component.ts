@@ -238,7 +238,9 @@ appointmentFormInitlize()
   notes:[''],
   appointmentStatus:['Active',Validators.required],
   IdentiyNumber:['',Validators.required],
-  IdentiyName:['',Validators.required]
+  IdentiyName:['',Validators.required],
+  departmentid:['',Validators.required],
+  
 }) 
 }
 
@@ -321,7 +323,8 @@ fileFormInitlize(){
 
   bookAppointment(appointment:any)
   {
-    const userData=JSON.parse(localStorage.getItem('data')||'');
+    if(this.bookappointment.valid){
+      const userData=JSON.parse(localStorage.getItem('data')||'');
     this.appointmentDto.date=this.formattedDateTime;
     this.appointmentDto.doctorId=appointment.value.doctorId;
     this.appointmentDto.notes=appointment.value.notes;
@@ -338,6 +341,12 @@ fileFormInitlize(){
     this.route.navigate([routes.invoices])
 
     });
+
+    }
+    else{
+      this.bookappointment.markAllAsTouched();
+    }
+    
   
 
   }

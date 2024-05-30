@@ -63,9 +63,14 @@
                                         <label for="Birth">Date Of Birth <span class="login-danger">*</span></label>
                                         <input class="form-control datetimepicker"
                                             (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text"
-                                             formControlName="dob" matInput [matDatepicker]="dob">
+                                            formControlName="dob" matInput [matDatepicker]="dob" [max]="maxDate">
                                         <mat-datepicker #dob></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
+                                        <div *ngIf="patientReg.get('dob')?.invalid && (patientReg.get('dob')?.dirty || patientReg.get('dob')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="patientReg.get('dob')?.errors?.['required']">DOB is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -94,10 +99,16 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="email">Email </label>
+                                        <label for="email">Email</label>
                                         <input class="form-control" formControlName="email" type="email" placeholder="">
+                                        <div *ngIf="patientReg.get('email')?.invalid && (patientReg.get('email')?.dirty || patientReg.get('email')?.touched) && patientReg.get('email')?.value"
+                                            class="text-danger">
+                                            <div *ngIf="patientReg.get('email')?.errors?.['email']">Please enter a valid
+                                                email address.</div>
+                                        </div>
                                     </div>
                                 </div>
+
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
@@ -107,6 +118,11 @@
                                                 {{data.value}}
                                             </mat-option>
                                         </mat-select>
+                                        <div *ngIf="patientReg.get('gender')?.invalid && (patientReg.get('gender')?.dirty || patientReg.get('gender')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="patientReg.get('gender')?.errors?.['required']">Gender is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -135,6 +151,12 @@
                                         <label for="address">Address <span class="login-danger">*</span></label>
                                         <textarea class="form-control" formControlName="address" rows="6"
                                             cols="30"></textarea>
+                                        <div *ngIf="patientReg.get('address')?.invalid && (patientReg.get('address')?.dirty || patientReg.get('address')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="patientReg.get('address')?.errors?.['required']">Address is
+                                                required.</div>
+                                        </div>
+
                                     </div>
                                 </div>
 
