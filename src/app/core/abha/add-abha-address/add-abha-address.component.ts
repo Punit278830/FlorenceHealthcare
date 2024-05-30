@@ -37,7 +37,7 @@ export class AddAbhaAddressComponent {
   mobileCofirmOTPForm!: FormGroup;
   mobileLinkedAbhaAddressessForm!: FormGroup;
   mobileCreateNewAbhaAddressForm!: FormGroup;
-
+  mobileAbhaDetailsForm!: FormGroup;
 
   showRegistrationOptionsForm: boolean = true;
   showRegistrationViaAbhaForm: boolean = false;
@@ -49,7 +49,14 @@ export class AddAbhaAddressComponent {
   showMobileCofirmOTPForm: boolean = false;
   showMobileLinkedAbhaAddressessForm: boolean = false;
   showMobileCreateNewAbhaAddressForm: boolean = false;
+  showMobileAbhaDetailsForm: boolean = false;
 
+  selectGender = [
+    { value: 'Male' },
+    { value: 'Female' },
+    { value: 'Transgender' },
+
+  ];
 
   constructor(private route: ActivatedRoute,
     private fb: FormBuilder,
@@ -101,6 +108,12 @@ export class AddAbhaAddressComponent {
     this.mobileCreateNewAbhaAddressForm = this.fb.group({
       newAbhaAddress: ['', Validators.required]
     });
+
+    // this.mobileCreateNewAbhaAddressForm = this.fb.group({
+    //   firstName: [''],
+    //   middleName: [''],
+    //   lastName: ['']
+    // });
   }
 
   onRegisterViaChanged(event: any) {
@@ -197,6 +210,7 @@ export class AddAbhaAddressComponent {
 
     this.showMobileLinkedAbhaAddressessForm = false;
     this.showMobileCreateNewAbhaAddressForm = false;
+    this.showMobileAbhaDetailsForm = false;
   }
 
   onValidateViaChanged(event: any) {
@@ -373,9 +387,9 @@ export class AddAbhaAddressComponent {
 
         this.suggestionList = res;
         this.txnId = res.transactionId;
-        //this.hideAllForms();
-        //this.showMobileCreateNewAbhaAddressForm = true;
-        this.toster.success("Details submitted successfully!");
+        // this.hideAllForms();
+        // this.showMobileAbhaDetailsForm = true;
+        //this.toster.success("Details submitted successfully!");
         console.log(res);
       },
       error => {
@@ -383,7 +397,7 @@ export class AddAbhaAddressComponent {
       });
   }
 
-  getSuggestions(){
+  getSuggestions() {
     this.abhaService.getAbhaAddressSuggestions(this.txnId).subscribe(
       res => {
         if (res && res.error) {
@@ -395,6 +409,8 @@ export class AddAbhaAddressComponent {
 
         this.hideAllForms();
         this.showMobileCreateNewAbhaAddressForm = true;
+        this.toster.success("Details submitted successfully!");
+
         console.log(res);
       },
       error => {
@@ -427,5 +443,15 @@ export class AddAbhaAddressComponent {
       error => {
         this.toster.error(error);
       });
+  }
+
+  addDetails() {
+    this.createNewAddressViaMobile();
+  }
+
+  showDetailsForm() {
+    this.hideAllForms();
+    this.showMobileAbhaDetailsForm = true;
+    this.createNewAddressViaMobile();
   }
 }

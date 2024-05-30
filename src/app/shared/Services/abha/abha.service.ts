@@ -194,21 +194,27 @@ export class AbhaService {
 
   createAbhaDetails(mobile: string, txnId:string): Observable<any> {
     let data = {
-      address: "",
-      countryCode: "+91",
-      dayOfBirth: "",
-      districtCode: "",
-      email: "",
       firstName: "Manpreet",
-      gender: "F",
-      lastName: "",
       middleName: "",
-      mobile: mobile,
+      lastName: "",
+      
+      dayOfBirth: "",
       monthOfBirth: "",
+      yearOfBirth: "1989",
+
+      gender: "F",
+      countryCode: "+91",
+      mobile: mobile,
+      
+      email: "",
+      address: "",
+      
       pinCode: "",
       stateCode: "",
+      districtCode: "",
+       
       transactionId: txnId,
-      yearOfBirth: "1989"
+      
     };
 
     const httpOptions = {
