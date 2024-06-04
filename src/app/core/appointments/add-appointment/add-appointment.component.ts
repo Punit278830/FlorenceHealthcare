@@ -201,15 +201,22 @@ private calculateTotalPages(totalData: number, pageSize: number): void {
   }
 }
 
+refresh(){
+  this.patientAppointmentData=[]
+  this.flag=false
+}
+
 
 ngOnInit()
 {
   this.appointmentFormInitlize();
   this.fileFormInitlize();
-  if(this.patierntService.patientId)
-  {
-    this.postDatatoAppointment(this.patierntService.patientId);
-  }
+  this.flag=false;
+  this.patientAppointmentData=[];
+  // if(this.patierntService.patientId)
+  // {
+  //   this.postDatatoAppointment(this.patierntService.patientId);
+  // }
   //this.updateFormattedDateTime();
   //this.downloadPatientFile();
   

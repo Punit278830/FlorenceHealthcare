@@ -10,13 +10,15 @@ import { DatePipe } from '@angular/common';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import * as jsPDF from 'jspdf';
 import { Router } from '@angular/router';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-patients-list',
   templateUrl: './patients-list.component.html',
   styleUrls: ['./patients-list.component.scss'],
-providers:[DatePipe],  
-  
+  providers: [DatePipe],
+
 })
 export class PatientsListComponent implements OnInit {
   public routes = routes;
@@ -35,30 +37,56 @@ export class PatientsListComponent implements OnInit {
   public currentPage = 1;
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
-   public patientList: Array<IpatientInfo>=[];
+  public patientList: Array<IpatientInfo> = [];
   public totalPages = 0;
-  public img="assets/img/profiles/avatar-08.jpg";
-  public age!:number;
-  public dateForm!:FormGroup;
-  
+  public img = "assets/img/profiles/avatar-08.jpg";
+  public age!: number;
+  public dateForm!: FormGroup;
+  public minToDate: Date | null = null;
 
-  constructor(public data : DataService,
-    private patientService:PatientService,
-    private datePipe:DatePipe,
-    private fb:FormBuilder,
-    private route:Router
-    ){
+
+  constructor(public data: DataService,
+    private patientService: PatientService,
+    private datePipe: DatePipe,
+    private fb: FormBuilder,
+    private route: Router,
+    private modalservice:ModalServiceService,
+    private toaster: ToastrService,
+  ) {
 
 
 
   }
-initlizeDateForm()
-{
-  this.dateForm=this.fb.group({
-    from:[null],
-    to:[null]
-  })
-}
+
+  deletePatient(idhere:number){
+    this.modalservice.openModal({
+      type: 'patient',
+      id: idhere,
+      confirmCallback: () => this.confirmDelete(idhere)
+    });
+  }
+
+  confirmDelete(idhere:number){
+    this.patientService.deletePatient(idhere).subscribe(res => {
+      if (res == null) {
+        this.toaster.success("Patient is deleted!")
+        this.getTableData()
+      }
+    })
+
+  }
+
+
+  
+
+  
+  initlizeDateForm() {
+    this.dateForm = this.fb.group({
+      from: [null],
+      to: [null]
+    });
+  }
+
 
   ngOnInit() {
     this.initlizeDateForm();
@@ -66,78 +94,77 @@ initlizeDateForm()
   }
 
   private getTableData(): void {
-    
+
     this.patientList = [];
     this.serialNumberArray = [];
-    const from=this.dateForm.get('from')?.value||null;
-    const to=this.dateForm.get('to')?.value||null;
-    if(from!==null && to!==null)
-    {
+    const from = this.dateForm.get('from')?.value || null;
+    const to = this.dateForm.get('to')?.value || null;
+    if (from !== null && to !== null) {
       this.dateForm.reset();
-     this.patientService.getPatientdateange(from,to).subscribe((data:any)=>{
-         this.totalData=data.length;
-          // this.staffList.push(data);
-             
-              console.log(data)
-              data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.calculateDateDifference(res.dob);
-          res.ageinYear=this.age;
-          
-          this.patientList.push(res);
-          console.log(res.DOJ)
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-              this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
-              this.calculateTotalPages(this.totalData, this.pageSize);
-        
-      }) 
-    }
-    else{
-      this.patientService.getPatientList().subscribe((data:any)=>{
-         this.totalData=data.length;
-          // this.staffList.push(data);
-             
-              console.log(data)
-              data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.calculateDateDifference(res.dob);
-          res.ageinYear=this.age;
-          
-          this.patientList.push(res);
-          console.log(res.DOJ)
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-              this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
-              this.calculateTotalPages(this.totalData, this.pageSize);
-        
+      this.patientService.getPatientdateange(from, to).subscribe((data: any) => {
+        this.totalData = data.length;
+        // this.staffList.push(data);
+
+        console.log(data)
+        data.map((res: any, index: number) => {
+          const serialNumber = index + 1;
+          if (index >= this.skip && serialNumber <= this.limit) {
+            this.calculateDateDifference(res.dob);
+            res.ageinYear = this.age;
+
+            this.patientList.push(res);
+            console.log(res.DOJ)
+            this.serialNumberArray.push(serialNumber);
+          }
+        });
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
       })
     }
-      // this.patientService.getPatientList().subscribe((data:any)=>{
-      //    this.totalData=data.length;
-      //     // this.staffList.push(data);
-             
-      //         console.log(data)
-      //         data.map((res: any, index: number) => {
-      //   const serialNumber = index + 1;
-      //   if (index >= this.skip && serialNumber <= this.limit) {
-      //     this.calculateDateDifference(res.dob);
-      //     res.ageinYear=this.age;
-          
-      //     this.patientList.push(res);
-      //     console.log(res.DOJ)
-      //     this.serialNumberArray.push(serialNumber);
-      //   }
-      // });
-      //         this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
-      //         this.calculateTotalPages(this.totalData, this.pageSize);
-        
-      // })
-      
+    else {
+      this.patientService.getPatientList().subscribe((data: any) => {
+        this.totalData = data.length;
+        // this.staffList.push(data);
+
+        console.log(data)
+        data.map((res: any, index: number) => {
+          const serialNumber = index + 1;
+          if (index >= this.skip && serialNumber <= this.limit) {
+            this.calculateDateDifference(res.dob);
+            res.ageinYear = this.age;
+
+            this.patientList.push(res);
+            console.log(res.DOJ)
+            this.serialNumberArray.push(serialNumber);
+          }
+        });
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      })
+    }
+    // this.patientService.getPatientList().subscribe((data:any)=>{
+    //    this.totalData=data.length;
+    //     // this.staffList.push(data);
+
+    //         console.log(data)
+    //         data.map((res: any, index: number) => {
+    //   const serialNumber = index + 1;
+    //   if (index >= this.skip && serialNumber <= this.limit) {
+    //     this.calculateDateDifference(res.dob);
+    //     res.ageinYear=this.age;
+
+    //     this.patientList.push(res);
+    //     console.log(res.DOJ)
+    //     this.serialNumberArray.push(serialNumber);
+    //   }
+    // });
+    //         this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+    //         this.calculateTotalPages(this.totalData, this.pageSize);
+
+    // })
+
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
     //   this.totalData = data.totalData;
     //   console.log("mock data"+data);
@@ -146,7 +173,7 @@ initlizeDateForm()
     //   // data.data.map((res: staffList, index: number) => {
     //   //   const serialNumber = index + 1;
     //   //   if (index >= this.skip && serialNumber <= this.limit) {
-         
+
     //   //     //this.staffList.push(res);
     //   //     this.serialNumberArray.push(serialNumber);
     //   //   }
@@ -164,7 +191,7 @@ initlizeDateForm()
   //     data.data.map((res: patientsList, index: number) => {
   //       const serialNumber = index + 1;
   //       if (index >= this.skip && serialNumber <= this.limit) {
-          
+
   //         this.patientsList.push(res);
   //         this.serialNumberArray.push(serialNumber);
   //       }
@@ -186,9 +213,9 @@ initlizeDateForm()
       this.patientList = data;
     } else {
       this.patientList = data.sort((a, b) => {
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const aValue = (a as any)[sort.active];
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bValue = (b as any)[sort.active];
         return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
       });
@@ -246,59 +273,55 @@ initlizeDateForm()
     }
   }
 
-  onEditPatient(id:number){
-    this.patientService.patientId=id;
+  onEditPatient(id: number) {
+    this.patientService.patientId = id;
 
   }
 
-  calculateDateDifference(dob:Date) {
+  calculateDateDifference(dob: Date) {
     const start = new Date(dob);
     const end = new Date();
     // Calculate the difference in years
     const diffInMilliseconds = Math.abs(end.getTime() - start.getTime());
     const yearsDifference = Math.floor(diffInMilliseconds / (365.25 * 24 * 60 * 60 * 1000));
-    
+
     this.age = yearsDifference;
-    
+
   }
-  
-   onDobDateChange(event: any,dateType:string): void {
+
+  onDobDateChange(event: any, dateType: string): void {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    if(dateType=='from')
-    {
+    if (dateType == 'from') {
+      this.minToDate=event.value
       this.dateForm.get('from')?.setValue(dateOnly)
-      
+
     }
-    if(dateType=='to')
-    {
+    if (dateType == 'to') {
       this.dateForm.get('to')?.setValue(dateOnly)
     }
-    const from=this.dateForm.get('from')?.value||null;
-    const to=this.dateForm.get('to')?.value||null;
-    if(from!==null && to!==null)
-    {
+    const from = this.dateForm.get('from')?.value || null;
+    const to = this.dateForm.get('to')?.value || null;
+    if (from !== null && to !== null) {
 
       this.getTableData();
     }
-    
 
-   
+
+
   }
 
- movetoProfile(id:number)
- {
-  this.patientService.patientId=id;
-  
-  this.route.navigate([routes.profile]);
+  movetoProfile(id: number) {
+    this.patientService.patientId = id;
 
- }
+    this.route.navigate([routes.profile]);
 
- movetoBookappointment(id:number)
- {
-  this.patientService.patientId=id;
-  this.route.navigate([routes.addAppointment]);
- }
+  }
+
+  movetoBookappointment(id: number) {
+    this.patientService.patientId = id;
+    this.route.navigate([routes.addAppointment]);
+  }
 
 }

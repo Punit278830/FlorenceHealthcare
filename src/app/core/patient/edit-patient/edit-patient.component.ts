@@ -76,11 +76,11 @@ export class EditPatientComponent implements OnInit {
   {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
-      lastName: [''],
-      dob:[null,],
+      lastName: ['', Validators.required],
+      dob: ['', Validators.required],
       mobile: ['', Validators.required],
       email: ['', [Validators.email]],
-      address: [''],
+      address: ['', Validators.required],
       gender:['Male',Validators.required],
       regstrationDate:[null,Validators.required],
       
@@ -100,7 +100,9 @@ getPatientData(id:number){
 
 UpdatePatientInfo(patientData:FormGroup)
 {
-  console.log(patientData.value)
+
+  if(patientData.valid){
+    console.log(patientData.value)
   this._patientDto=patientData.value;
   this._patientDto.patientId=this.patientId;
   this._patientDto.patientImage=this.previewImage;
@@ -110,6 +112,12 @@ UpdatePatientInfo(patientData:FormGroup)
   })
   
   //this.resetAddPatientForm()
+
+  }
+  else{
+    patientData.markAllAsTouched()
+  }
+  
 }
 
 resetAddPatientForm(){

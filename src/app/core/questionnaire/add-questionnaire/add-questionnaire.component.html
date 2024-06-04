@@ -36,7 +36,7 @@
                                         <div *ngIf="questForm.get('questionnaireName')?.invalid && (questForm.get('questionnaireName')?.dirty || questForm.get('questionnaireName')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="questForm.get('questionnaireName')?.errors?.['required']">
-                                                 Name is
+                                                Name is
                                                 required.</div>
                                         </div>
                                     </div>
@@ -54,7 +54,7 @@
                                         <div *ngIf="questForm.get('questinaryDeptId')?.invalid && (questForm.get('questinaryDeptId')?.dirty || questForm.get('questinaryDeptId')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="questForm.get('questinaryDeptId')?.errors?.['required']">
-                                                 Department name is
+                                                Department name is
                                                 required.</div>
                                         </div>
 
@@ -159,10 +159,14 @@
                                                         <i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle
                                                         Status</a>
                                                     <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="deleteQues(data.questionnaireId)"><i
+                                                            class="fa fa-trash-alt m-r-5"></i>
+                                                        Delete</a>
+                                                    <!-- <a class="dropdown-item" href="javascript:void(0);"
                                                         (click)="openModal(data.questionnaireId)" data-bs-toggle="modal"
                                                         data-bs-target="#delete_ques"><i
                                                             class="fa fa-trash-alt m-r-5"></i>
-                                                        Delete</a>
+                                                        Delete</a> -->
                                                 </div>
                                             </div>
                                         </td>
@@ -324,6 +328,7 @@
                                                                 (click)="EditQuestionAddOptionWithMapping(data.questionId)">
                                                                 <i class="fa-solid fa-pen-to-square m-r-5"></i>
                                                                 Edit</a>
+
                                                             <a class="dropdown-item" href="javascript:void(0);"
                                                                 data-bs-toggle="modal"
                                                                 data-bs-target="#delete_patient"><i
@@ -474,7 +479,8 @@
 
     </div>
 </div>
-<div id="delete_ques" class="modal fade delete-modal" role="dialog">
+
+<!-- <div id="delete_ques" class="modal fade delete-modal" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-body text-center">
@@ -488,4 +494,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->

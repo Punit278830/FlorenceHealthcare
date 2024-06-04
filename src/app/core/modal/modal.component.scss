@@ -1,0 +1,22 @@
+/* Add this to your global styles or component-specific styles */
+.modal.show {
+    display: block;
+    opacity: 1;
+    transition: opacity 0.3s linear;
+  }
+  
+  .modal {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s linear;
+  }
+  
+  .modal-backdrop {
+    display: none;
+  }
+  
+  .modal-backdrop.show {
+    display: block;
+    opacity: 0.5;
+  }
+  

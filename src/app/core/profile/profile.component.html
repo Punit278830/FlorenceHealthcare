@@ -10,11 +10,11 @@
                     <li class="breadcrumb-item active">Patient Profile</li>
                 </ul>
             </div>
-
-            <div class="col-sm-5 col-6 text-end m-b-30">
+            <!-- DO NOT DELETE -->
+            <!-- <div class="col-sm-5 col-6 text-end m-b-30">
                 <a [routerLink]="routes.editProfile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit
                     Profile</a>
-            </div>
+            </div> -->
         </div>
         <div class="card-box profile-header">
             <div class="row">
@@ -22,7 +22,7 @@
                     <div class="profile-view">
                         <div class="profile-img-wrap">
                             <div class="profile-img">
-                                <a href="javascript:void(0);"><img class="avatar" src="assets/img/doctor-03.jpg"
+                                <a href="javascript:void(0);"><img class="avatar" [src]="patientInfo.patientImage"
                                         alt=""></a>
                             </div>
                         </div>
