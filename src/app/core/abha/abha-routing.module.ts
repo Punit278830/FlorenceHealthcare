@@ -19,6 +19,11 @@ const routes: Routes = [
       path: 'register/address',
       loadChildren: () =>
         import('./add-abha-address/add-abha-address.module').then((m) => m.AddAbhaAddressModule),
+    },
+    {
+      path: 'search',
+      loadChildren: () =>
+        import('./search-abha-user/search-abha-user.module').then((m) => m.SearchAbhaUserModule),
     }
   ]
 }

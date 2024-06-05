@@ -5,6 +5,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { blob } from 'stream/consumers';
 import { catchError, map, retry, throwError } from 'rxjs';
+import { IAbhaDetails, IAbhaPatientInfo } from '../../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -86,6 +87,20 @@ export class AbhaService {
 
   private handleError(err: HttpErrorResponse): Observable<never> {
     return throwError(() => err.error);
+  }
+
+  searchUserByAbhaNumber(abhaNumber: string): Observable<any> {
+    let data = {
+      EncryptedData: abhaNumber
+    };
+
+    const httpOptions = {
+      headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+    }
+
+    return this.http.post(this.apiUrl + 'Abha/SearchUserByHealthId', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   generateOtpforAbhaAddress(keyData: string): Observable<any> {
@@ -192,36 +207,35 @@ export class AbhaService {
     );
   }
 
-  createAbhaDetails(mobile: string, txnId:string): Observable<any> {
+  createAbhaDetails(details: IAbhaDetails): Observable<any> {
     let data = {
-      firstName: "Manpreet",
-      middleName: "",
-      lastName: "",
+      firstName: details.firstName,
+      middleName: details.middleName,
+      lastName: details.lastName,
       
-      dayOfBirth: "",
-      monthOfBirth: "",
-      yearOfBirth: "1989",
+      dayOfBirth: details.dayOfBirth,
+      monthOfBirth: details.monthOfBirth,
+      yearOfBirth: details.yearOfBirth,
 
       gender: "F",
       countryCode: "+91",
-      mobile: mobile,
+      mobile: details.mobile,
       
-      email: "",
-      address: "",
+      email: details.email,
+      address: details.address,
       
-      pinCode: "",
-      stateCode: "",
-      districtCode: "",
+      pinCode: details.pinCode,
+      stateCode: details.stateCode,
+      districtCode: details.districtCode,
        
-      transactionId: txnId,
-      
+      transactionId: details.transactionId
     };
 
     const httpOptions = {
       headers: new HttpHeaders({ 'Content-Type': 'application/json' })
     }
 
-    return this.http.post(this.apiUrl + 'Abha/CreateAbhaDetails', JSON.stringify(data), httpOptions).pipe(
+    return this.http.post(this.apiUrl + 'Abha/CreateAbhaDetails', JSON.stringify(details), httpOptions).pipe(
       catchError(this.handleError)
     );
   }
@@ -238,6 +252,12 @@ export class AbhaService {
     }
 
     return this.http.post(this.apiUrl + 'Abha/CreateAbhaAddressViaMobile', JSON.stringify(data), httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  addPatient(patientData: IAbhaPatientInfo): Observable<any> {
+    return this.http.post(this.apiUrl + "PatientInfoes", patientData).pipe(
       catchError(this.handleError)
     );
   }

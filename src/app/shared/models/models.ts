@@ -146,17 +146,17 @@ export interface appointmentList {
   img: string;
 }
 
-export interface Ilogin{
-  fname:string;
-  lname:string;
-  userRole:string;
-  loginStatus:boolean;
-  loginId:number;
-  departmentId:number;
-} 
+export interface Ilogin {
+  fname: string;
+  lname: string;
+  userRole: string;
+  loginStatus: boolean;
+  loginId: number;
+  departmentId: number;
+}
 
 export interface IstaffInfo {
-  staffId:number;
+  staffId: number;
   firstName: string;
   lastName: string;
   mobile: string;
@@ -166,167 +166,154 @@ export interface IstaffInfo {
   designation: string;
   consultationFee: number;
   activeStatus: number;
-  password:string;
-  dob:Date;
-  doj:Date;
-  gender:string;
-  education:string;
+  password: string;
+  dob: Date;
+  doj: Date;
+  gender: string;
+  education: string;
 }
 
-export interface IpatientInfo
-{
-  patientId:number,
-  firstName:string;
-  lastName:string;
-  dob:Date,
-  mobile:string,
-  email:string,
-  address:string,
-  gender:string;
-  ageinYear?:number;
-  patientImage?:string;
-  regstrationDate?:Date;
+export interface IpatientInfo {
+  patientId: number,
+  firstName: string;
+  lastName: string;
+  dob: Date,
+  mobile: string,
+  email: string,
+  address: string,
+  gender: string;
+  ageinYear?: number;
+  patientImage?: string;
+  regstrationDate?: Date;
 }
 
-export interface Iappointment
-{
-  id:number,
-  patientId:number,
-  doctorId:number,
-  departmentid:number,
-  date:Date,
-  scheduledByid:number,
-  notes:string,
-  appointmentStatus:string,
-  fee:number;
-  identiyName:string;
-  identiyNumber:string;
-
-}
-
-export interface Idepartment
-{
-  departmentId:number,
-  departmentName:string,
-  departmentStatus:string;
-}
-
-export interface IfileUpload
-{
-  FileID:number,
-  fileName?:string,
-  FileType?:string,
-  fileData?:string,
-  UploadDate:Date,
-  AppointmentId:number,
+export interface Iappointment {
+  id: number,
+  patientId: number,
+  doctorId: number,
+  departmentid: number,
+  date: Date,
+  scheduledByid: number,
+  notes: string,
+  appointmentStatus: string,
+  fee: number;
+  identiyName: string;
+  identiyNumber: string;
 
 }
 
-export interface IconsultationFiles
-{
-  fileId:number,
-  fileName:string,
-  FileType:string,
-  fileData:string,
-  appointmentId:number,
+export interface Idepartment {
+  departmentId: number,
+  departmentName: string,
+  departmentStatus: string;
+}
+
+export interface IfileUpload {
+  FileID: number,
+  fileName?: string,
+  FileType?: string,
+  fileData?: string,
+  UploadDate: Date,
+  AppointmentId: number,
+
+}
+
+export interface IconsultationFiles {
+  fileId: number,
+  fileName: string,
+  FileType: string,
+  fileData: string,
+  appointmentId: number,
 }
 
 export interface IdownloadFile {
-  fileName: string ;
-  downloadLink:string;
+  fileName: string;
+  downloadLink: string;
 }
 
 
 
-export interface Istaffschedule
-{
-  scheduleId:number,
-  staffId:number,
-  departmentId:number,
-  scheduleDate:Date,
-  fromTime:string,
-  fromPostfix:string,
-  toTime:string,
-  toPostfix:string,
-  ApplyScheduleDate:Date,
-  leaveStatus:number,
+export interface Istaffschedule {
+  scheduleId: number,
+  staffId: number,
+  departmentId: number,
+  scheduleDate: Date,
+  fromTime: string,
+  fromPostfix: string,
+  toTime: string,
+  toPostfix: string,
+  ApplyScheduleDate: Date,
+  leaveStatus: number,
 }
 
-export interface IQuestionnaires
-{
-  questionnaireId:number,
-  questionnaireName:string,
-  questinaryDeptId:number;
-  isActive:boolean;
+export interface IQuestionnaires {
+  questionnaireId: number,
+  questionnaireName: string,
+  questinaryDeptId: number;
+  isActive: boolean;
 }
 
-export interface Iquestion
-{
-  questionId:number,
-  questionText:string,
-  questionType:number,
-  questionnaireId:number
+export interface Iquestion {
+  questionId: number,
+  questionText: string,
+  questionType: number,
+  questionnaireId: number
 
 }
 
-export interface Ioptions
-{
-  optionId?:number,
-  questionId:number,
-  optionText:string,
-  mapQuestionId:number
+export interface Ioptions {
+  optionId?: number,
+  questionId: number,
+  optionText: string,
+  mapQuestionId: number
 
 }
 
-export interface Ianswers
-{
-  answerId?:number,
-  questionId:number,
-  participantId:number,
-  answerText?:string,
-  selectedOptionId?:number,
-  appointmentId?:number
+export interface Ianswers {
+  answerId?: number,
+  questionId: number,
+  participantId: number,
+  answerText?: string,
+  selectedOptionId?: number,
+  appointmentId?: number
 }
 
-export interface Iconsultation
-{
-  id:number,
-  appointmentId:number,
-  examinationNote:string,
-  advice:number,
-  diffDiagnosis:string,
-  finalDiagnois:string,
-  followupDate:Date
+export interface Iconsultation {
+  id: number,
+  appointmentId: number,
+  examinationNote: string,
+  advice: number,
+  diffDiagnosis: string,
+  finalDiagnois: string,
+  followupDate: Date
 }
 
-export interface IPredefineDiagnosis
-{
-  diagnosId:number;
-  diagnosName:string;
-  diagnosText:string;
-  diagnosStatus:number;
+export interface IPredefineDiagnosis {
+  diagnosId: number;
+  diagnosName: string;
+  diagnosText: string;
+  diagnosStatus: number;
 }
 
-export interface Iinvoice
-{
-  invoiceId:number,
-  appoitmentId:number,
-  patientId:number,
-  createdDate:Date,
-  amount:number,
-  status:string
+export interface Iinvoice {
+  invoiceId: number,
+  appoitmentId: number,
+  patientId: number,
+  createdDate: Date,
+  amount: number,
+  status: string
 }
 
-export interface IinvoiceItem{
-  id:number,
-  invoiceId:number,
-  itemName:string,
-  description:string,
-  discount:number,
-  fee:number,
-  createdBy:number,
-  finalAmount:number,
-  status:string
+export interface IinvoiceItem {
+  id: number,
+  invoiceId: number,
+  itemName: string,
+  description: string,
+  discount: number,
+  fee: number,
+  createdBy: number,
+  finalAmount: number,
+  status: string
 }
 
 export interface assetsList {
@@ -351,40 +338,37 @@ export interface salary {
   img: string;
 }
 
- export interface ImedicineMaster
-  {
-    
-    medId:number,
-    medName:string,
-    genericName:string,
-    manufactureName:string,
-    medType:string,
-    unit:string
-  }
+export interface ImedicineMaster {
 
-  export interface IprescribeMedicine
-  {
-    medicationId:number,
-    appointmentId:number,
-    medName:string,
-    medType:string,
-    dose:string,
-    frequency:string,
-    timing:string,
-    duration:string,
-    instruction:string
-  }
+  medId: number,
+  medName: string,
+  genericName: string,
+  manufactureName: string,
+  medType: string,
+  unit: string
+}
 
-export interface Ivital
-{
-  vitalId:number,
-  appointmentId:number,
-  bp:string,
-  weight:string,
-  height:string,
-  pulse:string,
-  tempurature:string,
-  oxigenLevel:string
+export interface IprescribeMedicine {
+  medicationId: number,
+  appointmentId: number,
+  medName: string,
+  medType: string,
+  dose: string,
+  frequency: string,
+  timing: string,
+  duration: string,
+  instruction: string
+}
+
+export interface Ivital {
+  vitalId: number,
+  appointmentId: number,
+  bp: string,
+  weight: string,
+  height: string,
+  pulse: string,
+  tempurature: string,
+  oxigenLevel: string
 
 }
 
@@ -525,7 +509,7 @@ export interface SubMenu {
   menuValue: string;
   route: string;
   base: string;
- 
+
 }
 export interface MenuItem {
   menuValue: string;
@@ -537,7 +521,7 @@ export interface MenuItem {
   icon?: string;
   faIcon?: boolean;
   subMenus: SubMenu[];
-  
+
 }
 
 export interface SideBarData {
@@ -545,6 +529,63 @@ export interface SideBarData {
   showAsTab: boolean;
   separateRoute: boolean;
   menu: MenuItem[];
-} 
-  
+}
 
+export interface IAbhaDetails {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  dayOfBirth: string,
+  monthOfBirth: string,
+  yearOfBirth: string,
+  gender: string,
+  countryCode: string,
+  mobile: string,
+  email: string,
+  address: string,
+  pinCode: string,
+  stateCode: string,
+  districtCode: string,
+  transactionId: string,
+}
+
+
+export interface IAbhaProfile {
+  ABHANumber: string,
+  abhaStatus: string,
+  abhaType: string,
+  firstName: string,
+  middleName: string,
+  lastName: string,
+  dob: string,
+  dayOfBirth: string,
+  monthOfBirth: string,
+  yearOfBirth: string,
+  gender: string,
+  countryCode: string,
+  mobile: string,
+  email: string,
+  address: string,
+  pinCode: string,
+  stateCode: string,
+  stateName:  string,
+  districtCode: string,
+  districtName: string,
+  transactionId: string,
+  photo: string,
+  phrAddress: string[]
+}
+
+export interface IAbhaPatientInfo {
+  patientId: number,
+  firstName: string;
+  lastName: string;
+  dob?: string,
+  mobile: string,
+  email: string,
+  address: string,
+  gender: string;
+  ageinYear?: number;
+  patientImage?: string;
+  regstrationDate?: string;
+}

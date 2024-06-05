@@ -78,9 +78,7 @@ export class AddPatientComponent implements OnInit {
       email: ['', [Validators.email]],
       address: ['', [Validators.required]],
       gender: ['Male', [Validators.required]],
-      regstrationDate: [null, Validators.required],
-
-
+      regstrationDate: [null, Validators.required]
     })
   }
 

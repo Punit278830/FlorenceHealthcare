@@ -218,14 +218,14 @@ namespace hospitalApiProject.Controllers
 
     [HttpPost]
     [Route("SearchUserByHealthId")]
-    public async Task<IActionResult> SearchUserByHealthId([FromBody] string healhtIdNumber)
+    public async Task<IActionResult> SearchUserByHealthId([FromBody] EncryptedDataModel data)
     {
-      if (healhtIdNumber == null)
+      if (data.EncryptedData == null)
       {
         return BadRequest();
       }
 
-      var result = await _service.SearchUserByHealthId(healhtIdNumber);
+      var result = await _service.SearchUserByHealthId(data.EncryptedData);
       if (_service.HasError)
       {
         return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
