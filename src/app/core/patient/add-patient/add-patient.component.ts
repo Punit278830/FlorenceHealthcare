@@ -144,6 +144,10 @@ export class AddPatientComponent implements OnInit {
     this.camerastatus = '';
 
   }
+  cancel1() {
+    this.route.navigate([routes.patientsList]);
+
+  }
 
 
   changedob(year: any) {
