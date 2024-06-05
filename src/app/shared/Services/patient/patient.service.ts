@@ -39,6 +39,7 @@ export class PatientService {
   }
 
 
+<<<<<<< HEAD
 getPatientData(id:number)
 {
   return this._http.get(this.apiUrl+'PatientInfoes/'+id);
@@ -51,6 +52,7 @@ deletePatient(id:number){
   return this._http.delete(this.apiUrl+"PatientInfoes/"+id)
 
 }
+=======
   getPatientData(id: number) {
     return this._http.get(this.apiUrl + 'PatientInfoes/' + id);
   }
@@ -61,6 +63,7 @@ deletePatient(id:number){
   private handleError(err: HttpErrorResponse): Observable<never> {
     return throwError(() => err.error);
   }
+>>>>>>> 5a1a9d9d02198ca3846bef7ea407c12d87fc178a
 }
 
 
