@@ -166,7 +166,8 @@
                                 </div>
                             </mat-step>
 
-                            <mat-step [stepControl]="formAbhaProfileGroup" label="View Profile" [editable]="false">
+                            <mat-step [stepControl]="formAbhaProfileGroup" label="View Profile" 
+                            [editable]="false" [completed]="true">
                                 <div style="padding-top: 3%;">
                                     <form [formGroup]="formAbhaProfileGroup">
                                         <div *ngIf="abhaProfile != undefined">
@@ -262,16 +263,38 @@
                                             </mat-form-field> -->
                                         </div>
                                         <br />
-                                        <button mat-raised-button color="primary" matStepperNext
-                                            (click)="downloadABHACard()">Next</button>
-                                    </form>
+                                        <!-- <button mat-raised-button color="primary" (click)="nextStep()">Next</button> -->
+                                        <div>                                    
+                                            <button mat-raised-button color="primary" matStepperPrevious>Back</button> &nbsp;
+                                            &nbsp;
+                                            <button mat-raised-button color="accent" (click)="downloadABHACard()">Download ABHA Card</button> &nbsp; &nbsp;
+                                            <button mat-raised-button color="accent" (click)="addPatient()">Add Patient</button> &nbsp; &nbsp;
+                                            <button mat-raised-button color="warn" (click)="stepper.reset()">Reset</button>
+                                        </div></form>
                                 </div>
 
                             </mat-step>
                             <mat-step>
                                 <ng-template matStepLabel>Review</ng-template>
                                 <h5>You are now done.</h5>
-                                <div>
+                                <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4" (click)="downloadABHACard()">
+                                    <div class="dash-widget">
+                                        <div class="dash-content dash-content-align">
+                                            <h3>Download</h3>
+                                            <h4><span>ABHA Card</span></h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4" (click)="addPatient()">
+                                    <div class="dash-widget">
+                                        <div class="dash-content dash-content-align" >
+                                            <h3>Add Patient</h3>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>                                    
                                     <button mat-raised-button color="primary" matStepperPrevious>Back</button> &nbsp;
                                     &nbsp;
                                     <button mat-raised-button color="accent" type="submit">Submit</button> &nbsp; &nbsp;
@@ -285,27 +308,3 @@
         </div>
     </div>
 </div>
-<!-- <div *ngIf="showViewProfileModal" class="modal custom-modal modal-bg fade" id="abha-view-profile" role="dialog">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="form-header">
-                    <h3>{{modalHeader}}</h3>
-                    <p>Your Abha Number is {{abhaNumber}}.</p>
-                </div>
-                <div class="modal-btn delete-action">
-                    <div class="row">
-                        <div class="col-6">
-                            <a data-bs-dismiss="modal" [routerLink]="routes.abhaProfile"
-                                class="btn btn-primary paid-continue-btn">View Profile</a>
-                        </div>
-                        <div class="col-6">
-                            <a [routerLink]="routes.abhaProfile" data-bs-dismiss="modal"
-                                class="btn btn-primary paid-cancel-btn">Cancel</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> -->

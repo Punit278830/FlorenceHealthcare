@@ -1,0 +1,65 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.abhaDashboard">Abha </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active"><a [routerLink]="routes.searchAbhaUser">Search</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body" *ngIf="showSearchOptionsForm">
+                        <form [formGroup]="searchOptionsForm">
+                            <div class="row">
+                                <div class="form-group select-gender">
+                                    <label for="searchVia" class="gen-label">
+                                        <h2>Search user using ABHA Number</h2>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="info-banner" *ngIf="showAddPatient">
+                                    <br />
+                                    <h3>The provided ABHA number has been verified. You can add this patient to system.</h3>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="abhaNumber">ABHA Number <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="abhaNumber" type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row" *ngIf="showOtp">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <label for="otp">OTP <span class="login-danger">*</span></label>
+                                    <input class="form-control" formControlName="otp" type="text" placeholder="">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
+                                    <button class="btn btn-primary submit-form me-2" type="button"
+                                        (click)="submit()" *ngIf="!showAddPatient">Submit</button>
+                                    <button mat-raised-button color="accent" *ngIf="showAddPatient" (click)="addPatient()">Add Patient</button>
+                                    &nbsp; &nbsp;
+                                    <button class="btn btn-primary submit-form me-2" type="button">Cancel</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

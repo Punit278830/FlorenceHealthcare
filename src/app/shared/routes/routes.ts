@@ -386,4 +386,7 @@ export class routes {
   public static get abhaProfile(): string {
     return this.baseUrl + '/abha/profile';
   }
+  public static get searchAbhaUser(): string {
+    return this.baseUrl + '/abha/search';
+  } 
 }

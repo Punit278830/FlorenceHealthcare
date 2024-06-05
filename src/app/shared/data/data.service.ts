@@ -490,6 +490,11 @@ export class DataService {
               menuValue: 'Create Abha Address',
               route: routes.abhaAddress,
               base: routes.abhaAddress,
+            },
+            {
+              menuValue: 'Search Abha User',
+              route: routes.searchAbhaUser,
+              base: routes.searchAbhaUser,
             }
           ],
         },

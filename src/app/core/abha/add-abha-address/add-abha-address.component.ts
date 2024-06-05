@@ -1,17 +1,18 @@
-import { Component, ViewChild } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatStepper } from '@angular/material/stepper';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { AbhaDataService } from 'src/app/shared/Services/abha/abha-data.service';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 import { EncryptionService } from 'src/app/shared/encrypt/encryption.service';
+import { IAbhaDetails } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
   selector: 'app-add-abha-address',
   templateUrl: './add-abha-address.component.html',
-  styleUrls: ['./add-abha-address.component.scss']
+  styleUrls: ['./add-abha-address.component.scss'],
+  providers: [DatePipe],
 })
 export class AddAbhaAddressComponent {
   public routes = routes;
@@ -25,6 +26,7 @@ export class AddAbhaAddressComponent {
   linkedAddresses!: string[];
   suggestionList!: string[];
   selectedAbhaAddress: string = "";
+  abhaDetailsDto!: IAbhaDetails;
 
 
   registrationOptionsForm!: FormGroup;
@@ -55,7 +57,6 @@ export class AddAbhaAddressComponent {
     { value: 'Male' },
     { value: 'Female' },
     { value: 'Transgender' },
-
   ];
 
   constructor(private route: ActivatedRoute,
@@ -63,7 +64,7 @@ export class AddAbhaAddressComponent {
     private abhaService: AbhaService,
     private encryptionService: EncryptionService,
     private toster: ToastrService,
-    // private router: Router,
+    private datePipe: DatePipe,
   ) { }
 
   ngOnInit() {
@@ -109,11 +110,19 @@ export class AddAbhaAddressComponent {
       newAbhaAddress: ['', Validators.required]
     });
 
-    // this.mobileCreateNewAbhaAddressForm = this.fb.group({
-    //   firstName: [''],
-    //   middleName: [''],
-    //   lastName: ['']
-    // });
+    this.mobileAbhaDetailsForm = this.fb.group({
+      firstName: ['', [Validators.required]],
+      middleName: [''],
+      lastName: ['', [Validators.required]],
+      dob: [null, [Validators.required]],
+      gender: ['Male', [Validators.required]],
+      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      email: [''],
+      address: [''],
+      pinCode: [''],
+      stateCode: [''],
+      districtCode: [''],
+    });
   }
 
   onRegisterViaChanged(event: any) {
@@ -376,9 +385,47 @@ export class AddAbhaAddressComponent {
       });
   }
 
-  createNewAddressViaMobile() {
-    let data = this.encryptionService.encryptWithPKCS1(this.registrationOptionsForm.value.mobileNumber);
-    this.abhaService.createAbhaDetails(data, this.txnId).subscribe(
+  createNewAddressViaMobile(mobileAbhaDetailsForm: FormGroup) {
+    if (!mobileAbhaDetailsForm.valid) {
+      this.toster.error("Please provide correct details!");
+      return;
+    }
+    
+    this.abhaDetailsDto= {
+      firstName: mobileAbhaDetailsForm.value.firstName,
+      middleName: mobileAbhaDetailsForm.value.middleName,
+      lastName: mobileAbhaDetailsForm.value.lastName,
+      
+      dayOfBirth: "",
+      monthOfBirth: "",
+      yearOfBirth: "",
+
+      gender: mobileAbhaDetailsForm.value.gender == "Male" ? "M" : 
+      mobileAbhaDetailsForm.value.gender == "Female"? "F" : "T",
+      countryCode: "+91",
+      mobile: "",
+      
+      email: mobileAbhaDetailsForm.value.email,
+      address: mobileAbhaDetailsForm.value.address,
+      
+      pinCode: mobileAbhaDetailsForm.value.pinCode,
+      stateCode: mobileAbhaDetailsForm.value.stateCode,
+      districtCode: mobileAbhaDetailsForm.value.districtCode,
+       
+      transactionId: this.txnId
+    };
+    
+    const dateOnly = this.datePipe.transform(mobileAbhaDetailsForm.value.dob, 'yyyy-MM-dd');
+    let parts = dateOnly?.split('-'); // split the date string on '-'
+
+    if (parts != null && parts != undefined) {
+      this.abhaDetailsDto.yearOfBirth = parts[0]; // the first part is the year
+      this.abhaDetailsDto.monthOfBirth = parts[1]; // the second part is the month
+      this.abhaDetailsDto.dayOfBirth = parts[2]; // the third part is the day
+    }
+
+    this.abhaDetailsDto.mobile = this.encryptionService.encryptWithPKCS1(this.registrationOptionsForm.value.mobileNumber);
+    this.abhaService.createAbhaDetails(this.abhaDetailsDto).subscribe(
       res => {
         if (res && res.error) {
           this.toster.error("Some error has ocurred please try after some time!");
@@ -390,6 +437,8 @@ export class AddAbhaAddressComponent {
         // this.hideAllForms();
         // this.showMobileAbhaDetailsForm = true;
         //this.toster.success("Details submitted successfully!");
+
+        this.getSuggestions();
         console.log(res);
       },
       error => {
@@ -445,13 +494,17 @@ export class AddAbhaAddressComponent {
       });
   }
 
-  addDetails() {
-    this.createNewAddressViaMobile();
+  addDetails(data: any) {
+    this.createNewAddressViaMobile(data);
   }
 
   showDetailsForm() {
     this.hideAllForms();
     this.showMobileAbhaDetailsForm = true;
-    this.createNewAddressViaMobile();
+  }
+
+  onDobDateChange(event: any): void {
+    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    this.mobileAbhaDetailsForm.get('dob')?.setValue(dateOnly);
   }
 }

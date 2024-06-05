@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AddAbhaAddressRoutingModule } from './add-abha-address-routing.module';
 import { AddAbhaAddressComponent } from './add-abha-address.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { SharedModule } from 'src/app/shared/shared.module';
 
 
 @NgModule({
@@ -13,7 +14,8 @@ import { ReactiveFormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    AddAbhaAddressRoutingModule
+    AddAbhaAddressRoutingModule,
+    SharedModule
   ]
 })
 export class AddAbhaAddressModule { }

@@ -5,11 +5,15 @@ import { EncryptionService } from 'src/app/shared/encrypt/encryption.service';
 import { routes } from 'src/app/shared/routes/routes';
 import { ToastrService } from 'ngx-toastr';
 import { MatStepper } from '@angular/material/stepper';
+import { IAbhaPatientInfo, IAbhaProfile, IpatientInfo } from 'src/app/shared/models/models';
+import { PatientService } from 'src/app/shared/Services/patient/patient.service';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-register-by-aadhar-stepper',
   templateUrl: './register-by-aadhar-stepper.component.html',
-  styleUrls: ['./register-by-aadhar-stepper.component.scss']
+  styleUrls: ['./register-by-aadhar-stepper.component.scss'],
+  providers: [DatePipe]
 })
 export class RegisterByAadharStepperComponent {
   public routes = routes;
@@ -22,7 +26,7 @@ export class RegisterByAadharStepperComponent {
   isDifferentMobile: boolean = false;
   showOtp: boolean = false;
   isMobileVerified: boolean = false;
-  abhaProfile: any;
+  abhaProfile!: IAbhaProfile;
   abhaProfileName!: string;
   xToken!: string;
 
@@ -31,6 +35,8 @@ export class RegisterByAadharStepperComponent {
   formCommunicationDetailsGroup!: FormGroup;
   formAbhaProfileGroup!: FormGroup;
   completed: boolean = true;
+  age!: number;
+  private _patientDto!: IAbhaPatientInfo;
 
   @ViewChild('stepper') stepper!: MatStepper;
 
@@ -38,7 +44,10 @@ export class RegisterByAadharStepperComponent {
     private fb: FormBuilder,
     private abhaService: AbhaService,
     private encryptionService: EncryptionService,
-    private toster: ToastrService) {
+    private toster: ToastrService,
+    private patientService: PatientService,
+    private datePipe: DatePipe
+  ) {
     this.createForm();
   }
 
@@ -199,4 +208,63 @@ export class RegisterByAadharStepperComponent {
       }
     );
   }
+
+  parseDob(dateString: string) {
+    let parts = dateString.split('-'); // split the date string on '-'
+
+    let day = parseInt(parts[0], 10); // the first part is the day
+    let month = parseInt(parts[1], 10) - 1; // the second part is the month (subtract 1 because months are 0-based in JavaScript)
+    let year = parseInt(parts[2], 10); // the third part is the year
+
+    let dob = new Date(year, month, day);
+    this.calculateDateDifference(dob);
+
+    //const dateOnly = this.datePipe.transform(dateString, 'yyyy-MM-dd');
+
+    //const dateOnly = this.datePipe.transform(dob, 'yyyy-MM-dd');
+
+    // Format the date as a string in the "yyyy-MM-dd" format
+    //let formattedDate = dob.getFullYear() + '-' + ('0' + (dob.getMonth() + 1)).slice(-2) + '-' + ('0' + dob.getDate()).slice(-2);
+    return this.getDateOnly(dob);    
+  }
+
+  getDateOnly(date: Date)
+  {
+    return date.getFullYear() + '-' + ('0' + (date.getMonth() + 1)).slice(-2) + '-' + ('0' + date.getDate()).slice(-2);
+  }
+
+  calculateDateDifference(dob: Date) {
+    const start = new Date(dob);
+    const end = new Date();
+    // Calculate the difference in years
+    const diffInMilliseconds = Math.abs(end.getTime() - start.getTime());
+    const yearsDifference = Math.floor(diffInMilliseconds / (365.25 * 24 * 60 * 60 * 1000));
+
+    this.age = yearsDifference;
+  }
+
+  addPatient() {
+    this._patientDto = {
+      patientId: 0,
+      firstName: this.abhaProfile.firstName,
+      lastName: this.abhaProfile.lastName,
+      address: this.abhaProfile.address,
+      dob: this.parseDob(this.abhaProfile.dob),
+      email: this.abhaProfile.email,
+      gender: this.abhaProfile.gender,
+      mobile: this.abhaProfile.mobile,
+      ageinYear: this.age,
+      patientImage: this.abhaProfile.photo,
+      regstrationDate: this.getDateOnly(new Date()),
+    };
+
+    this.abhaService.addPatient(this._patientDto).subscribe(res => {
+      res ? this.toster.success("Patient added successfully", "Add Patient") : null;
+      //this.route.navigate([routes.addAppointment]);
+    })
+  }
+
+  // nextStep() {
+  //   this.stepper.next();
+  // }
 }
