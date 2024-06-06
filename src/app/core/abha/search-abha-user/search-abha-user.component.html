@@ -34,16 +34,23 @@
                                     <h3>The provided ABHA number has been verified. You can add this patient to system.</h3>
                                 </div>
                             </div>
+                            <div class="row" *ngIf="showAddPatient">
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row">
                                 <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
                                     <label for="abhaNumber">ABHA Number <span class="login-danger">*</span></label>
-                                    <input class="form-control" formControlName="abhaNumber" type="text" placeholder="">
+                                    <input class="form-control" formControlName="abhaNumber" [readonly]="showAddPatient" type="text" placeholder="">
                                 </div>
                             </div>
                             <div class="row" *ngIf="showOtp">
                                 <div class="col-12 col-md-6 col-xl-4 form-group local-forms">
                                     <label for="otp">OTP <span class="login-danger">*</span></label>
-                                    <input class="form-control" formControlName="otp" type="text" placeholder="">
+                                    <input class="form-control" formControlName="otp" [readonly]="showAddPatient" type="text" placeholder="">
                                 </div>
                             </div>
                             <div class="row">
