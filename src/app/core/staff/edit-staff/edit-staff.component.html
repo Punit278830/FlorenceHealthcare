@@ -30,12 +30,22 @@
                                     <div class="form-group local-forms">
                                         <label for="name">First Name <span class="login-danger">*</span></label>
                                         <input class="form-control" type="text" formControlName="firstName">
+                                        <div *ngIf="staffReg.get('firstName')?.invalid && (staffReg.get('firstName')?.dirty || staffReg.get('firstName')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('firstName')?.errors?.['required']">First name is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="last">Last Name <span class="login-danger">*</span></label>
                                         <input class="form-control" type="text" formControlName="lastName">
+                                        <div *ngIf="staffReg.get('lastName')?.invalid && (staffReg.get('lastName')?.dirty || staffReg.get('lastName')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('lastName')?.errors?.['required']">Last name is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- <div class="col-12 col-md-6 col-xl-4">
@@ -44,28 +54,40 @@
                                                                 <input class="form-control" type="text" formControlName="consultationFee">
                                                             </div>
                                                         </div> -->
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="department">Consultation Fee <span
-                                                class="login-danger">*</span></label>
-                                        <mat-select formControlName="consultationFee" class="form-control select"
-                                            placeholder="Select  Fee">
-                                            <mat-option *ngFor="let data of ConsultationFeeList" [value]="data">
-                                                {{data}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </div>
-                                </div>
+                                                        <div class="col-12 col-md-6 col-xl-4">
+                                                            <div class="form-group local-forms">
+                                                                <label for="user">Consultation Fee <span class="login-danger">*</span></label>
+                                                                <input class="form-control" type="number" formControlName="consultationFee">
+                                                                <div *ngIf="staffReg.get('consultationFee')?.invalid && (staffReg.get('consultationFee')?.dirty || staffReg.get('consultationFee')?.touched)"
+                                                                    class="text-danger">
+                                                                    <div *ngIf="staffReg.get('consultationFee')?.errors?.['required']">
+                                                                        Consultation Fee is required.</div>
+                                                                </div>
+                                                            </div>
+                                                        </div> 
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
                                         <label for="mobile">Mobile <span class="login-danger">*</span></label>
                                         <input class="form-control" type="text" formControlName="mobile">
+                                        <div *ngIf="mobile.invalid && (mobile.dirty || mobile.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="mobile.errors?.['required']">Mobile number is required.</div>
+                                            <div *ngIf="mobile.errors?.['pattern']">Mobile number must be exactly 10
+                                                digits.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
                                         <label for="email">Email <span class="login-danger">*</span></label>
                                         <input class="form-control" type="email" formControlName="email">
+                                        <div *ngIf="staffReg.get('email')?.invalid && (staffReg.get('email')?.dirty || staffReg.get('email')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('email')?.errors?.['required']">Email is required.
+                                            </div>
+                                            <div *ngIf="staffReg.get('email')?.errors?.['email']">Invalid email format.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -77,6 +99,11 @@
                                             matInput [matDatepicker]="dob">
                                         <mat-datepicker #dob></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
+                                        <div *ngIf="staffReg.get('dob')?.invalid && (staffReg.get('dob')?.dirty || staffReg.get('dob')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('dob')?.errors?.['required']">Date of birth is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
@@ -87,6 +114,11 @@
                                             matInput [matDatepicker]="doj">
                                         <mat-datepicker #doj></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="doj"></mat-datepicker-toggle>
+                                        <div *ngIf="staffReg.get('doj')?.invalid && (staffReg.get('doj')?.dirty || staffReg.get('doj')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('doj')?.errors?.['required']">Date of joining is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
@@ -105,12 +137,28 @@
                                                     value="Female">Female
                                             </label>
                                         </div>
+                                        <div class="form-check-inline">
+                                            <label class="form-check-label">
+                                                <input type="radio" formControlName="gender" class="form-check-input"
+                                                    value="Transgender">Transgender
+                                            </label>
+                                        </div>
+                                        <div *ngIf="staffReg.get('gender')?.invalid && (staffReg.get('gender')?.dirty || staffReg.get('gender')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('gender')?.errors?.['required']">Gender is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="education">Education <span class="login-danger">*</span></label>
                                         <input class="form-control" type="text" formControlName="education">
+                                        <div *ngIf="staffReg.get('education')?.invalid && (staffReg.get('education')?.dirty || staffReg.get('education')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('education')?.errors?.['required']">Education is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -131,6 +179,11 @@
                                                 {{data.value}}
                                             </mat-option>
                                         </mat-select>
+                                        <div *ngIf="staffReg.get('designation')?.invalid && (staffReg.get('designation')?.dirty || staffReg.get('designation')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('designation')?.errors?.['required']">Designation
+                                                is required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
@@ -142,6 +195,11 @@
                                                 <input type="radio" formControlName="activeStatus"
                                                     class="form-check-input" [value]="stat.key">{{stat.value}}
                                             </label>
+                                        </div>
+                                        <div *ngIf="staffReg.get('activeStatus')?.invalid && (staffReg.get('activeStatus')?.dirty || staffReg.get('activeStatus')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('activeStatus')?.errors?.['required']">Status is
+                                                required.</div>
                                         </div>
                                         <!-- <div class="form-check-inline">
                                             <label class="form-check-label">
@@ -159,10 +217,15 @@
                                         <label for="department">Department <span class="login-danger">*</span></label>
                                         <mat-select formControlName="departmentId" class="form-control select"
                                             placeholder="Select  Department">
-                                            <mat-option *ngFor="let data of departmentList" [value]="data.key">
-                                                {{data.value}}
+                                            <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
+                                                {{data.departmentName}}
                                             </mat-option>
                                         </mat-select>
+                                        <div *ngIf="staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department
+                                                is required.</div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -174,13 +237,26 @@
                                         <span (click)="togglePassword()" (keyup.enter)="togglePassword()"
                                             [ngClass]="passwordClass ? 'feather icon-eye' : 'feather icon-eye-off'"
                                             class="profile-views toggle-password" tabindex="0"></span>
+                                            <div *ngIf="staffReg.get('password')?.invalid && (staffReg.get('password')?.dirty || staffReg.get('password')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('password')?.errors?.['required']">Password is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="confirmpassword">Confirm Password <span
                                                 class="login-danger">*</span></label>
-                                        <input class="form-control" type="text">
+                                        <input class="form-control" formControlName="cpassword" [type]="passwordClass1 ? 'text' : 'password'">
+                                        <span (click)="togglePassword1()" (keyup.enter)="togglePassword1()"
+                                            [ngClass]="passwordClass1 ? 'feather icon-eye' : 'feather icon-eye-off'"
+                                            class="profile-views toggle-password" tabindex="0"></span>
+                                        <div *ngIf="staffReg.get('cpassword')?.invalid && (staffReg.get('cpassword')?.dirty || staffReg.get('cpassword')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('cpassword')?.errors?.['required']">This is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- <div class="col-12 col-md-6 col-xl-4">
@@ -200,6 +276,11 @@
                                         <label for="address">Address <span class="login-danger">*</span></label>
                                         <textarea class="form-control" rows="3" cols="30"
                                             formControlName="address"></textarea>
+                                            <div *ngIf="staffReg.get('address')?.invalid && (staffReg.get('address')?.dirty || staffReg.get('address')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('address')?.errors?.['required']">Address is
+                                                required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <!-- <div class="col-12 col-md-6 col-xl-3">
@@ -263,7 +344,7 @@
                                 <div class="col-12">
                                     <div class="doctor-submit text-end">
                                         <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
-                                        <button type="submit" class="btn btn-primary cancel-form">Cancel</button>
+                                        <button (click)="cancel()" class="btn btn-primary cancel-form">Cancel</button>
                                     </div>
                                 </div>
                             </div>

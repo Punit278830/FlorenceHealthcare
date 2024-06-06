@@ -24,6 +24,7 @@ export class AddStaffComponent {
   staffReg!: FormGroup;
   private _staffDto!: IstaffInfo;
   public passwordClass = false;
+  public passwordClass1 = false;
   public _depDto: Idepartment[] = []
 
 
@@ -40,6 +41,9 @@ export class AddStaffComponent {
 
   togglePassword() {
     this.passwordClass = !this.passwordClass;
+  }
+  togglePassword1() {
+    this.passwordClass1 = !this.passwordClass1;
   }
 
   onDobDateChange(event: any): void {
@@ -136,6 +140,7 @@ export class AddStaffComponent {
       doj: ['', Validators.required],
 
     });
+   
   }
 
   resetStaffRegForm() {
@@ -147,25 +152,33 @@ export class AddStaffComponent {
 
   addStaff(formValues: FormGroup) {
     if (this.staffReg.valid) {
-      this._staffDto = formValues.getRawValue();
-      this._staffDto.activeStatus = parseInt(formValues.value.activeStatus)
-      this._staffDto.departmentId = parseInt(formValues.value.departmentId)
-      this.staffService.CreateStaff(this._staffDto).subscribe(res => {
+      console.log("values", formValues.value);
+  
+      if (formValues.value.password != formValues.value.cpassword) {
+        this.toster.error("Password do not match");
+        return;
+      }
+  
+      // Create a copy of the form values and remove cpassword
+      let staffData = { ...formValues.getRawValue() };
+      delete staffData.cpassword;
+  
+      staffData.activeStatus = parseInt(staffData.activeStatus);
+      staffData.departmentId = parseInt(staffData.departmentId);
+  
+      this.staffService.CreateStaff(staffData).subscribe(res => {
         console.log(res);
-        res ? this.toster.success("Staff Added Successfully", 'Staff') : null;
-        this.resetStaffRegForm();
-
-      })
-
-    }
-    else {
+        if (res) {
+          this.toster.success("Staff Added Successfully", 'Staff');
+          this.resetStaffRegForm();
+        }
+      });
+  
+    } else {
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
     }
-
-
-
-
   }
+  
 
   onSelectionChange(event: MatSelectChange) {
     if ((event.value).toLowerCase() != 'doctor') {

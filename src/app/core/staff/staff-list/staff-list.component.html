@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-sm-12">
           <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a [routerLink]="routes.staffList">Staffs </a></li>
+            <li class="breadcrumb-item"><a [routerLink]="routes.staffList">Staff </a></li>
             <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
             <li class="breadcrumb-item active">Staff List</li>
           </ul>
@@ -26,7 +26,7 @@
               <div class="row align-items-center">
                 <div class="col">
                   <div class="doctor-table-blk">
-                    <h3>Staffs List</h3>
+                    <h3>Staff List</h3>
                     <div class="doctor-search-blk">
                       <div class="top-nav-search table-search-blk">
                         <input class="form-control" placeholder="Search here" [(ngModel)]="searchDataValue"
@@ -83,7 +83,7 @@
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </td> -->
-                    <td class="profile-image"><a [routerLink]="routes.profile"><img width="28" height="28" [src]="img"
+                    <td class="profile-image"><a [routerLink]="routes.staffProfile"><img width="28" height="28" [src]="img"
                           class="rounded-circle m-r-5" alt="">
                         {{data.firstName}} {{ data.lastName}}</a></td>
                     <td>{{data.departmentName}}</td>
@@ -99,8 +99,7 @@
                         <div class="dropdown-menu dropdown-menu-end">
                           <a class="dropdown-item" [routerLink]="routes.editStaff" (click)="onEditStaff(data.staffId)">
                             <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit</a>
-                          <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
-                            data-bs-target="#delete_patient"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="deleteStaff(data.staffId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>
                     </td>

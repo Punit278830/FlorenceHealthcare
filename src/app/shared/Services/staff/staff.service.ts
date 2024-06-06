@@ -54,6 +54,10 @@ getDoctorsListByDepartment(id:number)
   return this._http.get(this.apiUrl+'StaffInfoes/doctorsByDepartment?id='+id)
 }
 }
+deleteStaff(id:number){
+  return this._http.delete(this.apiUrl+'StaffInfoes/'+id)
+
+}
 }
 
 

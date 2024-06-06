@@ -169,4 +169,7 @@ get $trigger(): Observable<void>{
     this.camerastatus='';
 
   }
+  cancelEdit(){
+    this.route.navigate([routes.patientsList])
+  }
 }
