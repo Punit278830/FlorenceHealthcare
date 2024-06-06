@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
@@ -8,4 +10,16 @@ import { routes } from 'src/app/shared/routes/routes';
 })
 export class StaffProfileComponent {
   public routes = routes;
+  // public staffInfo! : IstaffInfo;
+
+
+  // constructor(private staffservice:StaffService){
+  //   this.getStaffInfo()
+  // }
+
+  // getStaffInfo(){
+
+  // }
+  
+  
 }

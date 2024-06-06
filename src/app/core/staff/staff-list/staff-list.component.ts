@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DataService } from 'src/app/shared/data/data.service';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { Idepartment, IstaffInfo, apiResultFormat, pageSelection, staffList } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
@@ -37,10 +39,33 @@ export class StaffListComponent implements OnInit{
 
   constructor(public data : DataService,
     private staffService:StaffService,
-    private departmentService:DepartmentService){
+    private departmentService:DepartmentService,
+  private modalservice:ModalServiceService,
+private toaster:ToastrService){
       //this.fetchCombineData();
 
   }
+
+  deleteStaff(idhere:number){
+    this.modalservice.openModal({
+      type: 'staff',
+      id: idhere,
+      confirmCallback: () => this.confirmDelete(idhere)
+    });
+  }
+
+  confirmDelete(idhere:number){
+    this.staffService.deleteStaff(idhere).subscribe(res => {
+      if (res == null) {
+        this.toaster.success("Staff is deleted!")
+        this.getTableData()
+      }
+    })
+
+  }
+
+
+
   ngOnInit() {
     //this.getTableData();
     this.fetchCombineData();

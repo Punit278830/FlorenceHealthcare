@@ -98,7 +98,7 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="email">Email <span class="login-danger">*</span></label>
+                                        <label for="email">Email </label>
                                         <input class="form-control" formControlName="email" type="email" placeholder="">
                                         <div *ngIf="patientReg.get('email')?.invalid && (patientReg.get('email')?.dirty || patientReg.get('email')?.touched) && patientReg.get('email')?.value"
                                             class="text-danger">
@@ -297,7 +297,7 @@
                                         <button type="button" class="btn btn-primary submit-form me-2"
                                             (click)="enableCamera()">Enable Camera</button>
                                         <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
-                                        <button type="submit" class="btn btn-primary cancel-form">Cancel</button>
+                                        <button (click)="cancelEdit()" class="btn btn-primary cancel-form">Cancel</button>
                                     </div>
                                 </div>
                             </div>
