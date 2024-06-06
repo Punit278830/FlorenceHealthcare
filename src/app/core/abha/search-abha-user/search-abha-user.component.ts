@@ -132,7 +132,7 @@ export class SearchAbhaUserComponent {
       address: this.abhaProfile.address,
       dob: this.parseDob(this.abhaProfile.dayOfBirth, this.abhaProfile.monthOfBirth, this.abhaProfile.yearOfBirth),
       email: this.abhaProfile.email,
-      gender: this.abhaProfile.gender,
+      gender: this.abhaProfile.gender == "M" ? "Male" : this.abhaProfile.gender == "F" ? "Female" : this.abhaProfile.gender,
       mobile: this.abhaProfile.mobile,
       ageinYear: this.age,
       patientImage: this.abhaProfile.photo,
