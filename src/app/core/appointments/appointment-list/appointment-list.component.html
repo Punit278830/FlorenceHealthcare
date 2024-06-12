@@ -37,22 +37,22 @@
                         <!-- <a [routerLink]="routes.addAppointment" class="btn btn-primary add-pluss ms-2"><img
                             src="assets/img/icons/plus.svg" alt=""></a> -->
                         <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2"><img
-                            src="assets/img/icons/re-fresh.svg" alt=""></a>
+                            src="assets/img/icons/re-fresh.svg" alt="" (click)="onRefresh()"></a>
                       </div>
                       <!-- Code for Appointment Filter by date -->
                       <form [formGroup]="appintmentDateForm">
                         <div class="top-nav-search">
                          
                           <input class="form-control datetimepicker" (dateChange)="appointmentByDate($event,'from')"
-                            formControlName="appointmentFrom" placeholder="From" type="text" matInput [matDatepicker]="appointmentDate">
-                          <mat-datepicker #appointmentDate></mat-datepicker>
-                          <mat-datepicker-toggle matIconSuffix [for]="appointmentDate"></mat-datepicker-toggle>
+                            formControlName="appointmentFrom" placeholder="From" type="text" matInput [matDatepicker]="appointmentFrom">
+                          <mat-datepicker #appointmentFrom></mat-datepicker>
+                          <mat-datepicker-toggle matIconSuffix [for]="appointmentFrom"></mat-datepicker-toggle>
 
                         </div>
                         <div class="top-nav-search">
                          
                           <input class="form-control datetimepicker" (dateChange)="appointmentByDate($event,'to')"
-                            formControlName="appointmentTo" placeholder="to" type="text" matInput [matDatepicker]="appointmentTo">
+                            formControlName="appointmentTo" placeholder="to" type="text" matInput [matDatepicker]="appointmentTo"  [min]="minToDate">
                           <mat-datepicker #appointmentTo></mat-datepicker>
                           <mat-datepicker-toggle matIconSuffix [for]="appointmentTo"></mat-datepicker-toggle>
 
@@ -119,14 +119,13 @@
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
                           aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                        <div *ngIf="data.appointmentStatus!=='Cancel' && data.appointmentStatus!== 'In Active'"
+                        <div 
                           class="dropdown-menu dropdown-menu-end">
                           <a class="dropdown-item" [routerLink]="routes.editAppointment"
                             (click)="onEditAppointment(data.id,data.appointmentStatus)"><i
                               class="fa-solid fa-pen-to-square m-r-5"></i>
                             Edit</a>
-                          <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
-                            data-bs-target="#delete_patient"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="deleteAppointment(data.id)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>
                     </td>

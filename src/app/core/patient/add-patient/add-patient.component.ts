@@ -35,11 +35,17 @@ export class AddPatientComponent implements OnInit {
     private patientService: PatientService,
     private route: Router, private datePipe: DatePipe,
     private toater: ToastrService) {
-      this.maxDate = new Date();
+    this.maxDate = new Date();
 
 
     this.createPatient();
   }
+  // selectGender = [
+  //   { key:"M",value: 'Male' },
+  //   { key:"F",value: 'Female' },
+  //   { key:"T",value: 'Transgender' },
+
+  // ];
   selectGender = [
     { value: 'Male' },
     { value: 'Female' },

@@ -103,6 +103,10 @@ return this._http.put(this.apiUrl+"appointmentInfoes/"+id,apointmentData);
     return yearsDifference;
     
   }
+  deleteAppointment(idhere:number){
+   return this._http.delete(this.apiUrl+'AppointmentInfoes/'+idhere);
+
+  }
     
 
 }
