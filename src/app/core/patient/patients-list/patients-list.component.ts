@@ -38,6 +38,7 @@ export class PatientsListComponent implements OnInit {
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public patientList: Array<IpatientInfo> = [];
+  public allpatientList: Array<IpatientInfo> = [];
   public totalPages = 0;
   public img = "assets/img/profiles/avatar-08.jpg";
   public age!: number;
@@ -97,6 +98,7 @@ export class PatientsListComponent implements OnInit {
 
   onRefresh() {
     this.patientList=[];
+    this.searchDataValue='';
     this.getTableData()
   }
 
@@ -124,7 +126,7 @@ export class PatientsListComponent implements OnInit {
             this.serialNumberArray.push(serialNumber);
           }
         });
-        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
@@ -133,6 +135,8 @@ export class PatientsListComponent implements OnInit {
       this.patientService.getPatientList().subscribe((data: any) => {
         this.totalData = data.length;
         // this.staffList.push(data);
+        this.allpatientList=data;
+        console.log("allpatients",this.allpatientList)
 
         console.log(data)
         data.map((res: any, index: number) => {
@@ -146,11 +150,12 @@ export class PatientsListComponent implements OnInit {
             this.serialNumberArray.push(serialNumber);
           }
         });
-        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
     }
+    this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
     // this.patientService.getPatientList().subscribe((data:any)=>{
     //    this.totalData=data.length;
     //     // this.staffList.push(data);

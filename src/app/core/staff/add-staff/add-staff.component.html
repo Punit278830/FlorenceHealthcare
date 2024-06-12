@@ -228,7 +228,7 @@
                                     <div class="form-group local-forms">
                                         <label for="password">Password <span class="login-danger">*</span></label>
                                         <input class="form-control" [type]="passwordClass ? 'text' : 'password'"
-                                            formControlName="password" (blur)="onBlur()">
+                                            formControlName="password">
                                         <span (click)="togglePassword()" (keyup.enter)="togglePassword()"
                                             [ngClass]="passwordClass ? 'feather icon-eye' : 'feather icon-eye-off'"
                                             class="profile-views toggle-password" tabindex="0"></span>
