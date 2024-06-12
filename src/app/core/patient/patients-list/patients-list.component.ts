@@ -38,11 +38,13 @@ export class PatientsListComponent implements OnInit {
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public patientList: Array<IpatientInfo> = [];
+  public allpatientList: Array<IpatientInfo> = [];
   public totalPages = 0;
   public img = "assets/img/profiles/avatar-08.jpg";
   public age!: number;
   public dateForm!: FormGroup;
   public minToDate: Date | null = null;
+  public loggedIn: any;
 
 
   constructor(public data: DataService,
@@ -50,7 +52,7 @@ export class PatientsListComponent implements OnInit {
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private route: Router,
-    private modalservice:ModalServiceService,
+    private modalservice: ModalServiceService,
     private toaster: ToastrService,
   ) {
 
@@ -58,7 +60,7 @@ export class PatientsListComponent implements OnInit {
 
   }
 
-  deletePatient(idhere:number){
+  deletePatient(idhere: number) {
     this.modalservice.openModal({
       type: 'patient',
       id: idhere,
@@ -66,7 +68,7 @@ export class PatientsListComponent implements OnInit {
     });
   }
 
-  confirmDelete(idhere:number){
+  confirmDelete(idhere: number) {
     this.patientService.deletePatient(idhere).subscribe(res => {
       if (res == null) {
         this.toaster.success("Patient is deleted!")
@@ -77,9 +79,9 @@ export class PatientsListComponent implements OnInit {
   }
 
 
-  
 
-  
+
+
   initlizeDateForm() {
     this.dateForm = this.fb.group({
       from: [null],
@@ -89,8 +91,15 @@ export class PatientsListComponent implements OnInit {
 
 
   ngOnInit() {
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initlizeDateForm();
     this.getTableData();
+  }
+
+  onRefresh() {
+    this.patientList=[];
+    this.searchDataValue='';
+    this.getTableData()
   }
 
   private getTableData(): void {
@@ -117,7 +126,7 @@ export class PatientsListComponent implements OnInit {
             this.serialNumberArray.push(serialNumber);
           }
         });
-        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
@@ -126,6 +135,8 @@ export class PatientsListComponent implements OnInit {
       this.patientService.getPatientList().subscribe((data: any) => {
         this.totalData = data.length;
         // this.staffList.push(data);
+        this.allpatientList=data;
+        console.log("allpatients",this.allpatientList)
 
         console.log(data)
         data.map((res: any, index: number) => {
@@ -139,11 +150,12 @@ export class PatientsListComponent implements OnInit {
             this.serialNumberArray.push(serialNumber);
           }
         });
-        this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
     }
+    this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
     // this.patientService.getPatientList().subscribe((data:any)=>{
     //    this.totalData=data.length;
     //     // this.staffList.push(data);
@@ -202,8 +214,30 @@ export class PatientsListComponent implements OnInit {
   // }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.patientList = this.dataSource.filteredData;
+    this.serialNumberArray = [];
+    this.totalData = 0;
+
+    if (value != '') {
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.patientList = this.dataSource.filteredData;
+      if (this.patientList.length > 0) {
+        this.patientList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.patientList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+
+    }
+    else {
+      this.getTableData()
+    }
+
   }
 
   public sortData(sort: Sort) {
@@ -275,6 +309,7 @@ export class PatientsListComponent implements OnInit {
 
   onEditPatient(id: number) {
     this.patientService.patientId = id;
+    console.log("stafflist", this.patientList)
 
   }
 
@@ -294,7 +329,7 @@ export class PatientsListComponent implements OnInit {
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     if (dateType == 'from') {
-      this.minToDate=event.value
+      this.minToDate = event.value
       this.dateForm.get('from')?.setValue(dateOnly)
 
     }

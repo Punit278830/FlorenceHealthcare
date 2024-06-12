@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -43,7 +43,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StaffInfo>>> GetStaffInfos()
         {
-            return await _context.StaffInfos.ToListAsync();
+            return await _context.StaffInfos.OrderByDescending(p=>p.StaffId).ToListAsync();
         }
 
         // GET: api/StaffInfoes/5

@@ -13,6 +13,7 @@ import { DepartmentService } from 'src/app/shared/Services/department/department
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DataService } from 'src/app/shared/data/data.service';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
@@ -23,7 +24,7 @@ import { routes } from 'src/app/shared/routes/routes';
   providers: [DatePipe],
 
 })
-export class AppointmentListComponent  implements OnInit {
+export class AppointmentListComponent implements OnInit {
   public routes = routes;
   public patientsList: Array<Iappointment> = [];
   dataSource!: MatTableDataSource<Iappointment>;
@@ -40,75 +41,108 @@ export class AppointmentListComponent  implements OnInit {
   public currentPage = 1;
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
-   public appointmentList: Array<any>=[];
-   public finaldata:any[]=[];
+  public appointmentList: Array<any> = [];
+  public finaldata: any[] = [];
   public totalPages = 0;
-  public img="assets/img/profiles/avatar-08.jpg";
-  public age!:number;
-  public combinedData:any[]=[];
-  public loggedIn!:Ilogin;
-  public appintmentDateForm!:FormGroup;
-  private isAppointmentDateSelected=false;
-  private dateOnly:any;
-  
+  public img = "assets/img/profiles/avatar-08.jpg";
+  public age!: number;
+  public combinedData: any[] = [];
+  public loggedIn!: Ilogin;
+  public appintmentDateForm!: FormGroup;
+  private isAppointmentDateSelected = false;
+  private dateOnly: any;
+  public minToDate: Date | null = null;
 
-  constructor(public data : DataService,private appointmentService:AppointmentService,
-    private departmentService:DepartmentService,
-    private staffService:StaffService,
-    private patientService:PatientService,
-    private dosctoService:StaffService,
-    private route:Router,
-    private datePipe:DatePipe,
-    private fb:FormBuilder,
-    private toastr:ToastrService){
-   
+
+  constructor(public data: DataService, private appointmentService: AppointmentService,
+    private departmentService: DepartmentService,
+    private staffService: StaffService,
+    private patientService: PatientService,
+    private dosctoService: StaffService,
+    private route: Router,
+    private datePipe: DatePipe,
+    private fb: FormBuilder,
+    private toastr: ToastrService,
+    private modalservice:ModalServiceService,
+  ) {
+
   }
   ngOnInit() {
-    this.loggedIn=JSON.parse(localStorage.getItem('data')||'')
-    this.initilizeAppointDateForm();
-   // this.getTableData();
-     this.fetchCombineData();
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.initializeAppointDateForm();
+    // this.getTableData();
+    this.fetchCombineData();
   }
 
-  initilizeAppointDateForm()
-  {
-    this.appintmentDateForm=this.fb.group({
-      appointmentFrom:['',Validators.required],
-      appointmentTo:['',Validators.required]
+  // initilizeAppointDateForm() {
+  //   this.appintmentDateForm = this.fb.group({
+  //     appointmentFrom: [null, Validators.required],
+  //     appointmentTo: [null, Validators.required]
+  //   })
+  // }
+  initializeAppointDateForm() {
+    const today = new Date();
+    const formattedToday = this.datePipe.transform(today, 'yyyy-MM-dd');
+
+    this.appintmentDateForm = this.fb.group({
+      appointmentFrom: [formattedToday, Validators.required],
+      appointmentTo: [formattedToday, Validators.required]
+    });
+  }
+  deleteAppointment(idhere:number){
+    this.modalservice.openModal({
+      type: 'appointment',
+      id: idhere,
+      confirmCallback: () => this.confirmDelete(idhere)
+    });
+  }
+
+  confirmDelete(idhere:number){
+    this.appointmentService.deleteAppointment(idhere).subscribe(res => {
+      if (res == null) {
+        this.toastr.success("Appointment is deleted!")
+        this.fetchCombineData()
+      }
     })
+
   }
 
-  fetchCombineData()
-  {
-    const from=this.appintmentDateForm.get('appointmentFrom')?.value||null;
-          const to=this.appintmentDateForm.get('appointmentTo')?.value||null;
-          
+  
+  onRefresh() {
+    this.appintmentDateForm.get("appointmentFrom")?.patchValue(null)
+    this.appintmentDateForm.get("appointmentTo")?.patchValue(null)
+    this.fetchCombineData()
+  }
+
+  fetchCombineData() {
+    const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
+    const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
+
     let appointmentData$;
-    if(from!==null && to!==null)
- {
-          
-          if(this.loggedIn.userRole=='admin'|| this.loggedIn.userRole=='reception' || this.loggedIn.userRole=='nursing')
-    {
-     
-      appointmentData$=this.appointmentService.getAppointmentByDate(from,to);
-      this.isAppointmentDateSelected=false;
-    }
-    else{
-      appointmentData$=this.appointmentService.getappointmentByIdAndDate(this.loggedIn.loginId,from,to);
-      this.isAppointmentDateSelected=false;
+    if (from !== null && to !== null) {
+      console.log("from to",from,to)
+
+      if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing') {
+
+        appointmentData$ = this.appointmentService.getAppointmentByDate(from, to);
+        this.isAppointmentDateSelected = false;
+      }
+      else {
+        appointmentData$ = this.appointmentService.getappointmentByIdAndDate(this.loggedIn.loginId, from, to);
+        this.isAppointmentDateSelected = false;
+      }
+
+
     }
 
-      
-    }
-
-    else{
-      if(this.loggedIn.userRole=='admin'|| this.loggedIn.userRole=='reception' || this.loggedIn.userRole=='nursing')
-    {
-      appointmentData$=this.appointmentService.getAppointmentList();
-    }
-    else{
-      appointmentData$=this.appointmentService.getAppointmentByDoctorId(this.loggedIn.loginId);
-    }
+    else {
+      if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing') {
+        console.log("all")
+        appointmentData$ = this.appointmentService.getAppointmentList();
+      }
+      else {
+        appointmentData$ = this.appointmentService.getAppointmentByDoctorId(this.loggedIn.loginId);
+      }
 
     }
     // if(this.loggedIn.userRole=='admin')
@@ -118,99 +152,100 @@ export class AppointmentListComponent  implements OnInit {
     // else{
     //   appointmentData$=this.appointmentService.getAppointmentByDoctorId(this.loggedIn.loginId);
     // }
-    
-    const departmentData$=this.departmentService.getDepartmentList();
-    const staffData$=this.staffService.getDoctorsList();
-    const patientData$=this.patientService.getPatientList();
-    forkJoin([appointmentData$, departmentData$,staffData$,patientData$]).subscribe(([appointments, departments,staffs,patient]) => {
-  // Combine data based on departmentId
-       this.totalData=appointments.length;
-        this.appointmentList = [];
-        this.serialNumberArray = [];
- 
-        if(appointments.message==="No records found")
-  {
-    this.toastr.error("No Appointment Available","Appointment Status");
+    const departmentData$ = this.departmentService.getDepartmentList();
+    const staffData$ = this.staffService.getDoctorsList();
+    const patientData$ = this.patientService.getPatientList();
+    forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
+      // Combine data based on departmentId
+      this.totalData = appointments.length;
+      this.appointmentList = [];
+      this.serialNumberArray = [];
+      console.log("appointments", appointments)
 
-  }
-  else{
-    this.combinedData = appointments.map((appointment:any) => {
-      const doctor=staffs.find((doctor:any)=> doctor.staffId === appointment.doctorId)
-      const patients=patient.find((patient:any)=> patient.patientId === appointment.patientId)
-      const department= departments.find((department:any)=> department.departmentId === appointment.departmentid)
-      
+      if (appointments.message === "No records found") {
+        this.appointmentList=[];
         
-     return {
-        ...appointment,
-        doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
-        doctorLname: doctor ? doctor.lastName : '',
-        departmentName: department ? department.departmentName : 'Unknown Department',
-        patientFname: patients? patients.firstName:'Unknon Patients',
-        patientLname: patients? patients.lastName:'Unknon Patients',
-        patientId:patients? patients.patientId:'Unknon Patients'
-      }; 
-      
-    });
-  
-    
-      this.combinedData.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          // this.calculateDateDifference(res.dob);
-          // res.ageinYear=this.age;
-          
-          this.appointmentList.push(res);
-          // console.log(res.DOJ)
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
+        this.toastr.error("No Appointment Available", "Appointment Status");
 
-  }
+      }
+      else {
+        this.combinedData = appointments.map((appointment: any) => {
+          const doctor = staffs.find((doctor: any) => doctor.staffId === appointment.doctorId)
+          const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
+          const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
 
 
-    
-  
+          return {
+            ...appointment,
+            doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
+            doctorLname: doctor ? doctor.lastName : '',
+            departmentName: department ? department.departmentName : 'Unknown Department',
+            patientFname: patients ? patients.firstName : 'Unknon Patients',
+            patientLname: patients ? patients.lastName : 'Unknon Patients',
+            patientId: patients ? patients.patientId : 'Unknon Patients'
+          };
 
-    
-              this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
-              this.calculateTotalPages(this.totalData, this.pageSize);  
-  },
-   error=>{
-    this.toastr.error("No Appointment Available","Appointment Status");
-    console.log(error);
+        });
 
-   })
+
+        this.combinedData.map((res: any, index: number) => {
+          const serialNumber = index + 1;
+          if (index >= this.skip && serialNumber <= this.limit) {
+            // this.calculateDateDifference(res.dob);
+            // res.ageinYear=this.age;
+
+            this.appointmentList.push(res);
+            // console.log(res.DOJ)
+            this.serialNumberArray.push(serialNumber);
+          }
+        });
+
+      }
+
+
+
+
+
+
+      this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
+      this.calculateTotalPages(this.totalData, this.pageSize);
+    },
+      error => {
+        this.toastr.error("No Appointment Available", "Appointment Status");
+        console.log(error);
+
+      })
 
   }
 
   private getTableData(): void {
     this.appointmentList = [];
     this.serialNumberArray = [];
-    
+
     // this.appointmentService.getappointmentByIDAndDate(19,dateOnly).subscribe(res=>{
-  //   console.log(res);
-  // })
-      this.appointmentService.getAppointmentList().subscribe((data:any)=>{
-         this.totalData=data.length;
-          // this.staffList.push(data);
-             
-              console.log(data)
-              data.map((res: any, index: number) => {
+    //   console.log(res);
+    // })
+    this.appointmentService.getAppointmentList().subscribe((data: any) => {
+      this.totalData = data.length;
+      // this.staffList.push(data);
+
+      console.log(data)
+      data.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
           // this.calculateDateDifference(res.dob);
           // res.ageinYear=this.age;
-          
+
           this.appointmentList.push(res);
           // console.log(res.DOJ)
           this.serialNumberArray.push(serialNumber);
         }
       });
-              this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
-              this.calculateTotalPages(this.totalData, this.pageSize);
-        
-      })
-      
+      this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
+      this.calculateTotalPages(this.totalData, this.pageSize);
+
+    })
+
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
     //   this.totalData = data.totalData;
     //   console.log("mock data"+data);
@@ -219,7 +254,7 @@ export class AppointmentListComponent  implements OnInit {
     //   // data.data.map((res: staffList, index: number) => {
     //   //   const serialNumber = index + 1;
     //   //   if (index >= this.skip && serialNumber <= this.limit) {
-         
+
     //   //     //this.staffList.push(res);
     //   //     this.serialNumberArray.push(serialNumber);
     //   //   }
@@ -228,7 +263,7 @@ export class AppointmentListComponent  implements OnInit {
     //   //this.calculateTotalPages(this.totalData, this.pageSize);
     // });
   }
-  
+
   public searchData(value: any): void {
     this.dataSource.filter = value.trim().toLowerCase();
     this.appointmentList = this.dataSource.filteredData;
@@ -241,9 +276,9 @@ export class AppointmentListComponent  implements OnInit {
       this.appointmentList = data;
     } else {
       this.appointmentList = data.sort((a, b) => {
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const aValue = (a as any)[sort.active];
-         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bValue = (b as any)[sort.active];
         return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
       });
@@ -263,7 +298,7 @@ export class AppointmentListComponent  implements OnInit {
       this.pageIndex = this.currentPage - 1;
       this.limit -= this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-     // this.getTableData();
+      // this.getTableData();
       this.fetchCombineData();
     }
   }
@@ -286,7 +321,7 @@ export class AppointmentListComponent  implements OnInit {
     this.limit = this.pageSize;
     this.skip = 0;
     this.currentPage = 1;
-   // this.getTableData();
+    // this.getTableData();
     this.fetchCombineData();
   }
 
@@ -310,89 +345,85 @@ export class AppointmentListComponent  implements OnInit {
 
   // }
 
-  calculateDateDifference(dob:Date) {
+  calculateDateDifference(dob: Date) {
     const start = new Date(dob);
     const end = new Date();
     // Calculate the difference in years
     const diffInMilliseconds = Math.abs(end.getTime() - start.getTime());
     const yearsDifference = Math.floor(diffInMilliseconds / (365.25 * 24 * 60 * 60 * 1000));
-    
+
     this.age = yearsDifference;
-    
+
   }
-  onEditAppointment(id:number,status:string)
-  {
-    this.appointmentService.appointmentId=id;
-    if(status!=='Active')
-    {
-      this.appointmentService.appoinmentStatus=false;
+  onEditAppointment(id: number, status: string) {
+    this.appointmentService.appointmentId = id;
+    if (status !== 'Active') {
+      this.appointmentService.appoinmentStatus = false;
     }
-    
+
   }
 
-  movetoProfile(patientId:number,appointmentId:number,departmentId:number,status:string,doctorId:number)
- {
-  this.patientService.patientId=patientId;
-  this.appointmentService.appointmentId=appointmentId;
-  this.departmentService.departmentId=departmentId;
-  this.dosctoService.staffId=doctorId;
-if(status!='Active')
-    {
-      this.appointmentService.appoinmentStatus=false;
+  movetoProfile(patientId: number, appointmentId: number, departmentId: number, status: string, doctorId: number) {
+    this.patientService.patientId = patientId;
+    this.appointmentService.appointmentId = appointmentId;
+    this.departmentService.departmentId = departmentId;
+    this.dosctoService.staffId = doctorId;
+    if (status != 'Active') {
+      this.appointmentService.appoinmentStatus = false;
     }
-  
-  
-   
-  this.route.navigate([routes.profile]);
 
- }
 
- appointmentByDate(event: any,type:string): void {
-  // Extract the date part only
-  // const datePipe = new DatePipe('en-US');
- this.dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
- if(type=='from')
- {
-  this.appintmentDateForm.get('appointmentFrom')?.setValue(this.dateOnly)
- }
- if(type=='to')
- {
-  this.appintmentDateForm.get('appointmentTo')?.setValue(this.dateOnly)
- }
- const from=this.appintmentDateForm.get('appointmentFrom')?.value||null;
- const to=this.appintmentDateForm.get('appointmentTo')?.value||null;
 
- //this.dateOnly = this.datePipe.transform(event.value, 'dd-MM-yyyy');
- if(from!==null && to!==null)
- {
-  this.isAppointmentDateSelected=true;
-  this.fetchCombineData();
+    this.route.navigate([routes.profile]);
 
- }
-  
-  
-  
-//     this.appointmentService.getappointmentByIdAndDate(19,this.dateOnly).subscribe((data:any)=>{
-  
-//     this.totalData=data.length;
-//      // this.staffList.push(data);
-        
-//          console.log(data)
-//          data.map((res: any, index: number) => {
-//    const serialNumber = index + 1;
-//    if (index >= this.skip && serialNumber <= this.limit) {
-//      // this.calculateDateDifference(res.dob);
-//      // res.ageinYear=this.age;
-     
-//      this.appointmentList.push(res);
-//      // console.log(res.DOJ)
-//      this.serialNumberArray.push(serialNumber);
-//    }
-//  });
-//          this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
-//          this.calculateTotalPages(this.totalData, this.pageSize);
-   
-//  })
+  }
 
- }
+  appointmentByDate(event: any, type: string): void {
+    // Extract the date part only
+    // const datePipe = new DatePipe('en-US');
+    this.dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    if (type == 'from') {
+      this.minToDate=this.dateOnly;
+    
+      this.appintmentDateForm.get('appointmentFrom')?.setValue(this.dateOnly)
+      this.appintmentDateForm.get('appointmentTo')?.setValue(null)
+    }
+    if (type == 'to') {
+      this.appintmentDateForm.get('appointmentTo')?.setValue(this.dateOnly)
+    }
+    const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
+    const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
+
+    //this.dateOnly = this.datePipe.transform(event.value, 'dd-MM-yyyy');
+    if (from !== null && to !== null) {
+      this.isAppointmentDateSelected = true;
+      this.fetchCombineData();
+
+    }
+
+
+
+    //     this.appointmentService.getappointmentByIdAndDate(19,this.dateOnly).subscribe((data:any)=>{
+
+    //     this.totalData=data.length;
+    //      // this.staffList.push(data);
+
+    //          console.log(data)
+    //          data.map((res: any, index: number) => {
+    //    const serialNumber = index + 1;
+    //    if (index >= this.skip && serialNumber <= this.limit) {
+    //      // this.calculateDateDifference(res.dob);
+    //      // res.ageinYear=this.age;
+
+    //      this.appointmentList.push(res);
+    //      // console.log(res.DOJ)
+    //      this.serialNumberArray.push(serialNumber);
+    //    }
+    //  });
+    //          this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
+    //          this.calculateTotalPages(this.totalData, this.pageSize);
+
+    //  })
+
+  }
 }

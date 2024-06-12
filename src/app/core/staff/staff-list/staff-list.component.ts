@@ -15,9 +15,9 @@ import { routes } from 'src/app/shared/routes/routes';
   templateUrl: './staff-list.component.html',
   styleUrls: ['./staff-list.component.scss']
 })
-export class StaffListComponent implements OnInit{
+export class StaffListComponent implements OnInit {
   public routes = routes;
-  public staffList: Array<any>=[];
+  public staffList: Array<any> = [];
   dataSource!: MatTableDataSource<IstaffInfo>;
 
   public showFilter = false;
@@ -33,20 +33,21 @@ export class StaffListComponent implements OnInit{
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
-  private _staffDto!:Array<IstaffInfo>;
-  public img="assets/img/profiles/avatar-08.jpg";
-  public combinedData:any[]=[];
+  private _staffDto!: Array<IstaffInfo>;
+  public img = "assets/img/profiles/avatar-08.jpg";
+  public combinedData: any[] = [];
+  public loggedIn: any;
 
-  constructor(public data : DataService,
-    private staffService:StaffService,
-    private departmentService:DepartmentService,
-  private modalservice:ModalServiceService,
-private toaster:ToastrService){
-      //this.fetchCombineData();
+  constructor(public data: DataService,
+    private staffService: StaffService,
+    private departmentService: DepartmentService,
+    private modalservice: ModalServiceService,
+    private toaster: ToastrService) {
+    //this.fetchCombineData();
 
   }
 
-  deleteStaff(idhere:number){
+  deleteStaff(idhere: number) {
     this.modalservice.openModal({
       type: 'staff',
       id: idhere,
@@ -54,7 +55,7 @@ private toaster:ToastrService){
     });
   }
 
-  confirmDelete(idhere:number){
+  confirmDelete(idhere: number) {
     this.staffService.deleteStaff(idhere).subscribe(res => {
       if (res == null) {
         this.toaster.success("Staff is deleted!")
@@ -67,29 +68,35 @@ private toaster:ToastrService){
 
 
   ngOnInit() {
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    console.log("loggedin", this.loggedIn)
     //this.getTableData();
     this.fetchCombineData();
+
+  }
+  onRefresh(){
+    this.staffList=[];
+    this.fetchCombineData()
   }
 
-  fetchCombineData()
-  {
-    const departmentData$=this.departmentService.getDepartmentList();
-    const staffData$=this.staffService.getStaffList();
+  fetchCombineData() {
+    const departmentData$ = this.departmentService.getDepartmentList();
+    const staffData$ = this.staffService.getStaffList();
 
-    
-forkJoin([staffData$, departmentData$]).subscribe(([staff, department]) => {
- this.totalData=staff.length;
- this.staffList=[];
- this.serialNumberArray = [];
 
- this.combinedData = staff.map((staffres: IstaffInfo) => {
- const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
-    return {
-      ...staffres,
-      departmentName: dept ? dept.departmentName : null
-    };
-  });
-this.combinedData.map((res: any, index: number) => {
+    forkJoin([staffData$, departmentData$]).subscribe(([staff, department]) => {
+      this.totalData = staff.length;
+      this.staffList = [];
+      this.serialNumberArray = [];
+
+      this.combinedData = staff.map((staffres: IstaffInfo) => {
+        const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
+        return {
+          ...staffres,
+          departmentName: dept ? dept.departmentName : null
+        };
+      });
+      this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
@@ -97,19 +104,18 @@ this.combinedData.map((res: any, index: number) => {
           this.serialNumberArray.push(serialNumber);
         }
       });
- this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
-              this.calculateTotalPages(this.totalData, this.pageSize);
-});
+      this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      this.calculateTotalPages(this.totalData, this.pageSize);
+    });
 
   }
-  private getTableData() 
-  {
+  private getTableData() {
     this.staffList = [];
     this.serialNumberArray = [];
-     
-      this.staffService.getStaffList().subscribe((data:any)=>{
-         this.totalData=data.length;
-         data.map((res: any, index: number) => {
+
+    this.staffService.getStaffList().subscribe((data: any) => {
+      this.totalData = data.length;
+      data.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
@@ -117,23 +123,71 @@ this.combinedData.map((res: any, index: number) => {
           this.serialNumberArray.push(serialNumber);
         }
       });
-              this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
-              this.calculateTotalPages(this.totalData, this.pageSize);
-        
-      })
-      
+
+      this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      this.calculateTotalPages(this.totalData, this.pageSize);
+
+    })
+    console.log("stafflist", this.staffList)
+
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
     //   this.totalData = data.totalData;
-     
-      
+
+
     // });
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.staffList = this.dataSource.filteredData;
+    this.serialNumberArray = [];
+    this.totalData = 0;
+
+    if (value != '') {
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.staffList = this.dataSource.filteredData;
+      if (this.staffList.length > 0) {
+        this.staffList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.staffList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+
+    }
+    else {
+      this.getTableData()
+    }
+
   }
 
+  // sortData(sort: Sort) {
+  //   const data = this.staffList.slice();
+  //   if (!sort.active || sort.direction === "") {
+  //     this.staffList = data;
+  //     return;
+  //   }
+
+  //   this.staffList = data.sort((a, b) => {
+  //     console.log("a b", a, b)
+  //     const isAsc = sort.direction === "asc";
+  //     switch (sort.active) {
+  //       case "doj":
+  //         return this.compare(a.doj, b.doj, isAsc);
+
+  //       default:
+  //         return 0;
+  //     }
+  //   });
+  // }
+
+
+  // compare(a: number | string, b: number | string, isAsc: boolean) {
+  //   return (a > b ? -1 : 1) * (isAsc ? -1 : 1);
+  // }
   public sortData(sort: Sort) {
     const data = this.staffList.slice();
 
@@ -141,14 +195,30 @@ this.combinedData.map((res: any, index: number) => {
       this.staffList = data;
     } else {
       this.staffList = data.sort((a, b) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const aValue = (a as any)[sort.active];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const bValue = (b as any)[sort.active];
-        return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
+        console.log("a b", a, b);
+        const isAsc = sort.direction === "asc";
+        switch (sort.active) {
+          case "mobile":
+            return this.compare(a.mobile, b.mobile, isAsc);
+          case "joiningDate":
+            console.log("joiningDate");
+            return this.compare(a.doj, b.doj, !isAsc); // Change to !isAsc for latest at the top
+          default:
+            return 0;
+        }
       });
     }
   }
+
+  compare(a: any, b: any, isAsc: boolean) {
+    if (typeof a === 'string' && typeof b === 'string') {
+      const dateA = new Date(a);
+      const dateB = new Date(b);
+      return (dateA < dateB ? -1 : 1) * (isAsc ? 1 : -1);
+    }
+    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
+  }
+
 
   public getMoreData(event: string): void {
     if (event == 'next') {
@@ -163,8 +233,8 @@ this.combinedData.map((res: any, index: number) => {
       this.pageIndex = this.currentPage - 1;
       this.limit -= this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-     // this.getTableData();
-     this.fetchCombineData()
+      // this.getTableData();
+      this.fetchCombineData()
     }
   }
 
@@ -177,7 +247,7 @@ this.combinedData.map((res: any, index: number) => {
     } else if (pageNumber < this.currentPage) {
       this.pageIndex = pageNumber + 1;
     }
-   // this.getTableData();
+    // this.getTableData();
     this.fetchCombineData();
   }
 
@@ -205,9 +275,9 @@ this.combinedData.map((res: any, index: number) => {
     }
   }
 
-  onEditStaff(item:number)
-  {
-    this.staffService.staffId=item;
+  onEditStaff(item: number) {
+    this.staffService.staffId = item;
+    console.log("stafflist", this.staffList)
 
   }
 }

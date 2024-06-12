@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
-import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
 import { Idepartment, IstaffInfo } from 'src/app/shared/models/models';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DatePipe } from '@angular/common';
@@ -26,6 +26,7 @@ export class AddStaffComponent {
   public passwordClass = false;
   public passwordClass1 = false;
   public _depDto: Idepartment[] = []
+  public maxDate: Date | null = null;
 
 
 
@@ -36,8 +37,10 @@ export class AddStaffComponent {
     private departmentService: DepartmentService) {
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
+    this.maxDate = new Date()
 
   }
+
 
   togglePassword() {
     this.passwordClass = !this.passwordClass;
@@ -133,14 +136,15 @@ export class AddStaffComponent {
       consultationFee: [0, Validators.required],
       activeStatus: [null, Validators.required],
       password: ['', Validators.required],
-      cpassword: ['', Validators.required],
+      cpassword: ['', [Validators.required]],
       education: ['', Validators.required],
       gender: ['', Validators.required],
       dob: ['', Validators.required],
       doj: ['', Validators.required],
 
+
     });
-   
+
   }
 
   resetStaffRegForm() {
@@ -150,35 +154,47 @@ export class AddStaffComponent {
     return this.staffReg.get('mobile') as AbstractControl;
   }
 
+  onBlur() {
+    if (this.staffReg.get('password')?.value != this.staffReg.get('cpassword')?.value) {
+      this.toster.error("Password do not match")
+      this.staffReg.get('cpassword')?.markAsTouched()
+    }
+  }
+
+  passwordMatchValidator: ValidatorFn = (formGroup: AbstractControl): ValidationErrors | null => {
+    const password = formGroup.get('password')?.value;
+    const cpassword = formGroup.get('cpassword')?.value;
+    return password === cpassword ? null : { passwordMismatch: true };
+  };
+
+
   addStaff(formValues: FormGroup) {
     if (this.staffReg.valid) {
       console.log("values", formValues.value);
-  
-      if (formValues.value.password != formValues.value.cpassword) {
+      if (formValues.value.password !== formValues.value.cpassword) {
         this.toster.error("Password do not match");
-        return;
+        return; // Exit the method if passwords don't match
       }
-  
       // Create a copy of the form values and remove cpassword
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
-  
+
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
-  
+
       this.staffService.CreateStaff(staffData).subscribe(res => {
         console.log(res);
         if (res) {
           this.toster.success("Staff Added Successfully", 'Staff');
-          this.resetStaffRegForm();
+          this.route.navigate([routes.staffList])
         }
       });
-  
+
     } else {
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
     }
   }
-  
+
 
   onSelectionChange(event: MatSelectChange) {
     if ((event.value).toLowerCase() != 'doctor') {

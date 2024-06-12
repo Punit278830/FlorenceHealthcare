@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { dA } from '@fullcalendar/core/internal-common';
 
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -79,7 +80,6 @@ ngOnInit()
 {
   this.getAppointDetail(this.appointmentService.appointmentId);
   this.appointmentFormInitlize();
-  this.updateFormattedDateTime();
   this.downloadPatientFile();
 
   
@@ -101,7 +101,7 @@ ngOnInit()
   getAppointDetail(id:number)
   {
     this.appointmentService.getAppointmentById(id).subscribe(res=>{
-      console.log("appointmentdata"+res)
+      console.log("appointmentdata",res)
       this.appointmentDto=res;
       this.patchAppointmentForm(this.appointmentDto)
       });
@@ -118,6 +118,16 @@ ngOnInit()
       this.bookappointment.get('IdentiyName')?.patchValue(appointmentData.identiyName);
       this.bookappointment.get('IdentiyNumber')?.patchValue(appointmentData.identiyNumber);
       this.bookappointment.get('date')?.patchValue(appointmentData.date);
+      this.bookappointment.get('doctorId')?.patchValue(appointmentData.doctorId);
+      this.staffService.getDoctorsListByDepartment(appointmentData.departmentid).subscribe((data:any)=>{
+        this.doctorList=[]
+        
+        data.map((res:any)=>{
+          this.doctorList.push(res)
+        })
+  
+      })
+      
       
     }
 
@@ -137,18 +147,31 @@ appointmentFormInitlize()
 }
 
   
-  updateFormattedDateTime() {
+  updateFormattedDateTime(event:any) {
   const currentDate = new Date();
   console.log("currentDate"+currentDate)
   //this.formattedDateTime = this.datePipe.transform(currentDate, 'yyyy-MM-ddTHH:mm:ss.SSSZ');
-  this.formattedDateTime=currentDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
-  console.log(this.formattedDateTime)
+  this.formattedDateTime=event.value.toISOString().replace(/\.\d{3}Z$/, 'Z');
+  console.log("formaatted",this.formattedDateTime)
+}
+
+
+onDobDateChange(event: any): void {
+  // Extract the date part only
+  // const datePipe = new DatePipe('en-US');
+  const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+  console.log('Selected Date (Date Only):', dateOnly);
+  this.bookappointment.get('date')?.setValue(dateOnly);
+  
+  
 }
 
   updateBookAppointment(appointment:any)
   {
     const userData=JSON.parse(localStorage.getItem('data')||'');
-    this.appointmentDto.date=this.formattedDateTime;
+    console.log("date",appointment.date)
+    // this.appointmentDto.date=this.formattedDateTime;
+    this.appointmentDto.date=appointment.value.date;
     this.appointmentDto.doctorId=appointment.value.doctorId;
     this.appointmentDto.notes=appointment.value.notes;
      this.appointmentDto.identiyName=appointment.value.IdentiyName;
@@ -181,7 +204,7 @@ appointmentFormInitlize()
   getDepartmentLits()
   {
    this.departmentService.getDepartmentList().subscribe((data:any)=>{
-    console.log(data);
+    console.log("departmentlist",data);
     data.map((res:any)=>{
       this.departmentList.push(res)
     })
@@ -191,6 +214,7 @@ appointmentFormInitlize()
 
   async loadDoctorData(event:any)
   {
+    this.doctorList=[]
     this.appointmentDto.departmentid=event.value;
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data:any)=>{
         
@@ -199,6 +223,7 @@ appointmentFormInitlize()
       })
 
     })
+    console.log("doctor list",this.doctorList)
    
   }
 

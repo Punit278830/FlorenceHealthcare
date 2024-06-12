@@ -34,8 +34,9 @@
                                             {{patientInfo.lastName}}</h3>
                                         <small class="text-muted">Patient</small>
                                         <div class="staff-id">Patient ID : P-{{patientInfo.patientId}}</div>
-                                        <div class="staff-msg"><a [routerLink]="routes.chat"
-                                                class="btn btn-primary">Send Message</a></div>
+                                        <!-- DO NOT DELETE -->
+                                        <!-- <div class="staff-msg"><a [routerLink]="routes.chat"
+                                                class="btn btn-primary">Send Message</a></div> -->
                                     </div>
                                 </div>
                                 <div class="col-md-7">
@@ -45,7 +46,7 @@
                                             <span class="text"><a href="">{{patientInfo?patientInfo.mobile:''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
-                                            <span class="title">Email:</span>
+                                            <span class="title">Email:</span>                    
                                             <span class="text"><a href="">{{patientInfo.email?patientInfo.email :''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
@@ -85,10 +86,10 @@
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane show active" id="history">
+                <div *ngIf="appointmentList.length>0" class="tab-pane show active" id="history">
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="card-box">
+                            <div   class="card-box">
                                 <h3 class="card-title">Appointment List</h3>
 
                                 <div class="col-12 col-md-6 col-xl-2" [formGroup]="profileForm">
@@ -221,6 +222,8 @@
                         </div>
                     </div>
                 </div>
+
+                <div *ngIf="appointmentList.length==0" class="tab-pane show active" id="history" >No records found</div>
                 <div class="tab-pane" id="Questionary">
                     <!-- <div class="tab-content">
                         <div class="tab-pane show active" id="history">

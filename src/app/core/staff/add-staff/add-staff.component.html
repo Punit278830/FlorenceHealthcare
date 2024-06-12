@@ -95,8 +95,8 @@
                                     <div class="form-group local-forms">
                                         <label for="Birth">Date Of Birth <span class="login-danger">*</span></label>
                                         <input class="form-control datetimepicker"
-                                            (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text" formControlName="dob"
-                                            matInput [matDatepicker]="dob">
+                                            (dateChange)="onDobDateChange($event)" placeholder="DD/MM/YYYY" type="text"
+                                            formControlName="dob" matInput [matDatepicker]="dob" [max]="maxDate">
                                         <mat-datepicker #dob></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
                                         <div *ngIf="staffReg.get('dob')?.invalid && (staffReg.get('dob')?.dirty || staffReg.get('dob')?.touched)"
@@ -244,7 +244,8 @@
                                     <div class="form-group local-forms">
                                         <label for="confirmpassword">Confirm Password <span
                                                 class="login-danger">*</span></label>
-                                        <input class="form-control" type="password"  formControlName="cpassword" [type]="passwordClass1 ? 'text' : 'password'">
+                                        <input class="form-control" type="password" formControlName="cpassword"
+                                            [type]="passwordClass1 ? 'text' : 'password'" (blur)="onBlur()">
                                         <span (click)="togglePassword1()" (keyup.enter)="togglePassword1()"
                                             [ngClass]="passwordClass1 ? 'feather icon-eye' : 'feather icon-eye-off'"
                                             class="profile-views toggle-password" tabindex="0"></span>
@@ -253,8 +254,10 @@
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('cpassword')?.errors?.['required']">This is
                                                 required.</div>
+                                            <div *ngIf="staffReg.hasError('passwordMismatch')">Passwords do not match.
+                                            </div>
                                         </div>
-                                        
+
                                     </div>
                                 </div>
 

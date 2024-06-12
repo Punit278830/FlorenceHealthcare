@@ -11,6 +11,7 @@ import { DepartmentService } from 'src/app/shared/Services/department/department
 import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-upload.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 interface data {
@@ -76,7 +77,8 @@ constructor(private patierntService:PatientService,private route:Router,
   private fileUploadService:FileUploadService,
   private staffScheduleService:StaffScheduleService,
   private toater:ToastrService,
-  private patientService:PatientService
+  private patientService:PatientService,
+  private modalservice:ModalServiceService,
   
   )
 {
@@ -91,6 +93,24 @@ constructor(private patierntService:PatientService,private route:Router,
 
 onEditPatient(id:number){
   this.patientService.patientId=id;
+
+}
+
+deletePatient(idhere:number){
+  this.modalservice.openModal({
+    type: 'patient',
+    id: idhere,
+    confirmCallback: () => this.confirmDelete(idhere)
+  });
+}
+
+confirmDelete(idhere:number){
+  this.patientService.deletePatient(idhere).subscribe(res => {
+    if (res == null) {
+      this.toater.success("Patient is deleted!")
+      this.getTableData()
+    }
+  })
 
 }
 

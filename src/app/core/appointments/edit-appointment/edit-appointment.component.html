@@ -134,8 +134,7 @@
                                         <label for="Date">Date of Appointment <span
                                                 class="login-danger">*</span></label>
                                         <input class="form-control  datetimepicker" formControlName="date" type="text"
-                                            matInput [matDatepicker]="picker"
-                                            (ngModelChange)="updateFormattedDateTime()">
+                                            matInput [matDatepicker]="picker" (dateChange)="onDobDateChange($event)">
                                         <mat-datepicker #picker></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="
                                                 picker"></mat-datepicker-toggle>

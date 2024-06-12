@@ -55,7 +55,7 @@ public partial class FlorenceDbContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-  //=> optionsBuilder.UseSqlServer("Server=.\\SQLEXPRESS01;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
+   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
   => optionsBuilder.UseSqlServer("Server=162.222.225.88;Database=florenceDb;User Id=mohit2024;Password=Spice@1234;TrustServerCertificate=True;");
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
@@ -322,7 +322,7 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("firstName");
       entity.Property(e => e.Gender)
-          .HasMaxLength(10)
+          .HasMaxLength(15)
           .IsUnicode(false)
           .HasColumnName("gender");
       entity.Property(e => e.LastName)
@@ -428,7 +428,7 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("firstName");
       entity.Property(e => e.Gender)
-          .HasMaxLength(10)
+          .HasMaxLength(15)
           .IsUnicode(false)
           .HasColumnName("gender");
       entity.Property(e => e.LastName)
