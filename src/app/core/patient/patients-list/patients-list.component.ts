@@ -97,8 +97,9 @@ export class PatientsListComponent implements OnInit {
   }
 
   onRefresh() {
-    this.patientList=[];
-    this.searchDataValue='';
+    this.patientList = [];
+    this.searchDataValue = '';
+    this.dateForm.reset();
     this.getTableData()
   }
 
@@ -109,7 +110,7 @@ export class PatientsListComponent implements OnInit {
     const from = this.dateForm.get('from')?.value || null;
     const to = this.dateForm.get('to')?.value || null;
     if (from !== null && to !== null) {
-      this.dateForm.reset();
+      // this.dateForm.reset();
       this.patientService.getPatientdateange(from, to).subscribe((data: any) => {
         this.totalData = data.length;
         // this.staffList.push(data);
@@ -135,8 +136,8 @@ export class PatientsListComponent implements OnInit {
       this.patientService.getPatientList().subscribe((data: any) => {
         this.totalData = data.length;
         // this.staffList.push(data);
-        this.allpatientList=data;
-        console.log("allpatients",this.allpatientList)
+        this.allpatientList = data;
+        console.log("allpatients", this.allpatientList)
 
         console.log(data)
         data.map((res: any, index: number) => {
@@ -257,13 +258,17 @@ export class PatientsListComponent implements OnInit {
   }
 
   public getMoreData(event: string): void {
-    if (event == 'next') {
+    console.log('Current Page:', this.currentPage);
+    console.log('Total Pages:', this.totalPages);
+    console.log('Patients List:', this.patientsList);
+
+    if (event == 'next' && this.currentPage < this.pageNumberArray.length) {
       this.currentPage++;
       this.pageIndex = this.currentPage - 1;
       this.limit += this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
       this.getTableData();
-    } else if (event == 'previous') {
+    } else if (event == 'previous' && this.currentPage > 1) {
       this.currentPage--;
       this.pageIndex = this.currentPage - 1;
       this.limit -= this.pageSize;
@@ -271,6 +276,7 @@ export class PatientsListComponent implements OnInit {
       this.getTableData();
     }
   }
+
 
   public moveToPage(pageNumber: number): void {
     this.currentPage = pageNumber;

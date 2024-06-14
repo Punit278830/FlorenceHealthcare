@@ -43,11 +43,13 @@
                                     <ul class="personal-info">
                                         <li style="width: 100%;">
                                             <span class="title">Phone:</span>
-                                            <span class="text"><a href="">{{patientInfo?patientInfo.mobile:''}}</a></span>
+                                            <span class="text"><a
+                                                    href="">{{patientInfo?patientInfo.mobile:''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
-                                            <span class="title">Email:</span>                    
-                                            <span class="text"><a href="">{{patientInfo.email?patientInfo.email :''}}</a></span>
+                                            <span class="title">Email:</span>
+                                            <span class="text"><a href="">{{patientInfo.email?patientInfo.email
+                                                    :''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
                                             <span class="title">Date of Birth:</span>
@@ -80,16 +82,17 @@
                         History</a>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="#Questionary" data-bs-toggle="tab">Questionary</a></li>
-               
-                <li *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'" class="nav-item"><a class="nav-link" href="#Prescription" data-bs-toggle="tab">Prescription</a></li>
+
+                <li *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'" class="nav-item"><a
+                        class="nav-link" href="#Prescription" data-bs-toggle="tab">Prescription</a></li>
                 <li class="nav-item"><a class="nav-link" href="#Preview" data-bs-toggle="tab">Preview</a></li>
             </ul>
 
             <div class="tab-content">
-                <div *ngIf="appointmentList.length>0" class="tab-pane show active" id="history">
+                <div class="tab-pane show active" id="history">
                     <div class="row">
                         <div class="col-md-12">
-                            <div   class="card-box">
+                            <div class="card-box">
                                 <h3 class="card-title">Appointment List</h3>
 
                                 <div class="col-12 col-md-6 col-xl-2" [formGroup]="profileForm">
@@ -191,7 +194,8 @@
                                         <tbody>
                                             <tr *ngFor="let data of appointmentList">
                                                 <td>{{data.date | date:'dd-MMM-yyyy' | uppercase}}</td>
-                                                <td><a  href="javascript:void(0);" (click)="updateAppointmentId(data.id)" >{{data.id}}</a></td>
+                                                <td><a href="javascript:void(0);"
+                                                        (click)="updateAppointmentId(data.id)">{{data.id}}</a></td>
                                                 <td><button class=" custom-badge status-gray" type="button"
                                                         (click)="showAppointmentData(data.id)">View</button></td>
                                             </tr>
@@ -217,13 +221,16 @@
 
                                     </div>
                                 </div>
+                                <!-- <div *ngIf="appointmentList.length==0" class="tab-pane show active">No records
+                                    found</div> -->
 
                             </div>
+
                         </div>
                     </div>
                 </div>
 
-                <div *ngIf="appointmentList.length==0" class="tab-pane show active" id="history" >No records found</div>
+
                 <div class="tab-pane" id="Questionary">
                     <!-- <div class="tab-content">
                         <div class="tab-pane show active" id="history">
@@ -333,7 +340,7 @@
                     <div class="card" *ngIf="vitalSubmitted">
                         <div class="card-body">
                             <div class="row">
-                               
+
                                 <div *ngFor="let data of questionnaireDto" class="col-12 col-md-12  col-xl-3"><a
                                         href="javascript:void(0);"
                                         (click)="mapQuestionAndOptions(data.questionnaireId)"><strong>{{data.questionnaireName}}</strong></a>
@@ -356,7 +363,7 @@
                                         <div class="form-heading">
                                             <h4>Vitals</h4>
                                         </div>
-                                       
+
                                     </div>
                                     <div class="col-12 col-md-12  col-xl-8">
                                         <form [formGroup]="vitalForm" (ngSubmit)="saveVItals(vitalForm) ">
@@ -750,26 +757,31 @@
                                                 <hr>
                                                 <div class="row">
                                                     <ng-container *ngIf="_doctorDto">
-                                                    <div class="col-12 col-md-6 col-xl-6">
-                                                        <h4><strong>Doctor Name:</strong> {{_doctorDto.firstName}}</h4>
-                                                        <h4><strong>Degree:</strong> {{_doctorDto.education}}</h4>
-                                                        <h4><strong>Designation:</strong>{{_doctorDto.designation}}</h4>
-                                                        <h4><strong>Email:</strong>{{_doctorDto.email}}</h4>
-                                                    </div>
-                                                </ng-container>
-                                                <ng-container *ngIf="patientInfo">
-                                                    <div class="col-12 col-md-6 col-xl-4">
-                                                   
+                                                        <div class="col-12 col-md-6 col-xl-6">
+                                                            <h4><strong>Doctor Name:</strong> {{_doctorDto.firstName}}
+                                                            </h4>
+                                                            <h4><strong>Degree:</strong> {{_doctorDto.education}}</h4>
+                                                            <h4><strong>Designation:</strong>{{_doctorDto.designation}}
+                                                            </h4>
+                                                            <h4><strong>Email:</strong>{{_doctorDto.email}}</h4>
+                                                        </div>
+                                                    </ng-container>
+                                                    <ng-container *ngIf="patientInfo">
+                                                        <div class="col-12 col-md-6 col-xl-4">
 
-                                                        <h4><strong>Patient Name:</strong>{{patientInfo.firstName}}</h4>
-                                                        <h4><strong>Age:</strong> {{patientAge}}</h4>
-                                                        <h4><strong>Gender:</strong>{{patientInfo.gender}}</h4>
-                                                        <h4><strong>HUID/ID
-                                                                proof:</strong>{{_appointmentDto ? _appointmentDto.identiyNumber : 'N/A' }}</h4>
-                                                                <h4><strong>Appointment Date:</strong>{{ _appointmentDto.date | date:'dd-MM-yyyy' || null }}</h4>
 
-                                                        <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
-                                                    </div>
+                                                            <h4><strong>Patient Name:</strong>{{patientInfo.firstName}}
+                                                            </h4>
+                                                            <h4><strong>Age:</strong> {{patientAge}}</h4>
+                                                            <h4><strong>Gender:</strong>{{patientInfo.gender}}</h4>
+                                                            <h4><strong>HUID/ID
+                                                                    proof:</strong>{{_appointmentDto ?
+                                                                _appointmentDto.identiyNumber : 'N/A' }}</h4>
+                                                            <h4><strong>Appointment Date:</strong>{{
+                                                                _appointmentDto.date | date:'dd-MM-yyyy' || null }}</h4>
+
+                                                            <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
+                                                        </div>
                                                     </ng-container>
                                                 </div>
                                                 <hr>
@@ -779,13 +791,13 @@
 
                                                         <ul *ngFor="let item of questionData">
                                                             <ng-container *ngIf="item.answerText">
-                                                            <li>{{item.questionText}}-<strong>{{item.answerText}}</strong>
-                                                            </li>
-                                                        </ng-container>
-                                                        <ng-container *ngIf="item.optionText">
-                                                            <li>{{item.questionText}}-<strong>{{item.optionText}}</strong>
-                                                            </li>
-                                                        </ng-container>
+                                                                <li>{{item.questionText}}-<strong>{{item.answerText}}</strong>
+                                                                </li>
+                                                            </ng-container>
+                                                            <ng-container *ngIf="item.optionText">
+                                                                <li>{{item.questionText}}-<strong>{{item.optionText}}</strong>
+                                                                </li>
+                                                            </ng-container>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -833,17 +845,17 @@
                                                 </div>
                                                 <div></div>
 
-                                               
-                                                    <div class="row">
-                                                        <ng-container *ngIf="displayImage.length>0">
+
+                                                <div class="row">
+                                                    <ng-container *ngIf="displayImage.length>0">
                                                         <div class="col-12 col-sm-6" *ngFor="let image of displayImage">
                                                             <h3>{{getFileNameWithoutExtension(image.fileName)}}</h3>
                                                             <img [src]="image.fileData" height="150" width="150" alt=""
                                                                 style="border: 2px solid #000" />
                                                         </div>
-                                                        </ng-container>
+                                                    </ng-container>
 
-                                                        <ng-container *ngIf="_consultationDto">
+                                                    <ng-container *ngIf="_consultationDto">
                                                         <div class="col-12" *ngIf="_consultationDto.examinationNote">
                                                             <div style="border: 2px solid black;">
                                                                 <h4><strong>Note:</strong>{{_consultationDto.examinationNote}}
@@ -882,42 +894,42 @@
                                                         </div>
                                                     </ng-container>
 
-                                                        <!-- display prescription Medicine code start from here -->
-                                                        <div class="table-responsive" *ngIf="medicineDto.length>0">
-                                                            <table
-                                                                class="table border-0 custom-table comman-table datatable mb-0">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th mat-sort-header="name">Medicine Name</th>
-                                                                        <th mat-sort-header="consultingDoctor">Type</th>
-                                                                        <th mat-sort-header="name">Dose</th>
-                                                                        <th mat-sort-header="consultingDoctor">Frequency
-                                                                        </th>
-                                                                        <th mat-sort-header="treatment">Timing</th>
-                                                                        <th mat-sort-header="treatment">Duration</th>
-                                                                        <th mat-sort-header="treatment">Instruction</th>
-                                                                        <th></th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    <tr *ngFor="let data of medicineDto">
+                                                    <!-- display prescription Medicine code start from here -->
+                                                    <div class="table-responsive" *ngIf="medicineDto.length>0">
+                                                        <table
+                                                            class="table border-0 custom-table comman-table datatable mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th mat-sort-header="name">Medicine Name</th>
+                                                                    <th mat-sort-header="consultingDoctor">Type</th>
+                                                                    <th mat-sort-header="name">Dose</th>
+                                                                    <th mat-sort-header="consultingDoctor">Frequency
+                                                                    </th>
+                                                                    <th mat-sort-header="treatment">Timing</th>
+                                                                    <th mat-sort-header="treatment">Duration</th>
+                                                                    <th mat-sort-header="treatment">Instruction</th>
+                                                                    <th></th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr *ngFor="let data of medicineDto">
 
-                                                                        <td>{{data.medName}}</td>
-                                                                        <td>{{data.medType}}</td>
-                                                                        <td>{{data.dose}}</td>
-                                                                        <td>{{data.frequency}}</td>
-                                                                        <td>{{data.timing}}</td>
-                                                                        <td>{{data.duration}}</td>
-                                                                        <td>{{data.instruction}}</td>
+                                                                    <td>{{data.medName}}</td>
+                                                                    <td>{{data.medType}}</td>
+                                                                    <td>{{data.dose}}</td>
+                                                                    <td>{{data.frequency}}</td>
+                                                                    <td>{{data.timing}}</td>
+                                                                    <td>{{data.duration}}</td>
+                                                                    <td>{{data.instruction}}</td>
 
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-
-
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
                                                     </div>
-                                                
+
+
+                                                </div>
+
 
                                             </div>
 
@@ -931,16 +943,16 @@
                         </div>
                         <button type="button" class="btn btn-primary m-2" (click)="exportConsultationToPdf()">Export to
                             PDF</button>
-                            <button type="button" class="btn btn-primary m-2 " (click)="print()">Print</button>
-                            
+                        <button type="button" class="btn btn-primary m-2 " (click)="print()">Print</button>
 
-                            
+
+
                     </div>
-                    
+
                 </div>
                 <!-- Preview section end here -->
 
-                
+
             </div>
         </div>
     </div>

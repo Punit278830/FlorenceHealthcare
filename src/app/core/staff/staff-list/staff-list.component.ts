@@ -9,6 +9,7 @@ import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { Idepartment, IstaffInfo, apiResultFormat, pageSelection, staffList } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-staff-list',
@@ -18,6 +19,7 @@ import { routes } from 'src/app/shared/routes/routes';
 export class StaffListComponent implements OnInit {
   public routes = routes;
   public staffList: Array<any> = [];
+  public allstaffList: Array<any> = [];
   dataSource!: MatTableDataSource<IstaffInfo>;
 
   public showFilter = false;
@@ -42,6 +44,7 @@ export class StaffListComponent implements OnInit {
     private staffService: StaffService,
     private departmentService: DepartmentService,
     private modalservice: ModalServiceService,
+    private route: Router,
     private toaster: ToastrService) {
     //this.fetchCombineData();
 
@@ -59,7 +62,7 @@ export class StaffListComponent implements OnInit {
     this.staffService.deleteStaff(idhere).subscribe(res => {
       if (res == null) {
         this.toaster.success("Staff is deleted!")
-        this.getTableData()
+        this.fetchCombineData()
       }
     })
 
@@ -70,12 +73,15 @@ export class StaffListComponent implements OnInit {
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     console.log("loggedin", this.loggedIn)
+
+
     //this.getTableData();
     this.fetchCombineData();
 
   }
-  onRefresh(){
-    this.staffList=[];
+  onRefresh() {
+    this.staffList = [];
+    this.searchDataValue = '';
     this.fetchCombineData()
   }
 
@@ -90,6 +96,7 @@ export class StaffListComponent implements OnInit {
       this.serialNumberArray = [];
 
       this.combinedData = staff.map((staffres: IstaffInfo) => {
+
         const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
         return {
           ...staffres,
@@ -98,15 +105,21 @@ export class StaffListComponent implements OnInit {
       });
       this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
+
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
           //console.log(res.DOJ)
           this.serialNumberArray.push(serialNumber);
         }
       });
-      this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
+    this.staffService.getStaffList().subscribe((data) => {
+      this.allstaffList = data;
+    })
+    this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
+
 
   }
   private getTableData() {
@@ -115,6 +128,7 @@ export class StaffListComponent implements OnInit {
 
     this.staffService.getStaffList().subscribe((data: any) => {
       this.totalData = data.length;
+      this.allstaffList = data;
       data.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
@@ -124,10 +138,11 @@ export class StaffListComponent implements OnInit {
         }
       });
 
-      this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
 
     })
+    this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
     console.log("stafflist", this.staffList)
 
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
@@ -159,7 +174,7 @@ export class StaffListComponent implements OnInit {
 
     }
     else {
-      this.getTableData()
+      this.fetchCombineData()
     }
 
   }
@@ -195,30 +210,14 @@ export class StaffListComponent implements OnInit {
       this.staffList = data;
     } else {
       this.staffList = data.sort((a, b) => {
-        console.log("a b", a, b);
-        const isAsc = sort.direction === "asc";
-        switch (sort.active) {
-          case "mobile":
-            return this.compare(a.mobile, b.mobile, isAsc);
-          case "joiningDate":
-            console.log("joiningDate");
-            return this.compare(a.doj, b.doj, !isAsc); // Change to !isAsc for latest at the top
-          default:
-            return 0;
-        }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const aValue = (a as any)[sort.active];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const bValue = (b as any)[sort.active];
+        return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
       });
     }
   }
-
-  compare(a: any, b: any, isAsc: boolean) {
-    if (typeof a === 'string' && typeof b === 'string') {
-      const dateA = new Date(a);
-      const dateB = new Date(b);
-      return (dateA < dateB ? -1 : 1) * (isAsc ? 1 : -1);
-    }
-    return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
-  }
-
 
   public getMoreData(event: string): void {
     if (event == 'next') {
@@ -277,7 +276,11 @@ export class StaffListComponent implements OnInit {
 
   onEditStaff(item: number) {
     this.staffService.staffId = item;
-    console.log("stafflist", this.staffList)
+    this.staffService.staffId = item;
 
+  }
+  moveToProfile(idhere: number) {
+    this.staffService.staffId = idhere;
+    this.route.navigate([routes.staffProfile])
   }
 }

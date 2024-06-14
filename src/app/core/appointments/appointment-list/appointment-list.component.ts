@@ -109,12 +109,14 @@ export class AppointmentListComponent implements OnInit {
 
   
   onRefresh() {
-    this.appintmentDateForm.get("appointmentFrom")?.patchValue(null)
-    this.appintmentDateForm.get("appointmentTo")?.patchValue(null)
+    this.appintmentDateForm.reset()
+    this.searchDataValue=''
+    
     this.fetchCombineData()
   }
 
   fetchCombineData() {
+    this.appointmentList = [];
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
@@ -158,7 +160,7 @@ export class AppointmentListComponent implements OnInit {
     forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
       // Combine data based on departmentId
       this.totalData = appointments.length;
-      this.appointmentList = [];
+      
       this.serialNumberArray = [];
       console.log("appointments", appointments)
 
