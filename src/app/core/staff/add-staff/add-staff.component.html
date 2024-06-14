@@ -112,7 +112,8 @@
                                         <label for="Birth">Date Of Joining <span class="login-danger">*</span></label>
                                         <input class="form-control datetimepicker"
                                             (dateChange)="onDOJDateChange($event)" placeholder="DD/MM/YYYY" type="text"
-                                            formControlName="doj" matInput [matDatepicker]="doj">
+                                            formControlName="doj" matInput [matDatepicker]="doj"
+                                            [min]="staffReg.get('dob')?.value">
                                         <mat-datepicker #doj></mat-datepicker>
                                         <mat-datepicker-toggle matIconSuffix [for]="doj"></mat-datepicker-toggle>
                                         <div *ngIf="staffReg.get('doj')?.invalid && (staffReg.get('doj')?.dirty || staffReg.get('doj')?.touched)"
@@ -122,6 +123,7 @@
                                         </div>
                                     </div>
                                 </div>
+
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group select-gender">

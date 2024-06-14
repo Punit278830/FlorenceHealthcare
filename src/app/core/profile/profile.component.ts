@@ -119,6 +119,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.appointmentYears.push(year);
     }
     this.selectedYear = currentYear;
+    console.log("current date",currentYear)
     this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.appointmentList]);
     this.initlizeProfileForm();
 

@@ -1,7 +1,87 @@
 <div class="page-wrapper">
     <div class="content">
+
+        <div class="row">
+
+            <div class="col-sm-7 col-6">
+                <ul class="breadcrumb">
+                    <li class="breadcrumb-item"><a [routerLink]="routes.adminDashboard">Dashboard </a></li>
+                    <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                    <li class="breadcrumb-item active">Patient Profile</li>
+                </ul>
+            </div>
+            <!-- DO NOT DELETE -->
+            <!-- <div class="col-sm-5 col-6 text-end m-b-30">
+                <a [routerLink]="routes.editProfile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit
+                    Profile</a>
+            </div> -->
+        </div>
+        <div class="card-box profile-header">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="profile-view">
+                        <div class="profile-img-wrap">
+                            <div class="profile-img">
+                                <a href="javascript:void(0);"><img class="avatar"
+                                        alt=""></a>
+                            </div>
+                        </div>
+                        <div class="profile-basic">
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <div class="profile-info-left" *ngIf="staffInfo">
+                                        <h3 class="user-name m-t-0 mb-0">{{staffInfo.firstName}}
+                                            {{staffInfo.lastName}}</h3>
+                                        <small class="text-muted">Staff</small>
+                                        <div class="staff-id">Staff ID : P-{{staffInfo.staffId}}</div>
+                                        <!-- DO NOT DELETE -->
+                                        <!-- <div class="staff-msg"><a [routerLink]="routes.chat"
+                                                class="btn btn-primary">Send Message</a></div> -->
+                                    </div>
+                                </div>
+                                <div class="col-md-7">
+                                    <ul class="personal-info">
+                                        <li style="width: 100%;">
+                                            <span class="title">Phone:</span>
+                                            <span class="text"><a
+                                                    href="">{{staffInfo?staffInfo.mobile:''}}</a></span>
+                                        </li>
+                                        <li style="width: 100%;">
+                                            <span class="title">Email:</span>
+                                            <span class="text"><a href="">{{staffInfo.email?staffInfo.email
+                                                    :''}}</a></span>
+                                        </li>
+                                        <li style="width: 100%;">
+                                            <span class="title">Date of Birth:</span>
+                                            <span class="text">{{staffInfo.dob}}</span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Address:</span>
+                                            <span class="text">{{staffInfo.address}}</span>
+                                        </li>
+
+                                        
+                                        <li>
+                                            <span class="title">Gender:</span>
+                                            <span class="text">{{staffInfo.gender}}</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+
+
+    <!-- <div class="page-wrapper">
+    <div class="content">
     
-        <!-- Page Header -->
+        
         <div class="page-header">
             <div class="row">
                 <div class="col-sm-12">
@@ -13,7 +93,7 @@
                 </div>
             </div>
         </div>
-        <!-- /Page Header -->
+        
         <div class="row">
             <div class="col-sm-12">
                 <div class="card">
@@ -310,4 +390,4 @@
         </div>
     </div>
 </div>
- 
+  -->
