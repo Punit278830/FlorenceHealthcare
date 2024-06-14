@@ -84,9 +84,12 @@ export class AddPatientComponent implements OnInit {
       email: ['', [Validators.email]],
       address: ['', [Validators.required]],
       gender: ['Male', [Validators.required]],
-      regstrationDate: [null, Validators.required]
+      regstrationDate: [null, Validators.required],
+      age: ['', ],
     })
   }
+
+  
 
 
   addPatient(patientData: FormGroup) {
@@ -115,6 +118,10 @@ export class AddPatientComponent implements OnInit {
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     this.patientReg.get('dob')?.setValue(dateOnly);
+    this.patientReg.get('age')?.setValue(null);
+
+    this.patientReg.get('age')?.disable()
+    
   }
 
   get $trigger(): Observable<void> {

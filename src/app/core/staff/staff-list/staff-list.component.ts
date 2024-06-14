@@ -93,6 +93,7 @@ export class StaffListComponent implements OnInit {
     forkJoin([staffData$, departmentData$]).subscribe(([staff, department]) => {
       this.totalData = staff.length;
       this.staffList = [];
+      this.allstaffList = [];
       this.serialNumberArray = [];
 
       this.combinedData = staff.map((staffres: IstaffInfo) => {
@@ -105,6 +106,7 @@ export class StaffListComponent implements OnInit {
       });
       this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
+        this.allstaffList.push(res)
 
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
@@ -115,9 +117,10 @@ export class StaffListComponent implements OnInit {
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
-    this.staffService.getStaffList().subscribe((data) => {
-      this.allstaffList = data;
-    })
+
+    // this.staffService.getStaffList().subscribe((data) => {
+    //   this.allstaffList = data;
+    // })
     this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
 
 
