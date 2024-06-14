@@ -9,7 +9,7 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { IpatientInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 interface data {
-  value: string ;
+  value: string;
 }
 @Component({
   selector: 'app-edit-patient',
@@ -19,61 +19,58 @@ interface data {
 })
 export class EditPatientComponent implements OnInit {
   public routes = routes;
-  public deleteIcon  = true;
-  public selectedValue! : string  ;
-  public patientReg!:FormGroup;
-  private _patientDto!:IpatientInfo;
-  private patientId!:number;
-  public camerastatus:any;
-  public trigger:Subject<void>=new Subject();
-  public previewImage!:string;
-  public btnLable='Capture Image';
-  
-  deleteIconFunc(){
+  public deleteIcon = true;
+  public selectedValue!: string;
+  public patientReg!: FormGroup;
+  private _patientDto!: IpatientInfo;
+  private patientId!: number;
+  public camerastatus: any;
+  public trigger: Subject<void> = new Subject();
+  public previewImage!: string;
+  public btnLable = 'Capture Image';
+
+  deleteIconFunc() {
     this.deleteIcon = !this.deleteIcon
   }
-  constructor(private fb:FormBuilder,
-    private patientService:PatientService,
-    private route:Router,
+  constructor(private fb: FormBuilder,
+    private patientService: PatientService,
+    private route: Router,
     private datePipe: DatePipe,
-    private toastr:ToastrService)
-  {
-    
-    this.patientId=patientService.patientId;
-    this.patientId?this.createPatient():this.route.navigate([routes.patientsList]);
-    
-    
+    private toastr: ToastrService) {
+
+    this.patientId = patientService.patientId;
+    this.patientId ? this.createPatient() : this.route.navigate([routes.patientsList]);
+
+
   }
   selectGender = [
-    {value: 'Male'},
-    {value: 'Female'},
-    {value: 'Transgender'},
+    { value: 'Male' },
+    { value: 'Female' },
+    { value: 'Transgender' },
   ];
   selectedList2: data[] = [
-    {value: 'Select City'},
-    {value: 'Alaska'},
-    {value: 'Los Angeles'},
+    { value: 'Select City' },
+    { value: 'Alaska' },
+    { value: 'Los Angeles' },
   ];
   selectedList3: data[] = [
-    {value: 'Select Country'},
-    {value: 'Usa'},
-    {value: 'Uk'},
-    {value: 'Italy'},
+    { value: 'Select Country' },
+    { value: 'Usa' },
+    { value: 'Uk' },
+    { value: 'Italy' },
   ];
   selectedList4: data[] = [
-    {value: 'Select State'},
-    {value: 'Alaska'},
-    {value: 'California'},
+    { value: 'Select State' },
+    { value: 'Alaska' },
+    { value: 'California' },
   ];
 
-  ngOnInit()
-  {
+  ngOnInit() {
 
     this.getPatientData(this.patientId);
   }
 
-  createPatient()
-  {
+  createPatient() {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['', Validators.required],
@@ -81,95 +78,115 @@ export class EditPatientComponent implements OnInit {
       mobile: ['', Validators.required],
       email: ['', [Validators.email]],
       address: ['', Validators.required],
-      gender:['Male',Validators.required],
-      regstrationDate:[null,Validators.required],
-      
-      
-  })
-}
+      gender: ['Male', Validators.required],
+      regstrationDate: [null, Validators.required],
+      age: [{ value: '', disabled: true }, Validators.required]
 
-getPatientData(id:number){
-  this.patientService.getPatientData(id).subscribe(data=>{
-    this._patientDto=data;
-    this.previewImage=data.patientImage;
-    this.patientReg.patchValue(this._patientDto);
-    
 
-  })
-}
-
-UpdatePatientInfo(patientData:FormGroup)
-{
-
-  if(patientData.valid){
-    console.log(patientData.value)
-  this._patientDto=patientData.value;
-  this._patientDto.patientId=this.patientId;
-  this._patientDto.patientImage=this.previewImage;
-  this.patientService.updatePatientData(this.patientId,this._patientDto).subscribe(res=>{
-    res?this.toastr.success("Patien info updated Successfully","Update Patient Info"):null;
-   this.route.navigate([routes.patientsList]);
-  })
-  
-  //this.resetAddPatientForm()
-
-  }
-  else{
-    patientData.markAllAsTouched()
-  }
-  
-}
-
-resetAddPatientForm(){
-  this.patientReg.reset();
-}
-onDobDateChange(event: any): void {
-    // Extract the date part only
-    // const datePipe = new DatePipe('en-US');
-    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    console.log('Selected Date (Date Only):', dateOnly);
-    this.patientReg.get('dob')?.setValue(dateOnly);
-    
-    
+    })
   }
 
-  enableCamera()
-  {
-    navigator.mediaDevices.getUserMedia({
-      video:{
-        width:100,
-        height:100
+  getPatientData(id: number) {
+    this.patientService.getPatientData(id).subscribe(data => {
+      this._patientDto = data;
+      this.previewImage = data.patientImage;
+      this.patientReg.patchValue(this._patientDto);
+
+      if (this._patientDto.dob) {
+        this.calculateAndSetAge(this._patientDto.dob);
       }
-    }).then((res)=>{
-      this.camerastatus=res;
+
+
+
+    })
+  }
+  private calculateAndSetAge(dob: Date): void {
+    const birthDate = new Date(dob);
+    const today = new Date();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    this.patientReg.get('age')?.setValue(age);
+  }
+
+  UpdatePatientInfo(patientData: FormGroup) {
+
+    if (patientData.valid) {
+      console.log(patientData.value)
+      this._patientDto = patientData.value;
+      this._patientDto.patientId = this.patientId;
+      this._patientDto.patientImage = this.previewImage;
+      this.patientService.updatePatientData(this.patientId, this._patientDto).subscribe(res => {
+        res ? this.toastr.success("Patien info updated Successfully", "Update Patient Info") : null;
+        this.route.navigate([routes.patientsList]);
+      })
+
+      //this.resetAddPatientForm()
+
+    }
+    else {
+      patientData.markAllAsTouched()
+    }
+
+  }
+
+  resetAddPatientForm() {
+    this.patientReg.reset();
+  }
+  onDobDateChange(event: any): void {
+    // Extract the date part only
+    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    this.patientReg.get('dob')?.setValue(dateOnly);
+
+    // Calculate age from date of birth
+    const dob = new Date(event.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    // Set age value in the form
+    this.patientReg.get('age')?.setValue(age);
+    this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
+  }
+
+  enableCamera() {
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: 100,
+        height: 100
+      }
+    }).then((res) => {
+      this.camerastatus = res;
       console.log(res);
-    }).catch(err=>{
+    }).catch(err => {
       console.log(err);
     })
     //this.camerastatus=!this.camerastatus;
   }
-get $trigger(): Observable<void>{
+  get $trigger(): Observable<void> {
     return this.trigger.asObservable();
   }
-  captureImage()
-  {
+  captureImage() {
     this.trigger.next();
     console.log()
   }
-  snapshot(event:WebcamImage)
-  {
+  snapshot(event: WebcamImage) {
 
-    this.previewImage=event.imageAsDataUrl;
-    this.btnLable='Re Capture Image';
-    this.camerastatus='';
+    this.previewImage = event.imageAsDataUrl;
+    this.btnLable = 'Re Capture Image';
+    this.camerastatus = '';
     console.log(event)
   }
-  cancel()
-  {
-    this.camerastatus='';
+  cancel() {
+    this.camerastatus = '';
 
   }
-  cancelEdit(){
+  cancelEdit() {
     this.route.navigate([routes.patientsList])
   }
 }
