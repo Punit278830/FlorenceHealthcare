@@ -115,14 +115,22 @@ export class AddPatientComponent implements OnInit {
 
   onDobDateChange(event: any): void {
     // Extract the date part only
-    // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     this.patientReg.get('dob')?.setValue(dateOnly);
-    this.patientReg.get('age')?.setValue(null);
 
-    this.patientReg.get('age')?.disable()
-    
-  }
+    // Calculate age from date of birth
+    const dob = new Date(event.value);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+
+    // Set age value in the form
+    this.patientReg.get('age')?.setValue(age);
+    this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
+}
 
   get $trigger(): Observable<void> {
     return this.trigger.asObservable();
