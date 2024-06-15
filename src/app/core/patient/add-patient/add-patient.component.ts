@@ -85,11 +85,11 @@ export class AddPatientComponent implements OnInit {
       address: ['', [Validators.required]],
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
-      age: ['', ],
+      age: ['',],
     })
   }
 
-  
+
 
 
   addPatient(patientData: FormGroup) {
@@ -124,13 +124,13 @@ export class AddPatientComponent implements OnInit {
     let age = today.getFullYear() - dob.getFullYear();
     const monthDiff = today.getMonth() - dob.getMonth();
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-        age--;
+      age--;
     }
 
     // Set age value in the form
     this.patientReg.get('age')?.setValue(age);
     this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
-}
+  }
 
   get $trigger(): Observable<void> {
     return this.trigger.asObservable();
