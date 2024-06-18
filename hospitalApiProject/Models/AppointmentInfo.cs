@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -19,7 +19,9 @@ public partial class AppointmentInfo
 
     public string? Notes { get; set; }
 
-    public string? AppointmentStatus { get; set; }
+  public string? appointTime { get; set; }
+
+  public string? AppointmentStatus { get; set; }
 
     public int Fee { get; set; }
 

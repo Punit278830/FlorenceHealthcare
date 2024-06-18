@@ -140,10 +140,25 @@
                                                 picker"></mat-datepicker-toggle>
                                     </div>
                                 </div>
+                                <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                      <label for="AppointTime">Appointment Time <span class="login-danger">*</span></label>
+                                      <timepicker [(ngModel)]="bookappointment.value.appointTime"
+                                                  formControlName="appointTime" 
+                                                  [showMeridian]="true" [hourStep]="1" [minuteStep]="1"></timepicker>
+                                      <div *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
+                                          class="text-danger">
+                                        <div *ngIf="bookappointment.get('appointTime')?.errors?.['required']">
+                                          Appointment Time is required.
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
 
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="Consulting">Department</label>
+                                        <label for="Consulting">Department<span
+                                            class="login-danger">*</span></label>
                                         <mat-select formControlName="departmentId" class="form-control select"
                                             placeholder="Select Department" (selectionChange)="loadDoctorData($event)">
                                             <mat-option *ngFor="let data of departmentList" [value]="data.departmentId">
@@ -154,7 +169,8 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="Consulting">Consulting Doctor</label>
+                                        <label for="Consulting">Consulting Doctor<span
+                                            class="login-danger">*</span></label>
                                         <mat-select formControlName="doctorId" formControlName="doctorId"
                                             class="form-control select" placeholder="Select Doctor"
                                             (selectionChange)="addFee($event)">
@@ -166,7 +182,8 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="Consulting">Appointment Status</label>
+                                        <label for="Consulting">Appointment Status<span
+                                            class="login-danger">*</span></label>
                                         <mat-select formControlName="doctorId" formControlName="appointmentStatus"
                                             class="form-control select" placeholder="Appointment Status">
                                             <mat-option *ngFor="let data of appointmentStatusData" [value]="data.value">
@@ -179,7 +196,8 @@
 
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="Consulting">Identity Proof</label>
+                                        <label for="Consulting">Identity Proof<span
+                                            class="login-danger">*</span></label>
                                         <mat-select formControlName="doctorId" formControlName="IdentiyName"
                                             class="form-control select" placeholder="Select Identity">
                                             <mat-option *ngFor="let data of IdentityDocNumber" [value]="data.value">
@@ -188,9 +206,9 @@
                                         </mat-select>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-4">
+                                <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="lastname">Identity Number <span
+                                        <label for="lastname">Identity Number  <span
                                                 class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="IdentiyNumber" type="text"
                                             placeholder="Enter Identity doc Number">

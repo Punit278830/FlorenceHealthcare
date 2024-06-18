@@ -16,9 +16,13 @@ import {
 } from 'ng-apexcharts';
 import { Sort } from '@angular/material/sort';
 import { DataService } from 'src/app/shared/data/data.service';
-import { recentPatients, upcomingAppointments } from 'src/app/shared/models/models';
+import { Iappointment, IpatientInfo, apiResultFormat, recentPatients, upcomingAppointments } from 'src/app/shared/models/models';
 import { AuthService } from 'src/app/shared/auth/auth.service';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
+import { PatientService } from 'src/app/shared/Services/patient/patient.service';
+import { forkJoin } from 'rxjs';
+import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 export type ChartOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   series: ApexAxisChartSeries | any;
@@ -62,18 +66,23 @@ export class AdminDashboardComponent implements OnInit {
   public chartOptionsOne: Partial<ChartOptions>;
   public chartOptionsTwo: Partial<ChartOptions>;
 
-  public recentPatients: Array<recentPatients> = [];
-  public upcomingAppointments: Array<upcomingAppointments> = [];
+  public recentPatients: Array<any> = [];
+  public upcomingAppointments: Array<any> = [];
   public CurrentTime=0;
   public greetingMsg='Good Morning';
   public userName='';
   public appCount=0;
   public consultatCount=0;
   public earning=0;
+  public combinedData:any[]  = [];
+  public departments:any[]  = []
  
   constructor(public data : DataService,
     private _auth:AuthService,
-    private appointmentService:AppointmentService) {
+    private appointmentService:AppointmentService,
+  private patientService:PatientService,
+private staffService:StaffService,
+private departmentService:DepartmentService) {
     this.chartOptionsOne = {
       chart: {
         height: 230,
@@ -128,6 +137,11 @@ export class AdminDashboardComponent implements OnInit {
           name: 'Female',
           color: '#00D3C7',
           data: [13, 23, 20, 8, 13, 27, 30, 25, 10, 15, 20],
+        },
+        {
+          name: 'Transgender',
+          color: '#FF0000',
+          data: [10, 20, 31, 57, 62, 53, 70, 10, 30, 20, 40],
         },
       ],
       xaxis: {
@@ -184,8 +198,8 @@ export class AdminDashboardComponent implements OnInit {
         }
     }],
     };
-    this.recentPatients = this.data.recentPatients;
-    this.upcomingAppointments = this.data.upcomingAppointments;
+//     this.recentPatients = this.data.getPatientsList().slice(0, 5);
+// this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
     
   }
 public ngOnInit(){
@@ -195,7 +209,84 @@ this.userName=data.fname +" "+data.lname;
 this.appointmentCount();
 this.consultationCount();
 this.totalEarning();
+this.loadRecentPatients();
+    // this.loadUpcomingAppointments();
+    this.fetchCombineData()
 }
+
+loadRecentPatients(): void {
+  this.patientService.getPatientList().subscribe((result) => {
+    console.log('patients', result);
+    this.recentPatients = result.slice(0, 5);
+  });
+}
+
+loadUpcomingAppointments(): void {
+  this.appointmentService.getAppointmentList().subscribe((result) => {
+    console.log('appointments', result);
+    this.upcomingAppointments = result.slice(0, 5);
+  });
+}
+
+fetchCombineData() {
+  this.upcomingAppointments = [];
+  
+
+  let appointmentData$;
+  appointmentData$ = this.appointmentService.getAppointmentList();
+  
+
+ 
+  const departmentData$ = this.departmentService.getDepartmentList();
+  const staffData$ = this.staffService.getDoctorsList();
+  const patientData$ = this.patientService.getPatientList();
+  forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
+    // Combine data based on departmentId
+    
+    console.log("department", departments)
+    this.departments=departments.slice(0,5);
+    console.log("sliced",this.departments)
+
+    if (appointments.message === "No records found") {
+      this.upcomingAppointments=[];
+      
+      
+
+    }
+    else {
+      this.combinedData = appointments.map((appointment: any) => {
+        const doctor = staffs.find((doctor: any) => doctor.staffId === appointment.doctorId)
+        const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
+        const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
+
+
+        return {
+          ...appointment,
+          doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
+          doctorLname: doctor ? doctor.lastName : '',
+          departmentName: department ? department.departmentName : 'Unknown Department',
+          patientFname: patients ? patients.firstName : 'Unknon Patients',
+          patientLname: patients ? patients.lastName : 'Unknon Patients',
+          patientId: patients ? patients.patientId : 'Unknon Patients'
+        };
+
+      });
+
+
+      this.combinedData.map((res: any, index: number) => {
+        const serialNumber = index + 1;
+        if (index >= 0 && serialNumber <= 5) {
+          // this.calculateDateDifference(res.dob);
+          // res.ageinYear=this.age;
+
+          this.upcomingAppointments.push(res);
+          
+        }
+      });
+
+    }
+  })}
+
 
 public getGreetingMsg()
   {

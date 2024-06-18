@@ -22,8 +22,7 @@
                     <div class="profile-view">
                         <div class="profile-img-wrap">
                             <div class="profile-img">
-                                <a href="javascript:void(0);"><img class="avatar"
-                                        alt=""></a>
+                                <a href="javascript:void(0);"><img class="avatar" alt=""></a>
                             </div>
                         </div>
                         <div class="profile-basic">
@@ -43,8 +42,7 @@
                                     <ul class="personal-info">
                                         <li style="width: 100%;">
                                             <span class="title">Phone:</span>
-                                            <span class="text"><a
-                                                    href="">{{staffInfo?staffInfo.mobile:''}}</a></span>
+                                            <span class="text"><a href="">{{staffInfo?staffInfo.mobile:''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
                                             <span class="title">Email:</span>
@@ -60,7 +58,7 @@
                                             <span class="text">{{staffInfo.address}}</span>
                                         </li>
 
-                                        
+
                                         <li>
                                             <span class="title">Gender:</span>
                                             <span class="text">{{staffInfo.gender}}</span>
@@ -71,9 +69,47 @@
                         </div>
                     </div>
                 </div>
+
+
+                
             </div>
         </div>
-        
+
+        <div class="boxOuter">
+            <ul class="personal-info">
+                <li style="width: 100%;">
+                    <span class="title">Designation:</span>
+                    <span class="text"><a href="">{{staffInfo?staffInfo.designation:''}}</a></span>
+                </li>
+                <li style="width: 100%;">
+                    <span class="title">Date of joining:</span>
+                    <span class="text"><a href="">{{staffInfo.doj?staffInfo.doj
+                            :''}}</a></span>
+                </li>
+                <li style="width: 100%;">
+                    <span class="title">Education:</span>
+                    <span class="text"><a href="">{{staffInfo.education?staffInfo.education
+                            :''}}</a></span>
+                </li>
+                <!-- <li style="width: 100%;">
+                    <span class="title">Date of Birth:</span>
+                    <span class="text">{{staffInfo.dob}}</span>
+                </li>
+                <li>
+                    <span class="title">Address:</span>
+                    <span class="text">{{staffInfo.address}}</span>
+                </li>
+
+
+                <li>
+                    <span class="title">Gender:</span>
+                    <span class="text">{{staffInfo.gender}}</span>
+                </li> -->
+            </ul>
+
+
+        </div>
+
     </div>
 
 

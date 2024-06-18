@@ -6,6 +6,7 @@ import { EditAppointmentComponent } from './edit-appointment.component';
 import { SharedModule } from 'src/app/shared/shared.module';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
+import { TimepickerModule } from 'ngx-bootstrap/timepicker';
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import { NgxSpinnerModule } from 'ngx-spinner';
     
     SharedModule,
     ToastrModule.forRoot(),
-    NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' })
+    NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' }),
+    TimepickerModule.forRoot()
     
   ]
 })

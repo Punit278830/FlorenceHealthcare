@@ -39,8 +39,9 @@
                     </div> -->
                     <div class="dash-content dash-count">
                         <h4>Appointments</h4>
-                        <h2><span class="counter-up" [countUp]="appCount" [options]="{duration: 10}">{{appCount}}</span></h2>
-                        
+                        <h2><span class="counter-up" [countUp]="appCount" [options]="{duration: 10}">{{appCount}}</span>
+                        </h2>
+
                     </div>
                 </div>
             </div>
@@ -51,7 +52,8 @@
                     </div> -->
                     <div class="dash-content dash-count">
                         <h4>Consultations</h4>
-                        <h2><span class="counter-up" [countUp]="consultatCount" [options]="{duration: 10}">{{consultatCount}}</span></h2>
+                        <h2><span class="counter-up" [countUp]="consultatCount"
+                                [options]="{duration: 10}">{{consultatCount}}</span></h2>
                         <!-- <p><span class="passive-view"><i class="feather icon-arrow-up-right me-1"></i>20%</span> vs last
                             month</p> -->
                     </div>
@@ -77,8 +79,9 @@
                     </div> -->
                     <div class="dash-content dash-count">
                         <h4>Earnings</h4>
-                        <h2>₹<span class="counter-up" [countUp]="earning" [options]="{duration: 10}">{{earning}}</span></h2>
-                        
+                        <h2>₹<span class="counter-up" [countUp]="earning" [options]="{duration: 10}">{{earning}}</span>
+                        </h2>
+
                     </div>
                 </div>
             </div>
@@ -91,8 +94,9 @@
                             <h4>Patient Visit by Gender</h4>
                             <div>
                                 <ul class="nav chat-user-total">
-                                    <li><i class="fa fa-circle current-users" aria-hidden="true"></i>Male 75%</li>
-                                    <li><i class="fa fa-circle old-users" aria-hidden="true"></i> Female 25%</li>
+                                    <li><i class="fa fa-circle current-users" aria-hidden="true"></i>Male 70%</li>
+                                    <li><i class="fa fa-circle old-users" aria-hidden="true"></i> Female 20%</li>
+                                    <li><i class="fa fa-circle current-users" aria-hidden="true"></i>Transgender 10%</li>
                                 </ul>
                             </div>
                             <div class="form-group mb-0">
@@ -134,19 +138,19 @@
             <div class="col-12 col-md-12  col-xl-4">
                 <div class="card top-departments">
                     <div class="card-header">
-                        <h4 class="card-title mb-0">Top Departments</h4>
+                        <h4 class="card-title mb-0">Recent Departments</h4>
                     </div>
                     <div class="card-body">
-                        <div class="activity-top">
+                        <div class="activity-top" *ngFor="let data of departments">
                             <div class="activity-boxs comman-flex-center">
                                 <img src="assets/img/icons/dep-icon-01.svg" alt="">
                             </div>
                             <div class="departments-list">
-                                <h4>General Physician</h4>
-                                <p>35%</p>
+                                <h4>{{data.departmentName}}</h4>
+                                <!-- <p>35%</p> -->
                             </div>
                         </div>
-                        <div class="activity-top">
+                        <!-- <div class="activity-top">
                             <div class="activity-boxs comman-flex-center">
                                 <img src="assets/img/icons/dep-icon-02.svg" alt="">
                             </div>
@@ -181,14 +185,14 @@
                                 <h4>Opthomology</h4>
                                 <p>20%</p>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
             <div class="col-12 col-md-12  col-xl-8">
                 <div class="card">
                     <div class="card-header">
-                        <h4 class="card-title d-inline-block">Upcoming Appointments</h4> <a
+                        <h4 class="card-title d-inline-block">Recent Appointments</h4> <a
                             [routerLink]="routes.appointmentList" class="patient-views float-end">Show all</a>
                     </div>
                     <div class="card-body p-0 table-dash">
@@ -197,7 +201,7 @@
                                 class="table mb-0 border-0 datatable custom-table">
                                 <thead>
                                     <tr>
-                                        <th mat-sort-header="checkbox">
+                                        <!-- <th mat-sort-header="checkbox">
                                             <div class="form-check check-tables">
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
@@ -206,13 +210,17 @@
                                         <th mat-sort-header="patientName">Patient name</th>
                                         <th mat-sort-header="doctor">Doctor</th>
                                         <th mat-sort-header="time">Time</th>
-                                        <th mat-sort-header="disease">Disease</th>
+                                        <th mat-sort-header="disease">Disease</th> -->
+                                        <th mat-sort-header="name">Patient Name</th>
+                                        <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
+                                        <th mat-sort-header="status">Status</th>
+                                        <th mat-sort-header="time">Time</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let data of upcomingAppointments">
-                                        <td>
+                                        <!-- <td>
                                             <div class="form-check check-tables">
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
@@ -223,8 +231,15 @@
                                             <img width="28" height="28" class="rounded-circle" [src]="data.img" alt="">
                                             <h2>{{data.doctor}}</h2>
                                         </td>
-                                        <td class="appoint-time"><span>{{data.date}} </span>{{data.time}}</td>
-                                        <td><button class="custom-badge status-green ">{{data.disease}}</button></td>
+                                        <td class="appoint-time"><span>{{data.date}} </span>{{data.appointTime}}</td>
+                                        <td><button class="custom-badge status-green ">{{data.disease}}</button></td> -->
+                                        <td> {{data.patientFname}}
+                                            {{data.patientLname}}</td>
+                                        <td>{{data.doctorFname}} {{data.doctorLname}}</td>
+                                        <td><button
+                                            [ngClass]="{'status-green' : data.appointmentStatus === 'Active', 'status-pink' : data.appointmentStatus === 'In Active','status-gray' : data.appointmentStatus === 'Cancel'}"
+                                            class="custom-badge">{{data.appointmentStatus}}</button></td>
+                                        <td>{{data.appointTime||0}}</td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
                                                 <a href="javascript:void(0);" class="action-icon dropdown-toggle"
@@ -260,7 +275,7 @@
                                 class="table mb-0 border-0 datatable custom-table">
                                 <thead>
                                     <tr>
-                                        <th mat-sort-header="checkbox">
+                                        <!-- <th mat-sort-header="checkbox">
                                             <div class="form-check check-tables">
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
@@ -269,14 +284,18 @@
                                         <th mat-sort-header="patientName">Patient name</th>
                                         <th mat-sort-header="age">Age</th>
                                         <th mat-sort-header="dateOfBirth">Date of Birth</th>
-                                        <th mat-sort-header="diagnosis">Diagnosis</th>
-                                        <th mat-sort-header="triage">Triage</th>
+                                        <th mat-sort-header="diagnosis">Diagnosis</th> -->
+                                        <!-- <th mat-sort-header="triage">Triage</th> -->
+                                        <th mat-sort-header="name">Name</th>
+                                        <th mat-sort-header="mobile">Mobile</th>
+                                        <th mat-sort-header="email">Email</th>
+                                        <th mat-sort-header="gender">Gender</th>
                                         <th></th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let data of recentPatients">
-                                        <td>
+                                        <!-- <td>
                                             <div class="form-check check-tables">
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
@@ -287,11 +306,23 @@
                                             <h2>{{data.patientName}}</h2>
                                         </td>
                                         <td>{{data.age}}</td>
-                                        <td>{{data.dateOfBirth}}</td>
-                                        <td>{{data.diagnosis}}</td>
-                                        <td><button
+                                        <td>{{data.dateOfBirth}}</td> -->
+                                        <!-- <td>{{data.diagnosis}}</td> -->
+                                        <!-- <td><button
                                                 [ngClass]="{'status-green': data.triage === 'Non Urgent', 'status-pink' : data.triage === 'Emergency','status-gray' : data.triage === 'Out Patient','status-orange' : data.triage === 'Urgent' }"
-                                                class="custom-badge">{{data.triage}}</button></td>
+                                                class="custom-badge">{{data.triage}}</button></td> -->
+                                        <td class="profile-image"> <a href="javascript:;">
+                                                {{data.firstName}}
+                                                {{data.lastName}}</a>
+                                        </td>
+
+                                        <!-- <td class="profile-image"> <a href="javascript:;" (click)="movetoBookappointment(data.patientId)">
+                                                    {{data.firstName}}
+                                                    {{data.lastName}}</a>
+                                                </td> -->
+                                        <td><a href="javascript:;">{{data.mobile}}</a></td>
+                                        <td>{{data.email}}</td>
+                                        <td>{{data.gender}}</td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
                                                 <a href="javascript:void(0);" class="action-icon dropdown-toggle"

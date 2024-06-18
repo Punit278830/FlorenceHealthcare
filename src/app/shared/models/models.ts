@@ -1,3 +1,4 @@
+import { Time } from "@angular/common";
 import { DateTime } from "luxon";
 
 export interface pageSelection {
@@ -199,6 +200,7 @@ export interface Iappointment {
   fee: number;
   identiyName: string;
   identiyNumber: string;
+  appointTime:string;
 
 }
 
