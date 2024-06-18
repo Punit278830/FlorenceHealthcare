@@ -110,8 +110,7 @@ export class EditAppointmentComponent implements OnInit {
     this.bookappointment.get('departmentId')?.patchValue(appointmentData.departmentid);
     this.bookappointment.get('notes')?.patchValue(appointmentData.notes);
     this.bookappointment.get('appointmentStatus')?.patchValue(appointmentData.appointmentStatus);
-    this.bookappointment.get('IdentiyName')?.patchValue(appointmentData.identiyName);
-    this.bookappointment.get('IdentiyNumber')?.patchValue(appointmentData.identiyNumber);
+    
     this.bookappointment.get('date')?.patchValue(appointmentData.date);
     this.bookappointment.get('doctorId')?.patchValue(appointmentData.doctorId);
     // Assuming appointmentData.appointTime = "09:30 AM"
@@ -205,8 +204,8 @@ export class EditAppointmentComponent implements OnInit {
     this.appointmentDto.date = appointment.value.date;
     this.appointmentDto.doctorId = appointment.value.doctorId;
     this.appointmentDto.notes = appointment.value.notes;
-    this.appointmentDto.identiyName = appointment.value.IdentiyName;
-    this.appointmentDto.identiyNumber = appointment.value.IdentiyNumber;
+    // this.appointmentDto.identiyName = appointment.value.IdentiyName;
+    // this.appointmentDto.identiyNumber = appointment.value.IdentiyNumber;
     this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
     this.appointmentDto.appointTime = formattedTime;
 

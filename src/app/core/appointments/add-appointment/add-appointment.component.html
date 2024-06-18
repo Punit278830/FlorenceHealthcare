@@ -233,40 +233,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-md-6 col-xl-6">
-                                            <div class="form-group local-forms">
-                                                <label for="Consulting">Identity Proof<span
-                                                        class="login-danger">*</span></label>
-                                                <mat-select formControlName="IdentiyName" formControlName="IdentiyName"
-                                                    class="form-control select" placeholder="Select Identity">
-                                                    <mat-option *ngFor="let data of IdentityDocNumber"
-                                                        [value]="data.value">
-                                                        {{data.value}}
-                                                    </mat-option>
-                                                </mat-select>
-                                                <div *ngIf="bookappointment.get('IdentiyName')?.invalid && (bookappointment.get('IdentiyName')?.dirty || bookappointment.get('IdentiyName')?.touched)"
-                                                    class="text-danger">
-                                                    <div
-                                                        *ngIf="bookappointment.get('IdentiyName')?.errors?.['required']">
-                                                        Proof is required.</div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-6 col-xl-6">
-                                            <div class="form-group local-forms">
-                                                <label for="lastname">Identity Number <span
-                                                        class="login-danger">*</span></label>
-                                                <input class="form-control" formControlName="IdentiyNumber" type="text"
-                                                    placeholder="Enter Identity doc Number">
-                                                <div *ngIf="bookappointment.get('IdentiyNumber')?.invalid && (bookappointment.get('IdentiyNumber')?.dirty || bookappointment.get('IdentiyNumber')?.touched)"
-                                                    class="text-danger">
-                                                    <div
-                                                        *ngIf="bookappointment.get('IdentiyNumber')?.errors?.['required']">
-                                                        Number is required.</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <div class="col-12 col-sm-12">
                                             <div class="form-group local-forms">
                                                 <label for="Notes">Notes <span class="login-danger">*</span></label>

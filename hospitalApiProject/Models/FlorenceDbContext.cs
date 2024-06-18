@@ -338,6 +338,12 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("patientImage");
       entity.Property(e => e.RegstrationDate).HasColumnName("regstrationDate");
+      entity.Property(e => e.IdentityName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.IdentityNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<PatientMedication>(entity =>

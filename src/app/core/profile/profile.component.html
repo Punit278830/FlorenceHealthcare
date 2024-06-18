@@ -68,6 +68,14 @@
                                             <span class="title">Gender:</span>
                                             <span class="text">{{patientInfo.gender}}</span>
                                         </li>
+                                        <li>
+                                            <span class="title">Idendity Proof:</span>
+                                            <span class="text">{{patientInfo.IdentityName}}</span>
+                                        </li>
+                                        <li>
+                                            <span class="title">Idendity Number:</span>
+                                            <span class="text">{{patientInfo.IdentityNumber}}</span>
+                                        </li>
                                     </ul>
                                 </div>
                             </div>
@@ -774,9 +782,9 @@
                                                             </h4>
                                                             <h4><strong>Age:</strong> {{patientAge}}</h4>
                                                             <h4><strong>Gender:</strong>{{patientInfo.gender}}</h4>
-                                                            <h4><strong>HUID/ID
+                                                            <!-- <h4><strong>HUID/ID
                                                                     proof:</strong>{{_appointmentDto ?
-                                                                _appointmentDto.identiyNumber : 'N/A' }}</h4>
+                                                                _appointmentDto.identiyNumber : 'N/A' }}</h4> -->
                                                             <h4><strong>Appointment Date:</strong>{{
                                                                 _appointmentDto.date | date:'dd-MM-yyyy' || null }}</h4>
 

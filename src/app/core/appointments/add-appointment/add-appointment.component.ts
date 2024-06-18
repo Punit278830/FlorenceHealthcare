@@ -246,14 +246,7 @@ export class AddAppointmentComponent implements OnInit {
     { value: 'Cancel' },
   ];
 
-  IdentityDocNumber = [
-    { value: 'Aadhar Card' },
-    { value: 'Driving Licence' },
-    { value: 'voterID' },
-    { value: 'ABHA ID' },
-    { value: 'Passport' },
-
-  ]
+  
 
   appointmentFormInitlize() {
     this.bookappointment = this.fb.group({
@@ -261,8 +254,7 @@ export class AddAppointmentComponent implements OnInit {
       doctorId: ['', Validators.required],
       notes: ['', Validators.required],
       appointmentStatus: ['Active', Validators.required],
-      IdentiyNumber: ['', Validators.required],
-      IdentiyName: ['', Validators.required],
+      
       departmentid: ['', Validators.required],
       appointTime: [null, Validators.required],
 
@@ -363,8 +355,7 @@ export class AddAppointmentComponent implements OnInit {
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-      this.appointmentDto.identiyName = appointment.value.IdentiyName;
-      this.appointmentDto.identiyNumber = appointment.value.IdentiyNumber;
+      
       this.appointmentDto.appointTime = formattedTime;
       console.log("tme", this.appointmentDto)
       //this.appointmentDto.departmentId=3;

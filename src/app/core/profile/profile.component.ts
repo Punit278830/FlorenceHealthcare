@@ -171,10 +171,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   loadPatientInfo() {
-    this.patientService.getPatientData(this.patientId).subscribe((data: IpatientInfo) => {
+    this.patientService.getPatientData(this.patientId).subscribe((data) => {
       this.patientInfo = data;
+      this.patientInfo.IdentityName=data.identityName;
+      this.patientInfo.IdentityNumber=data.identityNumber;
       this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
-      console.log("patient Info  hh" + this.patientInfo);
+      console.log("patient Info  hh" ,this.patientInfo);
     })
   }
 

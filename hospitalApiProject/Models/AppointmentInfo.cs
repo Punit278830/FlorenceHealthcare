@@ -25,7 +25,5 @@ public partial class AppointmentInfo
 
     public int Fee { get; set; }
 
-    public string? IdentiyName { get; set; }
-
-    public string? IdentiyNumber { get; set; }
+    
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -24,4 +24,8 @@ public partial class PatientInfo
     public string? PatientImage { get; set; }
 
     public DateOnly? RegstrationDate { get; set; }
+
+  public string? IdentityName { get; set; }
+
+  public string? IdentityNumber { get; set; }
 }
