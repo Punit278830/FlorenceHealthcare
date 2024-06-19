@@ -147,15 +147,10 @@ public partial class FlorenceDbContext : DbContext
           .HasColumnType("datetime")
           .HasColumnName("date");
       entity.Property(e => e.Departmentid).HasColumnName("departmentid");
-      entity.Property(e => e.appointTime).HasColumnName("AppointmentTime");
+      entity.Property(e => e.AppointTime).HasColumnName("AppointmentTime");
       entity.Property(e => e.DoctorId).HasColumnName("doctorId");
       entity.Property(e => e.Fee).HasColumnName("fee");
-      entity.Property(e => e.IdentiyName)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.IdentiyNumber)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+     
       entity.Property(e => e.Notes)
           .HasMaxLength(500)
           .IsUnicode(false)
