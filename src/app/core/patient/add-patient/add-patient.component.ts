@@ -114,7 +114,7 @@ export class AddPatientComponent implements OnInit {
         res ? this.toater.success("Patient added successfully", "Add Patient") : null;
         this.resetAddPatientForm();
         console.log("res",res)
-        // this.route.navigate([routes.addAppointment]);
+        this.route.navigate([routes.patientsList]);
       })
     }
     else {
