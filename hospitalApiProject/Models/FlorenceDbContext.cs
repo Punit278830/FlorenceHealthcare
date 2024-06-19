@@ -147,6 +147,7 @@ public partial class FlorenceDbContext : DbContext
           .HasColumnType("datetime")
           .HasColumnName("date");
       entity.Property(e => e.Departmentid).HasColumnName("departmentid");
+      entity.Property(e => e.appointTime).HasColumnName("AppointmentTime");
       entity.Property(e => e.DoctorId).HasColumnName("doctorId");
       entity.Property(e => e.Fee).HasColumnName("fee");
       entity.Property(e => e.IdentiyName)
@@ -337,6 +338,12 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("patientImage");
       entity.Property(e => e.RegstrationDate).HasColumnName("regstrationDate");
+      entity.Property(e => e.IdentityName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.IdentityNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<PatientMedication>(entity =>

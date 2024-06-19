@@ -40,6 +40,14 @@ export class AddPatientComponent implements OnInit {
 
     this.createPatient();
   }
+  IdentityDocNumber = [
+    { value: 'Aadhar Card' },
+    { value: 'Driving Licence' },
+    { value: 'voterID' },
+    { value: 'ABHA ID' },
+    { value: 'Passport' },
+
+  ]
   // selectGender = [
   //   { key:"M",value: 'Male' },
   //   { key:"F",value: 'Female' },
@@ -86,6 +94,8 @@ export class AddPatientComponent implements OnInit {
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
       age: ['',],
+      IdentiyNumber: ['', Validators.required],
+      IdentiyName: ['', Validators.required],
     })
   }
 
@@ -97,11 +107,14 @@ export class AddPatientComponent implements OnInit {
       console.log("entered")
       console.log(patientData.value)
       this._patientDto = patientData.value;
+      this._patientDto.IdentityName = patientData.value.IdentiyName;
+      this._patientDto.IdentityNumber = patientData.value.IdentiyNumber;
       this._patientDto.patientImage = this.previewImage
       this.patientService.CreatePatient(this._patientDto).subscribe(res => {
         res ? this.toater.success("Patient added successfully", "Add Patient") : null;
         this.resetAddPatientForm();
-        this.route.navigate([routes.addAppointment]);
+        console.log("res",res)
+        // this.route.navigate([routes.addAppointment]);
       })
     }
     else {
