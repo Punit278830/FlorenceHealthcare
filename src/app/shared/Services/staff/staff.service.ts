@@ -15,6 +15,13 @@ public staffId!:number
 
 
   constructor(private _http:ApiHttpService) { }
+
+  getScheduleList():Observable<IstaffInfo[]>
+{
+ return this._http.get( this.apiUrl+'StaffSchedules')
+
+}
+
   
   CreateStaff(staffData:IstaffInfo)
 {

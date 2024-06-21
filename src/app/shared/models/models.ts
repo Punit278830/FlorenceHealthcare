@@ -247,6 +247,7 @@ export interface Istaffschedule {
   toPostfix: string,
   ApplyScheduleDate: Date,
   leaveStatus: number,
+  status:string,
 }
 
 export interface IQuestionnaires {

@@ -464,6 +464,7 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("fromTime");
       entity.Property(e => e.LeaveStatus).HasColumnName("leaveStatus");
+      entity.Property(e => e.Status).HasColumnName("status");
       entity.Property(e => e.ScheduleDate).HasColumnName("scheduleDate");
       entity.Property(e => e.StaffId).HasColumnName("staffId");
       entity.Property(e => e.ToPostfix)

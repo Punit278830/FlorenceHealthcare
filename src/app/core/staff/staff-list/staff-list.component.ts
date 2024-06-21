@@ -114,6 +114,7 @@ export class StaffListComponent implements OnInit {
           this.serialNumberArray.push(serialNumber);
         }
       });
+      console.log("list",this.staffList)
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });

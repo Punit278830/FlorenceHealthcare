@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -121,16 +121,28 @@ namespace hospitalApiProject.Controllers
         // POST: api/PatientInfoes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<PatientInfo>> PostPatientInfo(PatientInfo patientInfo)
-        {
-            _context.PatientInfos.Add(patientInfo);
-            await _context.SaveChangesAsync();
+    public async Task<ActionResult<PatientInfo>> PostPatientInfo(PatientInfo patientInfo)
+    {
+      // Check if a patient with the same IdentityNumber already exists
+      var existingPatient = await _context.PatientInfos
+                                          .FirstOrDefaultAsync(p => p.IdentityNumber == patientInfo.IdentityNumber);
 
-            return CreatedAtAction("GetPatientInfo", new { id = patientInfo.PatientId }, patientInfo);
-        }
+      if (existingPatient != null)
+      {
+        // Return a conflict response if the IdentityNumber already exists
+        return Conflict(new { message = "Identity Number already exists." });
+      }
 
-        // DELETE: api/PatientInfoes/5
-        [HttpDelete("{id}")]
+      // Add the new PatientInfo
+      _context.PatientInfos.Add(patientInfo);
+      await _context.SaveChangesAsync();
+
+      return CreatedAtAction("GetPatientInfo", new { id = patientInfo.PatientId }, patientInfo);
+    }
+
+
+    // DELETE: api/PatientInfoes/5
+    [HttpDelete("{id}")]
         public async Task<IActionResult> DeletePatientInfo(int id)
         {
             var patientInfo = await _context.PatientInfos.FindAsync(id);
