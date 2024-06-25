@@ -16,13 +16,16 @@ builder.Services.AddDbContext<FlorenceDbContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: "AllowAngularDev",
-    builder => builder
-    .AllowAnyOrigin()
-    .AllowAnyMethod()
-    .AllowAnyHeader());
+  options.AddPolicy("AllowAllOrigin",
+            builder =>
+            {
+              builder.AllowAnyOrigin()
+                     .AllowAnyHeader()
+                     .AllowAnyMethod();
+            });
 
 });
 
@@ -38,18 +41,21 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     
-    app.UseCors("AllowAngularDev");
+    app.UseCors("AllowAllOrigin");
     app.UseSwagger();
     app.UseSwaggerUI();
     
 }
 else
 {
-    app.UseCors("AllowAngularDev");
+  //app.UseExceptionHandler("/Error");
+  app.UseHsts();
 }
 
 
 app.UseHttpsRedirection();
+
+app.UseCors("AllowAllOrigin");
 
 app.UseAuthorization();
 
