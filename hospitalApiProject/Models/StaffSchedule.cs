@@ -26,4 +26,6 @@ public partial class StaffSchedule
     public int LeaveStatus { get; set; }
 
   public string? Status { get; set; }
+
+  public string? Notes { get; set; }
 }

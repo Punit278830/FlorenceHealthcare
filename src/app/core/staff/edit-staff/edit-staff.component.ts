@@ -53,6 +53,14 @@ export class EditStaffComponent implements OnInit {
 
 
   }
+  IdentityDocNumber = [
+    { value: 'Aadhar Card' },
+    { value: 'Driving Licence' },
+    { value: 'voterID' },
+    { value: 'ABHA ID' },
+    { value: 'Passport' },
+
+  ]
 
   ngOnInit(): void {
     //this.staffReg=this._staffDto;
@@ -71,6 +79,7 @@ export class EditStaffComponent implements OnInit {
   getStaffInfo(sid: number) {
     this.staffService.getStaff(sid).subscribe((data: IstaffInfo) => {
       console.log(data);
+      console.log("data",data)
 
       this._staffDto = data;
       //this.fillStaffDataInForm()
@@ -78,6 +87,9 @@ export class EditStaffComponent implements OnInit {
       this.staffReg.get('departmentId')?.patchValue(this._staffDto.departmentId)
       //this.staffReg.patchValue({activeStatus:this._staffDto.activeStatus})
       this.staffReg.get('activeStatus')?.patchValue(this._staffDto.activeStatus)
+      console.log("staffDto",this._staffDto)
+      
+      
 
 
     })
@@ -175,6 +187,8 @@ export class EditStaffComponent implements OnInit {
       gender: ['', Validators.required],
       dob: ['', Validators.required],
       doj: ['', Validators.required],
+      identityNumber: ['', Validators.required],
+      identityName: ['', Validators.required],
 
     });
   }

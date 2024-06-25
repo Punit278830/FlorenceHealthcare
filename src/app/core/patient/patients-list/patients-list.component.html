@@ -136,7 +136,10 @@
               </table>
               <div class="table_footer">
                 <div class="col-sm-12 col-md-5">
-                  <div class="dataTables_info">
+                  <div *ngIf="patientList.length == 0 "   class="dataTables_info">
+                    No records found
+                  </div>
+                  <div *ngIf="patientList.length != 0"  class="dataTables_info">
                     Showing {{ serialNumberArray[0] }} to
                     {{ serialNumberArray[serialNumberArray.length - 1] }} of
                     {{ totalData }} entries

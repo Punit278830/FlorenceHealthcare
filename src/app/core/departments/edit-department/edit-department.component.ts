@@ -39,6 +39,13 @@ export class EditDepartmentComponent {
   ngOnInit()
   {
     this.initlizeDepartmentForm()
+    this.setData()
+  }
+  setData(){
+    this.departmentService.getDepartmentByID(this.departmentService.departmentId).subscribe(data=>{
+      console.log("data",data)
+      this.depForm.patchValue(data);
+    })
   }
 
 
@@ -47,7 +54,7 @@ export class EditDepartmentComponent {
   {
     this.depForm=this.fb.group({
       departmentName:['',Validators.required],
-      departmentStatus:['Active',Validators.required]
+      departmentStatus:['',Validators.required]
     })
 
   }
@@ -56,10 +63,13 @@ export class EditDepartmentComponent {
   {
     
     this.depDto=dep.value;
+    this.depDto.departmentId=this.depId;
+    console.log(this.depId,"depid ", this.depDto,"dto")
     this.departmentService.updateDepartment(this.depId,this.depDto).subscribe(
       res=>{
       console.log(res);
       res?this.toster.success("Department updated successfully"):null
+      this.route.navigate([routes.departmentList])
       
     },
      error => {

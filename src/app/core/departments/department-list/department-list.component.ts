@@ -1,8 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
+import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { DataService } from 'src/app/shared/data/data.service';
-import { pageSelection, apiResultFormat, departmentList } from 'src/app/shared/models/models';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { pageSelection, apiResultFormat, departmentList, Idepartment } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
@@ -13,8 +17,8 @@ import { routes } from 'src/app/shared/routes/routes';
 export class DepartmentListComponent implements OnInit{
   public routes = routes;
 
-  public departmentList: Array<departmentList> = [];
-  dataSource!: MatTableDataSource<departmentList>;
+  public departmentList: Array<Idepartment> = [];
+  dataSource!: MatTableDataSource<Idepartment>;
 
   public showFilter = false;
   public searchDataValue = '';
@@ -30,19 +34,60 @@ export class DepartmentListComponent implements OnInit{
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
 
-  constructor(public data : DataService){
+  constructor(public data : DataService,
+    private departmentservice:DepartmentService,
+    private route: Router,
+    private  modalservice : ModalServiceService,
+    private toaster : ToastrService
+  ){
 
   }
   ngOnInit() {
     this.getTableData();
   }
+
+  deleteDepartment(idhere: number) {
+    this.modalservice.openModal({
+      type: 'department',
+      id: idhere,
+      confirmCallback: () => this.confirmDelete(idhere)
+    });
+  }
+
+  confirmDelete(idhere: number) {
+    this.departmentservice.deleteDepartment(idhere).subscribe(res => {
+      if (res == null) {
+        this.toaster.success("Department is deleted!")
+        this.getTableData()
+      }
+    })
+
+
+  }
+
+
+  onRefresh() {
+    this.departmentList = [];
+    this.searchDataValue = '';
+    
+    this.getTableData()
+  }
+
+
+
+  movetoEdit(idhere:number){
+    this.departmentservice.departmentId=idhere;
+    this.route.navigate([routes.editDepartment]);
+    
+  }
   private getTableData(): void {
     this.departmentList = [];
     this.serialNumberArray = [];
 
-    this.data.getDepartmentList().subscribe((data: apiResultFormat) => {
-      this.totalData = data.totalData;
-      data.data.map((res: departmentList, index: number) => {
+    this.departmentservice.getDepartmentList().subscribe((data: Idepartment[]) => {
+      console.log("totalData",data)
+      this.totalData = data.length;
+      data.map((res:Idepartment, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
         
@@ -50,7 +95,7 @@ export class DepartmentListComponent implements OnInit{
           this.serialNumberArray.push(serialNumber);
         }
       });
-      this.dataSource = new MatTableDataSource<departmentList>(this.departmentList);
+      this.dataSource = new MatTableDataSource<Idepartment>(this.departmentList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
   }
@@ -58,6 +103,27 @@ export class DepartmentListComponent implements OnInit{
   public searchData(value: any): void {
     this.dataSource.filter = value.trim().toLowerCase();
     this.departmentList = this.dataSource.filteredData;
+
+    if (value != '') {
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.departmentList = this.dataSource.filteredData;
+      if (this.departmentList.length > 0) {
+        this.departmentList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.departmentList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+
+    }
+    else {
+      this.getTableData()
+    }
   }
 
   public sortData(sort: Sort) {

@@ -38,6 +38,7 @@ export class ScheduleComponent implements OnInit {
   public totalPages = 0;
   public combinedData: any[] = [];
   public flag: boolean = false;
+  public loggedInUser!:any;
 
   constructor(public data: DataService,
     private staffService: StaffService,
@@ -50,12 +51,14 @@ export class ScheduleComponent implements OnInit {
   }
   ngOnInit() {
     // this.fetchCombineData()
+    this.loggedInUser=JSON.parse(localStorage.getItem('data')||'')
+
     this.fetchCombineData();
   }
 
   deleteSchedule(idhere:number){
     this.modalservice.openModal({
-      type: 'appointment',
+      type: 'schedule',
       id: idhere,
       confirmCallback: () => this.confirmDelete(idhere)
     });
@@ -94,7 +97,7 @@ export class ScheduleComponent implements OnInit {
 
 
     forkJoin([staffData$, departmentData$, staffData1$]).subscribe(([staff, department, allStaff]) => {
-      this.totalData = staff.length;
+      
       this.schedule = [];
       this.serialNumberArray = [];
 
@@ -116,6 +119,10 @@ export class ScheduleComponent implements OnInit {
           staffName: staff ? `${staff.firstName} ${staff?.lastName}` : null
         };
       });
+      if(this.loggedInUser.userRole == "doctor"){
+        this.combinedData=this.combinedData.filter((item)=>item.staffId == this.loggedInUser.loginId)
+
+      }
       this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
 
@@ -126,6 +133,7 @@ export class ScheduleComponent implements OnInit {
         }
       });
       console.log("list", this.schedule)
+      this.totalData = this.schedule.length;
       this.dataSource = new MatTableDataSource<any[]>(this.schedule);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });

@@ -98,10 +98,17 @@
                                         </div>
                                     </div>
                                 </ng-container>
+                                
                                 <div class="col-12 col-sm-12">
                                     <div class="form-group local-forms">
-                                        <label for="notes">Notes <span class="login-danger">*</span></label>
-                                        <textarea class="form-control" rows="3" cols="30"></textarea>
+                                        <label for="Notes">Notes <span class="login-danger">*</span></label>
+                                        <textarea class="form-control" formControlName="notes" rows="3"
+                                            cols="30"></textarea>
+                                        <!-- <div *ngIf="bookappointment.get('notes')?.invalid && (bookappointment.get('notes')?.dirty || bookappointment.get('notes')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="bookappointment.get('notes')?.errors?.['required']">
+                                                Notes are required.</div>
+                                        </div> -->
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">

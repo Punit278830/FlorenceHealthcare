@@ -589,6 +589,11 @@ export class DataService {
               route: routes.addTestSchedule,
               base: routes.addTestSchedule,
             },
+            {
+              menuValue: 'List Schedule',
+              route: routes.schedule,
+              base: routes.schedule,
+            },
           ],
         },
         {

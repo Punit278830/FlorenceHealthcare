@@ -445,6 +445,12 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false)
           .HasColumnName("password");
+      entity.Property(e => e.IdentityName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.IdentityNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<StaffSchedule>(entity =>
@@ -465,6 +471,7 @@ public partial class FlorenceDbContext : DbContext
           .HasColumnName("fromTime");
       entity.Property(e => e.LeaveStatus).HasColumnName("leaveStatus");
       entity.Property(e => e.Status).HasColumnName("status");
+      entity.Property(e => e.Notes).HasColumnName("notes");
       entity.Property(e => e.ScheduleDate).HasColumnName("scheduleDate");
       entity.Property(e => e.StaffId).HasColumnName("staffId");
       entity.Property(e => e.ToPostfix)

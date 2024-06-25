@@ -58,8 +58,8 @@ export class EditScheduleComponent implements OnInit {
       scheduleId: [''] ,
       departmentId: [''] ,
       staffId: [''],
-      status :['']
-    })
+      status :[''],
+      notes:['']    })
 
   }
   setScheduleData() {
@@ -87,6 +87,7 @@ export class EditScheduleComponent implements OnInit {
     console.log("schelduledto", this.scheduleDto)
     this.staffScheduleService.updateSchedule(this.scheduleId, this.scheduleDto).subscribe((data) => {
       console.log("update response", data)
+      this.route.navigate([routes.schedule])
     })
   }
 
