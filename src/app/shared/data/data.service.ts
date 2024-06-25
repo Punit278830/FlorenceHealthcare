@@ -323,14 +323,14 @@ export class DataService {
           subMenus: [
             {
               menuValue: 'Schedule List',
+              route: routes.schedule,
+              base: routes.schedule,
+            },
+            {
+              menuValue: 'Add Schedule',
               route: routes.addTestSchedule,
               base: routes.addTestSchedule,
             },
-            // {
-            //   menuValue: 'Book Appointment',
-            //   route: routes.addSchedule,
-            //   base: routes.addSchedule,
-            // },
             // {
             //   menuValue: 'Edit Appointment',
             //   route: routes.editSchedule,
@@ -585,9 +585,14 @@ export class DataService {
           img: 'assets/img/icons/menu-icon-05.svg',
           subMenus: [
             {
-              menuValue: 'Schedule List',
+              menuValue: 'Add Schedule',
               route: routes.addTestSchedule,
               base: routes.addTestSchedule,
+            },
+            {
+              menuValue: 'List Schedule',
+              route: routes.schedule,
+              base: routes.schedule,
             },
           ],
         },

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -10,6 +10,9 @@ public partial class StaffInfo
     public string FirstName { get; set; } = null!;
 
     public string? LastName { get; set; }
+    public string? IdentityName { get; set; }
+
+    public string? IdentityNumber { get; set; }
 
     public string Mobile { get; set; } = null!;
 

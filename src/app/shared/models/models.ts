@@ -172,6 +172,8 @@ export interface IstaffInfo {
   doj: Date;
   gender: string;
   education: string;
+  IdentityName: string;
+  IdentityNumber: string;
 }
 
 export interface IpatientInfo {
@@ -247,6 +249,8 @@ export interface Istaffschedule {
   toPostfix: string,
   ApplyScheduleDate: Date,
   leaveStatus: number,
+  notes:string,
+  status:string,
 }
 
 export interface IQuestionnaires {

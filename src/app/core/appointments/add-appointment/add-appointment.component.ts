@@ -246,7 +246,7 @@ export class AddAppointmentComponent implements OnInit {
     { value: 'Cancel' },
   ];
 
-  
+
 
   appointmentFormInitlize() {
     this.bookappointment = this.fb.group({
@@ -254,9 +254,9 @@ export class AddAppointmentComponent implements OnInit {
       doctorId: ['', Validators.required],
       notes: ['', Validators.required],
       appointmentStatus: ['Active', Validators.required],
-      
+
       departmentid: ['', Validators.required],
-      appointTime: [null, Validators.required],
+      appointTime: [null],
 
     })
   }
@@ -335,17 +335,22 @@ export class AddAppointmentComponent implements OnInit {
 
   bookAppointment(appointment: any) {
     if (this.bookappointment.valid) {
-      const appointTime = new Date(appointment.value.appointTime);
+      let formattedTime=""
+      if (appointment.value.appointTime) {
+        console.log("value",appointment.value.appointTime)
+        const appointTime = new Date(appointment.value.appointTime);
 
-      let hours = appointTime.getHours();
-      let minutes = appointTime.getMinutes();
-      let ampm = hours >= 12 ? 'PM' : 'AM';
+        let hours = appointTime.getHours();
+        let minutes = appointTime.getMinutes();
+        let ampm = hours >= 12 ? 'PM' : 'AM';
 
-      // Convert hours to 12-hour format
-      hours = hours % 12;
-      hours = hours ? hours : 12; // Handle midnight (0 hours)
+        // Convert hours to 12-hour format
+        hours = hours % 12;
+        hours = hours ? hours : 12; // Handle midnight (0 hours)
 
-      const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+         formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+      }
+
 
 
 
@@ -354,17 +359,17 @@ export class AddAppointmentComponent implements OnInit {
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
-      this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-      
+      this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus ; 
+
       this.appointmentDto.appointTime = formattedTime;
       console.log("tme", this.appointmentDto)
       //this.appointmentDto.departmentId=3;
-      this.appointmentDto.scheduledByid = userData.loginId;
-      this.appointmentService.createAppointment(this.appointmentDto).subscribe(result=>{
-        console.log(result);
-        this.toater.success("Appointment booked succesfully","Book Appointment");
+      this.appointmentDto.scheduledByid = userData.loginId ;   
+      this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
+        console.log("result",result);
+        this.toater.success("Appointment booked succesfully", "Book Appointment") ; 
         this.bookappointment.reset();
-      this.route.navigate([routes.invoices])
+        // this.route.navigate([routes.invoices])
 
       });
 

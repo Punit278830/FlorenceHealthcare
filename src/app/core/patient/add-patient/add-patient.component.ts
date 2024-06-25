@@ -34,7 +34,7 @@ export class AddPatientComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private patientService: PatientService,
     private route: Router, private datePipe: DatePipe,
-    private toater: ToastrService) {
+    private toastr: ToastrService) {
     this.maxDate = new Date();
 
 
@@ -110,12 +110,22 @@ export class AddPatientComponent implements OnInit {
       this._patientDto.IdentityName = patientData.value.IdentiyName;
       this._patientDto.IdentityNumber = patientData.value.IdentiyNumber;
       this._patientDto.patientImage = this.previewImage
-      this.patientService.CreatePatient(this._patientDto).subscribe(res => {
-        res ? this.toater.success("Patient added successfully", "Add Patient") : null;
-        this.resetAddPatientForm();
-        console.log("res",res)
-        this.route.navigate([routes.patientsList]);
-      })
+      this.patientService.CreatePatient(this._patientDto).subscribe(
+        res => {
+          console.log("res", res);
+          if (!res.message) {
+            this.toastr.success("Patient added successfully", "Add Patient");
+            this.resetAddPatientForm();
+            this.route.navigate([routes.patientsList]);
+          } else {
+            this.toastr.error(res.message, "Error");
+          }
+        },
+        err => {
+          console.error("Error", err);
+          this.toastr.error(err.message || "An error occurred", "Error");
+        }
+      );
     }
     else {
       this.patientReg.markAllAsTouched(); // Mark all controls as touched to trigger error display

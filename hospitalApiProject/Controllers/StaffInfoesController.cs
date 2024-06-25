@@ -91,6 +91,8 @@ namespace hospitalApiProject.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutStaffInfo(int id, StaffInfo staffInfo)
+
+
         {
             if (id != staffInfo.StaffId)
             {
@@ -123,7 +125,15 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<StaffInfo>> PostStaffInfo(StaffInfo staffInfo)
         {
-            _context.StaffInfos.Add(staffInfo);
+
+      var existingStaff = await _context.StaffInfos.FirstOrDefaultAsync(p => p.IdentityNumber == staffInfo.IdentityNumber);
+
+      if (existingStaff != null)
+      {
+        // Return a conflict response if the IdentityNumber already exists
+        return Conflict(new { message = "Identity Number already exists." });
+      }
+      _context.StaffInfos.Add(staffInfo);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetStaffInfo", new { id = staffInfo.StaffId }, staffInfo);
