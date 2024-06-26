@@ -64,6 +64,14 @@ export class EditPatientComponent implements OnInit {
     { value: 'Alaska' },
     { value: 'California' },
   ];
+  IdentityDocNumber = [
+    { value: 'Aadhar Card' },
+    { value: 'Driving Licence' },
+    { value: 'voterID' },
+    { value: 'ABHA ID' },
+    { value: 'Passport' },
+
+  ]
 
   ngOnInit() {
 
@@ -73,14 +81,16 @@ export class EditPatientComponent implements OnInit {
   createPatient() {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
-      lastName: ['', Validators.required],
+      lastName: [''],
       dob: ['', Validators.required],
       mobile: ['', Validators.required],
       email: ['', [Validators.email]],
       address: ['', Validators.required],
       gender: ['Male', Validators.required],
       regstrationDate: [null, Validators.required],
-      age: [{ value: '', disabled: true }, Validators.required]
+      age: [{ value: '', disabled: true }, Validators.required],
+      identityNumber: ['', Validators.required],
+      identityName: ['', Validators.required],
 
 
     })
@@ -90,6 +100,9 @@ export class EditPatientComponent implements OnInit {
     this.patientService.getPatientData(id).subscribe(data => {
       this._patientDto = data;
       this.previewImage = data.patientImage;
+      console.log("patientdata",this._patientDto)
+    //   this.patientReg.get('IdentiyName')?.patchValue(this._patientDto.IdentityName);
+    // this.patientReg.get('IdentiyNumber')?.patchValue(this._patientDto.IdentityNumber);
       this.patientReg.patchValue(this._patientDto);
 
       if (this._patientDto.dob) {
@@ -117,6 +130,8 @@ export class EditPatientComponent implements OnInit {
       console.log(patientData.value)
       this._patientDto = patientData.value;
       this._patientDto.patientId = this.patientId;
+      this._patientDto.IdentityName = patientData.value.IdentiyName;
+      this._patientDto.IdentityNumber= patientData.value.IdentiyNumber;
       this._patientDto.patientImage = this.previewImage;
       this.patientService.updatePatientData(this.patientId, this._patientDto).subscribe(res => {
         res ? this.toastr.success("Patien info updated Successfully", "Update Patient Info") : null;

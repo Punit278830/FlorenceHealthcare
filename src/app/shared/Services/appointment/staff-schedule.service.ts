@@ -29,9 +29,9 @@ private readonly apiUrl=api_Url;
     return this._http.get(this.apiUrl+'StaffSchedules/'+id);
   }
 
-  updateSchedule(id:number,scheduleDate:Istaffschedule)
+  updateSchedule(id:number,scheduleData:Istaffschedule)
   {
-    return this._http.put(this.apiUrl+'StaffSchedules/'+id,scheduleDate);
+    return this._http.put(this.apiUrl+'StaffSchedules/'+id,scheduleData);
   }
 
   deleteScheuleById(id:number)

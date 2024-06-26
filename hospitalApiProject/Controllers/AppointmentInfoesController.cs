@@ -27,7 +27,7 @@ namespace hospitalApiProject.Controllers
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
       //var appointmentInfo = await _context.AppointmentInfos.Where(e => e.Date == currentDate).ToListAsync();
-      var appointmentInfo = await _context.AppointmentInfos.ToListAsync();
+      var appointmentInfo = await _context.AppointmentInfos.OrderByDescending(p=>p.Id).ToListAsync();
 
 
       if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found

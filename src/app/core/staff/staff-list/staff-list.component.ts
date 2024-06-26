@@ -114,6 +114,7 @@ export class StaffListComponent implements OnInit {
           this.serialNumberArray.push(serialNumber);
         }
       });
+      console.log("list",this.staffList)
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
@@ -158,10 +159,12 @@ export class StaffListComponent implements OnInit {
   public searchData(value: any): void {
     this.serialNumberArray = [];
     this.totalData = 0;
+    console.log("value",value)
 
     if (value != '') {
       this.dataSource.filter = value.trim().toLowerCase();
       this.staffList = this.dataSource.filteredData;
+      console.log("stafflist",this.staffList)
       if (this.staffList.length > 0) {
         this.staffList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)

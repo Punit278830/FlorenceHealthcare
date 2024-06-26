@@ -123,6 +123,14 @@ export class AddStaffComponent {
     { value: 'Alaska' },
     { value: 'California' },
   ];
+  IdentityDocNumber = [
+    { value: 'Aadhar Card' },
+    { value: 'Driving Licence' },
+    { value: 'voterID' },
+    { value: 'ABHA ID' },
+    { value: 'Passport' },
+
+  ]
 
   createStaffRegrestrationForm() {
     this.staffReg = this.fb.group({
@@ -141,6 +149,8 @@ export class AddStaffComponent {
       gender: ['', Validators.required],
       dob: ['', Validators.required],
       doj: ['', Validators.required],
+      IdentityNumber: ['', Validators.required],
+      IdentityName: ['', Validators.required],
 
 
     });
@@ -182,13 +192,20 @@ export class AddStaffComponent {
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
 
-      this.staffService.CreateStaff(staffData).subscribe(res => {
+      this.staffService.CreateStaff(staffData).subscribe((res:any) => {
         console.log(res);
-        if (res) {
+        if (!res.message) {
           this.toster.success("Staff Added Successfully", 'Staff');
           this.route.navigate([routes.staffList])
+        }else{
+          this.toster.error(res.message,"Error")
         }
-      });
+      },
+      (err)=>{
+        this.toster.error(err.message,"Error Err")
+
+      }
+    );
 
     } else {
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display

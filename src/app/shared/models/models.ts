@@ -1,3 +1,4 @@
+import { Time } from "@angular/common";
 import { DateTime } from "luxon";
 
 export interface pageSelection {
@@ -171,6 +172,8 @@ export interface IstaffInfo {
   doj: Date;
   gender: string;
   education: string;
+  IdentityName: string;
+  IdentityNumber: string;
 }
 
 export interface IpatientInfo {
@@ -185,6 +188,8 @@ export interface IpatientInfo {
   ageinYear?: number;
   patientImage?: string;
   regstrationDate?: Date;
+  IdentityName: string;
+  IdentityNumber: string;
 }
 
 export interface Iappointment {
@@ -197,8 +202,8 @@ export interface Iappointment {
   notes: string,
   appointmentStatus: string,
   fee: number;
-  identiyName: string;
-  identiyNumber: string;
+  
+  appointTime:string;
 
 }
 
@@ -244,6 +249,8 @@ export interface Istaffschedule {
   toPostfix: string,
   ApplyScheduleDate: Date,
   leaveStatus: number,
+  notes:string,
+  status:string,
 }
 
 export interface IQuestionnaires {

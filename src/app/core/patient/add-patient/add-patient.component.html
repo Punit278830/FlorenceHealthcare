@@ -41,7 +41,7 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="last">Last Name <span class="login-danger">*</span></label>
+                                        <label for="last">Last Name </label>
                                         <input class="form-control" formControlName="lastName" type="text"
                                             placeholder="">
                                         <div *ngIf="patientReg.get('lastName')?.invalid && (patientReg.get('lastName')?.dirty || patientReg.get('lastName')?.touched)"
@@ -124,6 +124,49 @@
                                     </div>
                                 </div>
 
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Identity Proof<span
+                                                class="login-danger">*</span></label>
+                                        <mat-select formControlName="IdentiyName" formControlName="IdentiyName"
+                                            class="form-control select" placeholder="Select Identity">
+                                            <mat-option *ngFor="let data of IdentityDocNumber"
+                                                [value]="data.value">
+                                                {{data.value}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="patientReg.get('IdentiyName')?.invalid && (patientReg.get('IdentiyName')?.dirty || patientReg.get('IdentiyName')?.touched)"
+                                            class="text-danger">
+                                            <div
+                                                *ngIf="patientReg.get('IdentiyName')?.errors?.['required']">
+                                                Proof is required.</div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="lastname">Identity Number <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="IdentiyNumber" type="text"
+                                            placeholder="Enter Identity doc Number">
+                                        <div *ngIf="patientReg.get('IdentiyNumber')?.invalid && (patientReg.get('IdentiyNumber')?.dirty || patientReg.get('IdentiyNumber')?.touched)"
+                                            class="text-danger">
+                                            <div
+                                                *ngIf="patientReg.get('IdentiyNumber')?.errors?.['required']">
+                                                Number is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="email">Age </label>
+                                        <input class="form-control" formControlName="age" #age (change)="changedob(age.value)" type="number"
+                                            placeholder="">
+                                    </div>
+                                    
+                                </div>
+
 
 
 
@@ -158,14 +201,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="email">Age </label>
-                                        <input class="form-control" formControlName="age" #age (change)="changedob(age.value)" type="number"
-                                            placeholder="">
-                                    </div>
-                                    
-                                </div>
+                               
                                 <div *ngIf="previewImage" class="col-12 col-sm-4">
                                     <img [src]="previewImage" height="150" width="120" alt=""
                                         style="border: 2px solid #000" />

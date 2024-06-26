@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -24,4 +24,8 @@ public partial class StaffSchedule
     public DateOnly? ApplyScheduleDate { get; set; }
 
     public int LeaveStatus { get; set; }
+
+  public string? Status { get; set; }
+
+  public string? Notes { get; set; }
 }

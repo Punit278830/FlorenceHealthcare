@@ -41,4 +41,7 @@ public departmentId!:number;
     return this._http.put(this.apiUrl+'DepartmentInfoes/'+id,departmentData);
     
   }
+  deleteDepartment(idhere:number){
+    return this._http.delete(this.apiUrl+'DepartmentInfoes/'+idhere);
+  }
 }

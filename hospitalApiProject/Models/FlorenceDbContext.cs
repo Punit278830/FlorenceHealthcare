@@ -147,14 +147,10 @@ public partial class FlorenceDbContext : DbContext
           .HasColumnType("datetime")
           .HasColumnName("date");
       entity.Property(e => e.Departmentid).HasColumnName("departmentid");
+      entity.Property(e => e.AppointTime).HasColumnName("AppointmentTime");
       entity.Property(e => e.DoctorId).HasColumnName("doctorId");
       entity.Property(e => e.Fee).HasColumnName("fee");
-      entity.Property(e => e.IdentiyName)
-          .HasMaxLength(100)
-          .IsUnicode(false);
-      entity.Property(e => e.IdentiyNumber)
-          .HasMaxLength(100)
-          .IsUnicode(false);
+     
       entity.Property(e => e.Notes)
           .HasMaxLength(500)
           .IsUnicode(false)
@@ -337,6 +333,12 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("patientImage");
       entity.Property(e => e.RegstrationDate).HasColumnName("regstrationDate");
+      entity.Property(e => e.IdentityName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.IdentityNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<PatientMedication>(entity =>
@@ -443,6 +445,12 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false)
           .HasColumnName("password");
+      entity.Property(e => e.IdentityName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.IdentityNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false);
     });
 
     modelBuilder.Entity<StaffSchedule>(entity =>
@@ -462,6 +470,8 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("fromTime");
       entity.Property(e => e.LeaveStatus).HasColumnName("leaveStatus");
+      entity.Property(e => e.Status).HasColumnName("status");
+      entity.Property(e => e.Notes).HasColumnName("notes");
       entity.Property(e => e.ScheduleDate).HasColumnName("scheduleDate");
       entity.Property(e => e.StaffId).HasColumnName("staffId");
       entity.Property(e => e.ToPostfix)

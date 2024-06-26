@@ -219,12 +219,48 @@
                                             placeholder="Select  Department">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
                                                 {{data.departmentName}}
+                                      
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department
                                                 is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="Consulting">Identity Proof<span
+                                                class="login-danger">*</span></label>
+                                        <mat-select formControlName="IdentityName" formControlName="identityName"
+                                            class="form-control select" placeholder="Select Identity">
+                                            <mat-option *ngFor="let data of IdentityDocNumber"
+                                                [value]="data.value">
+                                                {{data.value}}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="staffReg.get('IdentityName')?.invalid && (staffReg.get('IdentityName')?.dirty || staffReg.get('IdentityName')?.touched)"
+                                            class="text-danger">
+                                            <div
+                                                *ngIf="staffReg.get('IdentityName')?.errors?.['required']">
+                                                Proof is required.</div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="lastname">Identity Number <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="identityNumber" type="text"
+                                            placeholder="Enter Identity doc Number">
+                                        <div *ngIf="staffReg.get('IdentityNumber')?.invalid && (staffReg.get('IdentityNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
+                                            class="text-danger">
+                                            <div
+                                                *ngIf="staffReg.get('IdentityNumber')?.errors?.['required']">
+                                                Number is required.</div>
                                         </div>
                                     </div>
                                 </div>

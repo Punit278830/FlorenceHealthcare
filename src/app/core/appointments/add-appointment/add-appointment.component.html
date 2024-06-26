@@ -35,8 +35,9 @@
                                                 <a [routerLink]="routes.addPatient"
                                                     class="btn btn-primary add-pluss ms-2"><img
                                                         src="assets/img/icons/plus.svg" alt=""></a>
-                                                <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2" ><img
-                                                        src="assets/img/icons/re-fresh.svg" (click)="refresh()" alt=""></a>
+                                                <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2"><img
+                                                        src="assets/img/icons/re-fresh.svg" (click)="refresh()"
+                                                        alt=""></a>
                                             </div>
                                         </div>
                                     </div>
@@ -159,10 +160,46 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        <div class="col-12 col-md-6 col-xl-6">
+                                            <div class="form-group local-forms">
+                                              <label for="AppointTime">Appointment Time <span class="login-danger">*</span></label>
+                                              <timepicker [(ngModel)]="bookappointment.value.appointTime"
+                                                          formControlName="appointTime" 
+                                                          [showMeridian]="true" [hourStep]="1" [minuteStep]="1"></timepicker>
+                                              <div *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
+                                                  class="text-danger">
+                                                <div *ngIf="bookappointment.get('appointTime')?.errors?.['required']">
+                                                  Appointment Time is required.
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                        
+                                        
+
+
+
+
+
+
+                                        <!-- <div class="col-12 col-md-6 col-xl-6">
+                                            <div class="form-group local-forms">
+                                                <label for="AppointTime">Appointment Time <span
+                                                        class="login-danger">*</span></label>
+                                                <input type="time" class="form-control" formControlName="appointTime" />
+                                                <div *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
+                                                    class="text-danger">
+                                                    <div *ngIf="bookappointment.get('appointTime')?.errors?.['required']">
+                                                        Appointment Time is required.</div>
+                                                </div>
+                                            </div>
+                                        </div> -->
 
                                         <div class="col-12 col-md-6 col-xl-6">
                                             <div class="form-group local-forms">
-                                                <label for="Consulting">Department</label>
+                                                <label for="Consulting">Department<span
+                                                        class="login-danger">*</span></label>
                                                 <mat-select formControlName="departmentid" class="form-control select"
                                                     placeholder="Select Department"
                                                     (selectionChange)="loadDoctorData($event)">
@@ -181,7 +218,8 @@
                                         </div>
                                         <div class="col-12 col-md-6 col-xl-6">
                                             <div class="form-group local-forms">
-                                                <label for="Consulting">Consulting Doctor</label>
+                                                <label for="Consulting">Consulting Doctor<span
+                                                        class="login-danger">*</span></label>
                                                 <mat-select formControlName="doctorId" class="form-control select"
                                                     placeholder="Select Doctor" (selectionChange)="addFee($event)">
                                                     <mat-option *ngFor="let data of doctorList" [value]="data.staffId">
@@ -195,39 +233,7 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-md-6 col-xl-6">
-                                            <div class="form-group local-forms">
-                                                <label for="Consulting">Identity Proof</label>
-                                                <mat-select formControlName="IdentiyName" formControlName="IdentiyName"
-                                                    class="form-control select" placeholder="Select Identity">
-                                                    <mat-option *ngFor="let data of IdentityDocNumber"
-                                                        [value]="data.value">
-                                                        {{data.value}}
-                                                    </mat-option>
-                                                </mat-select>
-                                                <div *ngIf="bookappointment.get('IdentiyName')?.invalid && (bookappointment.get('IdentiyName')?.dirty || bookappointment.get('IdentiyName')?.touched)"
-                                                    class="text-danger">
-                                                    <div
-                                                        *ngIf="bookappointment.get('IdentiyName')?.errors?.['required']">
-                                                        Proof is required.</div>
-                                                </div>
-
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-6 col-xl-4">
-                                            <div class="form-group local-forms">
-                                                <label for="lastname">Identity Number <span
-                                                        class="login-danger">*</span></label>
-                                                <input class="form-control" formControlName="IdentiyNumber" type="text"
-                                                    placeholder="Enter Identity doc Number">
-                                                <div *ngIf="bookappointment.get('IdentiyNumber')?.invalid && (bookappointment.get('IdentiyNumber')?.dirty || bookappointment.get('IdentiyNumber')?.touched)"
-                                                    class="text-danger">
-                                                    <div
-                                                        *ngIf="bookappointment.get('IdentiyNumber')?.errors?.['required']">
-                                                        Number is required.</div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        
                                         <div class="col-12 col-sm-12">
                                             <div class="form-group local-forms">
                                                 <label for="Notes">Notes <span class="login-danger">*</span></label>
@@ -235,8 +241,7 @@
                                                     cols="30"></textarea>
                                                 <div *ngIf="bookappointment.get('notes')?.invalid && (bookappointment.get('notes')?.dirty || bookappointment.get('notes')?.touched)"
                                                     class="text-danger">
-                                                    <div
-                                                        *ngIf="bookappointment.get('notes')?.errors?.['required']">
+                                                    <div *ngIf="bookappointment.get('notes')?.errors?.['required']">
                                                         Notes are required.</div>
                                                 </div>
                                             </div>

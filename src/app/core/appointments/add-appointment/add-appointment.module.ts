@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { AddAppointmentRoutingModule } from './add-appointment-routing.module';
 import { AddAppointmentComponent } from './add-appointment.component';
 import { SharedModule } from 'src/app/shared/shared.module';
+import { TimepickerModule } from 'ngx-bootstrap/timepicker';
+
 
 
 
@@ -14,7 +16,8 @@ import { SharedModule } from 'src/app/shared/shared.module';
   imports: [
     CommonModule,
     AddAppointmentRoutingModule,
-    SharedModule
+    SharedModule,
+    TimepickerModule.forRoot()
   ]
 })
 export class AddAppointmentModule { }
