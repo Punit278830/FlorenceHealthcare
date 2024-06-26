@@ -215,12 +215,15 @@ export class PatientsListComponent implements OnInit {
   // }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
-    this.serialNumberArray = [];
-    this.totalData = 0;
+    // this.serialNumberArray = [];
+    // this.totalData = 0;
 
     if (value != '') {
+      console.log("value",value)
+      console.log("datasource",this.dataSource)
       this.dataSource.filter = value.trim().toLowerCase();
       this.patientList = this.dataSource.filteredData;
+      console.log("value",this.patientList)
       if (this.patientList.length > 0) {
         this.patientList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)

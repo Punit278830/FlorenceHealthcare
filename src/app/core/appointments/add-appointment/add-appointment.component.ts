@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatNumber } from '@angular/common';
 import { OnInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
@@ -12,7 +12,7 @@ import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-uploa
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
-import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, pageSelection } from 'src/app/shared/models/models';
+import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 interface data {
   value: string;
@@ -238,6 +238,21 @@ export class AddAppointmentComponent implements OnInit {
     //this.updateFormattedDateTime();
     //this.downloadPatientFile();
 
+    this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
+      this.clearOtherFields();
+    });
+
+
+  }
+
+  clearOtherFields(){
+    this.bookappointment.patchValue({
+      
+      doctorId: [''],
+      departmentid: [''],
+      
+
+    })
 
   }
   appointmentStatusData = [
@@ -330,14 +345,17 @@ export class AddAppointmentComponent implements OnInit {
     //this.formattedDateTime=currentDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
     console.log("formattedDateTime" + this.formattedDateTime);
     this.bookappointment.get('doctorId')?.patchValue('');
+    this.bookappointment.get('departmentid')?.patchValue('');
+    this.bookappointment.get('appointTime')?.patchValue(null);
+    
     //this.bookappointment.get('')?.patchValue('')
   }
 
   bookAppointment(appointment: any) {
     if (this.bookappointment.valid) {
-      let formattedTime=""
+      let formattedTime = ""
       if (appointment.value.appointTime) {
-        console.log("value",appointment.value.appointTime)
+        console.log("value", appointment.value.appointTime)
         const appointTime = new Date(appointment.value.appointTime);
 
         let hours = appointTime.getHours();
@@ -348,7 +366,7 @@ export class AddAppointmentComponent implements OnInit {
         hours = hours % 12;
         hours = hours ? hours : 12; // Handle midnight (0 hours)
 
-         formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
       }
 
 
@@ -359,15 +377,15 @@ export class AddAppointmentComponent implements OnInit {
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
-      this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus ; 
+      this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
 
       this.appointmentDto.appointTime = formattedTime;
       console.log("tme", this.appointmentDto)
       //this.appointmentDto.departmentId=3;
-      this.appointmentDto.scheduledByid = userData.loginId ;   
+      this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
-        console.log("result",result);
-        this.toater.success("Appointment booked succesfully", "Book Appointment") ; 
+        console.log("result", result);
+        this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
         // this.route.navigate([routes.invoices])
 
@@ -407,6 +425,7 @@ export class AddAppointmentComponent implements OnInit {
   async loadDoctorData(event: any) {
     this.doctorList = [];
     const doctorOnLeave: number[] = [];
+    const allDocSchedule: Istaffschedule[] = [];
     console.log(event.value);
     this.appointmentDto.departmentid = event.value;
 
@@ -417,12 +436,45 @@ export class AddAppointmentComponent implements OnInit {
 
       }
     })
+    await this.staffService.getScheduleList().subscribe(data => {
+      console.log("schedule ress", data)
+      data.forEach(item => {
+        allDocSchedule.push(item)
+      })
+
+    })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
 
       data.map((res: any) => {
+        console.log("doc res", res);
         const available = doctorOnLeave.find(e => e == res.staffId)
+        console.log("doc avai", available);
         if (!available) {
-          this.doctorList.push(res)
+          if (this.bookappointment.value.appointTime != null) {
+            console.log("entered book appoint.time")
+            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1)
+            console.log("doc sche", docschedule);
+            if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
+              const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
+              const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
+              
+
+              // Check if appointment time falls within doctor's available time range
+              if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
+                console.log("Doctor added based on time:", res);
+                this.doctorList.push(res);
+              }
+            }
+            else {
+              console.log("Doctor added without time check:", res);
+              this.doctorList.push(res);
+            }
+          }
+          else {
+            
+            console.log("Doctor added without appointTime value entered:", res);
+            this.doctorList.push(res);
+          }
         }
 
       })
@@ -430,6 +482,30 @@ export class AddAppointmentComponent implements OnInit {
     })
 
   }
+
+  convertToComparableTime(time: string, postfix: string): Date | null {
+    if (!time) return null;
+
+    // Parse time string to date object
+    const parsedTime = new Date(`2000-01-01 ${time} ${postfix}`);
+    return parsedTime;
+  }
+
+  isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
+    const appointmentHours = appointmentTime.getHours();
+    const appointmentMinutes = appointmentTime.getMinutes();
+    const fromHours = fromTime.getHours();
+    const fromMinutes = fromTime.getMinutes();
+    const toHours = toTime.getHours();
+    const toMinutes = toTime.getMinutes();
+  
+    const appointmentTotalMinutes = appointmentHours * 60 + appointmentMinutes;
+    const fromTotalMinutes = fromHours * 60 + fromMinutes;
+    const toTotalMinutes = toHours * 60 + toMinutes;
+  
+    return appointmentTotalMinutes >= fromTotalMinutes && appointmentTotalMinutes <= toTotalMinutes;
+  }
+  
 
   addFee(event: any) {
 

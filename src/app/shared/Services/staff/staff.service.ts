@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IstaffInfo } from '../../models/models';
+import { IstaffInfo, Istaffschedule } from '../../models/models';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { Observable, catchError, throwError } from 'rxjs';
 import { api_Url } from 'src/environment/environment';
@@ -17,7 +17,7 @@ export class StaffService {
 
   constructor(private _http: ApiHttpService) { }
 
-  getScheduleList(): Observable<IstaffInfo[]> {
+  getScheduleList(): Observable<Istaffschedule[]> {
     return this._http.get(this.apiUrl + 'StaffSchedules')
 
   }

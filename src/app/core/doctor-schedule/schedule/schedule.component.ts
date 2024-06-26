@@ -101,8 +101,7 @@ export class ScheduleComponent implements OnInit {
       this.schedule = [];
       this.serialNumberArray = [];
 
-      this.combinedData = staff.map((staffres: IstaffInfo) => {
-
+      this.combinedData = staff.map((staffres: Istaffschedule) => {
         const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
         console.log("dept", dept)
         return {
