@@ -81,7 +81,7 @@ export class EditPatientComponent implements OnInit {
   createPatient() {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
-      lastName: ['', Validators.required],
+      lastName: [''],
       dob: ['', Validators.required],
       mobile: ['', Validators.required],
       email: ['', [Validators.email]],
