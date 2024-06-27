@@ -134,7 +134,7 @@ namespace hospitalApiProject.Controllers
         public async Task<ActionResult<List<StaffSchedule>>> GetStaffOnLeave(int depId, DateOnly appointmentDate)
         {
             try {
-                var staffSchedule = await _context.StaffSchedules.Where(e => e.DepartmentId == depId && e.LeaveStatus == 2 && e.ScheduleDate == appointmentDate).ToListAsync();
+                var staffSchedule = await _context.StaffSchedules.Where(e => e.DepartmentId == depId && e.LeaveStatus == 2 && e.ScheduleDate == appointmentDate && e.Status == "approve").ToListAsync();
                 //var staffSchedule = await _context.StaffSchedules.FindAsync(id);
 
                 if (staffSchedule == null)

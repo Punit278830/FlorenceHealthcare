@@ -46,6 +46,14 @@ export class EditScheduleComponent implements OnInit {
 
     this.setScheduleData();
 
+    this.schedule.get('leaveStatus')?.valueChanges.subscribe(value => {
+      this.leaveCheckBoxStatus = value === 2;
+      this.setConditionalValidators(this.leaveCheckBoxStatus);
+    });
+
+    // Initialize validators based on initial leaveStatus value
+    this.setConditionalValidators(this.leaveCheckBoxStatus);
+
   }
   initializeForm() {
     this.schedule = this.fb.group({
@@ -59,9 +67,49 @@ export class EditScheduleComponent implements OnInit {
       departmentId: [''] ,
       staffId: [''],
       status :[''],
-      notes:['']    })
+      notes:['',Validators.required] 
+       })
 
   }
+
+
+  setConditionalValidators(leaveCheckBoxStatus:boolean) {
+    const fromTime = this.schedule.get('fromTime');
+    const fromPostfix = this.schedule.get('fromPostfix');
+    const toTime = this.schedule.get('toTime');
+    const toPostfix = this.schedule.get('toPostfix');
+    const scheduleDate = this.schedule.get('scheduleDate');
+    const notes = this.schedule.get('notes');
+
+    if (leaveCheckBoxStatus === false) {
+      fromTime?.setValidators([Validators.required]);
+      fromPostfix?.setValidators([Validators.required]);
+      toTime?.setValidators([Validators.required]);
+      toPostfix?.setValidators([Validators.required]);
+      scheduleDate?.setValidators([Validators.required]);
+      notes?.setValidators([Validators.required]);
+    } else if (leaveCheckBoxStatus === true) {
+      fromTime?.clearValidators();
+      fromPostfix?.clearValidators();
+      toTime?.clearValidators();
+      toPostfix?.clearValidators();
+      scheduleDate?.setValidators([Validators.required]);
+      notes?.setValidators([Validators.required]);
+    }
+
+    // Recalculate validation status
+    fromTime?.updateValueAndValidity();
+    fromPostfix?.updateValueAndValidity();
+    toTime?.updateValueAndValidity();
+    toPostfix?.updateValueAndValidity();
+    scheduleDate?.updateValueAndValidity();
+    notes?.updateValueAndValidity();
+  }
+
+
+
+
+
   setScheduleData() {
     this.staffScheduleService.getSelectedSchedule(this.scheduleId).subscribe(data => {
       console.log("data", data)
@@ -82,13 +130,20 @@ export class EditScheduleComponent implements OnInit {
   }
 
   UpdateStaffScheduleInfo(myschedule: FormGroup) {
-    
-    this.scheduleDto = myschedule.value;
+    if(myschedule.valid){
+      this.scheduleDto = myschedule.value;
     console.log("schelduledto", this.scheduleDto)
     this.staffScheduleService.updateSchedule(this.scheduleId, this.scheduleDto).subscribe((data) => {
       console.log("update response", data)
       this.route.navigate([routes.schedule])
     })
+
+    }
+    else{
+      myschedule.markAllAsTouched();
+    }
+    
+    
   }
 
 
