@@ -89,7 +89,7 @@
                     <td *ngIf="data.leaveStatus == 1">{{data.fromTime}}-{{data.toTime}} </td>
                     <td *ngIf="data.leaveStatus == 2">Full day</td>
                     <td><button
-                        [ngClass]="{'status-green' : data.status === 'Active', 'status-pink' : data.status === 'In Active'}"
+                        [ngClass]="{'status-green' : data.status === 'approve', 'status-orange' : data.status === 'pending','status-red' : data.status === 'cancel'}"
                         class="custom-badge">{{data.status}}</button></td>
                     <td class="text-end">
                       <div class="dropdown dropdown-action">

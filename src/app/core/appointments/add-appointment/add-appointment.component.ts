@@ -452,7 +452,7 @@ export class AddAppointmentComponent implements OnInit {
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
             console.log("entered book appoint.time")
-            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1)
+            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1 && item.status == "approve")
             console.log("doc sche", docschedule);
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
