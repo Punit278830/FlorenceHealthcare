@@ -138,6 +138,13 @@ namespace hospitalApiProject.Controllers
       return new FileContentResult(result, "application/pdf");
     }
 
+    [HttpGet]
+    [Route("testfunction")]
+    public async Task<IActionResult> testfunction()
+    {
+      return Ok("Hello");
+    }
+
     #region Abha Address Creation by Abha Number
 
     [HttpPost]
