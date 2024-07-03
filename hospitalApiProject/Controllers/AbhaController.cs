@@ -138,6 +138,8 @@ namespace hospitalApiProject.Controllers
       return new FileContentResult(result, "application/pdf");
     }
 
+   
+
     #region Abha Address Creation by Abha Number
 
     [HttpPost]
