@@ -117,6 +117,7 @@ export class InvoiceViewComponent implements OnInit {
 
   print()
 {
+  this.isPaidButtonVisible=false;
   const printContents = this.printView.nativeElement.innerHTML;
 const originalContents = document.body.innerHTML;
 document.body.innerHTML = printContents;
