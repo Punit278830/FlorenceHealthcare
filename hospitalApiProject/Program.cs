@@ -50,15 +50,10 @@ else
 
 
 app.UseHttpsRedirection();
-app.UseRouting();
+
 app.UseAuthorization();
 
-
-// Map controllers and additional endpoints
-app.UseEndpoints(endpoints =>
-{
-  endpoints.MapControllers();
-});
+app.MapControllers();
 
 
 
