@@ -1,5 +1,6 @@
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
+using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -114,7 +115,7 @@ namespace hospitalApiProject.Services
       {
         return response.Content.ReadAsStringAsync().Result;
       }
-        
+
       this.ErrorMessage = response.ReasonPhrase;
       this.StatusCode = response.StatusCode;
       return ErrorMessage;
@@ -126,6 +127,8 @@ namespace hospitalApiProject.Services
       URL = $"{baseUrl}/{api}";
       using var client = new HttpClient { BaseAddress = new Uri(URL) };
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+
 
       var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
       var response = await client.PostAsync(URL, stringContent);
@@ -165,9 +168,37 @@ namespace hospitalApiProject.Services
     {
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
-      
+
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
       return client;
+    }
+
+    private HttpClient ClientForScan()
+    {
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("accept", "*/*");
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      return client;
+    }
+
+    public async Task<string> OnShareProfileAsync(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = ClientForScan();
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
     }
 
     private void GetAuthToken()

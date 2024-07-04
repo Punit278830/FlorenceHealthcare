@@ -37,5 +37,7 @@ namespace hospitalApiProject.Services.Abha
     Task<string> CreateAbhaDetails(AbhaDetailsRequest data);
 
     Task<string> CreateAbhaAddressViaMobile(string phrAddress, string txnId);
+
+    Task<string> ShareProfile(PatientShareRequest request);
   }
 }

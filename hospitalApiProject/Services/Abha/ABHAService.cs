@@ -1,7 +1,7 @@
+using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Interfaces.Shared;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Services.Abha
 {
@@ -286,6 +286,51 @@ namespace hospitalApiProject.Services.Abha
 
       var json = JsonSerializer.Serialize(jsonContent);
       var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/create/phr", json);
+      return result;
+    }
+
+    public async Task<string> ShareProfile(PatientShareRequest request)
+    {
+      var jsonContent = new
+      {
+          requestId = request.requestId,
+          timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+          acknowledgement = new {
+            status = "SUCCESS",
+            healthId = request.healthId,
+            tokenNumber = "100"
+          },
+          resp = new
+          {
+            requestId = request.requestId
+          }
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent); 
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json);
+      return result;
+    }
+
+    public async Task<string> CareContext(PatientShareRequest request)
+    {
+      var jsonContent = new
+      {
+        requestId = request.requestId,
+        timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+        acknowledgement = new
+        {
+          status = "SUCCESS",
+          healthId = request.healthId,
+          tokenNumber = "100"
+        },
+        resp = new
+        {
+          requestId = request.requestId
+        }
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json);
       return result;
     }
   }

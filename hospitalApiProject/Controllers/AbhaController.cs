@@ -1,8 +1,10 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
+using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Services.Abha;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Controllers
 {
@@ -11,10 +13,13 @@ namespace hospitalApiProject.Controllers
   public class AbhaController : Controller
   {
     protected readonly IAbhaService _service;
+    //protected readonly IAbhaM2Service _abhaM2Service;
 
-    public AbhaController(IAbhaService service)
+
+    public AbhaController(IAbhaService service) //, IAbhaM2Service abhaM2Service
     {
       _service = service;
+      //_abhaM2Service = abhaM2Service;
     }
 
     [HttpPost]
@@ -314,7 +319,7 @@ namespace hospitalApiProject.Controllers
       if (data == null || data.phrAddress == null || data.txnId == null)
       {
         return BadRequest();
-      }   
+      }
 
       var result = await _service.CreatePHRAddress(data.phrAddress, data.txnId);
       if (_service.HasError)
@@ -326,6 +331,72 @@ namespace hospitalApiProject.Controllers
     }
     #endregion
 
+    #region Verification of ABHA Address
+
+    //[HttpPost]
+    //[Route("LinkCareContext")]
+    //public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
+    //{
+    //  if (data == null)
+    //  {
+    //    return BadRequest();
+    //  }
+
+    //  var result = await _abhaM2Service.LinkCareContext(data);
+    //  if (_service.HasError)
+    //  {
+    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+    //  }
+
+    //  return StatusCode((int)HttpStatusCode.Created, result);
+    //}
+
+    //[HttpPost]
+    //[Route("NotifyMobile")]
+    //public async Task<IActionResult> NotifyMobile([FromBody] CareContextModel data)
+    //{
+    //  if (data == null)
+    //  {
+    //    return BadRequest();
+    //  }
+
+    //  var result = await _abhaM2Service.NotifyMobile(data);
+    //  if (_service.HasError)
+    //  {
+    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+    //  }
+
+    //  return StatusCode((int)HttpStatusCode.Created, result);
+    //}
+
+    [HttpGet]
+    [Route("PipedreamTest")]
+    public async Task<IActionResult> PipedreamTest()
+    {
+      //if (data == null)
+      //{
+      //  return BadRequest();
+      //}
+
+      return StatusCode((int)HttpStatusCode.OK, "Hello World");
+    }
+
+    [HttpPost("share")]
+    public async Task<IActionResult> ShareData([FromBody] PatientShareRequest request)
+    {
+      if (request == null)
+      {
+        return BadRequest("Invalid request body");
+      }
+
+      var result = await _service.ShareProfile(request);
+
+      return Ok(new { Message = "Data received successfully" });
+    }
+
+    #endregion
+
   }
 
 }
+

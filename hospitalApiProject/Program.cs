@@ -33,6 +33,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAbhaService, ABHAService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+//builder.Services.AddScoped<IAbhaM2Service, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
 var app = builder.Build();
@@ -56,9 +57,11 @@ else
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAllOrigin");
-
+app.UseRouting();
 app.UseAuthorization();
+//app.MapControllers();
 
-app.MapControllers();
+app.UseEndpoints(e => e.MapControllers());
+
 
 app.Run();
