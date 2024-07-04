@@ -91,6 +91,7 @@
                                                     [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
                                                     class="custom-badge">{{invoiceDetails.status}}</button></td>
 
+
                                         </tr>
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
@@ -152,16 +153,17 @@
                                     aliquam ut a ex. Maecenas sed vehicula dui, ac suscipit lacus.</p>
                             </div>
                         </div>
-                        <div class="col-12" *ngIf="isPaidButtonVisible">
-                            <div class="doctor-submit float-end">
-                                <a href="javascript:;" class="btn btn-primary submit-form me-2"
-                                    (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
-                                <a href="javascript:;" class="btn btn-primary cancel-form" (click)="print()"><i
-                                        class="feather icon-printer me-2"></i>Print</a>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
+            </div>
+        </div>
+        <div class="col-12" *ngIf="isPaidButtonVisible">
+            <div class="doctor-submit float-end">
+                <a href="javascript:;" class="btn btn-primary submit-form me-2"
+                    (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
+                <a href="javascript:;" class="btn btn-primary cancel-form" (click)="print()"><i
+                        class="feather icon-printer me-2"></i>Print</a>
             </div>
         </div>
     </div>

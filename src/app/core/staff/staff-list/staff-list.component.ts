@@ -115,6 +115,7 @@ export class StaffListComponent implements OnInit {
         }
       });
       console.log("list",this.staffList)
+      this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
@@ -122,7 +123,7 @@ export class StaffListComponent implements OnInit {
     // this.staffService.getStaffList().subscribe((data) => {
     //   this.allstaffList = data;
     // })
-    this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
+    
 
 
   }
@@ -143,10 +144,11 @@ export class StaffListComponent implements OnInit {
       });
 
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
       this.calculateTotalPages(this.totalData, this.pageSize);
 
     })
-    this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
+    
     console.log("stafflist", this.staffList)
 
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {

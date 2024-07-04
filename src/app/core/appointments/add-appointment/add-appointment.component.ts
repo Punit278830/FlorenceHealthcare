@@ -248,8 +248,8 @@ export class AddAppointmentComponent implements OnInit {
   clearOtherFields(){
     this.bookappointment.patchValue({
       
-      doctorId: [''],
-      departmentid: [''],
+      doctorId: '',
+      departmentid:''
       
 
     })
@@ -387,7 +387,7 @@ export class AddAppointmentComponent implements OnInit {
         console.log("result", result);
         this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
-        // this.route.navigate([routes.invoices])
+        this.route.navigate([routes.invoices])
 
       });
 

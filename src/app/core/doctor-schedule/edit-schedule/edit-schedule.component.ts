@@ -36,9 +36,9 @@ export class EditScheduleComponent implements OnInit {
   public DayTime = ["1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00", "11:00", "12:00"];
   public postFix = ['AM', 'PM'];
   statusOptions = [
-    { value: 'pending', label: 'Pending' },
-    { value: 'approve', label: 'Approve' },
-    { value: 'cancel', label: 'Cancel' }
+    { value: 'Pending', label: 'Pending' },
+    { value: 'Approved', label: 'Approve' },
+    { value: 'Cancelled', label: 'Cancel' }
     // Add more options as needed
   ];
 
@@ -114,7 +114,7 @@ export class EditScheduleComponent implements OnInit {
     this.staffScheduleService.getSelectedSchedule(this.scheduleId).subscribe(data => {
       console.log("data", data)
       this.schedule.patchValue(data)
-      this.schedule.get('status')?.setValue(data.status||'pending');
+      this.schedule.get('status')?.setValue(data.status||'Pending');
       
       if (data.leaveStatus == 2) {
         this.leaveCheckBoxStatus = true;

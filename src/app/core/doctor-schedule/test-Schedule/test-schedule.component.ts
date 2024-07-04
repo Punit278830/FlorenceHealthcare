@@ -129,7 +129,7 @@ export class TestScheduleComponent implements OnInit {
       this._staffScheduleDto = this.scheduleGroup.value;
       this._staffScheduleDto.staffId = this.loggedInUser.loginId;
       this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
-      this._staffScheduleDto.status = 'pending';
+      this._staffScheduleDto.status = 'Pending';
       //  this._staffScheduleDto.name=`${this.loggedInUser.fname} ${this.loggedInUser.lname}`
       console.log("staffschedule", this._staffScheduleDto)
       this.staffScheduleService.addStaffSchedule(this._staffScheduleDto).subscribe(res => {
