@@ -62,7 +62,7 @@
     .table th,
     .table td {
         border: 1px linen #000;
-        padding-left: 2px;
+        padding: 1px;
         /* Reduced padding */
         text-align: left;
         font-size: 8px;
@@ -79,11 +79,11 @@
         background-color: #f9f9f9;
     }
 
-    // .custom-badge {
-    //     font-size: 3px;
-    //     /* Reduced font size for badges */
+    .custom-badge {
+       text-align: left;
+       font-size: 8px;
        
-    // }
+    }
 
     // .btn-primary.custom-badge {
     //     font-size: 3px;

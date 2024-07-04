@@ -114,6 +114,7 @@ export class PatientsListComponent implements OnInit {
       this.patientService.getPatientdateange(from, to).subscribe((data: any) => {
         this.totalData = data.length;
         // this.staffList.push(data);
+        this.allpatientList = data;
 
         console.log(data)
         data.map((res: any, index: number) => {
@@ -128,6 +129,7 @@ export class PatientsListComponent implements OnInit {
           }
         });
         // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
@@ -152,11 +154,12 @@ export class PatientsListComponent implements OnInit {
           }
         });
         // this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       })
     }
-    this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
+   
     // this.patientService.getPatientList().subscribe((data:any)=>{
     //    this.totalData=data.length;
     //     // this.staffList.push(data);
