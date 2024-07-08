@@ -17,145 +17,201 @@ import { routes } from 'src/app/shared/routes/routes';
 export class InvoiceViewComponent implements OnInit {
   @ViewChild('printview', { static: false }) printView!: ElementRef;
   public routes = routes;
-  public invoiceDetails!:Iinvoice;
-  private invoiceId!:number;
-  public patientDetails!:IpatientInfo;
-  public appointmentDetails!:Iappointment;
-  public doctorDetails!:IstaffInfo;
-  public addtionalInoiveItem:any[]=[];
-  public totalInvoiceAmount=0;
-  public balanceAmount=0;
-  public isPaidButtonVisible=true;
+  public invoiceDetails!: Iinvoice;
+  private invoiceId!: number;
+  public patientDetails!: IpatientInfo;
+  public appointmentDetails!: Iappointment;
+  public doctorDetails!: IstaffInfo;
+  public addtionalInoiveItem: any[] = [];
+  public totalInvoiceAmount = 0;
+  public balanceAmount = 0;
+  public isPaidButtonVisible = true;
+  public appointmentList: any[] = [];
+  public flag: boolean = false;
 
-  constructor(private invoiceService:InvoiceService,
-    private patientService:PatientService,
-    private appointmentService:AppointmentService,
-    private staffService:StaffService,
-    private toastr:ToastrService,
-    private route:Router)
-  {
-    if(!this.invoiceService.invoiceId)
-    {
+  constructor(private invoiceService: InvoiceService,
+    private patientService: PatientService,
+    private appointmentService: AppointmentService,
+    private staffService: StaffService,
+    private toastr: ToastrService,
+    private route: Router) {
+    if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
     }
-    
+
   }
 
-  getInvoiceDetails()
-  {
-    
-    this.invoiceId=this.invoiceService.invoiceId;
-    this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res=>{
-      if(res.status=='Paid')
-      {
-        this.isPaidButtonVisible=false;
+  getInvoiceDetails() {
+
+    this.invoiceId = this.invoiceService.invoiceId;
+    this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
+      if (res.status == 'Paid') {
+        this.isPaidButtonVisible = false;
       }
-      else{
-        this.isPaidButtonVisible=true;
+      else {
+        this.isPaidButtonVisible = true;
       }
-      this.invoiceDetails=res;
-      if(res.status=='un Paid')
-      {
+      this.invoiceDetails = res;
+      if (res.status == 'un Paid') {
         //this.isPaidButtonVisible=false;
-        this.balanceAmount=this.balanceAmount+res.amount;
+        this.balanceAmount = this.balanceAmount + res.amount;
       }
-      this.totalInvoiceAmount=this.totalInvoiceAmount+res.amount;
-    this.getPatientDetails(res.patientId);
-    this.getAppointDetails(res.appoitmentId);
-    this.getAddtionalItems(this.invoiceId)
-    
+      this.totalInvoiceAmount += res.amount;
+      
+      this.getPatientDetails(res.patientId);
+      this.getAppointDetails(res.appoitmentId);
+      this.getAddtionalItems(this.invoiceId)
+      
+
+
+
     })
-    
-   
-    
+
+
+
   }
 
-  ngOnInit()
-  {
+  ngOnInit() {
     this.getInvoiceDetails();
 
   }
 
-  getPatientDetails(id:number)
-  {
-    this.patientService.getPatientData(id).subscribe(res=>{
-      this.patientDetails=res;
+  getPatientDetails(id: number) {
+    this.patientService.getPatientData(id).subscribe(res => {
+      this.patientDetails = res;
 
     })
   }
 
 
-  getAppointDetails(id:number)
-  {
-    this.appointmentService.getAppointmentById(id).subscribe(res=>{
-      this.appointmentDetails=res;
+  getAppointDetails(id: number) {
+    this.appointmentService.getAppointmentById(id).subscribe(res => {
+      this.appointmentDetails = res;
+      console.log("appoint", this.appointmentDetails)
       this.getDoctorDetails();
+      
     })
   }
 
-  getDoctorDetails()
-  {
-    this.staffService.getStaffByID(this.appointmentDetails.doctorId).subscribe(res=>{
-      this.doctorDetails=res;
+  getDoctorDetails() {
+    this.staffService.getStaffByID(this.appointmentDetails.doctorId).subscribe(res => {
+      this.doctorDetails = res;
+      this.loadPatientAppointments();
     }
-      )
+    )
   }
-  paidinvoice(id:number)
-  {
-    this.invoiceDetails.status='Paid';
-    this.invoiceService.updateInvoice(id,this.invoiceDetails).subscribe(res=>{
-      if(res)
-      {
+  loadPatientAppointments() {
+    this.appointmentList = [];
+    const currentYear = new Date().getFullYear();
+
+    this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
+      this.appointmentList = res;
+
+      // Find the latest appointment and check if it is within the last 7 days
+      this.checkLatestAppointmentWithin7Days();
+    });
+  }
+
+  checkLatestAppointmentWithin7Days() {
+    if (this.appointmentList.length > 0) {
+      // Sort the appointments by date in descending order
+      this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+      const selectedAppointmentDate = new Date(this.appointmentDetails.date);
+      let previousAppointmentDate: Date | null = null;
+
+      for (let appointment of this.appointmentList) {
+        const appointmentDate = new Date(appointment.date);
+        if (appointmentDate < selectedAppointmentDate) {
+          previousAppointmentDate = appointmentDate;
+          break;
+        }
+      }
+
+      if (previousAppointmentDate) {
+        const differenceInTime = selectedAppointmentDate.getTime() - previousAppointmentDate.getTime();
+        const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+
+        console.log("Selected Appointment Date:", selectedAppointmentDate);
+        console.log("Previous Appointment Date:", previousAppointmentDate);
+        console.log("Difference in Days:", differenceInDays);
+
+        // Check if the difference between the selected and previous appointment is within 7 days
+        this.flag = differenceInDays <= 7 && differenceInDays >= 0;
+      } else {
+        console.warn("No appointment found before the selected appointment date.");
+        this.flag = false;
+      }
+    } else {
+      this.flag = false;
+    }
+
+    if (this.flag) {
+      this.totalInvoiceAmount = 0;
+    }
+
+    console.log("Flag:", this.flag);
+  }
+
+
+
+
+
+  paidinvoice(id: number) {
+    this.invoiceDetails.status = 'Paid';
+    this.invoiceService.updateInvoice(id, this.invoiceDetails).subscribe(res => {
+      if (res) {
         this.getInvoiceDetails();
-        this.balanceAmount=0;
-        this.toastr.success("Invoice Paid Successfully","Update Invoice");
-        
+        this.balanceAmount = 0;
+        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
+
       }
     })
 
   }
 
-  print()
-{
-  this.isPaidButtonVisible=false;
-  const printContents = this.printView.nativeElement.innerHTML;
-const originalContents = document.body.innerHTML;
-document.body.innerHTML = printContents;
-window.print();
-document.body.innerHTML = originalContents; 
- }
+  print() {
+    this.isPaidButtonVisible = false;
+    const printContents = this.printView.nativeElement.innerHTML;
+    const originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+  }
 
- getAddtionalItems(id:number)
- {
+  getAddtionalItems(id: number) {
 
-  this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res:any)=>{
-    
-    this.addtionalInoiveItem=res;
-    res.map((data:any)=>{
-      if(data.status=='un Paid')
-      {
-        this.isPaidButtonVisible=false;
-        this.balanceAmount=this.balanceAmount+data.finalAmount;
-      }
-      this.totalInvoiceAmount=this.totalInvoiceAmount+data.finalAmount;
+    this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res: any) => {
+
+      this.addtionalInoiveItem = res;
+      res.map((data: any) => {
+        if (data.status == 'un Paid') {
+          this.isPaidButtonVisible = false;
+          this.balanceAmount = this.balanceAmount + data.finalAmount;
+        }
+        this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
+      })
+      console.log("addi", this.addtionalInoiveItem);
+      console.log("appo", this.appointmentDetails);
+      console.log("doc", this.doctorDetails);
+
+
+    })
+  }
+
+
+  paidsubInvoiceItem(id: number) {
+    this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result: any) => {
+      result.status = 'Paid';
+      this.invoiceService.updateSubInvoiceItem(id, result).subscribe(res => {
+        this.toastr.success("Invoice Paid", 'Paid');
+        this.balanceAmount = 0;
+        this.totalInvoiceAmount = 0;
+        this.getInvoiceDetails();
+      })
     })
 
-    
-  })
- }
-
- paidsubInvoiceItem(id:number)
- {
-  this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result:any)=>{
-    result.status='Paid';
-    this.invoiceService.updateSubInvoiceItem(id,result).subscribe(res=>{
-      this.toastr.success("Invoice Paid",'Paid');
-      this.balanceAmount=0;
-      this.totalInvoiceAmount=0;
-      this.getInvoiceDetails();
-    })
-  })
-  
- }
+  }
 
 }
+

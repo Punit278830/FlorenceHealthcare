@@ -85,7 +85,7 @@
                                             <td>Consultation</td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                             <td>{{appointmentDetails.fee}}</td>
-                                            <td>0</td>
+                                            <td>{{ flag ? 100 : 0 }}</td>
                                             <td>{{appointmentDetails.fee}}</td>
                                             <td><button
                                                     [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
@@ -168,3 +168,41 @@
         </div>
     </div>
 </div>
+
+<!-- <div #printview [ngClass]="[classes.printAreaContainer, classes.fontMono]" [ngStyle]="{ width: width }">
+    <div [ngClass]="classes.textCenter">Florence Healthcare</div>
+    <div [ngClass]="classes.textCenter">Kheri Road, Kheri ,Lakhimpur Kheri-262701</div>
+    <div [ngClass]="classes.textCenter">Near By Don Bosco School</div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
+
+    <div [ngClass]="classes.textCenter">Receipt / Invoice / Bill </div>
+    <div [ngClass]="classes.textLeft">{{patientDetails.firstName}} {{patientDetails.lastName}}</div>
+    <div [ngClass]="classes.textRight">Date{{invoiceDetails.createdDate |
+        date:'dd-MMMM-yyyy'}} </div>
+    <div [ngClass]="classes.textRight">InvoiceId-#INV-{{invoiceDetails.invoiceId}} </div>
+
+
+
+
+    <div [ngClass]="classes.grid3Col">
+        <div><strong>Item</strong></div>
+        <div [ngClass]="classes.textRight"><strong>Backbar</strong></div>
+        <div [ngClass]="classes.textRight"><strong>Price</strong></div>
+
+
+        <div *ngFor="let data of addtionalInoiveItem; let i=index">
+            <div [ngClass]="classes.maxLine2">{{data.itemName}}</div>
+            <div [ngClass]="classes.textRight">{{data.fee}}</div>
+            <div [ngClass]="classes.textRight">{{data.finalAmount}}</div>
+        </div>
+
+
+
+        <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
+
+        <div [ngClass]="[classes.colSpan2, classes.maxLine2]">
+            <strong>Total:₹{{totalInvoiceAmount}}</strong>
+        </div>
+        <div [ngClass]="classes.textRight"><strong>$8.0</strong></div>
+    </div>
+</div> -->
