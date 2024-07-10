@@ -596,3 +596,8 @@ export interface IAbhaPatientInfo {
   patientImage?: string;
   regstrationDate?: string;
 }
+
+export interface IAbhaPatientDetails extends IAbhaPatientInfo {
+  abhaNumber: string,
+  abhaAddress: string
+}

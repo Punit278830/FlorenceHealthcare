@@ -173,20 +173,23 @@ namespace hospitalApiProject.Services
       return client;
     }
 
-    private HttpClient ClientForScan()
+    private HttpClient ClientForScan(string timeStamp)
     {
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
-      client.DefaultRequestHeaders.Add("accept", "*/*");
+      client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
+      //client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("TIMESTAMP", timeStamp);
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
       return client;
     }
 
-    public async Task<string> OnShareProfileAsync(string baseUrl, string api, string content)
+    public async Task<string> OnShareProfileAsync(string baseUrl, string api, string content, string timestamp)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
-      var client = ClientForScan();
+      var client = ClientForScan(timestamp);
 
       var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
       var response = await client.PostAsync(URL, stringContent);

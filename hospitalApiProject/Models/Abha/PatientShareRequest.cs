@@ -9,41 +9,28 @@ public class PatientShareRequest
 
   public string requestId { get; set; }
 
-  public DateTime timestamp { get; set; }
+  public string timestamp { get; set; }
   public string healthId { get; set; }
-}
-
-public class MetaData
-{
-  public string HipId { get; set; }
-  public string Context { get; set; }
-  public string HprId { get; set; }
-  public string Latitude { get; set; }
-  public string Longitude { get; set; }
-}
-
-public class Profile
-{
-  public Patient Patient { get; set; }
+  public Patient patient { get; set; }
 }
 
 public class Patient
 {
-  public int AbhaNumber { get; set; }
-  public string AbhaAddress { get; set; }
-  public string Name { get; set; }
-  public string Gender { get; set; }
-  public string DayOfBirth { get; set; }
-  public string MonthOfBirth { get; set; }
-  public string YearOfBirth { get; set; }
-  public Address Address { get; set; }
-  public string PhoneNumber { get; set; }
+  public string abhaNumber { get; set; }
+  public string abhaAddress { get; set; }
+  public string name { get; set; }
+  public string gender { get; set; }
+  public string dayOfBirth { get; set; }
+  public string monthOfBirth { get; set; }
+  public string yearOfBirth { get; set; }
+  public Address? address { get; set; }
+  public string phoneNumber { get; set; }
 }
 
 public class Address
 {
-  public string Line { get; set; }
-  public string District { get; set; }
-  public string State { get; set; }
-  public int PinCode { get; set; }
+  public string? line { get; set; }
+  public string? district { get; set; } 
+  public string? state { get; set; }
+  public string? pincode { get; set; }
 }

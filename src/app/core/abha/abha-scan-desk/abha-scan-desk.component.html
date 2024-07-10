@@ -1,0 +1,77 @@
+<div class="page-wrapper">
+    <div class="content">
+  
+      <!-- Page Header -->
+      <div class="page-header">
+        <div class="row">
+          <div class="col-sm-12">
+            <ul class="breadcrumb">
+              <li class="breadcrumb-item"><a [routerLink]="routes.patientsList">Patients </a></li>
+              <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+              <li class="breadcrumb-item active">Patient List</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- /Page Header -->
+  
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card card-table show-entire">
+            <div class="card-body">
+  
+              <!-- Table Header -->
+              <div class="page-table-header mb-2">
+                <div class="row align-items-center">
+                  <div class="col">
+                    <div class="doctor-table-blk">
+                      <h3>ABHA Scan Desk</h3>
+                      <div class="doctor-search-blk">
+                        <div class="top-nav-search table-search-blk">
+                          <input type="text" class="form-control" placeholder="Search here">
+                          <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
+                        </div>
+                      </div>
+  
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /Table Header -->
+  
+              <div class="table-responsive">
+                <table matSort
+                  class="table border-0 custom-table comman-table datatable mb-0">
+                  <thead>
+                    <tr>
+                      <th mat-sort-header="abhaAddress">Abha Address</th>
+                      <th mat-sort-header="name">Name</th>
+                      <th mat-sort-header="mobile">Mobile</th>
+                      <th mat-sort-header="gender">Gender</th>
+                      <th mat-sort-header="gender">Action</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let data of abhaPatients">
+                      <td>{{data.abhaAddress}}</td>
+                      <td>
+                          {{data.firstName}}
+                          {{data.lastName}}
+                      </td>
+                      <td><a href="javascript:;">{{data.mobile}}</a></td>
+                      <td>{{data.gender}}</td>
+                      <td class="text-end">
+                        Add Patient
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>

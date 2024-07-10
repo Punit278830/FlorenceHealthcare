@@ -293,21 +293,28 @@ namespace hospitalApiProject.Services.Abha
     {
       var jsonContent = new
       {
-          requestId = request.requestId,
-          timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+          //timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
           acknowledgement = new {
             status = "SUCCESS",
-            healthId = request.healthId,
-            tokenNumber = "100"
+            abhaAddress = request.healthId,
+            profile = new {
+              context = 123,
+              tokenNumber = 100,
+              expiry = 600
+            }
           },
-          resp = new
+          response = new
           {
             requestId = request.requestId
           }
       };
 
       var json = JsonSerializer.Serialize(jsonContent); 
-      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json);
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/hiecm/api", "v3/patient-share/on-share", json, request.timestamp);
+
+      if (this.ErrorMessage != null) {
+
+      }
       return result;
     }
 
@@ -330,7 +337,7 @@ namespace hospitalApiProject.Services.Abha
       };
 
       var json = JsonSerializer.Serialize(jsonContent);
-      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json);
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json, "");
       return result;
     }
   }

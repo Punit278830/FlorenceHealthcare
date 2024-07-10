@@ -3,6 +3,7 @@ using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Services.Abha;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Net;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -14,11 +15,13 @@ namespace hospitalApiProject.Controllers
   {
     protected readonly IAbhaService _service;
     //protected readonly IAbhaM2Service _abhaM2Service;
+    private readonly FlorenceDbContext _context;
 
 
-    public AbhaController(IAbhaService service) //, IAbhaM2Service abhaM2Service
+    public AbhaController(IAbhaService service, FlorenceDbContext context) //, IAbhaM2Service abhaM2Service
     {
       _service = service;
+      _context = context;
       //_abhaM2Service = abhaM2Service;
     }
 
@@ -391,7 +394,80 @@ namespace hospitalApiProject.Controllers
 
       var result = await _service.ShareProfile(request);
 
+      if (_service.HasError)
+      {
+        return Ok(); //todo : update
+      }
+
+      await AddAbhaPatientProfile(request);
+
       return Ok(new { Message = "Data received successfully" });
+    }
+
+    [HttpPost("AddAbhaPatient")]
+
+    public async Task<ActionResult<AbhaPatientDetails>> AddAbhaPatientProfile(PatientShareRequest patientInfo)
+    {
+      var patientProfile = patientInfo.patient;
+      // Check if a patient with the same IdentityNumber already exists
+      var existingPatient = await _context.AbhaPatientDetails
+                                          .FirstOrDefaultAsync(p => p.AbhaAddress == patientProfile.abhaAddress);
+
+      //if (existingPatient != null)
+      //{
+      //  // Return a conflict response if the IdentityNumber already exists
+      //  return Conflict(new { message = "Patient exists with same ABHA address." });
+      //}
+
+      // Parse day, month, and year components with leading zeros handling
+      int day = int.Parse(patientProfile.dayOfBirth.PadLeft(2, '0'));   // PadLeft ensures 2 digits with leading zeros if necessary
+      int month = int.Parse(patientProfile.monthOfBirth.PadLeft(2, '0')); // PadLeft ensures 2 digits with leading zeros if necessary
+      int year = int.Parse(patientProfile.yearOfBirth);
+
+      // Construct a DateTime object
+      DateTime dateOfBirth = new DateTime(year, month, day);
+      // Convert to DateOnly
+      DateOnly dob = DateOnly.FromDateTime(dateOfBirth);
+
+      string[] nameParts = patientProfile.name.Split(' ');
+
+
+      var abhaPatient = new AbhaPatientDetails
+      {
+        AbhaAddress = patientProfile.abhaAddress,
+        AbhaNumber = patientProfile.abhaNumber,
+        Address = patientProfile.address?.line,
+        Dob = dob,
+        Mobile = patientProfile.phoneNumber,
+        Gender = patientProfile.gender == "M" ? "Male" : "Female",
+        RegistrationDate = DateOnly.FromDateTime(DateTime.Today),
+        FirstName = nameParts[0],
+        LastName = nameParts[1]
+      };
+
+      // Add the new PatientInfo
+      _context.AbhaPatientDetails.Add(abhaPatient);
+      await _context.SaveChangesAsync();
+
+      return Ok();
+      //return CreatedAtAction("GetPatientInfo", new { id = patientInfo.Id }, patientInfo);
+    }
+
+    [HttpGet("ScanDesk/Patients")]
+    public async Task<ActionResult<List<AbhaPatientDetails>>> GetPatientDetailsByDateRange()
+    {
+      DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+
+      List<AbhaPatientDetails> patientData = await _context.AbhaPatientDetails
+          .Where(e => e.RegistrationDate == today)
+          .ToListAsync();
+
+      if (patientData != null)
+      {
+        return Ok(patientData);
+      }
+
+      return NotFound();
     }
 
     #endregion
