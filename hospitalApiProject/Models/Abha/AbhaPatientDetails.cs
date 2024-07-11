@@ -25,6 +25,8 @@ namespace hospitalApiProject.Models.Abha
     public string? PatientImage { get; set; }
 
     public DateOnly? RegistrationDate { get; set; }
+
+    public string? Status { get; set; }
   }
 
 }

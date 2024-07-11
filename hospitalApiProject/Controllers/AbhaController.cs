@@ -1,11 +1,11 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
-using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Services.Abha;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using System.Net;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Controllers
 {
@@ -14,14 +14,16 @@ namespace hospitalApiProject.Controllers
   public class AbhaController : Controller
   {
     protected readonly IAbhaService _service;
+    private readonly IPatientInfoService _patientInfoService;
+
     //protected readonly IAbhaM2Service _abhaM2Service;
     private readonly FlorenceDbContext _context;
 
-
-    public AbhaController(IAbhaService service, FlorenceDbContext context) //, IAbhaM2Service abhaM2Service
+    public AbhaController(IAbhaService service, FlorenceDbContext context, IPatientInfoService patientInfoService) //, IAbhaM2Service abhaM2Service
     {
       _service = service;
       _context = context;
+      _patientInfoService = patientInfoService;
       //_abhaM2Service = abhaM2Service;
     }
 
@@ -396,78 +398,42 @@ namespace hospitalApiProject.Controllers
 
       if (_service.HasError)
       {
-        return Ok(); //todo : update
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
       }
 
-      await AddAbhaPatientProfile(request);
-
-      return Ok(new { Message = "Data received successfully" });
-    }
-
-    [HttpPost("AddAbhaPatient")]
-
-    public async Task<ActionResult<AbhaPatientDetails>> AddAbhaPatientProfile(PatientShareRequest patientInfo)
-    {
-      var patientProfile = patientInfo.patient;
-      // Check if a patient with the same IdentityNumber already exists
-      var existingPatient = await _context.AbhaPatientDetails
-                                          .FirstOrDefaultAsync(p => p.AbhaAddress == patientProfile.abhaAddress);
-
-      //if (existingPatient != null)
-      //{
-      //  // Return a conflict response if the IdentityNumber already exists
-      //  return Conflict(new { message = "Patient exists with same ABHA address." });
-      //}
-
-      // Parse day, month, and year components with leading zeros handling
-      int day = int.Parse(patientProfile.dayOfBirth.PadLeft(2, '0'));   // PadLeft ensures 2 digits with leading zeros if necessary
-      int month = int.Parse(patientProfile.monthOfBirth.PadLeft(2, '0')); // PadLeft ensures 2 digits with leading zeros if necessary
-      int year = int.Parse(patientProfile.yearOfBirth);
-
-      // Construct a DateTime object
-      DateTime dateOfBirth = new DateTime(year, month, day);
-      // Convert to DateOnly
-      DateOnly dob = DateOnly.FromDateTime(dateOfBirth);
-
-      string[] nameParts = patientProfile.name.Split(' ');
-
-
-      var abhaPatient = new AbhaPatientDetails
+      await _service.AddAbhaPatientProfile(request.patient);
+      if (_service.HasError)
       {
-        AbhaAddress = patientProfile.abhaAddress,
-        AbhaNumber = patientProfile.abhaNumber,
-        Address = patientProfile.address?.line,
-        Dob = dob,
-        Mobile = patientProfile.phoneNumber,
-        Gender = patientProfile.gender == "M" ? "Male" : "Female",
-        RegistrationDate = DateOnly.FromDateTime(DateTime.Today),
-        FirstName = nameParts[0],
-        LastName = nameParts[1]
-      };
-
-      // Add the new PatientInfo
-      _context.AbhaPatientDetails.Add(abhaPatient);
-      await _context.SaveChangesAsync();
+        return StatusCode(500, _service.ErrorMessage);
+      }
 
       return Ok();
-      //return CreatedAtAction("GetPatientInfo", new { id = patientInfo.Id }, patientInfo);
     }
 
     [HttpGet("ScanDesk/Patients")]
-    public async Task<ActionResult<List<AbhaPatientDetails>>> GetPatientDetailsByDateRange()
+    public async Task<ActionResult<List<AbhaPatientDetails>>> GetScannedPatients()
     {
-      DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-
-      List<AbhaPatientDetails> patientData = await _context.AbhaPatientDetails
-          .Where(e => e.RegistrationDate == today)
-          .ToListAsync();
-
-      if (patientData != null)
+      try
       {
-        return Ok(patientData);
-      }
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly tomorrow = today.AddDays(1); 
 
-      return NotFound();
+        List<AbhaPatientDetails> patientData = await _context.AbhaPatientDetails
+    .Where(e => e.RegistrationDate.HasValue && e.RegistrationDate.Value >= today && e.RegistrationDate.Value < tomorrow)
+    .ToListAsync();
+
+        if (patientData != null)
+        {
+          return Ok(patientData);
+        }
+
+        return NotFound();
+      }
+      catch (Exception ex)
+      {
+        var msg = ex.ToString();
+        return BadRequest();
+      }
     }
 
     #endregion

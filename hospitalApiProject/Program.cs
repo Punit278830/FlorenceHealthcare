@@ -1,6 +1,7 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services;
 using hospitalApiProject.Services.Abha;
+using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<IAbhaService, ABHAService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 //builder.Services.AddScoped<IAbhaM2Service, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
 
 var app = builder.Build();
 

@@ -599,5 +599,6 @@ export interface IAbhaPatientInfo {
 
 export interface IAbhaPatientDetails extends IAbhaPatientInfo {
   abhaNumber: string,
-  abhaAddress: string
+  abhaAddress: string,
+  status: string,
 }

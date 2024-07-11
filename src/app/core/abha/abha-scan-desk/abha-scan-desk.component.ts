@@ -28,8 +28,6 @@ export class AbhaScanDeskComponent {
     this.abhaPatients = [];       
       this.abhaService.getAbhaPatients().subscribe((data: any) => {
         this.abhaPatients = data;
-        console.log(this.abhaPatients);
-        console.log(this.abhaPatients.slice());
         });
   }
 

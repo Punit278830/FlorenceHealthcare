@@ -11,10 +11,10 @@ public class PatientShareRequest
 
   public string timestamp { get; set; }
   public string healthId { get; set; }
-  public Patient patient { get; set; }
+  public PatientProfile patient { get; set; }
 }
 
-public class Patient
+public class PatientProfile
 {
   public string abhaNumber { get; set; }
   public string abhaAddress { get; set; }
