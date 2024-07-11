@@ -51,19 +51,19 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-  //app.UseExceptionHandler("/Error");
-  app.UseHsts();
+  app.UseCors("AllowAngularDev");
 }
 
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowAllOrigin");
-app.UseRouting();
 app.UseAuthorization();
 //app.MapControllers();
 
 app.UseEndpoints(e => e.MapControllers());
+
+
+
 
 
 app.Run();

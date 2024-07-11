@@ -1,9 +1,11 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
 import { Ilogin, Istaffschedule } from 'src/app/shared/models/models';
+import { routes } from 'src/app/shared/routes/routes';
 
 
 @Component({
@@ -14,7 +16,7 @@ import { Ilogin, Istaffschedule } from 'src/app/shared/models/models';
 })
 
 export class TestScheduleComponent implements OnInit {
-
+  public routes = routes;
   public scheduleGroup!: FormGroup;
   private _staffScheduleDto!: Istaffschedule;
   public formattedDateTime!: any;
@@ -26,12 +28,13 @@ export class TestScheduleComponent implements OnInit {
   public leaveCheckBoxStatus = false;
   public leaveOption = [
     { key: "No", value: 1 },
-    { key: "Yes", value: 2 }]
+    { key: "Yes", value: 2 }];
+  public minDate:Date | null=null;
 
   constructor(private fb: FormBuilder,
     private staffScheduleService: StaffScheduleService,
     private datePipe: DatePipe,
-    private toster: ToastrService) {
+    private toster: ToastrService,private route : Router) {
 
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
     this.showAdujestmentSchedule(this.loggedInUser.loginId);
@@ -41,20 +44,75 @@ export class TestScheduleComponent implements OnInit {
 
   ngOnInit() {
     this.initlizeScheduleForm();
+    this.minDate=new Date();
+
+    this.scheduleGroup.get('leaveStatus')?.valueChanges.subscribe(value => {
+      this.leaveCheckBoxStatus = value === 2;
+      this.setConditionalValidators(this.leaveCheckBoxStatus);
+    });
+
+    // Initialize validators based on initial leaveStatus value
+    this.setConditionalValidators(this.leaveCheckBoxStatus);
   }
 
   initlizeScheduleForm() {
     this.scheduleGroup = this.fb.group({
-      scheduleDate: ['', Validators.required],
-      fromTime: ['', Validators.required],
-      fromPostfix: ['', Validators.required],
-      toTime: ['', Validators.required],
-      toPostfix: ['', Validators.required],
+      // scheduleDate: ['', Validators.required],
+      // fromTime: ['', Validators.required],
+      // fromPostfix: ['', Validators.required],
+      // toTime: ['', Validators.required],
+      // toPostfix: ['', Validators.required],
+      // leaveStatus: [1, Validators.required],
+      // notes: ['', Validators.required]
       leaveStatus: [1, Validators.required],
-      notes: ['', Validators.required]
+      scheduleDate: [''],
+      fromTime: [''],
+      fromPostfix: [''],
+      toTime: [''],
+      toPostfix: [''],
+      notes: ['']
 
     })
   }
+
+
+  setConditionalValidators(leaveCheckBoxStatus:boolean) {
+    const fromTime = this.scheduleGroup.get('fromTime');
+    const fromPostfix = this.scheduleGroup.get('fromPostfix');
+    const toTime = this.scheduleGroup.get('toTime');
+    const toPostfix = this.scheduleGroup.get('toPostfix');
+    const scheduleDate = this.scheduleGroup.get('scheduleDate');
+    const notes = this.scheduleGroup.get('notes');
+
+    if (leaveCheckBoxStatus === false) {
+      fromTime?.setValidators([Validators.required]);
+      fromPostfix?.setValidators([Validators.required]);
+      toTime?.setValidators([Validators.required]);
+      toPostfix?.setValidators([Validators.required]);
+      scheduleDate?.setValidators([Validators.required]);
+      notes?.setValidators([Validators.required]);
+    } else if (leaveCheckBoxStatus === true) {
+      fromTime?.clearValidators();
+      fromPostfix?.clearValidators();
+      toTime?.clearValidators();
+      toPostfix?.clearValidators();
+      scheduleDate?.setValidators([Validators.required]);
+      notes?.setValidators([Validators.required]);
+    }
+
+    // Recalculate validation status
+    fromTime?.updateValueAndValidity();
+    fromPostfix?.updateValueAndValidity();
+    toTime?.updateValueAndValidity();
+    toPostfix?.updateValueAndValidity();
+    scheduleDate?.updateValueAndValidity();
+    notes?.updateValueAndValidity();
+  }
+
+
+
+
+
 
   public DayTime = ["1:00", "2:00", "3:00", "4:00", "5:00", "6:00", "7:00", "8:00", "9:00", "10:00", "11:00", "12:00"];
   public postFix = ['AM', 'PM']
@@ -62,22 +120,29 @@ export class TestScheduleComponent implements OnInit {
 
 
   submitschedule(scheduleData: FormGroup) {
-    console.log(scheduleData.value);
-    //this._staffScheduleDto=scheduleData.value;  
+    console.log(scheduleData.valid);
+    if (scheduleData.valid) {
+      //this._staffScheduleDto=scheduleData.value;  
+      console.log(scheduleData.value);
 
-    this.leaveCheckBoxStatus ? this.scheduleGroup.get('leaveStatus')?.setValue(2) : this.scheduleGroup.get('leaveStatus')?.setValue(1);
-    this._staffScheduleDto = this.scheduleGroup.value;
-    this._staffScheduleDto.staffId = this.loggedInUser.loginId;
-    this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
-    this._staffScheduleDto.status = 'pending';
-    //  this._staffScheduleDto.name=`${this.loggedInUser.fname} ${this.loggedInUser.lname}`
-    console.log("staffschedule", this._staffScheduleDto)
-    this.staffScheduleService.addStaffSchedule(this._staffScheduleDto).subscribe(res => {
-      console.log(res);
-      this.showAdujestmentSchedule(this.loggedInUser.loginId);
-      this._staffScheduleDto.leaveStatus == 1 ? this.toster.success("Schedule adjusted Successfully", "Schedule") : this.toster.success("Leave apply successfully", "Leave");
-      this.scheduleGroup.reset();
-    })
+      this.leaveCheckBoxStatus ? this.scheduleGroup.get('leaveStatus')?.setValue(2) : this.scheduleGroup.get('leaveStatus')?.setValue(1);
+      this._staffScheduleDto = this.scheduleGroup.value;
+      this._staffScheduleDto.staffId = this.loggedInUser.loginId;
+      this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
+      this._staffScheduleDto.status = 'Pending';
+      //  this._staffScheduleDto.name=`${this.loggedInUser.fname} ${this.loggedInUser.lname}`
+      console.log("staffschedule", this._staffScheduleDto)
+      this.staffScheduleService.addStaffSchedule(this._staffScheduleDto).subscribe(res => {
+        console.log(res);
+        this.showAdujestmentSchedule(this.loggedInUser.loginId);
+        this._staffScheduleDto.leaveStatus == 1 ? this.toster.success("Schedule adjusted Successfully", "Success") : this.toster.success("Leave apply successfully", "Success");
+        this.scheduleGroup.reset();
+      })
+
+    }else{
+      this.scheduleGroup.markAllAsTouched();
+    }
+
   }
 
   applyLeave() {
@@ -112,7 +177,7 @@ export class TestScheduleComponent implements OnInit {
   }
 
   Cancel() {
-    this.scheduleGroup.reset();
+    this.route.navigate([routes.schedule]);
   }
 
   showAdujestmentSchedule(id: number) {

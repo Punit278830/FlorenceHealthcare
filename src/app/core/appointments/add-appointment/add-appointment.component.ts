@@ -248,8 +248,8 @@ export class AddAppointmentComponent implements OnInit {
   clearOtherFields(){
     this.bookappointment.patchValue({
       
-      doctorId: [''],
-      departmentid: [''],
+      doctorId: '',
+      departmentid:''
       
 
     })
@@ -387,7 +387,7 @@ export class AddAppointmentComponent implements OnInit {
         console.log("result", result);
         this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
-        // this.route.navigate([routes.invoices])
+        this.route.navigate([routes.invoices])
 
       });
 
@@ -444,15 +444,16 @@ export class AddAppointmentComponent implements OnInit {
 
     })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-
+      console.log("doctoronleave",doctorOnLeave);
       data.map((res: any) => {
         console.log("doc res", res);
+        
         const available = doctorOnLeave.find(e => e == res.staffId)
         console.log("doc avai", available);
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
             console.log("entered book appoint.time")
-            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1)
+            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1 && item.status == "Approved")
             console.log("doc sche", docschedule);
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);

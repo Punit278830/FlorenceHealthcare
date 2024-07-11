@@ -161,9 +161,10 @@ return{
   ];
 
 
-  movetoInvoiceView(Id:number)
+  movetoInvoiceView(Id:number,patienId:number)
   {
     this.invoiceService.invoiceId=Id;
+    this.patientService.patientId=patienId
     this.route.navigate(['/accounts/invoice-view'])
   }
 

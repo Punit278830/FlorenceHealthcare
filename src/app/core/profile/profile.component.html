@@ -379,7 +379,7 @@
                                                 <div class="col-12 col-md-6 col-xl-4">
                                                     <div class="form-group local-forms">
                                                         <label for="bp">BP</label>
-                                                        <input type="text" class="form-control" formControlName="bp">
+                                                        <input type="text" class="form-control" formControlName="bp" placeholder="/mmHg">
                                                     </div>
 
 
@@ -404,7 +404,7 @@
                                                 <div class="col-12 col-md-6 col-xl-4">
                                                     <div class="form-group local-forms">
                                                         <label for="pulse">Pulse</label>
-                                                        <input type="text" class="form-control" formControlName="pulse">
+                                                        <input type="text" class="form-control" formControlName="pulse" placeholder="bpm">
 
                                                     </div>
                                                 </div>
@@ -412,7 +412,7 @@
                                                     <div class="form-group local-forms">
                                                         <label for="tempurature">Temprature</label>
                                                         <input type="text" class="form-control"
-                                                            formControlName="tempurature">
+                                                            formControlName="tempurature" placeholder="C">
 
 
                                                     </div>
@@ -421,7 +421,7 @@
                                                     <div class="form-group local-forms">
                                                         <label for="oxigenLevel">Oxygen Level</label>
                                                         <input type="text" class="form-control"
-                                                            formControlName="oxigenLevel">
+                                                            formControlName="oxigenLevel" placeholder="mg/L">
                                                     </div>
                                                 </div>
 
@@ -832,12 +832,12 @@
                                                     <div class="col-12 col-md-6 col-xl-6">
 
                                                         <ul class="list-unstyled invoice-clinic mt-2 ">
-                                                            <li><strong>Pulse:{{vitalDto.pulse}} /mmHg</strong>
+                                                            <li><strong>Pulse:{{vitalDto.pulse}} / bpm</strong>
                                                             </li>
-                                                            <li><strong>Tempurature:{{vitalDto.tempurature}} Kg</strong>
+                                                            <li><strong>Tempurature:{{vitalDto.tempurature}} C</strong>
                                                             </li>
                                                             <li><strong>OxigenLevel:{{vitalDto.oxigenLevel}}
-                                                                    CM</strong></li>
+                                                                    mg/L</strong></li>
                                                         </ul>
 
                                                         <!-- <h5>Pulse:<strong>{{vitalDto.pulse}} /min</strong></h5>

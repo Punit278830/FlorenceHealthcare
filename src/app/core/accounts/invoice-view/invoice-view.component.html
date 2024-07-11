@@ -15,7 +15,7 @@
         </div>
         <!-- /Page Header -->
 
-        <div class="row" #printview>
+        <div class="row">
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -28,27 +28,29 @@
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <div class="invoice-counts float-end">
-                                        <h4>Status: <a href="javascript:;" class="status-green">{{invoiceDetails.status}}</a></h4>
+                                        <h4>Status: <a href="javascript:;"
+                                                class="status-green">{{invoiceDetails.status}}</a></h4>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="row custom-invoice">
-                            <div class="col-12 col-md-6 m-b-20">
-                                <img src="assets/img/logo.png" width="35" height="35" alt=""> <span>Florence Healthcare</span>
+                            <div class="col-12 col-md-6 m-b-20 part-one">
+                                <img src="assets/img/logo.png" width="35" height="35" alt=""> <span>Florence
+                                    Healthcare</span>
                                 <ul class="list-unstyled invoice-clinic mt-2">
                                     <li>Kheri Road, Kheri</li>
                                     <li>Lakhimpur Kheri-262701</li>
                                     <li>Near By Don Bosco School</li>
                                 </ul>
                             </div>
-                            <div class="col-12 col-md-6 m-b-20">
+                            <div class="col-12 col-md-6 m-b-20 part-two">
                                 <div class="invoice-details">
                                     <h3>Bill To:</h3>
                                     <ul class="list-unstyled invoice-clinic">
                                         <li>{{patientDetails.firstName}} {{patientDetails.lastName}}</li>
                                         <li>{{patientDetails.mobile}}</li>
-                                        
+
                                     </ul>
                                 </div>
                             </div>
@@ -56,56 +58,68 @@
                         <div class="row">
                             <div class="col-sm-6 col-lg-12 m-b-20">
                                 <div class="invoice-details">
-                                    <h4>Invoice Date : <i class="feather icon-calendar me-2"></i><span>{{invoiceDetails.createdDate | date:'dd-MMMM-yyyy'}}</span></h4>
+                                    <h4>Invoice Date : <i
+                                            class="feather icon-calendar me-2"></i><span>{{invoiceDetails.createdDate |
+                                            date:'dd-MMMM-yyyy'}}</span></h4>
                                 </div>
                             </div>
                         </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover border-0 custom-table invoice-table">
-                                <thead>
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Item</th>
-                                        <th>Description/Dr. Name</th>
-                                        <th>Fee</th>                                   
-                                        <th>Discount (%)</th>
-                                        <th>Total</th>
-                                        <th>Status</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td>Consultation</td>
-                                        <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
-                                        <td>{{appointmentDetails.fee}}</td>
-                                        <td>0</td>
-                                        <td>{{appointmentDetails.fee}}</td>
-                                        <td><button [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}" class="custom-badge">{{invoiceDetails.status}}</button></td>
-                                        
-                                    </tr>
-                                    <ng-container *ngIf="addtionalInoiveItem.length>0">
-                                    <tr *ngFor="let data of addtionalInoiveItem; let i=index">
-                                       
-                                        <td>{{i+2}}</td>
-                                        <td>{{data.itemName}}</td>
-                                        <td>{{data.description}}</td>
-                                        <td>{{data.fee}}</td>
-                                        <td>{{data.discount}} </td>
-                                        <td>{{data.finalAmount}}</td>
-                                        <td><button [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}" class="custom-badge">{{data.status}}</button></td>
-                                        <td>
-                                            <button type="button" (click)="paidsubInvoiceItem(data.id)" [disabled]="data.status === 'Paid'"  class="btn btn-primary custom-badge">Paid</button>
-                                          </td>
-                                          
-                                    </tr>
-                                </ng-container>
+                        <div class="wrapperClass">
+                            <div class="table-responsive">
+                                <table class="table table-hover border-0 custom-table invoice-table">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Item</th>
+                                            <th>Description/Dr. Name</th>
+                                            <th>Fee</th>
+                                            <th>Discount (%)</th>
+                                            <th>Total</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td>Consultation</td>
+                                            <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
+                                            <td>{{appointmentDetails.fee}}</td>
+                                            <td>{{ flag ? 100 : 0 }}</td>
+                                            <td>{{ appointmentDetails.fee - ((disc/100) * appointmentDetails.fee) }}</td>
+
+                                            <td><button
+                                                    [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
+                                                    class="custom-badge">{{invoiceDetails.status}}</button></td>
+
+
+                                        </tr>
+                                        <ng-container *ngIf="addtionalInoiveItem.length>0">
+                                            <tr *ngFor="let data of addtionalInoiveItem; let i=index">
+
+                                                <td>{{i+2}}</td>
+                                                <td>{{data.itemName}}</td>
+                                                <td>{{data.description}}</td>
+                                                <td>{{data.fee}}</td>
+                                                <td>{{data.discount}} </td>
+                                                <td>{{ data.fee - ((data.discount/100) * data.fee) }}</td>
+                                                <!-- <td>{{data.finalAmount}}</td> -->
+                                                <td><button
+                                                        [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
+                                                        class="custom-badge">{{data.status}}</button></td>
+                                                <td>
+                                                    <button type="button" (click)="paidsubInvoiceItem(data.id)"
+                                                        [disabled]="data.status === 'Paid'"
+                                                        class="btn btn-primary custom-badge">Paid</button>
+                                                </td>
+
+                                            </tr>
+                                        </ng-container>
                                     </tbody>
-                            </table>
-                        </div>
-                       
-                        <div>
+                                </table>
+                            </div>
+
+
                             <div class="row invoice-payment">
                                 <div class="col-sm-7">
                                 </div>
@@ -141,16 +155,75 @@
                                     aliquam ut a ex. Maecenas sed vehicula dui, ac suscipit lacus.</p>
                             </div>
                         </div>
-                        <div class="col-12" *ngIf="isPaidButtonVisible">
-                            <div class="doctor-submit float-end">
-                                <a href="javascript:;" class="btn btn-primary submit-form me-2" (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
-                                <a href="javascript:;" class="btn btn-primary cancel-form" (click)="print()"><i
-                                        class="feather icon-printer me-2" ></i>Print</a>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
             </div>
         </div>
+        <div class="col-12" *ngIf="isPaidButtonVisible">
+            <div class="doctor-submit float-end">
+                <a href="javascript:;" class="btn btn-primary submit-form me-2"
+                    (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
+                <a href="javascript:;" class="btn btn-primary submit-form me-2" (click)="print()"><i
+                        class="feather icon-printer me-2"></i>Print</a>
+                <a href="javascript:;" class="btn btn-primary submit-form me-2"
+                    (click)="moveToEditInvoice(invoiceDetails.invoiceId)">Add Item</a>
+            </div>
+        </div>
     </div>
+</div>
+
+<div *ngIf="thermalvisible" #printview [ngClass]="[classes.printAreaContainer, classes.fontMono]" [ngStyle]="{ width: width }">
+    <div [ngClass]="classes.textCenter">Florence Healthcare RMEE2225901</div>
+    <div [ngClass]="classes.textCenter">Kheri Road, Kheri ,Lakhimpur Kheri-262701</div>
+    <div [ngClass]="classes.textCenter">Near By Don Bosco School</div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
+
+    <div [ngClass]="classes.textCenter">Receipt / Invoice / Bill </div>
+    <div [ngClass]="classes.textLeft">{{patientDetails.firstName}} {{patientDetails.lastName}}</div>
+    <div [ngClass]="classes.textRight">Date{{invoiceDetails.createdDate |
+        date:'dd-MMMM-yyyy'}} </div>
+    <div [ngClass]="classes.textRight">InvoiceId-#INV-{{invoiceDetails.invoiceId}} </div>
+
+    <div [ngClass]="classes.grid3Col">
+        <div [ngClass]="classes.wrapper">
+            <div style="width: 10mm;"><strong>Item</strong></div>
+            <div style="width: 3mm;margin-left: 5px"><strong>QTY</strong></div>
+            <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Price</strong></div>
+            <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Amount</strong></div>
+        </div>
+
+        <div [ngClass]="[classes.gridBorder, classes.gridBorderDouble]"></div>
+        <div style="display: flex;flex-direction: column;">
+            <div [ngClass]="classes.wrapper">
+                <div style="width: 10mm;">Consultation </div>
+                <div style="width: 3mm; margin-left: 5px;">1</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+            </div>
+
+            <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index">
+                <div style="width:10mm;">{{data.itemName}}</div>
+                <div style="width: 3mm;margin-left: 5px">1</div>
+                <div style="width: 10mm;">{{data.fee}}</div>
+                <div style="width: 10mm;">{{data.finalAmount}}</div>
+            </div>
+
+        </div>
+
+
+
+        <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
+
+        <div [ngClass]="[classes.colSpan2, classes.maxLine2,classes.textRight]">
+            <strong>Total: ₹{{totalInvoiceAmount}}</strong>
+        </div>
+       
+    </div>
+
+    <div [ngClass]="classes.textLeft">Terms and Conditions</div>
+    <div [ngClass]="classes.textLeft">OPD Prescription valid for 7(seven) days including today</div>
+    <div [ngClass]="classes.textLeft">Audiometry services are subject to availability and warranty services are only being provided by selling company.</div>
+    <div [ngClass]="classes.textLeft">Authorized Signatory</div>
+
 </div>
