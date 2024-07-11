@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/shared/auth/auth.service';
+import { IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
@@ -24,26 +27,43 @@ export class LoginComponent implements OnInit {
     return this.form.controls;
   }
 
-  constructor(public auth: AuthService) {}
+  constructor(public auth: AuthService, 
+    private router: Router,
+    private toaster: ToastrService) {}
+
   ngOnInit(): void {
-   // alert("login component")
     if (localStorage.getItem('authenticated')) {
       localStorage.removeItem('authenticated');
     }
   }
 
-  loginFormSubmit() {
+  loginFormSubmit(): void {
+
     if (this.form.valid) {
-      const email=this.form.controls.email.value;
-      const password=this.form.controls.password.value
-      if(email!=null && password!=null)
-      {
-      this.auth.login(email,password);
-        
-      }
-      
+      const email=this.form.controls.email.value as string;
+      const password=this.form.controls.password.value as string;
+
+      this.auth.login(email, password).subscribe(
+        (staffInfo: IstaffInfo) => {
+          // Login successful, navigate based on user role and status
+          if (staffInfo.designation.toLowerCase() === 'admin' && staffInfo.activeStatus === 1) {
+            this.router.navigate([routes.adminDashboard]);
+          } else if (staffInfo.designation.toLowerCase() === 'doctor' && staffInfo.activeStatus === 1) {
+            this.router.navigate([routes.doctorDashboard]);
+          } else if (staffInfo.designation.toLowerCase() === 'reception' && staffInfo.activeStatus === 1) {
+            this.router.navigate([routes.appointmentList]);
+          } else if (staffInfo.designation.toLowerCase() === 'nursing' && staffInfo.activeStatus === 1) {
+            this.router.navigate([routes.addPatient]);
+          }
+        },
+        (error: string) => {
+          // Error occurred, handle error message
+          this.toaster.error(error);
+        }
+      );
     }
   }
+
   togglePassword() {
     this.passwordClass = !this.passwordClass;
   }

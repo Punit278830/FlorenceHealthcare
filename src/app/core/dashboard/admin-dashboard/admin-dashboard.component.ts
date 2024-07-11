@@ -216,14 +216,12 @@ this.loadRecentPatients();
 
 loadRecentPatients(): void {
   this.patientService.getPatientList().subscribe((result) => {
-    console.log('patients', result);
     this.recentPatients = result.slice(0, 5);
   });
 }
 
 loadUpcomingAppointments(): void {
   this.appointmentService.getAppointmentList().subscribe((result) => {
-    console.log('appointments', result);
     this.upcomingAppointments = result.slice(0, 5);
   });
 }
@@ -241,17 +239,11 @@ fetchCombineData() {
   const staffData$ = this.staffService.getDoctorsList();
   const patientData$ = this.patientService.getPatientList();
   forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
-    // Combine data based on departmentId
-    
-    console.log("department", departments)
+    // Combine data based on departmentId    
     this.departments=departments.slice(0,5);
-    console.log("sliced",this.departments)
 
     if (appointments.message === "No records found") {
       this.upcomingAppointments=[];
-      
-      
-
     }
     else {
       this.combinedData = appointments.map((appointment: any) => {
@@ -276,11 +268,7 @@ fetchCombineData() {
       this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= 0 && serialNumber <= 5) {
-          // this.calculateDateDifference(res.dob);
-          // res.ageinYear=this.age;
-
-          this.upcomingAppointments.push(res);
-          
+          this.upcomingAppointments.push(res);          
         }
       });
 
@@ -291,7 +279,6 @@ fetchCombineData() {
 public getGreetingMsg()
   {
     this.CurrentTime = new Date().getHours()
-    console.log(this.CurrentTime)
     if(this.CurrentTime>0 && this.CurrentTime<12)
     {this.greetingMsg='Good Morning'}
     
@@ -301,8 +288,7 @@ public getGreetingMsg()
       if(this.CurrentTime>=17 && this.CurrentTime<20)
       {this.greetingMsg='Good Evening'}
       if(this.CurrentTime>=20 && this.CurrentTime<24)
-      {this.greetingMsg='Good Night'}
-    
+      {this.greetingMsg='Good Night'}    
   }
 
 
@@ -310,8 +296,6 @@ public getGreetingMsg()
   {
     this.appointmentService.getAppointmentCount().subscribe(res=>{
       res>0?this.appCount=res:this.appCount=0;
-
-
     })
   }
 
@@ -319,8 +303,6 @@ public getGreetingMsg()
   {
     this.appointmentService.getConsultationCount().subscribe(res=>{
       res>0?this.consultatCount=res:this.consultatCount=0;
-
-
     })
 
   }
@@ -329,8 +311,6 @@ public getGreetingMsg()
   {
     this.appointmentService.getEarning().subscribe(res=>{
       res>0?this.earning=res:this.earning=0;
-
-
     })
 
   }
