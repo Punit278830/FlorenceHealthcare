@@ -17,16 +17,13 @@ builder.Services.AddDbContext<FlorenceDbContext>(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy("AllowAllOrigin",
-            builder =>
-            {
-              builder.AllowAnyOrigin()
-                     .AllowAnyHeader()
-                     .AllowAnyMethod();
-            });
+  options.AddPolicy(name: "AllowAngularDev",
+  builder => builder
+  .AllowAnyOrigin()
+  .AllowAnyMethod()
+  .AllowAnyHeader());
 
 });
 
@@ -34,7 +31,6 @@ builder.Services.AddCors(options =>
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAbhaService, ABHAService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-//builder.Services.AddScoped<IAbhaM2Service, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
 
@@ -43,11 +39,11 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    
-    app.UseCors("AllowAllOrigin");
-    app.UseSwagger();
-    app.UseSwaggerUI();
-    
+
+  app.UseCors("AllowAngularDev");
+  app.UseSwagger();
+  app.UseSwaggerUI();
+
 }
 else
 {
@@ -56,12 +52,15 @@ else
 
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
-//app.MapControllers();
 
-//app.UseEndpoints(e => e.MapControllers());
 
+// Map controllers and additional endpoints
+app.UseEndpoints(endpoints =>
+{
+  endpoints.MapControllers();
+});
 
 
 
