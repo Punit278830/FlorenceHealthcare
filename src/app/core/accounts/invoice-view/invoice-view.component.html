@@ -15,7 +15,7 @@
         </div>
         <!-- /Page Header -->
 
-        <div class="row" #printview>
+        <div class="row">
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
@@ -85,8 +85,9 @@
                                             <td>Consultation</td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                             <td>{{appointmentDetails.fee}}</td>
-                                            <td>0</td>
-                                            <td>{{appointmentDetails.fee}}</td>
+                                            <td>{{ flag ? 100 : 0 }}</td>
+                                            <td>{{ appointmentDetails.fee - ((disc/100) * appointmentDetails.fee) }}</td>
+
                                             <td><button
                                                     [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
                                                     class="custom-badge">{{invoiceDetails.status}}</button></td>
@@ -101,7 +102,8 @@
                                                 <td>{{data.description}}</td>
                                                 <td>{{data.fee}}</td>
                                                 <td>{{data.discount}} </td>
-                                                <td>{{data.finalAmount}}</td>
+                                                <td>{{ data.fee - ((data.discount/100) * data.fee) }}</td>
+                                                <!-- <td>{{data.finalAmount}}</td> -->
                                                 <td><button
                                                         [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
                                                         class="custom-badge">{{data.status}}</button></td>
@@ -162,9 +164,66 @@
             <div class="doctor-submit float-end">
                 <a href="javascript:;" class="btn btn-primary submit-form me-2"
                     (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>
-                <a href="javascript:;" class="btn btn-primary cancel-form" (click)="print()"><i
+                <a href="javascript:;" class="btn btn-primary submit-form me-2" (click)="print()"><i
                         class="feather icon-printer me-2"></i>Print</a>
+                <a href="javascript:;" class="btn btn-primary submit-form me-2"
+                    (click)="moveToEditInvoice(invoiceDetails.invoiceId)">Add Item</a>
             </div>
         </div>
     </div>
+</div>
+
+<div *ngIf="thermalvisible" #printview [ngClass]="[classes.printAreaContainer, classes.fontMono]" [ngStyle]="{ width: width }">
+    <div [ngClass]="classes.textCenter">Florence Healthcare RMEE2225901</div>
+    <div [ngClass]="classes.textCenter">Kheri Road, Kheri ,Lakhimpur Kheri-262701</div>
+    <div [ngClass]="classes.textCenter">Near By Don Bosco School</div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
+
+    <div [ngClass]="classes.textCenter">Receipt / Invoice / Bill </div>
+    <div [ngClass]="classes.textLeft">{{patientDetails.firstName}} {{patientDetails.lastName}}</div>
+    <div [ngClass]="classes.textRight">Date{{invoiceDetails.createdDate |
+        date:'dd-MMMM-yyyy'}} </div>
+    <div [ngClass]="classes.textRight">InvoiceId-#INV-{{invoiceDetails.invoiceId}} </div>
+
+    <div [ngClass]="classes.grid3Col">
+        <div [ngClass]="classes.wrapper">
+            <div style="width: 10mm;"><strong>Item</strong></div>
+            <div style="width: 3mm;margin-left: 5px"><strong>QTY</strong></div>
+            <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Price</strong></div>
+            <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Amount</strong></div>
+        </div>
+
+        <div [ngClass]="[classes.gridBorder, classes.gridBorderDouble]"></div>
+        <div style="display: flex;flex-direction: column;">
+            <div [ngClass]="classes.wrapper">
+                <div style="width: 10mm;">Consultation </div>
+                <div style="width: 3mm; margin-left: 5px;">1</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+            </div>
+
+            <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index">
+                <div style="width:10mm;">{{data.itemName}}</div>
+                <div style="width: 3mm;margin-left: 5px">1</div>
+                <div style="width: 10mm;">{{data.fee}}</div>
+                <div style="width: 10mm;">{{data.finalAmount}}</div>
+            </div>
+
+        </div>
+
+
+
+        <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
+
+        <div [ngClass]="[classes.colSpan2, classes.maxLine2,classes.textRight]">
+            <strong>Total: ₹{{totalInvoiceAmount}}</strong>
+        </div>
+       
+    </div>
+
+    <div [ngClass]="classes.textLeft">Terms and Conditions</div>
+    <div [ngClass]="classes.textLeft">OPD Prescription valid for 7(seven) days including today</div>
+    <div [ngClass]="classes.textLeft">Audiometry services are subject to availability and warranty services are only being provided by selling company.</div>
+    <div [ngClass]="classes.textLeft">Authorized Signatory</div>
+
 </div>

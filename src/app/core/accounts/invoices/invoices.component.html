@@ -109,7 +109,7 @@
                                         <th mat-sort-header="invoiceNumber">Invoice Number</th>
                                         <th mat-sort-header="patient">Patient Name</th>
                                         <th mat-sort-header="createdDate">Created Date</th>
-                                        <th mat-sort-header="amount">Appointment Id</th>
+                                        <th mat-sort-header="appoitmentId">Appointment Id</th>
                                         <th mat-sort-header="amount">Amount</th>
                                         <th mat-sort-header="status">Status</th>
                                         <th></th>
@@ -122,7 +122,7 @@
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
                                         </td> -->
-                                        <td><a href="javascript:void(0);" (click)="movetoInvoiceView(data.invoiceId)">#INV-{{data.invoiceId}}</a></td>
+                                        <td><a href="javascript:void(0);" (click)="movetoInvoiceView(data.invoiceId,data.patientId)">#INV-{{data.invoiceId}}</a></td>
                                         <td> {{data.patientFname}} {{data.patientLname}}</td>
                                        
                                         <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
