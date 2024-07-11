@@ -60,7 +60,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 //app.MapControllers();
 
-app.UseEndpoints(e => e.MapControllers());
+//app.UseEndpoints(e => e.MapControllers());
 
 
 
