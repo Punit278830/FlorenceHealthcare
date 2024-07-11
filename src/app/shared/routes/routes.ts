@@ -388,5 +388,8 @@ export class routes {
   }
   public static get searchAbhaUser(): string {
     return this.baseUrl + '/abha/search';
+  }
+  public static get abhaScanDesk(): string {
+    return this.baseUrl + '/abha/scanDesk';
   } 
 }

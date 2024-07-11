@@ -24,6 +24,11 @@ const routes: Routes = [
       path: 'search',
       loadChildren: () =>
         import('./search-abha-user/search-abha-user.module').then((m) => m.SearchAbhaUserModule),
+    },
+    {
+      path: 'scanDesk',
+      loadChildren: () =>
+        import('./abha-scan-desk/abha-scan-desk.module').then((m) => m.AbhaScanDeskModule),
     }
   ]
 }

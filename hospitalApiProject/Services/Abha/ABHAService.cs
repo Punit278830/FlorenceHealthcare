@@ -1,7 +1,8 @@
+using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
+using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
 using System.Text.Json;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace hospitalApiProject.Services.Abha
 {
@@ -12,11 +13,16 @@ namespace hospitalApiProject.Services.Abha
 
     protected readonly IAuthService _authService;
     protected readonly string _token;
+    private readonly FlorenceDbContext _context;
+    private readonly IPatientInfoService _patientInfoService;
 
-    public ABHAService(ITokenService tokenService, IAuthService authService) : base(tokenService, authService)
+    public ABHAService(ITokenService tokenService, IAuthService authService, FlorenceDbContext context, IPatientInfoService patientInfoService) : base(tokenService, authService)
     {
       _baseUrl = "https://abhasbx.abdm.gov.in/abha";
       _phrBaseUrl = "https://phrsbx.abdm.gov.in";
+      _context = context;
+      _patientInfoService = patientInfoService;
+      _patientInfoService = patientInfoService;
     }
 
     public async Task<string> GenerateOtp(string aadhar)
@@ -34,7 +40,7 @@ namespace hospitalApiProject.Services.Abha
         };
 
         var json = JsonSerializer.Serialize(jsonContent);
-        var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);        
+        var result = ExecutePost(_baseUrl, "api/v3/enrollment/request/otp", json);
 
         return result;
       }
@@ -261,7 +267,7 @@ namespace hospitalApiProject.Services.Abha
     }
 
     public async Task<string> CreateAbhaDetails(AbhaDetailsRequest data)
-    {      
+    {
       var json = JsonSerializer.Serialize(data);
       var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/details", json);
       return result;
@@ -286,6 +292,144 @@ namespace hospitalApiProject.Services.Abha
 
       var json = JsonSerializer.Serialize(jsonContent);
       var result = await ExecutePostV1Async(_phrBaseUrl, "api/v1/phr/registration/create/phr", json);
+      return result;
+    }
+
+    public async Task<string> ShareProfile(PatientShareRequest request)
+    {
+      var jsonContent = new
+      {
+        //timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+        acknowledgement = new
+        {
+          status = "SUCCESS",
+          abhaAddress = request.healthId,
+          profile = new
+          {
+            context = 123,
+            tokenNumber = 100,
+            expiry = 600
+          }
+        },
+        response = new
+        {
+          requestId = request.requestId
+        }
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/hiecm/api", "v3/patient-share/on-share", json, request.timestamp);
+
+      if (this.ErrorMessage != null)
+      {
+
+      }
+      return result;
+    }
+
+    public async Task AddAbhaPatientProfile(PatientProfile patientProfile)
+    {
+      AbhaPatientDetails abhaPatient = default;
+
+      try
+      {
+        // Parse day, month, and year 
+        int day = int.Parse(patientProfile.dayOfBirth);   
+        int month = int.Parse(patientProfile.monthOfBirth); 
+        int year = int.Parse(patientProfile.yearOfBirth);
+
+        DateTime dateOfBirth = new DateTime(year, month, day);
+        DateOnly dob = DateOnly.FromDateTime(dateOfBirth);
+
+        // Extract Name
+        string[] nameParts = patientProfile.name.Split(' ');
+
+        abhaPatient = new AbhaPatientDetails
+        {
+          AbhaAddress = patientProfile.abhaAddress,
+          AbhaNumber = patientProfile.abhaNumber,
+          Address = patientProfile.address?.line,
+          Dob = dob,
+          Mobile = patientProfile.phoneNumber,
+          Gender = patientProfile.gender == "M" ? "Male" : "Female",
+          RegistrationDate = DateOnly.FromDateTime(DateTime.Today),
+          FirstName = nameParts[0],
+          LastName = nameParts[1]
+        };
+
+        var errorMessage = await AddNewPatient(abhaPatient);
+
+        if (errorMessage != null)
+        {
+          abhaPatient.Status = errorMessage == "Identity Number already exists." ? "Existing Patient" : "Not Registered"; //todo : check for already existing
+        }
+        else {
+          abhaPatient.Status = "Registered";
+        }
+      }
+      catch (Exception ex)
+      {
+        this.ErrorMessage = "Error occurred while registering the new ABHA patient.";
+      }
+
+      // Add the new PatientInfo to AbhaPatientDetails table
+      try
+      {
+        _context.AbhaPatientDetails.Add(abhaPatient);
+        await _context.SaveChangesAsync();
+      }
+      catch (Exception ex)
+      {
+        this.ErrorMessage = "Error occurred while adding the ABHA patient profile received from QR Code Scan.";
+      }
+    }
+
+    private async Task<string?> AddNewPatient(AbhaPatientDetails patientProfile)
+    {
+      var patientInfo = new PatientInfo
+      {
+        FirstName = patientProfile.FirstName,
+        LastName = patientProfile.LastName,
+        IdentityName = "ABHA ID",
+        IdentityNumber = patientProfile.AbhaNumber,
+        Address = patientProfile.Address,
+        Dob = patientProfile.Dob,
+        Mobile = patientProfile.Mobile,
+        Gender = patientProfile.Gender,
+        RegstrationDate = patientProfile.RegistrationDate,
+      };
+
+      // Add the new PatientInfo
+      await _patientInfoService.AddPatient(patientInfo);
+
+      if (_patientInfoService.HasError)
+      {
+        return _patientInfoService.ErrorMessage;
+      }
+
+      return null;
+    }
+
+    public async Task<string> CareContext(PatientShareRequest request)
+    {
+      var jsonContent = new
+      {
+        requestId = request.requestId,
+        timeStamp = request.timestamp, //DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+        acknowledgement = new
+        {
+          status = "SUCCESS",
+          healthId = request.healthId,
+          tokenNumber = "100"
+        },
+        resp = new
+        {
+          requestId = request.requestId
+        }
+      };
+
+      var json = JsonSerializer.Serialize(jsonContent);
+      var result = await OnShareProfileAsync("https://dev.abdm.gov.in/gateway/", "v1.0/patients/profile/on-share", json, "");
       return result;
     }
   }

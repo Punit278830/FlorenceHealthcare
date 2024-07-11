@@ -495,6 +495,11 @@ export class DataService {
               menuValue: 'Search Abha User',
               route: routes.searchAbhaUser,
               base: routes.searchAbhaUser,
+            },
+            {
+              menuValue: 'Scan Desk',
+              route: routes.abhaScanDesk,
+              base: routes.abhaScanDesk,
             }
           ],
         },

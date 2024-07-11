@@ -1,7 +1,10 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Services.Abha;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using System.Net;
 
 namespace hospitalApiProject.Controllers
@@ -11,10 +14,17 @@ namespace hospitalApiProject.Controllers
   public class AbhaController : Controller
   {
     protected readonly IAbhaService _service;
+    private readonly IPatientInfoService _patientInfoService;
 
-    public AbhaController(IAbhaService service)
+    //protected readonly IAbhaM2Service _abhaM2Service;
+    private readonly FlorenceDbContext _context;
+
+    public AbhaController(IAbhaService service, FlorenceDbContext context, IPatientInfoService patientInfoService) //, IAbhaM2Service abhaM2Service
     {
       _service = service;
+      _context = context;
+      _patientInfoService = patientInfoService;
+      //_abhaM2Service = abhaM2Service;
     }
 
     [HttpPost]
@@ -137,8 +147,6 @@ namespace hospitalApiProject.Controllers
       var result = await _service.DownloadAbhaCard(xToken);
       return new FileContentResult(result, "application/pdf");
     }
-
-   
 
     #region Abha Address Creation by Abha Number
 
@@ -316,7 +324,7 @@ namespace hospitalApiProject.Controllers
       if (data == null || data.phrAddress == null || data.txnId == null)
       {
         return BadRequest();
-      }   
+      }
 
       var result = await _service.CreatePHRAddress(data.phrAddress, data.txnId);
       if (_service.HasError)
@@ -328,6 +336,109 @@ namespace hospitalApiProject.Controllers
     }
     #endregion
 
+    #region Verification of ABHA Address
+
+    //[HttpPost]
+    //[Route("LinkCareContext")]
+    //public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
+    //{
+    //  if (data == null)
+    //  {
+    //    return BadRequest();
+    //  }
+
+    //  var result = await _abhaM2Service.LinkCareContext(data);
+    //  if (_service.HasError)
+    //  {
+    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+    //  }
+
+    //  return StatusCode((int)HttpStatusCode.Created, result);
+    //}
+
+    //[HttpPost]
+    //[Route("NotifyMobile")]
+    //public async Task<IActionResult> NotifyMobile([FromBody] CareContextModel data)
+    //{
+    //  if (data == null)
+    //  {
+    //    return BadRequest();
+    //  }
+
+    //  var result = await _abhaM2Service.NotifyMobile(data);
+    //  if (_service.HasError)
+    //  {
+    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+    //  }
+
+    //  return StatusCode((int)HttpStatusCode.Created, result);
+    //}
+
+    [HttpGet]
+    [Route("PipedreamTest")]
+    public async Task<IActionResult> PipedreamTest()
+    {
+      //if (data == null)
+      //{
+      //  return BadRequest();
+      //}
+
+      return StatusCode((int)HttpStatusCode.OK, "Hello World");
+    }
+
+    [HttpPost("share")]
+    public async Task<IActionResult> ShareData([FromBody] PatientShareRequest request)
+    {
+      if (request == null)
+      {
+        return BadRequest("Invalid request body");
+      }
+
+      var result = await _service.ShareProfile(request);
+
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      await _service.AddAbhaPatientProfile(request.patient);
+      if (_service.HasError)
+      {
+        return StatusCode(500, _service.ErrorMessage);
+      }
+
+      return Ok();
+    }
+
+    [HttpGet("ScanDesk/Patients")]
+    public async Task<ActionResult<List<AbhaPatientDetails>>> GetScannedPatients()
+    {
+      try
+      {
+        DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+        DateOnly tomorrow = today.AddDays(1); 
+
+        List<AbhaPatientDetails> patientData = await _context.AbhaPatientDetails
+    .Where(e => e.RegistrationDate.HasValue && e.RegistrationDate.Value >= today && e.RegistrationDate.Value < tomorrow)
+    .ToListAsync();
+
+        if (patientData != null)
+        {
+          return Ok(patientData);
+        }
+
+        return NotFound();
+      }
+      catch (Exception ex)
+      {
+        var msg = ex.ToString();
+        return BadRequest();
+      }
+    }
+
+    #endregion
+
   }
 
 }
+

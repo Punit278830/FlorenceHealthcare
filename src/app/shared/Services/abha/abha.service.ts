@@ -5,7 +5,7 @@ import { Observable } from 'rxjs/internal/Observable';
 import { HttpErrorResponse, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { blob } from 'stream/consumers';
 import { catchError, map, retry, throwError } from 'rxjs';
-import { IAbhaDetails, IAbhaPatientInfo } from '../../models/models';
+import { IAbhaDetails, IAbhaPatientDetails, IAbhaPatientInfo } from '../../models/models';
 
 @Injectable({
   providedIn: 'root'
@@ -262,4 +262,9 @@ export class AbhaService {
     );
   }
 
+  getAbhaPatients(): Observable<IAbhaPatientDetails[]> {
+    return this.http.get(this.apiUrl + 'Abha/ScanDesk/Patients').pipe(
+      catchError(this.handleError)
+    );
+  }
 }

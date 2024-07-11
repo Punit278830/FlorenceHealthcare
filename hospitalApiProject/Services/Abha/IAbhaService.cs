@@ -1,6 +1,8 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
+using hospitalApiProject.Models.Abha.response;
 using hospitalApiProject.Services.Interfaces.Shared;
+using Microsoft.AspNetCore.Mvc;
 
 namespace hospitalApiProject.Services.Abha
 {
@@ -37,5 +39,11 @@ namespace hospitalApiProject.Services.Abha
     Task<string> CreateAbhaDetails(AbhaDetailsRequest data);
 
     Task<string> CreateAbhaAddressViaMobile(string phrAddress, string txnId);
+
+    Task<string> ShareProfile(PatientShareRequest request);
+
+    Task AddAbhaPatientProfile(PatientProfile request);
+    //Task<ActionResult<List<AbhaPatientDetails>>> GetScannedPatients();
+
   }
 }

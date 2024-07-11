@@ -1,6 +1,7 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services;
 using hospitalApiProject.Services.Abha;
+using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,7 @@ builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAbhaService, ABHAService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
 
 var app = builder.Build();
 
@@ -50,10 +52,15 @@ else
 
 
 app.UseHttpsRedirection();
-
+app.UseRouting();
 app.UseAuthorization();
 
-app.MapControllers();
+
+// Map controllers and additional endpoints
+app.UseEndpoints(endpoints =>
+{
+  endpoints.MapControllers();
+});
 
 
 
