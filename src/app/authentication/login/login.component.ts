@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/shared/auth/auth.service';
 import { IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
   selector: 'app-login',
@@ -29,7 +30,8 @@ export class LoginComponent implements OnInit {
 
   constructor(public auth: AuthService, 
     private router: Router,
-    private toaster: ToastrService) {}
+    private toaster: ToastrService,
+    private loadingService: LoadingService) {}
 
   ngOnInit(): void {
     if (localStorage.getItem('authenticated')) {
@@ -38,7 +40,7 @@ export class LoginComponent implements OnInit {
   }
 
   loginFormSubmit(): void {
-
+    this.loadingService.showLoader();
     if (this.form.valid) {
       const email=this.form.controls.email.value as string;
       const password=this.form.controls.password.value as string;
@@ -46,6 +48,7 @@ export class LoginComponent implements OnInit {
       this.auth.login(email, password).subscribe(
         (staffInfo: IstaffInfo) => {
           // Login successful, navigate based on user role and status
+          this.loadingService.hideLoader();
           if (staffInfo.designation.toLowerCase() === 'admin' && staffInfo.activeStatus === 1) {
             this.router.navigate([routes.adminDashboard]);
           } else if (staffInfo.designation.toLowerCase() === 'doctor' && staffInfo.activeStatus === 1) {
@@ -58,6 +61,7 @@ export class LoginComponent implements OnInit {
         },
         (error: string) => {
           // Error occurred, handle error message
+          this.loadingService.hideLoader();
           this.toaster.error(error);
         }
       );

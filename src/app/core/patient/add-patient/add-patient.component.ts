@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { WebcamImage } from 'ngx-webcam';
 import { Observable, Subject } from 'rxjs';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { IpatientInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
@@ -34,7 +35,8 @@ export class AddPatientComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private patientService: PatientService,
     private route: Router, private datePipe: DatePipe,
-    private toastr: ToastrService) {
+    private toastr: ToastrService,
+    private loadingService: LoadingService) {
     this.maxDate = new Date();
 
 
@@ -104,12 +106,14 @@ export class AddPatientComponent implements OnInit {
 
   addPatient(patientData: FormGroup) {
     if (patientData.valid) {
-      console.log("entered")
-      console.log(patientData.value)
+      this.loadingService.showLoader();
+
+      console.log(patientData.value);
       this._patientDto = patientData.value;
       this._patientDto.IdentityName = patientData.value.IdentiyName;
       this._patientDto.IdentityNumber = patientData.value.IdentiyNumber;
-      this._patientDto.patientImage = this.previewImage
+      this._patientDto.patientImage = this.previewImage;
+
       this.patientService.CreatePatient(this._patientDto).subscribe(
         res => {
           console.log("res", res);
@@ -126,6 +130,8 @@ export class AddPatientComponent implements OnInit {
           this.toastr.error(err.message || "An error occurred", "Error");
         }
       );
+
+      this.loadingService.hideLoader();
     }
     else {
       this.patientReg.markAllAsTouched(); // Mark all controls as touched to trigger error display

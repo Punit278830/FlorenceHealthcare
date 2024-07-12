@@ -10,6 +10,7 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 import { Idepartment, IstaffInfo, apiResultFormat, pageSelection, staffList } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { Router } from '@angular/router';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
   selector: 'app-staff-list',
@@ -45,7 +46,8 @@ export class StaffListComponent implements OnInit {
     private departmentService: DepartmentService,
     private modalservice: ModalServiceService,
     private route: Router,
-    private toaster: ToastrService) {
+    private toaster: ToastrService,
+    private loadingService: LoadingService) {
     //this.fetchCombineData();
 
   }
@@ -86,9 +88,10 @@ export class StaffListComponent implements OnInit {
   }
 
   fetchCombineData() {
+    this.loadingService.showLoader();
+
     const departmentData$ = this.departmentService.getDepartmentList();
     const staffData$ = this.staffService.getStaffList();
-
 
     forkJoin([staffData$, departmentData$]).subscribe(([staff, department]) => {
       this.totalData = staff.length;
@@ -114,7 +117,10 @@ export class StaffListComponent implements OnInit {
           this.serialNumberArray.push(serialNumber);
         }
       });
-      console.log("list",this.staffList)
+      console.log("list",this.staffList);
+
+      this.loadingService.hideLoader();
+      
       this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
       // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
       this.calculateTotalPages(this.totalData, this.pageSize);

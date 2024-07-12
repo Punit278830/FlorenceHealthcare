@@ -8,11 +8,13 @@ import { SharedModule } from './shared/shared.module';
 import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { LoaderComponent } from './core/loader/loader.component';
 
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    LoaderComponent
   ],
   imports: [
     BrowserModule,
