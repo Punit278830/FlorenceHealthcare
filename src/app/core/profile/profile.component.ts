@@ -387,11 +387,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   saveVItals(vital: FormGroup) {
     this.vitalDto = vital.value;
+    console.log("entered")
     this.vitalDto.appointmentId = this.appointmentService.appointmentId;
     this.question.postVitalInformation(this.vitalDto).subscribe(res => {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
-      res ? this.toaster.success("Vital detail saved", "Vital data") : null
+      this.toaster.success("Vital detail saved", "Vital data");
     })
 
   }
@@ -606,7 +607,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   //consutation fine upload code
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
-    this.onFileUpload();
+    // this.onFileUpload();
 
   }
 
@@ -655,6 +656,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         //this.FileUploadDto.FileData= this.base64String;
         this.FileUploadDto.appointmentId = this.appointmentService.appointmentId;
         if (this.selectedFile.type == "image/jpeg" || this.selectedFile.type == "image/png") {
+          console.log("fileData",this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(result => {
             console.log(result);
             //this.spinner.hide();
@@ -667,6 +669,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         }
       }
       reader.readAsDataURL(this.selectedFile);
+    }
+    else{
+      this.toaster.error("No file selected", "Select a file")
     }
   }
 

@@ -87,6 +87,7 @@
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </th> -->
+                    <th></th>
                     <th mat-sort-header="name">Name</th>
                     <th mat-sort-header="Age">Age</th>
                     <th mat-sort-header="mobile">Mobile</th>
@@ -96,13 +97,14 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let data of patientList">
+                  <tr *ngFor="let data of patientList; let i=index">
                     <!-- DO NOT DELETE -->
                     <!-- <td>
                       <div class="form-check check-tables">
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </td>-->
+                    <td>{{serialNumberArray[i]}}</td>
                     <td class="profile-image"> <a href="javascript:;" (click)="movetoProfile(data.patientId)">
                         {{data.firstName}}
                         {{data.lastName}}</a>

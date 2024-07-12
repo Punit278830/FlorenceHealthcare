@@ -522,8 +522,14 @@
                         <div class="card">
                             <div class="card-body">
                                 <div class="col-12 col-md-6 col-xl-6">
-                                    <div class="form-group local-top-form">
-                                        <label for="Avatar" class="local-top">Upload documents <span
+                                    <label for="Avatar" class="local-top">Upload documents <span
+                                        class="login-danger">*</span></label>
+                                        <div style="display: flex;gap:20px;justify-content: start;align-items:center;">
+                                    <input type="file" id="file" (change)=onFileSelected($event) class="form-control" style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;" >
+                                    <button class="uploadbtn" (click)="onFileUpload()" >Upload file</button>
+                                </div>
+                                    <!-- <div class="form-group local-top-form">
+                                         <label for="Avatar" class="local-top">Upload documents <span
                                                 class="login-danger">*</span></label>
                                         <div class="settings-btn upload-files-avator">
                                             <input type="file" class="hide-input" id="file"
@@ -533,7 +539,7 @@
 
                                         </div>
 
-                                    </div>
+                                    </div> -->
                                 </div>
                                 <!-- Medicine serch form start from here -->
                                 <div class="top-nav-search mob-view" *ngIf="!toggalUi">
@@ -766,7 +772,7 @@
                                                 <div class="row">
                                                     <ng-container *ngIf="_doctorDto">
                                                         <div class="col-12 col-md-6 col-xl-6">
-                                                            <h4><strong>Doctor Name:</strong> {{_doctorDto.firstName}}
+                                                            <h4><strong>Doctor Name:</strong> {{_doctorDto.firstName}}{{_doctorDto.lastName}}
                                                             </h4>
                                                             <h4><strong>Degree:</strong> {{_doctorDto.education}}</h4>
                                                             <h4><strong>Designation:</strong>{{_doctorDto.designation}}
@@ -778,7 +784,7 @@
                                                         <div class="col-12 col-md-6 col-xl-4">
 
 
-                                                            <h4><strong>Patient Name:</strong>{{patientInfo.firstName}}
+                                                            <h4><strong>Patient Name:</strong>{{patientInfo.firstName}}{{patientInfo.lastName}}
                                                             </h4>
                                                             <h4><strong>Age:</strong> {{patientAge}}</h4>
                                                             <h4><strong>Gender:</strong>{{patientInfo.gender}}</h4>

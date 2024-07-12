@@ -108,6 +108,7 @@ export class AddQuestionnaireComponent {
           if (res) {
             this.toaster.success("Questionaire created ", "Questionaire Name")
             this.getQuestionairewithDepName();
+            this.questForm.reset();
           }
         })
 
