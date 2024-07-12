@@ -7,6 +7,7 @@ import { HeaderComponent } from '../common-component/header/header.component';
 import { SidebarComponent } from '../common-component/sidebar/sidebar.component';
 import { SharedModule } from '../shared/shared.module';
 import { ModalComponent } from './modal/modal.component';
+import { LoaderComponent } from './loader/loader.component';
 
 
 @NgModule({
@@ -16,7 +17,6 @@ import { ModalComponent } from './modal/modal.component';
     SidebarComponent,
     ModalComponent,
     
-   
   ],
   imports: [
     CommonModule,

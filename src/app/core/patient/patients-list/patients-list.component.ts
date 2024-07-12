@@ -12,6 +12,7 @@ import * as jsPDF from 'jspdf';
 import { Router } from '@angular/router';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
   selector: 'app-patients-list',
@@ -54,6 +55,7 @@ export class PatientsListComponent implements OnInit {
     private route: Router,
     private modalservice: ModalServiceService,
     private toaster: ToastrService,
+    private loadingService: LoadingService
   ) {
 
 
@@ -109,6 +111,9 @@ export class PatientsListComponent implements OnInit {
     this.serialNumberArray = [];
     const from = this.dateForm.get('from')?.value || null;
     const to = this.dateForm.get('to')?.value || null;
+
+    this.loadingService.showLoader();
+
     if (from !== null && to !== null) {
       // this.dateForm.reset();
       this.patientService.getPatientdateange(from, to).subscribe((data: any) => {
@@ -116,7 +121,9 @@ export class PatientsListComponent implements OnInit {
         // this.staffList.push(data);
         this.allpatientList = data;
 
-        console.log(data)
+        console.log(data);
+        this.loadingService.hideLoader();
+
         data.map((res: any, index: number) => {
           const serialNumber = index + 1;
           if (index >= this.skip && serialNumber <= this.limit) {
@@ -140,6 +147,7 @@ export class PatientsListComponent implements OnInit {
         // this.staffList.push(data);
         this.allpatientList = data;
         console.log("allpatients", this.allpatientList)
+        this.loadingService.hideLoader();
 
         console.log(data)
         data.map((res: any, index: number) => {
@@ -159,7 +167,7 @@ export class PatientsListComponent implements OnInit {
 
       })
     }
-   
+
     // this.patientService.getPatientList().subscribe((data:any)=>{
     //    this.totalData=data.length;
     //     // this.staffList.push(data);
@@ -197,6 +205,7 @@ export class PatientsListComponent implements OnInit {
     //   //this.dataSource = new MatTableDataSource<staffList>(this.staffList);
     //   //this.calculateTotalPages(this.totalData, this.pageSize);
     // });
+  
   }
   // private getTableData(): void {
   //   this.patientsList = [];
@@ -222,11 +231,11 @@ export class PatientsListComponent implements OnInit {
     // this.totalData = 0;
 
     if (value != '') {
-      console.log("value",value)
-      console.log("datasource",this.dataSource)
+      console.log("value", value)
+      console.log("datasource", this.dataSource)
       this.dataSource.filter = value.trim().toLowerCase();
       this.patientList = this.dataSource.filteredData;
-      console.log("value",this.patientList)
+      console.log("value", this.patientList)
       if (this.patientList.length > 0) {
         this.patientList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)
