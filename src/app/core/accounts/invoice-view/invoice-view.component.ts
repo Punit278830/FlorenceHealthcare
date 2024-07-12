@@ -235,7 +235,7 @@ export class InvoiceViewComponent implements OnInit {
     }
 
     if (this.flag) {
-      // this.totalInvoiceAmount = 0;
+       this.totalInvoiceAmount = this.totalInvoiceAmount-this.invoiceDetails.amount;
       this.disc=100;
     }
   console.log("Flag:", this.flag);
