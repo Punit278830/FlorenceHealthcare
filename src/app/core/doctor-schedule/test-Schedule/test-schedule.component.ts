@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { Ilogin, Istaffschedule } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
@@ -34,7 +35,7 @@ export class TestScheduleComponent implements OnInit {
   constructor(private fb: FormBuilder,
     private staffScheduleService: StaffScheduleService,
     private datePipe: DatePipe,
-    private toster: ToastrService,private route : Router) {
+    private toster: ToastrService,private route : Router,private loaderService : LoadingService) {
 
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
     this.showAdujestmentSchedule(this.loggedInUser.loginId);
@@ -121,6 +122,7 @@ export class TestScheduleComponent implements OnInit {
 
   submitschedule(scheduleData: FormGroup) {
     console.log(scheduleData.valid);
+    this.loaderService.showLoader();
     if (scheduleData.valid) {
       //this._staffScheduleDto=scheduleData.value;  
       console.log(scheduleData.value);
@@ -142,6 +144,7 @@ export class TestScheduleComponent implements OnInit {
     }else{
       this.scheduleGroup.markAllAsTouched();
     }
+    this.loaderService.hideLoader();
 
   }
 

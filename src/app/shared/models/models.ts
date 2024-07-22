@@ -228,7 +228,7 @@ export interface IconsultationFiles {
   fileName: string,
   FileType: string,
   fileData: string,
-  appointmentId: number,
+  appointmentId?: number,
 }
 
 export interface IdownloadFile {

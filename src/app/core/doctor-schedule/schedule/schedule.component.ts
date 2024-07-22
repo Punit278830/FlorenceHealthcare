@@ -6,6 +6,7 @@ import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
 import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
@@ -46,7 +47,8 @@ export class ScheduleComponent implements OnInit {
     private staffScheduleService: StaffScheduleService, 
     private route: Router,
   private modalservice : ModalServiceService,
-  private toaster: ToastrService,) {
+  private toaster: ToastrService,
+private loaderService : LoadingService) {
 
   }
   ngOnInit() {
@@ -91,6 +93,7 @@ export class ScheduleComponent implements OnInit {
 
 
   fetchCombineData() {
+    this.loaderService.showLoader();
     const departmentData$ = this.departmentService.getDepartmentList();
     const staffData$ = this.staffService.getScheduleList();
     const staffData1$ = this.staffService.getStaffList();
@@ -133,6 +136,7 @@ export class ScheduleComponent implements OnInit {
       });
       console.log("list", this.schedule)
       this.totalData = this.schedule.length;
+      this.loaderService.hideLoader();
       this.dataSource = new MatTableDataSource<any[]>(this.schedule);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
@@ -140,7 +144,7 @@ export class ScheduleComponent implements OnInit {
     // this.staffService.getStaffList().subscribe((data) => {
     //   this.allstaffList = data;
     // })
-
+    
 
 
   }

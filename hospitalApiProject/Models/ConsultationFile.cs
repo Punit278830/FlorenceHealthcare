@@ -7,7 +7,7 @@ public partial class ConsultationFile
 {
     public int FileId { get; set; }
 
-    public int AppointmentId { get; set; }
+    public int? AppointmentId { get; set; }
 
     public string? FileName { get; set; }
 

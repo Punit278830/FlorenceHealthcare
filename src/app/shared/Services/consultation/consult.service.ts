@@ -8,6 +8,8 @@ import { IPredefineDiagnosis, Iconsultation, IprescribeMedicine } from '../../mo
   providedIn: 'root'
 })
 export class ConsultService {
+  public copyId:number=-1;
+  public selectedId:number=-1;
 private readonly apiUrl=api_Url;
 public diagnosisId!:number;
  
@@ -23,6 +25,10 @@ public diagnosisId!:number;
    getConsultData(appointmentId:number):Observable<any>
    {
     return this.http.get(this.apiUrl+"ConsultationDatas/"+appointmentId);
+   }
+   updateConsultData(id:number,consult:Iconsultation):Observable<any>
+   {
+    return this.http.put(this.apiUrl+'ConsultationDatas/'+id,consult)
    }
 
 //Api to add preDefine diagnosis

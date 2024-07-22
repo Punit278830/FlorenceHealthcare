@@ -118,6 +118,7 @@ export class AppointmentListComponent implements OnInit {
   }
 
   fetchCombineData() {
+    this.loadingService.showLoader();
     this.appointmentList = [];
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
@@ -210,12 +211,13 @@ export class AppointmentListComponent implements OnInit {
     },
 
       error => {
+        this.loadingService.hideLoader();
+
         this.toastr.error("No Appointment Available", "Appointment Status");
         console.log(error);
 
       });
 
-    this.loadingService.hideLoader();
   }
 
   private getTableData(): void {
