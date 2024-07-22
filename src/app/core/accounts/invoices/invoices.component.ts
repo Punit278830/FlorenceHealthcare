@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo } from 'src/app/shared/models/models';
@@ -42,17 +43,19 @@ export class InvoicesComponent  implements OnInit{
   constructor(public data : DataService,
     private invoiceService:InvoiceService,
     private patientService:PatientService,
-    private route:Router){
+    private route:Router,
+    private loadingService: LoadingService){
 
   }
   ngOnInit() {
     this.getTableData();
   }
   private getTableData(): void {
+    this.loadingService.showLoader();
     const invoices$=this.invoiceService.getAllInvoice();
     const Patients$=this.patientService.getPatientList();
     forkJoin([invoices$,Patients$]).subscribe(([invoice,patient])=>{
-
+      
       this.combinedData=invoice.map((invoice:Iinvoice)=>{
       const patients=patient.find((id:IpatientInfo)=>id.patientId===invoice.patientId);
 return{
@@ -76,6 +79,7 @@ return{
       });
       this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.calculateTotalPages(this.totalData, this.pageSize);
+      this.loadingService.hideLoader();
       
     })
    

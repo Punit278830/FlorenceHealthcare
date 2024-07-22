@@ -4,6 +4,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, departmentList, Idepartment } from 'src/app/shared/models/models';
@@ -38,7 +39,8 @@ export class DepartmentListComponent implements OnInit{
     private departmentservice:DepartmentService,
     private route: Router,
     private  modalservice : ModalServiceService,
-    private toaster : ToastrService
+    private toaster : ToastrService,
+    private loaderService : LoadingService
   ){
 
   }
@@ -81,6 +83,7 @@ export class DepartmentListComponent implements OnInit{
     
   }
   private getTableData(): void {
+    this.loaderService.showLoader();
     this.departmentList = [];
     this.serialNumberArray = [];
 
@@ -97,6 +100,7 @@ export class DepartmentListComponent implements OnInit{
       });
       this.dataSource = new MatTableDataSource<Idepartment>(this.departmentList);
       this.calculateTotalPages(this.totalData, this.pageSize);
+      this.loaderService.hideLoader();
     });
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

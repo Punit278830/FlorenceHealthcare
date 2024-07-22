@@ -108,6 +108,7 @@ export class InvoiceViewComponent implements OnInit {
   public width! : string ;
   public thermalvisible : boolean = false;
   public disc:number=0;
+  public loggedIn!:any;
 
   constructor(private invoiceService: InvoiceService,
     private patientService: PatientService,
@@ -115,6 +116,7 @@ export class InvoiceViewComponent implements OnInit {
     private staffService: StaffService,
     private toastr: ToastrService,
     private route: Router) {
+      this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
       console.log("invoiceId",this.invoiceService.invoiceId);
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])

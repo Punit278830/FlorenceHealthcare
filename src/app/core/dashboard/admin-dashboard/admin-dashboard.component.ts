@@ -23,6 +23,7 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { forkJoin } from 'rxjs';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { Router } from '@angular/router';
 export type ChartOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   series: ApexAxisChartSeries | any;
@@ -82,7 +83,7 @@ export class AdminDashboardComponent implements OnInit {
     private appointmentService:AppointmentService,
   private patientService:PatientService,
 private staffService:StaffService,
-private departmentService:DepartmentService) {
+private departmentService:DepartmentService,private route : Router) {
     this.chartOptionsOne = {
       chart: {
         height: 230,
@@ -224,6 +225,12 @@ loadUpcomingAppointments(): void {
   this.appointmentService.getAppointmentList().subscribe((result) => {
     this.upcomingAppointments = result.slice(0, 5);
   });
+}
+movetoPatient(id: number) {
+  this.patientService.patientId = id;
+
+  this.route.navigate([routes.profile]);
+
 }
 
 fetchCombineData() {

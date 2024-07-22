@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
-import { IconsultationFiles, IfileUpload } from '../../models/models';
+import { Iconsultation, IconsultationFiles, IfileUpload } from '../../models/models';
 import { Observable } from 'rxjs';
 import { api_Url } from 'src/environment/environment';
 
@@ -8,6 +8,8 @@ import { api_Url } from 'src/environment/environment';
   providedIn: 'root'
 })
 export class FileUploadService {
+  public appointmentId!:number;
+  public editPresc:boolean=false;
 
   
 //private readonly apiUrl="https://localhost:44320/api/";
@@ -36,9 +38,10 @@ getFileById(fileId:number):Observable<IfileUpload>
 
   // file upload code for Consulation 
 
-   uploadConsultationFile(data:IconsultationFiles):Observable<any>
+   uploadConsultationFile(data:IfileUpload):Observable<any>
   {
-    return this._http.post(this.apiUrl+'ConsultationFiles',data)
+    console.log("data in service ",data);
+    return this._http.post(this.apiUrl+'FilesUploads',data)
   }
 
   getConsultationFileByAppointment(appointmentid:number):Observable<IconsultationFiles[]>

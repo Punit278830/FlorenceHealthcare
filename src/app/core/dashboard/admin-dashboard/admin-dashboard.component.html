@@ -233,7 +233,7 @@
                                         </td>
                                         <td class="appoint-time"><span>{{data.date}} </span>{{data.appointTime}}</td>
                                         <td><button class="custom-badge status-green ">{{data.disease}}</button></td> -->
-                                        <td> {{data.patientFname}}
+                                        <td (click)="movetoPatient(data.patientId)"> {{data.patientFname}}
                                             {{data.patientLname}}</td>
                                         <td>{{data.doctorFname}} {{data.doctorLname}}</td>
                                         <td><button
@@ -311,7 +311,7 @@
                                         <!-- <td><button
                                                 [ngClass]="{'status-green': data.triage === 'Non Urgent', 'status-pink' : data.triage === 'Emergency','status-gray' : data.triage === 'Out Patient','status-orange' : data.triage === 'Urgent' }"
                                                 class="custom-badge">{{data.triage}}</button></td> -->
-                                        <td class="profile-image"> <a href="javascript:;">
+                                        <td (click)="movetoPatient(data.patientId)" class="profile-image"> <a href="javascript:;">
                                                 {{data.firstName}}
                                                 {{data.lastName}}</a>
                                         </td>
