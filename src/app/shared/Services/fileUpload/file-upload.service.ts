@@ -38,7 +38,7 @@ getFileById(fileId:number):Observable<IfileUpload>
 
   // file upload code for Consulation 
 
-   uploadConsultationFile(data:IfileUpload):Observable<any>
+  uploadConsultationFile(data: IconsultationFiles):Observable<any>
   {
     console.log("data in service ",data);
     return this._http.post(this.apiUrl+'FilesUploads',data)
