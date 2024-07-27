@@ -110,7 +110,7 @@
                                                 <td>
                                                     <button type="button" (click)="paidsubInvoiceItem(data.id)"
                                                         [disabled]="data.status === 'Paid'"
-                                                        class="btn btn-primary custom-badge">Paid</button>
+                                                        class="btn btn-primary custom-badge">Pay</button>
                                                 </td>
 
                                             </tr>
@@ -158,7 +158,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-12" *ngIf="isPaidButtonVisible">
+        <div class="col-12" >
             <div class="doctor-submit float-end">
                 <a href="javascript:;" class="btn btn-primary submit-form me-2"
                     (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a>

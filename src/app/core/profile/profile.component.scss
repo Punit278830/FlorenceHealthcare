@@ -9,3 +9,35 @@
     border-radius: 8px;
 
 }
+.h4heading{
+    font-weight:700;
+    font-size:25px
+}
+.h2question{
+    font-weight: 600;
+    font-size: 23px;
+}
+.optionsOuter{
+    display: flex;
+    gap: 20px;
+    justify-content: start;
+    flex-direction: row-reverse;
+    align-items: center;
+}
+.heading{
+    font-size: 20px;
+    font-weight: 500;
+    margin: 5px 0px;
+    
+}
+.filesOuter{
+    display:flex;
+    gap:10px;
+    align-items: center;
+}
+.filesMainOuter{
+    margin:15px 0px;
+    display: flex;
+    flex-direction: column;
+    gap:10px
+}

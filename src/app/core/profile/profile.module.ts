@@ -8,6 +8,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgxSpinnerModule } from 'ngx-spinner';
 
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
+import { MatStepperModule } from '@angular/material/stepper';
 
 
 
@@ -21,6 +22,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
     ProfileRoutingModule,
     MatSelectModule,
     ReactiveFormsModule,
+    MatStepperModule,
     NgxExtendedPdfViewerModule,
     FormsModule,
     NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' })

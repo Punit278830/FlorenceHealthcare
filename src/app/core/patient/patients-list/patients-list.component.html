@@ -89,6 +89,8 @@
                     </th> -->
                     <th></th>
                     <th mat-sort-header="name">Name</th>
+                    <th mat-sort-header="name">Patient Id</th>
+                    <th mat-sort-header="name">Registration Date</th>
                     <th mat-sort-header="Age">Age</th>
                     <th mat-sort-header="mobile">Mobile</th>
                     <th mat-sort-header="email">Email</th>
@@ -114,6 +116,8 @@
                         {{data.firstName}}
                         {{data.lastName}}</a>
                     </td> -->
+                    <td>{{data.patientId}}</td>
+                    <td>{{data.regstrationDate}}</td>
                     <td>{{data.ageinYear}}</td>
                     <td><a href="javascript:;">{{data.mobile}}</a></td>
                     <td>{{data.email}}</td>

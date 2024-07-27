@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -82,7 +82,7 @@ namespace hospitalApiProject.Controllers
             _context.ConsultationFiles.Add(consultationFile);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetConsultationFile", new { id = consultationFile.FileId }, consultationFile);
+            return CreatedAtAction("GetConsultationFile", new { AppointmentId = consultationFile.AppointmentId }, consultationFile);
         }
 
         // DELETE: api/ConsultationFiles/5

@@ -225,10 +225,11 @@ export interface IfileUpload {
 
 export interface IconsultationFiles {
   fileId: number,
-  fileName: string,
-  FileType: string,
-  fileData: string,
+  fileName?: string,
+  FileType?: string,
+  fileData?: string,
   appointmentId?: number,
+  docName?:string,
 }
 
 export interface IdownloadFile {

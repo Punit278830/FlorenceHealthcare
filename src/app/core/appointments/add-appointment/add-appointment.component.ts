@@ -495,6 +495,8 @@ export class AddAppointmentComponent implements OnInit {
   isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
     const appointmentHours = appointmentTime.getHours();
     const appointmentMinutes = appointmentTime.getMinutes();
+    console.log("app 1",appointmentHours)
+    console.log("app 1",appointmentMinutes)
     const fromHours = fromTime.getHours();
     const fromMinutes = fromTime.getMinutes();
     const toHours = toTime.getHours();
