@@ -88,13 +88,15 @@
                       </div>
                     </th> -->
                     <th></th>
-                    <th mat-sort-header="name">Name</th>
                     <th mat-sort-header="name">Patient Id</th>
-                    <th mat-sort-header="name">Registration Date</th>
+                    <th mat-sort-header="name">Name</th>
+                    <th mat-sort-header="gender">Gender</th>
+                    
                     <th mat-sort-header="Age">Age</th>
                     <th mat-sort-header="mobile">Mobile</th>
                     <th mat-sort-header="email">Email</th>
-                    <th mat-sort-header="gender">Gender</th>
+                    
+                    <th mat-sort-header="name">Registration Date</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -107,21 +109,24 @@
                       </div>
                     </td>-->
                     <td>{{serialNumberArray[i]}}</td>
+                    <td>{{data.patientId}}</td>
                     <td class="profile-image"> <a href="javascript:;" (click)="movetoProfile(data.patientId)">
                         {{data.firstName}}
                         {{data.lastName}}</a>
                     </td>
+                    
+                    <td>{{data.gender}}</td>
 
                     <!-- <td class="profile-image"> <a href="javascript:;" (click)="movetoBookappointment(data.patientId)">
                         {{data.firstName}}
                         {{data.lastName}}</a>
                     </td> -->
-                    <td>{{data.patientId}}</td>
-                    <td>{{data.regstrationDate}}</td>
+                   
+                    
                     <td>{{data.ageinYear}}</td>
                     <td><a href="javascript:;">{{data.mobile}}</a></td>
                     <td>{{data.email}}</td>
-                    <td>{{data.gender}}</td>
+                    <td>{{data.regstrationDate}}</td> 
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"

@@ -78,8 +78,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public appointmentStatus = true;
   public questionData: any[] = [];
   public toggalUi = true;
-  public selectedFile!: File;
-  public VselectedFile!: File;
+  public selectedFile: File|null=null;
+  public VselectedFile: File|null=null;
   private spinner!: NgxSpinnerService;
   private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
   private VFileUploadDto: IconsultationFiles = {} as IconsultationFiles;
@@ -299,8 +299,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       participantId: this.loggedInUserId.loginId,
       answerText: typeof answer.value[answerKey] === 'string' ? answer.value[answerKey] : '',
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
-      appointmentId: this.appointmentService.appointmentId
+      appointmentId: this.latestId
     }
+    console.log("answer object ",answerObject)
     this.answerDto.push(answerObject);
 
     console.log(answer.value)
@@ -318,6 +319,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.questionCounter = position;
         if (this.questionCounter <= this.questionLenth) {   //this.currentQuestion=this.nextQuestionId
           this.combindQuestionOption.map((data: any) => {
+            console.log(" question data option ",data);
             if (data.questionId == this.nextQuestionId) {
               this.currentQuestionData = data;
               this.previousQuestionId = this.nextQuestionId;
@@ -344,8 +346,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.questionCounter >= this.questionLenth) {
       this.finishQuestionniary = true;
     }
+
+    console.log("this.questionCounter ",this.questionCounter );
+    console.log(" this.nextQuestionId", this.nextQuestionId );
+    console.log(" this.previousQuestionId", this.previousQuestionId );
+
   }
 
+   isCompleted(data:IQuestionnaires): boolean {
+    return this.selectedQueslist.some(q => q.questionnaireId === data.questionnaireId);
+  }
+
+  isUntouched(data:IQuestionnaires): boolean {
+    return !this.isCompleted(data) && data.questionnaireId !== this.selectedques;
+  }
+
+  isActive(data:IQuestionnaires): boolean {
+    return data.questionnaireId === this.selectedques;
+  }
 
   mapQuestionAndOptions(questId: number) {
     this.selectedques = questId;
@@ -379,6 +397,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
+
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
@@ -389,6 +408,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
     this.selectedQueslist.push(temp[0])
     this.selectedques = 0;
+
     console.log("list single", this.selectedQueslist, this.selectedques)
     this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
       console.log(res);
@@ -396,6 +416,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.toaster.success("Questionniare submitted successfully", "Questionniare")
     })
     this.answerDto = [];
+    this.combindQuestionOption= [];
   }
 
   getAppointmentFiles(fileid: number) {
@@ -792,19 +813,20 @@ export class ProfileComponent implements OnInit, OnDestroy {
       reader.onload = () => {
         this.base64String = reader.result as string;
 
-        this.FileUploadDto.fileName = this.selectedFile.name;
-        this.FileUploadDto.FileType = this.selectedFile.type;
+        this.FileUploadDto.fileName = this.selectedFile?.name;
+        this.FileUploadDto.FileType = this.selectedFile?.type;
         this.FileUploadDto.fileData = this.base64String;
         // this.FileUploadDto.UploadDate = new Date()
         this.FileUploadDto.docName = "prescription";
         //this.FileUploadDto.FileData= this.base64String;
         this.FileUploadDto.appointmentId = this.latestId;
-        if (this.selectedFile.type == "image/jpeg" || this.selectedFile.type == "image/png") {
+        if (this.selectedFile?.type == "image/jpeg" || this.selectedFile?.type == "image/png") {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(result => {
             console.log(result);
             //this.spinner.hide();
             this.getUploadedFiles(this.latestId);
+            this.selectedFile = null;
             this.toastr.success('File uploaded Successfully', 'Success');
 
           });
@@ -826,7 +848,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       reader1.onload = () => {
         console.log("Vfile", this.VFileUploadDto);
         this.base64String = reader1.result as string;
-        this.VFileUploadDto.fileName = this.VselectedFile.name;
+        this.VFileUploadDto.fileName = this.VselectedFile?.name;
         this.VFileUploadDto.FileType = this.VselectedFile?.type;
         this.VFileUploadDto.fileData = this.base64String;
         // this.VFileUploadDto.UploadDate = new Date();
@@ -834,12 +856,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
         //this.FileUploadDto.FileData= this.base64String;
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        if (this.VselectedFile.type == "image/jpeg" || this.VselectedFile.type == "image/png") {
+        if (this.VselectedFile?.type == "image/jpeg" || this.VselectedFile?.type == "image/png") {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
             //this.spinner.hide();
             this.getUploadedFiles(this.latestId);
+            this.VselectedFile = null;
             this.toastr.success('File uploaded Successfully', 'Success');
 
           });

@@ -220,6 +220,7 @@ export interface IfileUpload {
   fileData?: string,
   UploadDate: Date,
   AppointmentId: number,
+  docName?:string,
 
 }
 
