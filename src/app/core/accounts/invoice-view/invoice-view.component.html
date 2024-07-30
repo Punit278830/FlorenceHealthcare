@@ -115,10 +115,10 @@
                                                 <td>
                                                     <button type="button" (click)="paidsubInvoiceItem(data.id)"
                                                         [disabled]="data.status === 'Paid'"
-                                                        class="btn btn-primary custom-badge">Pay</button>
+                                                        class="btn btn-primary custom-badge">{{data.status == 'Paid' ? 'Paid' : 'Pay'}}</button>
                                                 </td>
 
-                                            </tr>
+                                            </tr> 
                                         </ng-container>
                                     </tbody>
                                 </table>

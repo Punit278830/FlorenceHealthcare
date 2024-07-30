@@ -616,6 +616,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this._consultationDto = res[res.length - 1];
     })
   }
+  
   getUploadedFiles(id:number) {
     this.presDocuments = [];
     this.vitalDocuments = [];
