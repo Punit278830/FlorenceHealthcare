@@ -220,15 +220,17 @@ export interface IfileUpload {
   fileData?: string,
   UploadDate: Date,
   AppointmentId: number,
+  docName?:string,
 
 }
 
 export interface IconsultationFiles {
   fileId: number,
-  fileName: string,
-  FileType: string,
-  fileData: string,
+  fileName?: string,
+  FileType?: string,
+  fileData?: string,
   appointmentId?: number,
+  docName?:string,
 }
 
 export interface IdownloadFile {

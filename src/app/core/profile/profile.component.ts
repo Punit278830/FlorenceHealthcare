@@ -18,6 +18,7 @@ import * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { MatStepper } from '@angular/material/stepper';
 
 
 @Component({
@@ -41,7 +42,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public patientInfo!: IpatientInfo;
   public pdfUrl = '';
   public patientAge!: number
-
+  public showNext: boolean = false;
+  @ViewChild('stepper') stepper!: MatStepper;
+  public copyId: number = -1;
+  public latestId: number = -1;
+  public departmentId: number = -1;
+  public selectedQueslist: any[] = [];
+  public selectedques!: number
   //*********8 Questionnaire related Variables decletation start */
   public questionnaireDto: IQuestionnaires[] = [];
   public finishQuestionniary = false;
@@ -71,9 +78,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public appointmentStatus = true;
   public questionData: any[] = [];
   public toggalUi = true;
-  public selectedFile!: File;
+  public selectedFile: File|null=null;
+  public VselectedFile: File|null=null;
   private spinner!: NgxSpinnerService;
   private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
+  private VFileUploadDto: IconsultationFiles = {} as IconsultationFiles;
   public base64String!: string;
   public base64StringArray: string[] = [];
   public medicineDto: IprescribeMedicine[] = [];
@@ -83,6 +92,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   //public displayImage:any[]=[];
   public displayImage: IconsultationFiles[] = [];
   public images: any;
+  public presDocuments: IconsultationFiles[]=[];
+  public vitalDocuments: IconsultationFiles[]=[];
 
 
 
@@ -112,6 +123,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.appointmentStatus = this.appointmentService.appoinmentStatus;
     this.appointmentId = this.appointmentService.appointmentId;
     this.doctorId = this.doctorService.staffId;
+
     this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');
     const currentYear = new Date().getFullYear();
 
@@ -119,12 +131,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.appointmentYears.push(year);
     }
     this.selectedYear = currentYear;
-    console.log("current date",currentYear)
-    this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.appointmentList]);
+    console.log("current date", currentYear)
+    this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
     this.initlizeProfileForm();
 
     //department id Required here
-    this.getQuestionnaireByDepartmentId(this.departmentService.departmentId);
+    this.getQuestionnaireByDepartmentId(this.departmentId);
   }
 
   initlizeProfileForm() {
@@ -134,7 +146,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -148,6 +159,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getCurrentAppointmentDetils();
     this.getConsultationFiles();
     this.getPreDiagnosisTemplate();
+    this.getUploadedFiles(this.latestId);
     //     this.preDiagnosis=[
     //   {
     //   diagnosId:1,diagnosName:"diagnosOne",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1},
@@ -158,6 +170,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
+  copyClick(id: number, depId: number) {
+
+    this.copyId = id;
+    // this.fileUpladServie.editPresc = true;
+    this.showNext = true;
+    this.getVitalByAppointment(this.copyId);
+    this.getQuestionnaireByDepartmentId(depId)
+    const questionaryTab = document.getElementById('questab');
+    if (questionaryTab) {
+      questionaryTab.click();
+    }
+    this.stepper.next();
+  }
 
 
   loadPatientAppointments() {
@@ -165,18 +190,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // this.selectedYear=event.value;
     this.selectedYear = this.profileForm.get('appointYear')?.value
     this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe(res => {
+      // Assuming the date field is named 'date' and is in a format that can be compared directly (e.g., ISO string).
 
-      this.appointmentList = res;
-    })
+      console.log("app", res)
+      this.appointmentList = res.sort((a, b) => {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      });
+      console.log(" in app list ", this.appointmentList);
+      this.latestId = this.appointmentList[0]?.id;
+      console.log("selectedId", this.latestId);
+      this.departmentId = this.appointmentList[0]?.departmentid;
+    });
   }
 
   loadPatientInfo() {
     this.patientService.getPatientData(this.patientId).subscribe((data) => {
       this.patientInfo = data;
-      this.patientInfo.IdentityName=data.identityName;
-      this.patientInfo.IdentityNumber=data.identityNumber;
+      this.patientInfo.IdentityName = data.identityName;
+      this.patientInfo.IdentityNumber = data.identityNumber;
       this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
-      console.log("patient Info  hh" ,this.patientInfo);
+      console.log("patient Info  hh", this.patientInfo);
     })
   }
 
@@ -243,6 +276,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   getQuestionnaireByDepartmentId(depId: number) {
     this.question.getQuestionnaireByDepId(depId).subscribe(res => {
       this.questionnaireDto = res;
+      console.log("questionnare", res)
     })
   }
 
@@ -265,8 +299,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       participantId: this.loggedInUserId.loginId,
       answerText: typeof answer.value[answerKey] === 'string' ? answer.value[answerKey] : '',
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
-      appointmentId: this.appointmentService.appointmentId
+      appointmentId: this.latestId
     }
+    console.log("answer object ",answerObject)
     this.answerDto.push(answerObject);
 
     console.log(answer.value)
@@ -284,6 +319,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.questionCounter = position;
         if (this.questionCounter <= this.questionLenth) {   //this.currentQuestion=this.nextQuestionId
           this.combindQuestionOption.map((data: any) => {
+            console.log(" question data option ",data);
             if (data.questionId == this.nextQuestionId) {
               this.currentQuestionData = data;
               this.previousQuestionId = this.nextQuestionId;
@@ -310,10 +346,27 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (this.questionCounter >= this.questionLenth) {
       this.finishQuestionniary = true;
     }
+
+    console.log("this.questionCounter ",this.questionCounter );
+    console.log(" this.nextQuestionId", this.nextQuestionId );
+    console.log(" this.previousQuestionId", this.previousQuestionId );
+
   }
 
+   isCompleted(data:IQuestionnaires): boolean {
+    return this.selectedQueslist.some(q => q.questionnaireId === data.questionnaireId);
+  }
+
+  isUntouched(data:IQuestionnaires): boolean {
+    return !this.isCompleted(data) && data.questionnaireId !== this.selectedques;
+  }
+
+  isActive(data:IQuestionnaires): boolean {
+    return data.questionnaireId === this.selectedques;
+  }
 
   mapQuestionAndOptions(questId: number) {
+    this.selectedques = questId;
     this.displayVitalCard = false;
     const question$ = this.question.getQuestionByQuestionaireId(questId)
     const options$ = this.question.getAllOptions();
@@ -344,6 +397,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
+
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
@@ -351,12 +405,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   submitAnswers() {
+    var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
+    this.selectedQueslist.push(temp[0])
+    this.selectedques = 0;
+
+    console.log("list single", this.selectedQueslist, this.selectedques)
     this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
       console.log(res);
 
       this.toaster.success("Questionniare submitted successfully", "Questionniare")
     })
     this.answerDto = [];
+    this.combindQuestionOption= [];
   }
 
   getAppointmentFiles(fileid: number) {
@@ -387,20 +447,40 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   saveVItals(vital: FormGroup) {
     this.vitalDto = vital.value;
-    console.log("entered")
-    this.vitalDto.appointmentId = this.appointmentService.appointmentId;
+    console.log("entered", this.vitalDto)
+
+
+    if (this.copyId != -1 && this.latestId != -1) {
+      console.log("1", this.latestId)
+      this.vitalDto.appointmentId = this.latestId;
+    }
+    else {
+      console.log("2", this.appointmentService.appointmentId)
+      this.vitalDto.appointmentId = this.latestId;
+    }
+    console.log("vitaldto", this.vitalDto);
     this.question.postVitalInformation(this.vitalDto).subscribe(res => {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
       this.toaster.success("Vital detail saved", "Vital data");
+      this.gotoQuestionnairy();
+
+
     })
 
   }
+  gotoQuestionnairy() {
+    this.getQuestionnaireByDepartmentId(this.departmentId)
+    this.stepper.next();
+  }
+
+
 
   getVitalByAppointment(appointmentId: number) {
     this.question.getVitalInfoByAppointmentId(appointmentId).subscribe(res => {
       res ? this.vitalSubmitted = true : this.vitalSubmitted = false;
       this.vitalDto = res;
+      console.log("res", res)
       this.patchVitalFormValueForEdit();
 
     })
@@ -410,10 +490,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const vitalId = this.vitalDto.vitalId;
 
     this.vitalDto = this.vitalForm.value;
-    this.vitalDto.appointmentId = this.appointmentService.appointmentId;
+    if (this.copyId != -1 && this.latestId != -1) {
+      console.log("1", this.latestId)
+      this.vitalDto.appointmentId = this.latestId;
+    }
+    else {
+      console.log("2", this.latestId)
+      this.vitalDto.appointmentId = this.latestId;
+    }
     this.vitalDto.vitalId = vitalId;
+    console.log("vitaldto", this.vitalDto);
     this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(res => {
       this.toaster.success("Vital Info Successfully Updated", "Vital update")
+      this.gotoQuestionnairy();
     })
 
   }
@@ -518,6 +607,33 @@ export class ProfileComponent implements OnInit, OnDestroy {
       followupDate: ['']
     })
   }
+  getConsultationOnAppointmentId(id: number) {
+    console.log("id in C ", id)
+    this.consultService.getConsultData(id).subscribe(res => {
+      console.log("consult data", res)
+      res ? this.showNext = true : this.showNext = false;
+      this.consultForm.patchValue(res[res.length - 1]);
+      this._consultationDto = res[res.length - 1];
+    })
+  }
+  getUploadedFiles(id:number) {
+    this.presDocuments = [];
+    this.vitalDocuments = [];
+    this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
+      res.forEach(item => {
+        console.log("item",item)
+        if ( item.docName == "prescription") {
+          this.presDocuments.push(item);
+        }
+        if ( item.docName == "vital") {
+          this.vitalDocuments.push(item);
+        }
+      })
+
+
+    })
+    console.log("pres vit",this.presDocuments,this.vitalDocuments);
+  }
 
   submitConsultation(consultData: FormGroup) {
     const days = parseInt(consultData.value.followupDate)
@@ -530,11 +646,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     this._consultationDto = consultData.value;
-    this._consultationDto.appointmentId = this.appointmentService.appointmentId;
+    console.log("id0", this.latestId)
+    if (this.copyId != -1 && this.latestId != -1) {
+      this._consultationDto.appointmentId = this.latestId;
+      console.log("1", this.copyId);
+    }
+    else {
+      console.log("2");
+      this._consultationDto.appointmentId = this.latestId;
+    }
     //this._consultationDto.followupDate=this.followupDate;
+    console.log("consult dto", this._consultationDto)
     this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Data Saved", "Consultation Data")
       this.toggalUi = false;
+      this.stepper.next();
     },
       error => {
         console.error('Error adding consultation data:', error);
@@ -546,6 +672,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
 
   }
+  updateConsultation() {
+    const consultId = this._consultationDto.id;
+
+    this._consultationDto = this.consultForm.value;
+    if (this.copyId != -1 && this.latestId != -1) {
+      this._consultationDto.appointmentId = this.latestId;
+    }
+    else {
+      this._consultationDto.appointmentId = this.latestId;
+    }
+    this._consultationDto.id = consultId;
+    console.log("consult dto", this._consultationDto);
+    this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
+      this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
+      this.stepper.next();
+    })
+
+  }
+
+
 
   addPreDefineDiagnosis(diagnosisValue: any) {
     this.consultForm.get('finalDiagnosis')?.patchValue(diagnosisValue.value)
@@ -610,6 +756,22 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // this.onFileUpload();
 
   }
+  onVfileSelected(event: any) {
+    this.VselectedFile = event.target.files[0];
+    console.log("vvv", this.VselectedFile)
+    // this.onFileUpload();
+
+  }
+
+  deleteFile(id:number){
+    this.fileUpladServie.deleteConsultationFile(id).subscribe(result => {
+      //this.spinner.hide();
+      this.getUploadedFiles(this.latestId)
+      this.toastr.success('File deleted Successfully', 'Success');
+
+    });
+
+  }
 
   onFileUpload() {
     // if (this.selectedFile) 
@@ -650,16 +812,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
       const reader = new FileReader();
       reader.onload = () => {
         this.base64String = reader.result as string;
-        this.FileUploadDto.fileName = this.selectedFile.name;
-        this.FileUploadDto.FileType = this.selectedFile.type;
+
+        this.FileUploadDto.fileName = this.selectedFile?.name;
+        this.FileUploadDto.FileType = this.selectedFile?.type;
         this.FileUploadDto.fileData = this.base64String;
+        // this.FileUploadDto.UploadDate = new Date()
+        this.FileUploadDto.docName = "prescription";
         //this.FileUploadDto.FileData= this.base64String;
-        this.FileUploadDto.appointmentId = this.appointmentService.appointmentId;
-        if (this.selectedFile.type == "image/jpeg" || this.selectedFile.type == "image/png") {
-          console.log("fileData",this.FileUploadDto);
+        this.FileUploadDto.appointmentId = this.latestId;
+        if (this.selectedFile?.type == "image/jpeg" || this.selectedFile?.type == "image/png") {
+          console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(result => {
             console.log(result);
             //this.spinner.hide();
+            this.getUploadedFiles(this.latestId);
+            this.selectedFile = null;
             this.toastr.success('File uploaded Successfully', 'Success');
 
           });
@@ -670,9 +837,88 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
       reader.readAsDataURL(this.selectedFile);
     }
-    else{
+    else {
       this.toaster.error("No file selected", "Select a file")
     }
+  }
+  onVFileUpload() {
+    if (this.VselectedFile) {
+      //this.spinner.show(); 
+      const reader1 = new FileReader();
+      reader1.onload = () => {
+        console.log("Vfile", this.VFileUploadDto);
+        this.base64String = reader1.result as string;
+        this.VFileUploadDto.fileName = this.VselectedFile?.name;
+        this.VFileUploadDto.FileType = this.VselectedFile?.type;
+        this.VFileUploadDto.fileData = this.base64String;
+        // this.VFileUploadDto.UploadDate = new Date();
+        this.VFileUploadDto.docName = "vital";
+        //this.FileUploadDto.FileData= this.base64String;
+        this.VFileUploadDto.appointmentId = this.latestId;
+        console.log("Vfile", this.VFileUploadDto);
+        if (this.VselectedFile?.type == "image/jpeg" || this.VselectedFile?.type == "image/png") {
+          console.log("fileData", this.VFileUploadDto);
+          this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
+            console.log(result);
+            //this.spinner.hide();
+            this.getUploadedFiles(this.latestId);
+            this.VselectedFile = null;
+            this.toastr.success('File uploaded Successfully', 'Success');
+
+          });
+        }
+        else {
+          this.toaster.error("File type not correct", "File Type")
+        }
+      }
+      reader1.readAsDataURL(this.VselectedFile);
+    }
+    else {
+      this.toaster.error("No file selected", "Select a file")
+    }
+
+  }
+  editDetails(id: number) {
+    console.log("enter")
+    this.latestId = id;
+    // this.fileUpladServie.appointmentId = id;
+    // this.fileUpladServie.editPresc = true;
+    this.getUploadedFiles(id);
+    this.getVitalByAppointment(this.latestId);
+    // this.vitalSubmitted=true;
+    // const questionaryTab = document.getElementById('questab');
+    // if (questionaryTab) {
+    //   questionaryTab.click();
+    // }
+    this.stepper.next();
+
+  }
+  movetopres() {
+    console.log(" copy latest ", this.copyId, this.latestId)
+    if (this.copyId != -1) {
+      this.getConsultationOnAppointmentId(this.copyId)
+      this.getUploadedFiles(this.copyId);
+    }
+    else {
+      this.getConsultationOnAppointmentId(this.latestId)
+      this.getUploadedFiles(this.latestId);
+    }
+    this.toggalUi = true;
+    this.stepper.next();
+
+  }
+
+  movetoprev() {
+    this.vitalForm.reset();
+    this.consultForm.reset()
+    this.fileUpladServie.editPresc = false;
+    this.showNext = this.fileUpladServie.editPresc;
+    this.ApiCallsForPreview();
+    const questionaryTab = document.getElementById('prevtab');
+    if (questionaryTab) {
+      questionaryTab.click();
+    }
+
   }
 
   getPrescribeMedicine() {
@@ -729,14 +975,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     document.body.innerHTML = originalContents;
   }
 
-      updateAppointmentId(appointmentId:number)
-      {
+  updateAppointmentId(appointmentId: number) {
 
-        this.appointmentService.appointmentId=appointmentId;
-        const currentUrl = this.route.url;
-      this.route.navigateByUrl('/', { skipLocationChange: true }).then(() => {
-        this.route.navigate([currentUrl]);
-      })
+    this.appointmentService.appointmentId = appointmentId;
+    const currentUrl = this.route.url;
+    this.route.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.route.navigate([currentUrl]);
+    })
 
   }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -14,4 +14,6 @@ public partial class ConsultationFile
     public string? FileType { get; set; }
 
     public string? FileData { get; set; }
+
+  public string? docName { get; set; } 
 }

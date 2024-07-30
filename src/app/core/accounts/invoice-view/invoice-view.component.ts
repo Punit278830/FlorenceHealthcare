@@ -59,10 +59,10 @@ const styles = {
     textOverflow: "clip",
     whiteSpace: "nowrap"
   },
-  wrapper:{
-    display:"flex",
-    justifyContent:"space-between",
-    width:"70mm"
+  wrapper: {
+    display: "flex",
+    justifyContent: "space-between",
+    width: "70mm"
 
   },
   colSpan2: {
@@ -104,11 +104,12 @@ export class InvoiceViewComponent implements OnInit {
   public isPaidButtonVisible = true;
   public appointmentList: any[] = [];
   public flag: boolean = false;
-  public classes:any;
-  public width! : string ;
-  public thermalvisible : boolean = false;
-  public disc:number=0;
-  public loggedIn!:any;
+  public classes: any;
+  public width!: string;
+  public thermalvisible: boolean = false;
+  public disc: number = 0;
+  public loggedIn!: any;
+  public Timenow!: string;
 
   constructor(private invoiceService: InvoiceService,
     private patientService: PatientService,
@@ -116,8 +117,8 @@ export class InvoiceViewComponent implements OnInit {
     private staffService: StaffService,
     private toastr: ToastrService,
     private route: Router) {
-      this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
-      console.log("invoiceId",this.invoiceService.invoiceId);
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
+    console.log("invoiceId", this.invoiceService.invoiceId);
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
     }
@@ -135,6 +136,7 @@ export class InvoiceViewComponent implements OnInit {
         this.isPaidButtonVisible = true;
       }
       this.invoiceDetails = res;
+      console.log("invoice details", res)
       if (res.status == 'un Paid') {
         //this.isPaidButtonVisible=false;
         this.balanceAmount = this.balanceAmount + res.amount;
@@ -162,7 +164,7 @@ export class InvoiceViewComponent implements OnInit {
     this.sheets.add(sheet);
     this.classes = sheet.attach().classes;
     this.width = '80mm';
-    
+
 
   }
 
@@ -237,10 +239,10 @@ export class InvoiceViewComponent implements OnInit {
     }
 
     if (this.flag) {
-       this.totalInvoiceAmount = this.totalInvoiceAmount-this.invoiceDetails.amount;
-      this.disc=100;
+      this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
+      this.disc = 100;
     }
-  console.log("Flag:", this.flag);
+    console.log("Flag:", this.flag);
   }
 
 
@@ -262,7 +264,9 @@ export class InvoiceViewComponent implements OnInit {
 
   print() {
     this.thermalvisible = true;
-    
+    var dateToday = new Date();
+    this.Timenow = `${dateToday.getHours()} ${dateToday.getMinutes()}`;
+
     setTimeout(() => {
       if (this.printView) {
         const tpm = new ThermalPrinterService('80mm');
@@ -273,7 +277,7 @@ export class InvoiceViewComponent implements OnInit {
         tpm.addRawHtml(this.printView.nativeElement.innerHTML);
         tpm.print();
 
-        this.thermalvisible=false;
+        this.thermalvisible = false;
       } else {
         console.error('printView is not defined');
       }
@@ -313,11 +317,10 @@ export class InvoiceViewComponent implements OnInit {
     })
 
   }
-  
-  
-  moveToEditInvoice(id:number)
-  {
-    this.invoiceService.invoiceId=id;
+
+
+  moveToEditInvoice(id: number) {
+    this.invoiceService.invoiceId = id;
     this.route.navigate(['/invoice/edit-invoice'])
 
   }
@@ -353,7 +356,9 @@ class ThermalPrinterService {
     this.cssStyles = cssStyles;
   }
 
+
   print() {
+    
     const printerWindow = window.open(``, `_blank`);
     if (printerWindow) {
       printerWindow.document.write(`

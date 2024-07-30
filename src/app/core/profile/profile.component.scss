@@ -2,10 +2,87 @@
     display: flex;
     flex-direction: column;
 }
+.completed {
+    background-color:lightgreen;
+}
+.untouched {
+    background-color:lightgray;
+}
+.active {
+background-color: white;
+}
+
 .uploadbtn{
     padding: 8px 16px;
     text-align: center;
     border: 1px solid black;
     border-radius: 8px;
 
+}
+.h4heading{
+    font-weight:700;
+    font-size:25px
+}
+.h2question{
+    font-weight: 500;
+    font-size: 23px;
+}
+.optionsOuter{
+    display: flex;
+    gap: 20px;
+    justify-content: start;
+    flex-direction: row-reverse;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.heading{
+    font-size: 20px;
+    font-weight: 700;
+    margin: 5px 0px;
+    width:fit-content;
+
+    
+}
+.filesOuter{
+    display:flex;
+    gap:10px;
+    align-items: center;
+}
+.filesMainOuter{
+    margin:15px 0px;
+    display: flex;
+    flex-direction: column;
+    gap:10px
+}
+.box{
+    display:flex;
+    gap: 10px;
+    margin-bottom:20px
+}
+.imageOuter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px; /* Adjust the gap between images */
+}
+
+.imageContainer {
+    flex: 1 1 200px; /* Adjust the flex basis to control the size */
+    margin: 10px;
+}
+
+.imageContainer img {
+    width: 50%;
+    height: auto;
+    display: block;
+}
+.quesheading{
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 6px 12px;
+    width: fit-content;
+    // background-color: lightgray;
+}
+.quesText{
+    color: black;
+    font-weight: bold;
 }

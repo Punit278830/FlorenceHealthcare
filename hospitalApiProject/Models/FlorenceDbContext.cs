@@ -197,6 +197,7 @@ public partial class FlorenceDbContext : DbContext
       entity.ToTable("consultationFiles");
 
       entity.Property(e => e.FileId).HasColumnName("fileId");
+      entity.Property(e => e.docName).HasColumnName("docName");
       entity.Property(e => e.AppointmentId).HasColumnName("appointmentId");
       entity.Property(e => e.FileData)
           .IsUnicode(false)
