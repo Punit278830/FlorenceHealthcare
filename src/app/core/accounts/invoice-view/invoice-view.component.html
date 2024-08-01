@@ -180,27 +180,27 @@
 
 <div *ngIf="thermalvisible" #printview [ngClass]="[classes.printAreaContainer, classes.fontMono]"
     [ngStyle]="{ width: width }">
-    <div [ngClass]="classes.textCenter"><strong> Healthcare RMEE2225901</strong></div>
-    <div [ngClass]="classes.textCenter"><strong>Kheri Road, Kheri ,Lakhimpur Kheri-262701</strong></div>
-    <div [ngClass]="classes.textCenter"><strong>Near By Don Bosco School</strong></div>
+    <div [ngClass]="classes.textCenter"><strong>Florence Healthcare RMEE2225901</strong></div>
+    <div [ngClass]="classes.textCenter"><strong>Kheri Road Lakhimpur , Near Don Bosco School Lakhimpur Kheri UP - 262701</strong></div>
+    <div [ngClass]="classes.textCenter"><strong>Ph.No:6388803534</strong></div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
 
-    <div [ngClass]="classes.textCenter">Receipt / Invoice / Bill </div>
+    <div [ngClass]="classes.textCenter"><strong>Receipt / Invoice / Bill</strong> </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-    <div [ngClass]="classes.textLeft">Patient Name - {{patientDetails.firstName}} {{patientDetails.lastName}}</div>
+    <div [ngClass]="classes.textLeft"><strong>Patient Name - </strong>{{patientDetails.firstName}} {{patientDetails.lastName}}</div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-    <div [ngClass]="classes.textLeft">Receipt by - {{loggedIn.fname}} {{loggedIn.lname}} </div>
+    <div [ngClass]="classes.textLeft"><strong>Receipt by -</strong> {{loggedIn.fname}} {{loggedIn.lname}} </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-    <div [ngClass]="classes.textRight">Date{{invoiceDetails.createdDate |
+    <div [ngClass]="classes.textRight"><strong>Date-</strong>{{invoiceDetails.createdDate |
         date:'dd-MMMM-yyyy'}} </div>
-    <div [ngClass]="classes.textRight">Time :{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM': 'AM'}} </div>
-    <div [ngClass]="classes.textRight">InvoiceId-#INV-{{invoiceDetails.invoiceId}} </div>
+    <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM': 'AM'}} </div>
+    <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
 
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
             <div style="width: 10mm;"><strong>Item</strong></div>
-            <div style="width: 3mm;margin-left: 5px"><strong>QTY</strong></div>
+            <div style="width: 3mm;margin-left: 5px"><strong>Qty</strong></div>
             <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Price</strong></div>
             <div style="width: 10mm;" [ngClass]="classes.textRight"><strong>Amount</strong></div>
         </div>
@@ -227,7 +227,7 @@
 
         <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
         <div [ngClass]="classes.singleLine">&nbsp;</div>
-        <div [ngClass]="classes.textRight">
+        <div [ngClass]="classes.textRight" style="width: fit-content;">
             <strong>Total: ₹{{totalInvoiceAmount}}</strong>
         </div>
 
@@ -235,9 +235,11 @@
 
     <div [ngClass]="classes.textLeft">Terms and Conditions</div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
+    <div [ngClass]="classes.textLeft"><strong>Terms and Conditions</strong> </div>
     <div [ngClass]="classes.textLeft">OPD Prescription valid for 7(seven) days including today</div>
     <div [ngClass]="classes.textLeft">Audiometry services are subject to availability and warranty services are only
         being provided by selling company.</div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.textLeft">Authorized Signatory</div>
 
 </div>

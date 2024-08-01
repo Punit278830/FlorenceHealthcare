@@ -19,6 +19,7 @@ import html2canvas from 'html2canvas';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
 
 @Component({
@@ -94,6 +95,21 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public images: any;
   public presDocuments: IconsultationFiles[]=[];
   public vitalDocuments: IconsultationFiles[]=[];
+  public documentUrl: SafeResourceUrl | null = null;
+  public currentFileName: string | null = null;
+
+  viewDocument(item: any) {
+    this.currentFileName = item.fileName;
+    this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(item.fileData);
+  }
+
+  closeDocument() {
+    this.documentUrl = null;
+    this.currentFileName = null;
+  }
+  goToStep(index: number): void {
+    this.stepper.selectedIndex = index;
+  }
 
 
 
@@ -115,7 +131,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private datePipe: DatePipe,
     private consultService: ConsultService,
     private toastr: ToastrService,
-    private doctorService: StaffService
+    private doctorService: StaffService,
+    private sanitizer: DomSanitizer,
 
   ) {
 
@@ -329,12 +346,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
           })
         }
+       
       }
       else {
         this.finishQuestionniary = true;
       }
-
-
+      
     }
     else {
       this.questionCounter++;
@@ -367,6 +384,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   mapQuestionAndOptions(questId: number) {
     this.selectedques = questId;
+    
     this.displayVitalCard = false;
     const question$ = this.question.getQuestionByQuestionaireId(questId)
     const options$ = this.question.getAllOptions();
@@ -408,7 +426,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
     this.selectedQueslist.push(temp[0])
     this.selectedques = 0;
-
+    this.questionCounter = 0;
+    this.finishQuestionniary = false;
     console.log("list single", this.selectedQueslist, this.selectedques)
     this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
       console.log(res);
@@ -444,6 +463,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
 
   }
+  cancelVitals(){
+    this.vitalForm.reset();
+  }
 
   saveVItals(vital: FormGroup) {
     this.vitalDto = vital.value;
@@ -469,10 +491,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
 
   }
-  gotoQuestionnairy() {
-    this.getQuestionnaireByDepartmentId(this.departmentId)
-    this.stepper.next();
-  }
+  
 
 
 
@@ -505,6 +524,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.gotoQuestionnairy();
     })
 
+  }
+  gotoQuestionnairy() {
+    this.getQuestionnaireByDepartmentId(this.departmentId)
+    this.stepper.next();
   }
 
   patchVitalFormValueForEdit() {
@@ -576,10 +599,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
       m.appointmentId = this.appointmentService.appointmentId
     })
+    
     this.medicineService.submitPrescribeMedicine(prescribeMedicines.medicine).subscribe(res => {
       if (res) {
         this.toaster.success("Medicine add to Prescription", "Add Medicine")
         this.medicine.clear();
+        this.searchMedForm.reset();
       }
     })
 
@@ -606,6 +631,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       finalDiagnosis: [''],
       followupDate: ['']
     })
+  }
+  cancelConsultation(){
+    this.consultForm.reset()
   }
   getConsultationOnAppointmentId(id: number) {
     console.log("id in C ", id)
@@ -661,7 +689,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Data Saved", "Consultation Data")
       this.toggalUi = false;
-      this.stepper.next();
+      this.gotoPreview();
     },
       error => {
         console.error('Error adding consultation data:', error);
@@ -687,9 +715,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     console.log("consult dto", this._consultationDto);
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
-      this.stepper.next();
+      this.gotoPreview();
     })
 
+  }
+  gotoPreview(){
+    this.ApiCallsForPreview();
+    this.stepper.next();
   }
 
 
@@ -719,14 +751,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ApiCallsForPreview() {
     this.appointmentId = this.appointmentService.appointmentId
-    this.question.getQuestionwithAnswerByAppointmentId(this.appointmentId).subscribe(res => {
+    this.question.getQuestionwithAnswerByAppointmentId(this.latestId).subscribe(res => {
       this.questionData = res;
+      console.log("ques",res)
     })
 
-    this.consultService.getConsultData(this.appointmentId).subscribe(res => {
+    this.consultService.getConsultData(this.latestId).subscribe(res => {
       this._consultationDto = res[0];
 
     })
+    this.getPrescribeMedicine();
 
   }
 
@@ -775,73 +809,45 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onFileUpload() {
-    // if (this.selectedFile) 
-    // {
-    //        // this.spinner.show(); 
-    //       const reader = new FileReader();
-    //      reader.onload = () => {
-    //     // This code executes when the file has been successfully loaded
-
-    //     // Extract the base64 representation of the file from reader.result
-    //     const base64String = reader.result as string;
-
-    //     // Set up data for upload
-    //     this.FileUploadDto.fileName = this.selectedFile.name;
-    //     this.FileUploadDto.FileType = this.selectedFile.type;
-    //     this.FileUploadDto.fileData = base64String;
-    //     this.FileUploadDto.appointmentId = this.appointmentService.appointmentId;
-
-    //     // Upload the file data to the server
-    //     this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
-    //         result => {
-    //             // Handle the result of the upload, such as displaying a success message
-    //             console.log(result);
-    //             this.toastr.success('File uploaded Successfully', 'Success');
-    //         },
-    //         error => {
-    //             // Handle any errors that occur during the upload process
-    //             console.error('Error uploading file:', error);
-    //             this.toastr.error('File upload failed', 'Error');
-    //         }
-    //     );
-    // };
-
-
-    // }
     if (this.selectedFile) {
-      //this.spinner.show(); 
+      // Show spinner or loading indicator if needed
       const reader = new FileReader();
       reader.onload = () => {
-        this.base64String = reader.result as string;
-
+        const base64String = reader.result as string;
+  
         this.FileUploadDto.fileName = this.selectedFile?.name;
         this.FileUploadDto.FileType = this.selectedFile?.type;
-        this.FileUploadDto.fileData = this.base64String;
-        // this.FileUploadDto.UploadDate = new Date()
+        this.FileUploadDto.fileData = base64String;
         this.FileUploadDto.docName = "prescription";
-        //this.FileUploadDto.FileData= this.base64String;
         this.FileUploadDto.appointmentId = this.latestId;
-        if (this.selectedFile?.type == "image/jpeg" || this.selectedFile?.type == "image/png") {
+  
+        // Check for supported file types (for example, PDFs, Word documents, etc.)
+        const supportedFileTypes:string[] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
           console.log("fileData", this.FileUploadDto);
-          this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(result => {
-            console.log(result);
-            //this.spinner.hide();
-            this.getUploadedFiles(this.latestId);
-            this.selectedFile = null;
-            this.toastr.success('File uploaded Successfully', 'Success');
-
-          });
+          this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
+            result => {
+              console.log(result);
+              // Hide spinner if needed
+              this.getUploadedFiles(this.latestId);
+              this.selectedFile = null;
+              this.toastr.success('File uploaded Successfully', 'Success');
+            },
+            error => {
+              console.error('Error uploading file:', error);
+              this.toastr.error('File upload failed', 'Error');
+            }
+          );
+        } else {
+          this.toastr.error("Unsupported file type", "File Type");
         }
-        else {
-          this.toaster.error("File type not correct", "File Type")
-        }
-      }
+      };
       reader.readAsDataURL(this.selectedFile);
-    }
-    else {
-      this.toaster.error("No file selected", "Select a file")
+    } else {
+      this.toastr.error("No file selected", "Select a file");
     }
   }
+  
   onVFileUpload() {
     if (this.VselectedFile) {
       //this.spinner.show(); 
@@ -923,7 +929,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   getPrescribeMedicine() {
-    this.medicineService.getPrescribeMedicine(this.appointmentId).subscribe(res => {
+    this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
       this.medicineDto = res;
     })
   }
@@ -934,12 +940,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
   }
   getCurrentAppointmentDetils() {
-    this.appointmentService.getAppointmentById(this.appointmentId).subscribe(res => {
+    this.appointmentService.getAppointmentById(this.latestId).subscribe(res => {
       this._appointmentDto = res;
     })
   }
   getConsultationFiles() {
-    this.fileUpladServie.getConsultationFileByAppointment(this.appointmentId).subscribe(res => {
+    this.fileUpladServie.getConsultationFileByAppointment(this.latestId).subscribe(res => {
       //const data:IconsultationFiles[]=res;
       // const fileData=res.map(data=>data.fileData)
       // this.displayImage.push(...fileData);
