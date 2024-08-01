@@ -265,7 +265,7 @@ export class InvoiceViewComponent implements OnInit {
   print() {
     this.thermalvisible = true;
     var dateToday = new Date();
-    this.Timenow = `${dateToday.getHours()} ${dateToday.getMinutes()}`;
+    this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes()<10 ? '0':''}${dateToday.getMinutes()}`;
 
     setTimeout(() => {
       if (this.printView) {

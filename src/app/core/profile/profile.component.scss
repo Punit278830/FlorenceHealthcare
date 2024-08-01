@@ -2,6 +2,20 @@
     display: flex;
     flex-direction: column;
 }
+.btnOuter{
+    width:100%;
+    display:flex;
+    justify-content: end;
+
+}
+.btnOuter1{
+    width:100%;
+    display:flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+
+}
 .completed {
     background-color:lightgreen;
 }
@@ -93,3 +107,38 @@ background-color: white;
 .profile-info-right {
     border-left: 2px dashed #ccc;
   }
+.listOuter{
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+.fileOuter{
+    display:flex;
+    gap:10px;
+    font-size: 15px;
+    font-weight: 500;
+    align-items:center;
+}
+.viewtbn{
+    padding:6px 10px;
+    border: 1px solid grey;
+    border-radius: 8px;
+}
+.medicineOuter{
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.boxlistOuter{
+    display: flex;
+    gap: 10px;
+}
+.questionsOuter{
+    display: flex;
+    width:100%;
+    gap:10px;
+    flex-wrap: wrap;
+}
+.quesansOuter{
+    width:40%
+}
