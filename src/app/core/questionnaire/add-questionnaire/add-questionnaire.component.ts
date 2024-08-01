@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, ViewEncapsulation } from '@angular/core';
 import { NgForm, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
@@ -14,7 +14,8 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 @Component({
   selector: 'app-add-questionnaire',
   templateUrl: './add-questionnaire.component.html',
-  styleUrls: ['./add-questionnaire.component.scss']
+  styleUrls: ['./add-questionnaire.component.scss'],
+  encapsulation: ViewEncapsulation.None // Add this line
 })
 export class AddQuestionnaireComponent {
   public routes = routes;
@@ -36,6 +37,7 @@ export class AddQuestionnaireComponent {
   public showAddQuestion = false;
   public questionForm!: FormGroup;
   private questionnaireId!: number;
+  public selectedQuestionnaire!: string;
   public _questionDto!: Iquestion;
   public questiontoDisplay: any[] = [];
   public objectiveType = false;
@@ -48,10 +50,17 @@ export class AddQuestionnaireComponent {
   public currentQuestion = 0;
   public nextQuestionId = 0;
   public previousQuestion!: number;
-  private questionLenth = 0;
+  public questionLenth = 0;
   public currentQuestionData: any;
   public finishQuestionniary = false;
   private questionCounter = 0;
+  selectedRow: number | null = null;
+  selectedOption!: number;
+  currentQuestionIndex: number = 1; 
+  totalQuestions: number = 1;
+  selectedQuestionIdToMap: number | null = null;
+  questionList!: Iquestion[];
+  showQuestionList: boolean = false;
 
   constructor(private fb: FormBuilder,
     private departmentService: DepartmentService,
@@ -64,10 +73,12 @@ export class AddQuestionnaireComponent {
     this.getQuestionairewithDepName();
     this.initlizeQuestionForm();
     this.answerForm = this.fb.group({});
-    this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');
-
+    this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');    
   }
 
+  ngOnInit(): void {
+    this.loadQuestions();
+  }
 
   initlizaQuestForm() {
     this.questForm = this.fb.group({
@@ -132,32 +143,37 @@ export class AddQuestionnaireComponent {
       const depName$ = this.departmentService.getDepartmentList();
       const questionaire$ = this.question.getAllQuestionaireName();
       forkJoin([depName$, questionaire$]).subscribe(([depName, questionaire]) => {
-
+    
         // Define a lookup object for filter functions
         const filterFunctions: { [key: string]: (quest: any) => boolean } = {
           'Active': (quest: any) => quest.isActive,
           'Inactive': (quest: any) => !quest.isActive,
           'All': (quest: any) => true  // Assuming 'All' is the value of this.selectedStatus when no filter is applied
         };
-
+    
         // Get the appropriate filter function based on this.selectedOption
         const filterFunction = filterFunctions[this.selectedStatus] || filterFunctions['All'];
-
+    
         // Filter questionaire using the selected filter function
         const filteredQuestionaire = questionaire.filter(filterFunction);
-
+    
         this.combineData = filteredQuestionaire.map((questName: any) => {
-          const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId)
-
+          const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId);
+    
           return {
             ...questName,
             deptName: departmentName ? departmentName.departmentName : 'Unknown Name',
-
-          }
-        })
-      })
+          };
+        });
+    
+        // Select the top questionnaire by default if available
+        if (this.combineData.length > 0) {
+          const topQuestionnaire = this.combineData[0];
+          this.OnQuestionnaireChange(topQuestionnaire);
+        }
+      });
     }
-
+    
     onEditQuestionaire(data: any) {
       this.question.toggleQuestionaireStatus(data).subscribe(res => {
         if (res == null) {
@@ -170,7 +186,7 @@ export class AddQuestionnaireComponent {
 
     //********************* */
     questionType = [
-      { key: "Optonal", value: 1 },
+      { key: "Optional", value: 1 },
       { key: "Text", value: 2 }
     ]
 
@@ -186,6 +202,7 @@ export class AddQuestionnaireComponent {
 
 
     addDynamicControl() {
+      this.showQuestionList = true;
       this.optionControls.push(
         this.fb.group({
           option: ['', Validators.required],
@@ -203,11 +220,36 @@ export class AddQuestionnaireComponent {
       return this.questionForm.get('optionControls') as FormArray;
     }
 
-    showaddQuestion(id: number) {
+    resetForm(): void {
+      this.editQuestion = false;
+      this.currentQuestionIndex = 1;
+
+      this.resetAddQuestion();
+    }  
+    
+    resetAddQuestion(){
+      this.questionForm.reset();
+      this.optionControls.clear();
+    }
+
+    OnQuestionnaireChange(data: any){
+      this.resetForm();
+
+      this.selectedQuestionnaire = data.questionnaireName;
+      this.showaddQuestion(data.questionnaireId);
+      this.showAddQuestion = this.currentQuestionData == null || this.currentQuestionData.length == 0 ? false : true;
+    }
+
+    showAddQuestionSection()
+    {
       this.showAddQuestion = true;
+    }
+
+    showaddQuestion(id: number) {
       this.questionnaireId = id;
       this.questionCounter = 0;
       this.finishQuestionniary = false;
+      this.currentQuestionData = null;
       this.getQuestionByQuestionniareId(this.questionnaireId)
       this.mapQuestionAndOptions(this.questionnaireId);
       //this.dispalyPatientQuiz();
@@ -224,55 +266,31 @@ export class AddQuestionnaireComponent {
     }
 
     addQustion(data: FormGroup) {
-      //let temp:any[]=[];
+      if (!data.valid) {
+        data.markAllAsTouched();
+        return;
+      }
+
       this.optionArray = [];
       this._questionDto = data.value;
       this._questionDto.questionnaireId = this.questionnaireId;
-      // if(data.value.questionType==1)
-      // {
-      // if(data.value.optionControls.length>0)
-      // {
-      //   temp=data.value.optionControls;
-      // }
-
+      
       this.question.createQuestion(this._questionDto).subscribe(res => {
         const id: number = res.questionId
-        this.toaster.success("Question added Successfully", "Add Question")
-        //   if(id)
-        //   {
-        //   temp.map(data=>{
-        //     const optionObject=
-        //     {
-
-        //     questionId:id,
-        //     optionText:data.option,
-        //     mapQuestionId:data.mapQuestionId
-
-        //     }
-        //     this.optionArray.push(optionObject)
-        //   })
-        //   this.addOptions(this.optionArray)
-        // }  
+        this.toaster.success("Question added Successfully", "Add Question");
         this.showaddQuestion(this.questionnaireId);
       })
-      // }
-      // else{
-      //    this.question.createQuestion(this._questionDto).subscribe(res=>{
-      //    if(res)
-      //     {
-      //       this.toaster.success("Question added Successfully","Add Question")
-      //     }
-      //   })
-      // }
     }
 
     getQuestionByQuestionniareId(questId: number) {
       this.question.getQuestionByQuestionaireId(questId).subscribe(res => {
         console.log(res);
-
         this.questiontoDisplay = res;
 
-
+        if(this.questiontoDisplay != null && this.questiontoDisplay.length > 0)
+        {
+          this.showAddQuestionSection();
+        }
       })
     }
 
@@ -315,13 +333,9 @@ export class AddQuestionnaireComponent {
 
     addOptions(option: any[]) {
       this.question.createOption(option).subscribe(res => {
-
         this.toaster.success("Options added Successfully", "Add Optiones")
-        this.questionForm.reset();
-        this.optionControls.clear();
+        this.resetAddQuestion();
         this.objectiveType = false;
-
-
       })
     }
 
@@ -361,11 +375,18 @@ export class AddQuestionnaireComponent {
         this.questionForm.get('questionText')?.patchValue(res.questionText);
         this.questionForm.get('questionType')?.patchValue(res.questionType);
         this.showOption(res.questionType);
-
-
       })
+    }
 
-
+    loadQuestions(): void {
+      this.question.getAllQuestions().subscribe(
+        (res) => {
+          this.questionList = res;
+        },
+        (error) => {
+          console.error('Error fetching questions:', error);
+        }
+      );
     }
 
 
@@ -440,33 +461,18 @@ export class AddQuestionnaireComponent {
             if (data.questionId == this.nextQuestionId) {
               this.currentQuestionData = data;
               this.nextQuestionId = 0;
-
             }
-
           })
         }
       }
       else {
         this.questionCounter++;
         if (this.questionCounter < this.questionLenth) {
-          //  this.combindQuestionOption.map((data:any)=>
-          //   {
-          //     if(data.questionId==this.questionCounter)
-          //     this.currentQuestionData=data;
-          //   })
           this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
         }
       }
 
-
-      // this.combindQuestionOption.map((data:any)=>{
-      //   if(data.questionId==this.currentQuestion)
-      //   this.currentQuestionData=data;
-      //   this.currentQuestionData=this.combindQuestionOption[this.currentQuestion];
-      //  this.nextQuestionId=0;
-      // })
-
-
+      this.currentQuestionIndex = this.questionCounter + 1;
 
       if (this.questionCounter >= this.questionLenth - 1) {
         this.finishQuestionniary = true;
@@ -504,6 +510,32 @@ export class AddQuestionnaireComponent {
           this.getQuestionairewithDepName();
         }
       })
+    }
+
+    // onClear(){
+      
+    // }
+
+    selectRow(index: number): void {
+      this.selectedRow = index;
+    }
+
+    deleteOption(){
+      this.question.deleteOption(this.selectedOption).subscribe(res => {
+        if (res == null) {
+          this.toaster.success("Option is deleted!")
+          this.mapQuestionAndOptions(this.questionnaireId);
+        }
+      })
+    }
+
+    onOptionChange(index: number) {
+      this.selectedOption = index;
+      console.log('Selected Option ID:', this.selectedOption);
+    }
+
+    populateQuestionId(questionId: number): void {
+      this.selectedQuestionIdToMap = questionId;
     }
   }
 

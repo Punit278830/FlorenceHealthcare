@@ -19,3 +19,45 @@
     overflow-x: auto;
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
+  
+.align-right {
+  margin-left: auto;
+  margin-right: 0;
+}
+/* Make sure to include these styles to align items properly */
+.align-items-center {
+  display: flex;
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.text-right {
+  text-align: right;
+}
+
+
+.text-left {
+  text-align: left;
+}
+
+.selectedQuest {
+  background-color: rgb(0, 204, 255) !important;
+  color: white !important;
+}
+
+.mat-select {
+  text-align: left; /* Ensures text inside the select is left-aligned */
+}
+
+.mat-select-trigger {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.mat-select-value-text {
+  text-align: left !important; /* Forces text inside the selected option to be left-aligned */
+}

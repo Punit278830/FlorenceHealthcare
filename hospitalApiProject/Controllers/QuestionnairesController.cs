@@ -24,7 +24,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Questionnaire>>> GetQuestionnaires()
     {
-      return await _context.Questionnaires.ToListAsync();
+      return await _context.Questionnaires.OrderByDescending(q => q.QuestionnaireId).ToListAsync();
     }
 
     // GET: api/Questionnaires/5

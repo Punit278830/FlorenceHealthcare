@@ -38,6 +38,10 @@ export class QuestionService {
    }
    //*********Question Related API calls ******** */
 
+   getAllQuestions():Observable<Iquestion[]>{
+    return this.http.get(this.apiUrl+'Questions');
+   }
+
    createQuestion(question:Iquestion):Observable<any>
    {
     return this.http.post(this.apiUrl+'Questions',question);
@@ -71,6 +75,10 @@ export class QuestionService {
    {
     return this.http.get(this.apiUrl+'Options');
    }
+
+   deleteOption(id: number): Observable<any> {
+    return this.http.delete(this.apiUrl+ 'Options/' + id);
+  }
 
    //***********Answer related API */
 
