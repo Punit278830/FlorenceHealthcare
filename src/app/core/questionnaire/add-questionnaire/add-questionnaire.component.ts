@@ -1,5 +1,5 @@
 
-import { Component } from '@angular/core';
+import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NgForm, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
@@ -17,6 +17,8 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
   styleUrls: ['./add-questionnaire.component.scss'],
 })
 export class AddQuestionnaireComponent {
+  @ViewChild('textInput') textInput!: ElementRef<HTMLInputElement>;
+
   public routes = routes;
   public questForm!: FormGroup;
   public _depDto: Idepartment[] = [];
@@ -63,6 +65,8 @@ export class AddQuestionnaireComponent {
   questionList!: Iquestion[];
   showQuestionList: boolean = false;
   public allOptions: Ioptions[] = [];
+  textInputValue: string = '';
+
 
   constructor(private fb: FormBuilder,
     private departmentService: DepartmentService,
@@ -505,49 +509,35 @@ export class AddQuestionnaireComponent {
 
 
   nextQuestion() {
-    var subQuestionIndex = -1;
-  
-    // If there's a next question id, it means we need to navigate to a sub-question
+    // existing logic for handling the question flow
     if (this.nextQuestionId != 0) {
-      this.subQuestionCounter += 1;
-  
-      if (this.currentQuestionData && this.currentQuestionData.options) {
-        // Find the index of the sub-question in the current question's options
-        const index = this.currentQuestionData.options.findIndex(
-          (option: any) => option.mapQuestionId === this.nextQuestionId
-        );
-        subQuestionIndex = index;
-      }
-  
+      this.subQuestionCounter++;
+      const subQuestionIndex = this.currentQuestionData?.options?.findIndex(
+        (option: any) => option.mapQuestionId === this.nextQuestionId
+      ) ?? -1;
+
       if (subQuestionIndex != -1) {
-        // Navigate to the next mapped question (sub-question)
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
     } else {
-      // Navigate to the next main question
       this.questionCounter++;
       if (this.questionCounter < this.questionLenth) {
         this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-
-        subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
-        this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
-
-        // Reset sub-question counter for the new main question
-        //this.subQuestionCounter = 0;
+        this.subQuestionCounter = this.currentQuestionData.options?.length ? 1 : -1;
       }
     }
-  
-    // Update the current question index
+
     this.currentQuestionIndex = this.questionCounter + 1;
-  
-    // Check if we have reached the end of the main questions and there are no more sub-questions
-    if (this.questionCounter >= this.questionLenth - 1 && subQuestionIndex == -1) {
+    const currentTotalCount = this.questionCounter + this.subQuestionCounter;
+    if (currentTotalCount >= this.totalQuestions) {
       this.finishQuestionniary = true;
-      this.currentQuestionIndex -= 1;
     }
+
+    this.textInputValue = '';
   }
-  
+
+
   getNextMappedQuestion() {
     const nextQuestion = this.questionList.find(
       question => question.questionId === this.nextQuestionId
@@ -570,9 +560,8 @@ export class AddQuestionnaireComponent {
   }
 
   fetchAllOptions() {
-    this.question.getAllOptions().subscribe(res=> {
-      if(res)
-      {
+    this.question.getAllOptions().subscribe(res => {
+      if (res) {
         this.allOptions = res;
       }
     });
