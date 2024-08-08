@@ -188,6 +188,7 @@ export class AddQuestionnaireComponent {
     });
   }
 
+
   onEditQuestionaire(data: any) {
     this.question.toggleQuestionaireStatus(data).subscribe(res => {
       if (res == null) {
@@ -514,34 +515,51 @@ export class AddQuestionnaireComponent {
   // }
 
 
-  nextQuestion() {
-    // existing logic for handling the question flow
-    if (this.nextQuestionId != 0) {
-      this.subQuestionCounter++;
-      const subQuestionIndex = this.currentQuestionData?.options?.findIndex(
+nextQuestion() {
+  var subQuestionIndex = -1;
+
+  // If there's a next question id, it means we need to navigate to a sub-question
+  if (this.nextQuestionId != 0) {
+    this.subQuestionCounter += 1;
+
+    if (this.currentQuestionData && this.currentQuestionData.options) {
+      // Find the index of the sub-question in the current question's options
+      const index = this.currentQuestionData.options.findIndex(
         (option: any) => option.mapQuestionId === this.nextQuestionId
-      ) ?? -1;
-
-      if (subQuestionIndex != -1) {
-        this.getNextMappedQuestion();
-        this.nextQuestionId = 0;
-      }
-    } else {
-      this.questionCounter++;
-      if (this.questionCounter < this.questionLenth) {
-        this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-        this.subQuestionCounter = this.currentQuestionData.options?.length ? 1 : -1;
-      }
+      );
+      subQuestionIndex = index;
     }
 
-    this.currentQuestionIndex = this.questionCounter + 1;
-    const currentTotalCount = this.questionCounter + this.subQuestionCounter;
-    if (currentTotalCount >= this.totalQuestions) {
-      this.finishQuestionniary = true;
+    if (subQuestionIndex != -1) {
+      // Navigate to the next mapped question (sub-question)
+      this.getNextMappedQuestion();
+      this.nextQuestionId = 0;
     }
+  } else {
+    // Navigate to the next main question
+    this.questionCounter++;
+    if (this.questionCounter < this.questionLenth) {
+      this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
 
-    this.textInputValue = '';
+      subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
+      this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
+
+      // Reset sub-question counter for the new main question
+      //this.subQuestionCounter = 0;
+    }
   }
+
+  // Update the current question index
+  this.currentQuestionIndex = this.questionCounter + 1;
+
+  // Check if we have reached the end of the main questions and there are no more sub-questions
+  if (this.questionCounter >= this.questionLenth - 1 && subQuestionIndex == -1) {
+    this.finishQuestionniary = true;
+    this.currentQuestionIndex = this.questionLenth;
+  }
+
+  this.textInputValue = '';
+}
 
 
   getNextMappedQuestion() {
