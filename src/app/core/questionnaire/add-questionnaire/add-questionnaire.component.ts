@@ -10,6 +10,7 @@ import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } f
 import { routes } from 'src/app/shared/routes/routes';
 import { ModalComponent } from '../../modal/modal.component';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
   selector: 'app-add-questionnaire',
@@ -72,7 +73,8 @@ export class AddQuestionnaireComponent {
     private departmentService: DepartmentService,
     private question: QuestionService,
     private toaster: ToastrService,
-    private modalservice: ModalServiceService) {
+    private modalservice: ModalServiceService,
+    private loadingService: LoadingService) {
 
     this.initlizaQuestForm();
     this.getDepartmentList();
@@ -148,6 +150,8 @@ export class AddQuestionnaireComponent {
 
   getQuestionairewithDepName() {
     this.combineData = [];
+    this.loadingService.showLoader();
+
     const depName$ = this.departmentService.getDepartmentList();
     const questionaire$ = this.question.getAllQuestionaireName();
     forkJoin([depName$, questionaire$]).subscribe(([depName, questionaire]) => {
@@ -167,6 +171,8 @@ export class AddQuestionnaireComponent {
 
       this.combineData = filteredQuestionaire.map((questName: any) => {
         const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId);
+
+        this.loadingService.hideLoader();
 
         return {
           ...questName,
