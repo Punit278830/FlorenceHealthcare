@@ -466,100 +466,51 @@ export class AddQuestionnaireComponent {
     this.currentQuestionIndex = this.questionCounter + 1; // Ensure this is set initially
   }
 
-  // nextQuestion() {
-  //   var subQuestionIndex = -1;
-  //   if (this.nextQuestionId != 0) {
-  //     // const position = this.combindQuestionOption.findIndex(
-  //     //   element => element.mapQuestionId == this.nextQuestionId
-  //     // );
+  nextQuestion() {
+    var subQuestionIndex = -1;
 
-  //     // var totalSubQuestions = 0;
-  //     this.subQuestionCounter += 1;
+    // If there's a next question id, it means we need to navigate to a sub-question
+    if (this.nextQuestionId != 0) {
+      this.subQuestionCounter += 1;
 
-  //     if (this.currentQuestionData && this.currentQuestionData.options) {
-  //       // totalSubQuestions = this.currentQuestionData.options.length;
+      if (this.currentQuestionData && this.currentQuestionData.options) {
+        // Find the index of the sub-question in the current question's options
+        const index = this.currentQuestionData.options.findIndex(
+          (option: any) => option.mapQuestionId === this.nextQuestionId
+        );
+        subQuestionIndex = index;
+      }
 
-  //       const index = this.currentQuestionData.options.findIndex(
-  //         (option: any) => option.mapQuestionId === this.nextQuestionId
-  //       );
-  //       subQuestionIndex = index;
-  //     }
-  //     // else {
-  //     //   subQuestionCounter = -1; // Return -1 if currentQuestionData or options is not defined
-  //     // }
+      if (subQuestionIndex != -1) {
+        // Navigate to the next mapped question (sub-question)
+        this.getNextMappedQuestion();
+        this.nextQuestionId = 0;
+      }
+    } else {
+      // Navigate to the next main question
+      this.questionCounter++;
+      if (this.questionCounter < this.questionLenth) {
+        this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
 
-  //     if (subQuestionIndex != -1) {
-  //       // this.combindQuestionOption.map((data: any) => {
-  //       //   if (data.mapQuestionId == this.nextQuestionId) {
-  //       //     this.getNextMappedQuestion();
-  //       //     //this.currentQuestionData = data;
-  //       //     this.nextQuestionId = 0;
-  //       //   }
-  //       // });
+        subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
+        this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
 
-  //       this.getNextMappedQuestion();
-  //       this.nextQuestionId = 0;
-  //     }
-  //   } else {
-  //     this.questionCounter++;
-  //     if (this.questionCounter < this.questionLenth) {
-  //       this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-  //     }
-  //   }
-
-  //   this.currentQuestionIndex = this.questionCounter + 1;
-
-  //   if (this.questionCounter >= this.questionLenth - 1 && this.subQuestionCounter == 0) {
-  //     this.finishQuestionniary = true;
-  //   }
-  // }
-
-
-nextQuestion() {
-  var subQuestionIndex = -1;
-
-  // If there's a next question id, it means we need to navigate to a sub-question
-  if (this.nextQuestionId != 0) {
-    this.subQuestionCounter += 1;
-
-    if (this.currentQuestionData && this.currentQuestionData.options) {
-      // Find the index of the sub-question in the current question's options
-      const index = this.currentQuestionData.options.findIndex(
-        (option: any) => option.mapQuestionId === this.nextQuestionId
-      );
-      subQuestionIndex = index;
+        // Reset sub-question counter for the new main question
+        //this.subQuestionCounter = 0;
+      }
     }
 
-    if (subQuestionIndex != -1) {
-      // Navigate to the next mapped question (sub-question)
-      this.getNextMappedQuestion();
-      this.nextQuestionId = 0;
-    }
-  } else {
-    // Navigate to the next main question
-    this.questionCounter++;
-    if (this.questionCounter < this.questionLenth) {
-      this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
+    // Update the current question index
+    this.currentQuestionIndex = this.questionCounter + 1;
 
-      subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
-      this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
-
-      // Reset sub-question counter for the new main question
-      //this.subQuestionCounter = 0;
+    // Check if we have reached the end of the main questions and there are no more sub-questions
+    if (this.questionCounter >= this.questionLenth && subQuestionIndex == -1) {
+      this.finishQuestionniary = true;
+      this.currentQuestionIndex = this.questionLenth;
     }
+
+    this.textInputValue = '';
   }
-
-  // Update the current question index
-  this.currentQuestionIndex = this.questionCounter + 1;
-
-  // Check if we have reached the end of the main questions and there are no more sub-questions
-  if (this.questionCounter >= this.questionLenth - 1 && subQuestionIndex == -1) {
-    this.finishQuestionniary = true;
-    this.currentQuestionIndex = this.questionLenth;
-  }
-
-  this.textInputValue = '';
-}
 
 
   getNextMappedQuestion() {
