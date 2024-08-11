@@ -142,3 +142,32 @@ background-color: white;
 .quesansOuter{
     width:40%
 }
+.documentsOuter{
+    margin: 7px 7px;
+    display: flex;
+    gap: 20px;
+}
+.submitted {
+    background-color: lightgreen;
+    color: white;
+}
+
+.completed {
+    background-color: lightgreen;
+    color: white;
+}
+
+.untouched {
+    background-color: lightgray;
+    color: white;
+}
+
+.active {
+    background-color: white;
+    color: black;
+}
+
+.inactive {
+    background-color: gray;
+    color: white;
+}

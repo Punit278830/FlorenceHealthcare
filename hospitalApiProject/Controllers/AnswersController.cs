@@ -41,10 +41,37 @@ namespace hospitalApiProject.Controllers
 
             return answer;
         }
+    [HttpPut("update")]
+    public async Task<IActionResult> UpdateAnswers([FromQuery] int appId, [FromQuery] int qId, [FromBody] List<Answer> answers)
+    {
+      if (answers == null || answers.Count == 0)
+      {
+        return BadRequest("No answers provided.");
+      }
 
-        // PUT: api/Answers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+      // Find and remove existing answers that match the AppointmentId and QuestionnaireId
+      var existingAnswers = _context.Answers
+          .Where(a => a.AppointmentId == appId && a.Question.QuestionnaireId == qId)
+          .ToList();
+
+      _context.Answers.RemoveRange(existingAnswers);
+
+      // Add the new list of answers
+      _context.Answers.AddRange(answers);
+
+      // Save the changes
+      await _context.SaveChangesAsync();
+
+      return NoContent();
+    }
+
+
+
+
+
+    // PUT: api/Answers/5
+    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+    [HttpPut("{id}")]
         public async Task<IActionResult> PutAnswer(int id, Answer answer)
         {
             if (id != answer.AnswerId)
