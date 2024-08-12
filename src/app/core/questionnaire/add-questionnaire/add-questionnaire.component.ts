@@ -8,7 +8,6 @@ import { QuestionService } from 'src/app/shared/Services/question/question.servi
 import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } from 'src/app/shared/models/models';
 
 import { routes } from 'src/app/shared/routes/routes';
-import { ModalComponent } from '../../modal/modal.component';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 
 @Component({
@@ -97,6 +96,7 @@ export class AddQuestionnaireComponent {
 
   }
 
+  //Delete Questionnaire
   deleteQues(idhere: number) {
     this.questionnaireId = idhere;
     this.modalservice.openModal({
@@ -106,6 +106,15 @@ export class AddQuestionnaireComponent {
     });
   }
 
+  //Delete Question
+  deleteQuestion(id: number) {
+    this.questionId = id;
+    this.modalservice.openModal({
+      type: 'question',
+      id: id,
+      confirmCallback: () => this.confirmQuestionDelete()
+    });
+  }
 
 
   getDepartmentList() {
@@ -590,12 +599,21 @@ export class AddQuestionnaireComponent {
   openModal(questionnaireId: number) {
     this.questionnaireId = questionnaireId;
   }
-
+  
   confirmDelete() {
     this.question.deleteQuestionaire(this.questionnaireId).subscribe(res => {
       if (res == null) {
         this.toaster.success("Questionaire is deleted!")
         this.getQuestionairewithDepName();
+      }
+    })
+  }
+
+  confirmQuestionDelete() {
+    this.question.deleteQuestion(this.questionId).subscribe(res => {
+      if (res == null) {
+        this.toaster.success("Question is deleted!")
+        this.showaddQuestion(this.questionnaireId);
       }
     })
   }

@@ -52,6 +52,10 @@ export class QuestionService {
     return this.http.put(this.apiUrl+'Questions/'+id,question);
    }
 
+   deleteQuestion(id:number):Observable<any>
+   {
+    return this.http.delete(this.apiUrl+'Questions/'+id);
+   }
 
 
    getQuestionById(id:number):Observable<Iquestion>
