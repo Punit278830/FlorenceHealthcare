@@ -124,7 +124,7 @@
                                                         <a class="dropdown-item" href="javascript:void(0);"
                                                             (click)="deleteQues(data.questionnaireId)">
                                                             <i class="fa fa-trash-alt m-r-5"></i> Delete
-                                                        </a>
+                                                        </a>                        
                                                     </div>
                                                 </div>
                                             </td>
@@ -193,8 +193,8 @@
                                                         (click)="EditQuestionAddOptionWithMapping(data.questionId)">
                                                         <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
                                                     </a>
-                                                    <a class="dropdown-item" href="javascript:void(0);"
-                                                        data-bs-toggle="modal" data-bs-target="#delete_patient">
+                                                    <a class="dropdown-item" href="javascript:void(0);" 
+                                                       (click)="deleteQuestion(data.questionId)">
                                                         <i class="fa fa-trash-alt m-r-5"></i> Delete
                                                     </a>
                                                 </div>
@@ -457,7 +457,7 @@
                 </div> -->
                     </div>
                 </div>
-            </div>
+            </div> 
         </div>
 
     </div>
