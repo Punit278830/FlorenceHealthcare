@@ -97,6 +97,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public vitalDocuments: IconsultationFiles[] = [];
   public documentUrl: SafeResourceUrl | null = null;
   public currentFileName: string | null = null;
+   public seletedAppointmentDate!:Date;
+  public submittedQues:any[]=[];
 
 
   // public showAddQuestion=true;

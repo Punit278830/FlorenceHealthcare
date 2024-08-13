@@ -190,6 +190,7 @@ export interface IpatientInfo {
   regstrationDate?: Date;
   IdentityName: string;
   IdentityNumber: string;
+  SubQues:any[]
 }
 
 export interface Iappointment {
