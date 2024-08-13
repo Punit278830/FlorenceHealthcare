@@ -79,8 +79,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public appointmentStatus = true;
   public questionData: any[] = [];
   public toggalUi = true;
-  public selectedFile: File|null=null;
-  public VselectedFile: File|null=null;
+  public selectedFile: File | null = null;
+  public VselectedFile: File | null = null;
   private spinner!: NgxSpinnerService;
   private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
   private VFileUploadDto: IconsultationFiles = {} as IconsultationFiles;
@@ -93,25 +93,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   //public displayImage:any[]=[];
   public displayImage: IconsultationFiles[] = [];
   public images: any;
-  public presDocuments: IconsultationFiles[]=[];
-  public vitalDocuments: IconsultationFiles[]=[];
+  public presDocuments: IconsultationFiles[] = [];
+  public vitalDocuments: IconsultationFiles[] = [];
   public documentUrl: SafeResourceUrl | null = null;
   public currentFileName: string | null = null;
-
-  viewDocument(item: any) {
-    this.currentFileName = item.fileName;
-    this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(item.fileData);
-  }
-
-  closeDocument() {
-    this.documentUrl = null;
-    this.currentFileName = null;
-  }
-  goToStep(index: number): void {
-    this.stepper.selectedIndex = index;
-  }
-
-
+   public seletedAppointmentDate!:Date;
+  public submittedQues:any[]=[];
 
 
   // public showAddQuestion=true;
@@ -166,17 +153,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
-    this.getVitalByAppointment(this.appointmentService.appointmentId);
+    // this.getVitalByAppointment(this.appointmentService.appointmentId);
     this.initilizemedicineForm();
     this.initlizeSearchMedicine();
     this.initlizeConsultForm();
-    this.ApiCallsForPreview();
-    this.getPrescribeMedicine();
-    this.getDoctorDetails();
+    // this.ApiCallsForPreview();
+    // this.getPrescribeMedicine();
+    // this.getDoctorDetails();
     this.getCurrentAppointmentDetils();
-    this.getConsultationFiles();
+    // this.getConsultationFiles();
     this.getPreDiagnosisTemplate();
-    this.getUploadedFiles(this.latestId);
+    // this.getUploadedFiles(this.latestId);
     //     this.preDiagnosis=[
     //   {
     //   diagnosId:1,diagnosName:"diagnosOne",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1},
@@ -187,6 +174,118 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
+  viewDocument(item: any) {
+    this.currentFileName = item.fileName;
+    this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(item.fileData);
+  }
+
+  closeDocument() {
+    this.documentUrl = null;
+    this.currentFileName = null;
+  }
+  goToStep(index: number): void {
+    this.getUploadedFiles(this.latestId);
+    this.stepper.selectedIndex = index;
+  }
+  downloadPreviewAsPdf() {
+    const data = document.getElementById('convertToPdf');
+    if (data) {
+      html2canvas(data).then(canvas => {
+        const imgWidth = 208;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        const contentDataURL = canvas.toDataURL('image/png');
+        let pdf = new jsPDF('p', 'mm', 'a4');
+        const position = 0;
+
+        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+        pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
+      })
+    }
+
+  }
+  saveAsPDF(): void {
+    const data = document.getElementById('convertToPdf');
+    if (data) {
+      html2canvas(data).then(canvas => {
+        const imgWidth = 208;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+
+        const contentDataURL = canvas.toDataURL('image/png');
+        let pdf = new jsPDF('p', 'mm', 'a4');
+        const position = 0;
+
+        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+
+        // Convert the PDF to a Blob
+        const pdfBlob = pdf.output('blob');
+
+        // Convert Blob to base64 string
+        const reader = new FileReader();
+        reader.readAsDataURL(pdfBlob);
+        reader.onloadend = () => {
+          const base64String = reader.result as string;
+          const fileName = `${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`;
+          const fileType = 'application/pdf';
+
+          this.FileUploadDto.fileName = fileName;
+          this.FileUploadDto.FileType = fileType;
+          this.FileUploadDto.fileData = base64String;
+          this.FileUploadDto.docName = 'prescription';
+          this.FileUploadDto.appointmentId = this.latestId;
+
+          // Detailed logging for debugging
+          console.log('Generated PDF Base64 Length:', this.FileUploadDto.fileData.length);
+          console.log('Generated PDF Base64 String:', this.FileUploadDto.fileData);
+
+          this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
+            result => {
+              console.log(result);
+              this.getUploadedFiles(this.latestId);
+              this.toastr.success('File uploaded Successfully', 'Success');
+            },
+            error => {
+              console.error('Error uploading file:', error);
+              this.toastr.error('File upload failed', 'Error');
+            }
+          );
+        };
+      }).catch(error => {
+        console.error('Error generating PDF:', error);
+        this.toastr.error('Error generating PDF', 'Error');
+      });
+    } else {
+      this.toastr.error('No content to convert', 'Error');
+    }
+  }
+
+  loadSavedAnswers(appointmentId: number) {
+    this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
+      this.questionData = res;
+      console.log("question answer res", res)
+
+      res.forEach(answer => {
+        const questionIndex = this.combindQuestionOption.findIndex(q => q.questionId === answer.questionId);
+        if (questionIndex !== -1) {
+          const question = this.combindQuestionOption[questionIndex];
+
+          if (question.questionType === 2) {
+            question.savedAnswerText = answer.answerText;
+          } else if (question.questionType === 1) {
+            question.savedSelectedOptionId = answer.selectedOptionId;
+          }
+          console.log("saved question", question);
+          console.log("saved answer", answer);
+        }
+      });
+
+      this.dispalyPatientQuiz();
+    });
+  }
+
+
   copyClick(id: number, depId: number) {
 
     this.copyId = id;
@@ -307,6 +406,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.currentQuestionData.options.map((res: Ioptions) => {
 
         if (res.optionId == answer.value[answerKey]) {
+          console.log("res.mapQuestionId",res.mapQuestionId)
           this.nextQuestionId = res.mapQuestionId;
         }
       })
@@ -364,27 +464,31 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.finishQuestionniary = true;
     }
 
-    console.log("this.questionCounter ",this.questionCounter );
-    console.log(" this.nextQuestionId", this.nextQuestionId );
-    console.log(" this.previousQuestionId", this.previousQuestionId );
+    console.log("this.questionCounter ", this.questionCounter);
+    console.log(" this.nextQuestionId", this.nextQuestionId);
+    console.log(" this.previousQuestionId", this.previousQuestionId);
 
   }
 
-   isCompleted(data:IQuestionnaires): boolean {
+  isCompleted(data: IQuestionnaires): boolean {
     return this.selectedQueslist.some(q => q.questionnaireId === data.questionnaireId);
   }
 
-  isUntouched(data:IQuestionnaires): boolean {
+  isUntouched(data: IQuestionnaires): boolean {
     return !this.isCompleted(data) && data.questionnaireId !== this.selectedques;
   }
 
-  isActive(data:IQuestionnaires): boolean {
+  isActive(data: IQuestionnaires): boolean {
     return data.questionnaireId === this.selectedques;
+  }
+
+  isSubmitted(questionnaireId: number): boolean {
+    return this.submittedQues.includes(questionnaireId);
   }
 
   mapQuestionAndOptions(questId: number) {
     this.selectedques = questId;
-    
+    this.combindQuestionOption = [];
     this.displayVitalCard = false;
     const question$ = this.question.getQuestionByQuestionaireId(questId)
     const options$ = this.question.getAllOptions();
@@ -407,10 +511,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         return {
           ...quest,
           mapQuestionId: opt ? opt.mapQuestionId : 0,
+          savedAnswerText: '',  // Add default value for saved answer text
+          savedSelectedOptionId: null
 
         }
       })
-      this.dispalyPatientQuiz();
+      console.log("issubmitted", this.isSubmitted(questId))
+      if (this.isSubmitted(questId)) {
+        this.loadSavedAnswers(this.latestId);
+      } else {
+        this.dispalyPatientQuiz();
+      }
     })
 
   }
@@ -420,22 +531,60 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
 
+    if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
+      this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
+    } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
+      this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+    }
+    console.log("current", this.currentQuestionData);
+
   }
 
   submitAnswers() {
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
+    console.log("submQues", this.submittedQues, this.selectedques);
+
+    // if(!this.submittedQues.includes(this.selectedques)){
+    //   
+    // }
+    if (this.submittedQues.includes(this.selectedques)) {
+
+      console.log("answer dto in update", this.answerDto)
+
+      this.question.updateQuestionniareAnswers(this.answerDto,this.latestId,this.selectedques).subscribe(res => {
+        console.log(res);
+
+        this.toaster.success("Questionniare updated successfully", "Questionniare")
+      })
+
+
+
+    } else {
+      console.log("answer dto in add", this.answerDto)
+      this.submittedQues.push(this.selectedques);
+      this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
+        console.log(res);
+
+        this.toaster.success("Questionniare submitted successfully", "Questionniare")
+      })
+
+
+    }
+
     this.selectedQueslist.push(temp[0])
     this.selectedques = 0;
     this.questionCounter = 0;
     this.finishQuestionniary = false;
-    console.log("list single", this.selectedQueslist, this.selectedques)
-    this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
-      console.log(res);
 
-      this.toaster.success("Questionniare submitted successfully", "Questionniare")
+
+    console.log("submQues", this.submittedQues, this.selectedques);
+    this.patientInfo.SubQues = this.submittedQues;
+    this.patientService.updatePatientData(this.patientId, this.patientInfo).subscribe(res => {
+      console.log("patientInfo updated")
+      this.loadPatientInfo();
     })
     this.answerDto = [];
-    this.combindQuestionOption= [];
+    this.combindQuestionOption = [];
   }
 
   getAppointmentFiles(fileid: number) {
@@ -485,13 +634,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
       this.toaster.success("Vital detail saved", "Vital data");
-      this.gotoQuestionnairy();
+      this.getQuestionnaireByDepartmentId(this.departmentId)
+      this.stepper.next();
 
 
     })
 
   }
-  
+
 
 
 
@@ -520,15 +670,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.vitalDto.vitalId = vitalId;
     console.log("vitaldto", this.vitalDto);
     this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(res => {
-      this.toaster.success("Vital Info Successfully Updated", "Vital update")
-      this.gotoQuestionnairy();
+      console.log("res",res)
+      this.toaster.success("Vital Info Successfully Updated", "Vital update");
+      this.getQuestionnaireByDepartmentId(this.departmentId);
+     
     })
 
-  }
-  gotoQuestionnairy() {
-    this.getQuestionnaireByDepartmentId(this.departmentId)
     this.stepper.next();
+
   }
+ 
 
   patchVitalFormValueForEdit() {
 
@@ -597,14 +748,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   submitPrescribeMedicine(prescribeMed: FormGroup) {
     const prescribeMedicines = prescribeMed.getRawValue();
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
-      m.appointmentId = this.appointmentService.appointmentId
+      m.appointmentId = this.latestId;
     })
-    
+
     this.medicineService.submitPrescribeMedicine(prescribeMedicines.medicine).subscribe(res => {
       if (res) {
         this.toaster.success("Medicine add to Prescription", "Add Medicine")
         this.medicine.clear();
         this.searchMedForm.reset();
+        this.getPrescribeMedicine();
       }
     })
 
@@ -632,7 +784,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       followupDate: ['']
     })
   }
-  cancelConsultation(){
+  cancelConsultation() {
     this.consultForm.reset()
   }
   getConsultationOnAppointmentId(id: number) {
@@ -689,7 +841,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Data Saved", "Consultation Data")
       this.toggalUi = false;
-      this.gotoPreview();
+      this.ApiCallsForPreview();
+      this.stepper.next();
     },
       error => {
         console.error('Error adding consultation data:', error);
@@ -715,14 +868,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     console.log("consult dto", this._consultationDto);
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
-      this.gotoPreview();
+      this.ApiCallsForPreview();
+      // this.stepper.next();
     })
 
   }
-  gotoPreview(){
-    this.ApiCallsForPreview();
-    this.stepper.next();
-  }
+  
 
 
 
@@ -753,14 +904,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.appointmentId = this.appointmentService.appointmentId
     this.question.getQuestionwithAnswerByAppointmentId(this.latestId).subscribe(res => {
       this.questionData = res;
-      console.log("ques",res)
+      console.log("ques", res)
     })
 
     this.consultService.getConsultData(this.latestId).subscribe(res => {
       this._consultationDto = res[0];
 
     })
-    this.getPrescribeMedicine();
+    this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
+      this.medicineDto = res;
+      console.log("ques 1", res)
+    })
 
   }
 
@@ -798,7 +952,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
-  deleteFile(id:number){
+  deleteFile(id: number) {
     this.fileUpladServie.deleteConsultationFile(id).subscribe(result => {
       //this.spinner.hide();
       this.getUploadedFiles(this.latestId)
@@ -814,15 +968,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
       const reader = new FileReader();
       reader.onload = () => {
         const base64String = reader.result as string;
-  
+
         this.FileUploadDto.fileName = this.selectedFile?.name;
         this.FileUploadDto.FileType = this.selectedFile?.type;
         this.FileUploadDto.fileData = base64String;
         this.FileUploadDto.docName = "prescription";
         this.FileUploadDto.appointmentId = this.latestId;
-  
+
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes:string[] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
@@ -847,7 +1001,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.toastr.error("No file selected", "Select a file");
     }
   }
-  
+
   onVFileUpload() {
     if (this.VselectedFile) {
       //this.spinner.show(); 
@@ -885,9 +1039,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
   }
-  editDetails(id: number) {
+  editDetails(id: number, dateHere: Date) {
     console.log("enter")
     this.latestId = id;
+    this.seletedAppointmentDate = dateHere;
     // this.fileUpladServie.appointmentId = id;
     // this.fileUpladServie.editPresc = true;
     this.getUploadedFiles(id);
@@ -910,23 +1065,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.getConsultationOnAppointmentId(this.latestId)
       this.getUploadedFiles(this.latestId);
     }
+    this.getPrescribeMedicine();
     this.toggalUi = true;
     this.stepper.next();
 
   }
 
-  movetoprev() {
-    this.vitalForm.reset();
-    this.consultForm.reset()
-    this.fileUpladServie.editPresc = false;
-    this.showNext = this.fileUpladServie.editPresc;
-    this.ApiCallsForPreview();
-    const questionaryTab = document.getElementById('prevtab');
-    if (questionaryTab) {
-      questionaryTab.click();
-    }
 
-  }
 
   getPrescribeMedicine() {
     this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
@@ -953,6 +1098,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
     //this.images=this.displayImage[0];    
 
+  }
+  gotodocuments() {
+    this.getUploadedFiles(this.latestId);
+    this.stepper.next();
   }
 
   getPreDiagnosisTemplate() {

@@ -90,6 +90,11 @@ export class QuestionService {
    {
     return this.http.post(this.apiUrl+'Answers',answers);
    }
+   updateQuestionniareAnswers(answers: any, appId: any, qId: any): Observable<any> {
+    const url = `${this.apiUrl}Answers/update?appId=${appId}&qId=${qId}`;
+    return this.http.put(url, answers);
+  }
+  
 
    //Get Questionnaire by Department Id
    getQuestionnaireByDepId(depId:number):Observable<IQuestionnaires[]>

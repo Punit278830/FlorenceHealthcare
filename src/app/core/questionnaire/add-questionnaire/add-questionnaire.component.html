@@ -29,17 +29,20 @@
                             <div class="row">
                                 <div class="col-12 col-md-4 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="QuestionnairesName">Questionnaire Name <span class="login-danger">*</span></label>
+                                        <label for="QuestionnairesName">Questionnaire Name <span
+                                                class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="questionnaireName" type="text">
                                         <div *ngIf="questForm.get('questionnaireName')?.invalid && (questForm.get('questionnaireName')?.dirty || questForm.get('questionnaireName')?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="questForm.get('questionnaireName')?.errors?.['required']">Name is required.</div>
+                                            <div *ngIf="questForm.get('questionnaireName')?.errors?.['required']">Name
+                                                is required.</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="departmet">Department Name <span class="login-danger">*</span></label>
+                                        <label for="departmet">Department Name <span
+                                                class="login-danger">*</span></label>
                                         <mat-select formControlName="questinaryDeptId" class="form-control select">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
                                                 {{data.departmentName}}
@@ -47,12 +50,14 @@
                                         </mat-select>
                                         <div *ngIf="questForm.get('questinaryDeptId')?.invalid && (questForm.get('questinaryDeptId')?.dirty || questForm.get('questinaryDeptId')?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="questForm.get('questinaryDeptId')?.errors?.['required']">Select a Department.</div>
+                                            <div *ngIf="questForm.get('questinaryDeptId')?.errors?.['required']">Select
+                                                a Department.</div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-4 col-xl-4">
-                                    <button type="submit" class="btn btn-primary submit-form me-2">Create Questionnaire</button>
+                                    <button type="submit" class="btn btn-primary submit-form me-2">Create
+                                        Questionnaire</button>
                                     <!-- <button type="button" class="btn btn-primary cancel-form" (click)="onClear()">Clear</button> -->
                                 </div>
                             </div>
@@ -73,7 +78,8 @@
                             <div class="col-4 text-right">
                                 <div class="form-group local-forms">
                                     <label for="Status">Status</label>
-                                    <mat-select class="form-control select text-left" (selectionChange)="onStatusChange($event)">
+                                    <mat-select class="form-control select text-left"
+                                        (selectionChange)="onStatusChange($event)">
                                         <mat-option *ngFor="let qStatus of questionnaireStatuses" [value]="qStatus">
                                             {{qStatus}}
                                         </mat-option>
@@ -81,7 +87,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="table-responsive flex-grow-1" style="overflow-x:clip;">
                             <table class="table border-0 custom-table comman-table datatable mb-0">
                                 <thead>
@@ -97,7 +103,8 @@
                                         <tr [class.selectedQuest]="i === selectedRow" (click)="selectRow(i)">
                                             <td class="profile-image">
                                                 <a href="javascript:void(0);" (click)="OnQuestionnaireChange(data)">
-                                                    <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+                                                    <img width="28" height="28" [src]="img" class="rounded-circle m-r-5"
+                                                        alt="">
                                                     {{data.questionnaireName}}
                                                 </a>
                                             </td>
@@ -105,14 +112,17 @@
                                             <td>{{data.isActive ? "Active" : "Inactive"}}</td>
                                             <td class="text-end">
                                                 <div class="dropdown dropdown-action">
-                                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">
                                                         <i class="fa fa-ellipsis-v"></i>
                                                     </a>
                                                     <div class="dropdown-menu dropdown-menu-end">
                                                         <a class="dropdown-item" (click)="onEditQuestionaire(data)">
-                                                            <i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle Status
+                                                            <i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle
+                                                            Status
                                                         </a>
-                                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQues(data.questionnaireId)">
+                                                        <a class="dropdown-item" href="javascript:void(0);"
+                                                            (click)="deleteQues(data.questionnaireId)">
                                                             <i class="fa fa-trash-alt m-r-5"></i> Delete
                                                         </a>                        
                                                     </div>
@@ -122,7 +132,7 @@
                                     </ng-container>
                                 </tbody>
                             </table>
-                            
+
                         </div>
                     </div>
                 </div>
@@ -153,7 +163,8 @@
                                     </tr>
                                     <tr *ngIf="questiontoDisplay.length === 0">
                                         <td colspan="4" class="text-center">
-                                            <a href="javascript:void(0);" (click)="showAddQuestionSection()">Add New Question</a>
+                                            <a href="javascript:void(0);" (click)="showAddQuestionSection()">Add New
+                                                Question</a>
                                         </td>
                                     </tr>
                                     <tr *ngFor="let data of questiontoDisplay">
@@ -163,22 +174,27 @@
                                             </div>
                                         </td>
                                         <td class="profile-image">
-                                            <a href="javascript:void(0);" (click)="showaddQuestion(data.questionnaireId)">
-                                                <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+                                            <a href="javascript:void(0);"
+                                                (click)="showaddQuestion(data.questionnaireId)">
+                                                <img width="28" height="28" [src]="img" class="rounded-circle m-r-5"
+                                                    alt="">
                                                 {{data.questionText}}
                                             </a>
                                         </td>
                                         <td>{{data.questionId}}</td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
-                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fa fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="EditQuestionAddOptionWithMapping(data.questionId)">
+                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="EditQuestionAddOptionWithMapping(data.questionId)">
                                                         <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
                                                     </a>
-                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQuestion(data.questionId)">
+                                                    <a class="dropdown-item" href="javascript:void(0);" 
+                                                       (click)="deleteQuestion(data.questionId)">
                                                         <i class="fa fa-trash-alt m-r-5"></i> Delete
                                                     </a>
                                                 </div>
@@ -191,7 +207,7 @@
                     </div>
                 </div>
             </div>
-        </div>        
+        </div>
 
         <div class="row" *ngIf="showAddQuestion">
             <div class="col-sm-12">
@@ -207,11 +223,13 @@
 
                                     <div class="col-12 col-md-6 col-xl-8">
                                         <div class="form-group local-forms">
-                                            <label for="questionText">Question<span class="login-danger">*</span></label>
+                                            <label for="questionText">Question<span
+                                                    class="login-danger">*</span></label>
                                             <input class="form-control" formControlName="questionText" type="text">
                                             <div *ngIf="questionForm.get('questionText')?.invalid && (questionForm.get('questionText')?.dirty || questionForm.get('questionText')?.touched)"
                                                 class="text-danger">
-                                                <div *ngIf="questionForm.get('questionText')?.errors?.['required']">Question is required.</div>
+                                                <div *ngIf="questionForm.get('questionText')?.errors?.['required']">
+                                                    Question is required.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -228,7 +246,8 @@
                                             </mat-select>
                                             <div *ngIf="questionForm.get('questionType')?.invalid && (questionForm.get('questionType')?.dirty || questionForm.get('questionType')?.touched)"
                                                 class="text-danger">
-                                                <div *ngIf="questionForm.get('questionType')?.errors?.['required']">Question Type is required.</div>
+                                                <div *ngIf="questionForm.get('questionType')?.errors?.['required']">
+                                                    Question Type is required.</div>
                                             </div>
                                         </div>
                                     </div>
@@ -284,7 +303,8 @@
                                                 </button>
                                             </ng-container>
 
-                                            <button type="button" class="btn btn-primary cancel-form" (click)="resetAddQuestion()">Cancel</button>
+                                            <button type="button" class="btn btn-primary cancel-form"
+                                                (click)="resetAddQuestion()">Cancel</button>
                                         </div>
                                     </div>
 
@@ -294,83 +314,95 @@
 
 
                     </div>
-                    <div class="col-12 col-md-12 col-xl-6" *ngIf="combindQuestionOption.length > 0">
+                    <div class="col-12 col-md-12 col-xl-6">
                         <div class="card">
-                          <div class="card-body">
-                            <div class="row align-items-center justify-content-between">
-                              <div class="col-4 form-heading">
-                                <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter > 0">
-                                    Question {{currentQuestionIndex}}.{{subQuestionCounter}} of {{questionLenth}}
-                                </h4>
-                                <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter <= 0">
-                                  Question {{currentQuestionIndex}} of {{questionLenth}}
-                                </h4>
-                                <h4 *ngIf="combindQuestionOption.length <= 1">
-                                  Question
-                                </h4>
-                              </div>
-                              <div class="col-4 text-right" *ngIf="currentQuestionData?.options?.length > 0">
-                                <div class="form-group local-forms">
-                                  <label for="existingOptions">Options</label>
-                                  <mat-select [(ngModel)]="selectedOption" class="form-control select text-left" (selectionChange)="onOptionChange($event.value)" name="exitsingOptions">
-                                    <mat-option *ngFor="let data of currentQuestionData.options" [value]="data.optionId">
-                                      {{data.optionText}}
-                                    </mat-option>
-                                  </mat-select>
+                            <div class="card-body" *ngIf="combindQuestionOption.length > 0 && !finishQuestionniary">
+                                <div class="row align-items-center justify-content-between">
+                                    <div class="col-4 form-heading">
+                                        <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter > 0">
+                                            Question {{currentQuestionIndex}}.{{subQuestionCounter}} of
+                                            {{questionLenth}}
+                                        </h4>
+                                        <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter <= 0">
+                                            Question {{currentQuestionIndex}} of {{questionLenth}}
+                                        </h4>
+                                        <h4 *ngIf="combindQuestionOption.length <= 1">
+                                            Question
+                                        </h4>
+                                    </div>
+                                    <div class="col-4 text-right" *ngIf="currentQuestionData?.options?.length > 0">
+                                        <div class="form-group local-forms">
+                                            <label for="existingOptions">Options</label>
+                                            <mat-select [(ngModel)]="selectedOption"
+                                                class="form-control select text-left"
+                                                (selectionChange)="onOptionChange($event.value)" name="exitsingOptions">
+                                                <mat-option *ngFor="let data of currentQuestionData.options"
+                                                    [value]="data.optionId">
+                                                    {{data.optionText}}
+                                                </mat-option>
+                                            </mat-select>
+                                        </div>
+                                        <button type="button" class="btn btn-primary submit-form me-2"
+                                            (click)="deleteOption()">Remove Option</button>
+                                    </div>
                                 </div>
-                                <button type="button" class="btn btn-primary submit-form me-2" (click)="deleteOption()">Remove Option</button>
-                              </div>
+
+                                <div class="col-12 col-md-12 col-xl-8">
+                                    <form (ngSubmit)="saveAnswer(answer)" #answer="ngForm">
+                                        <div class="row">
+                                            <div class="col-12 col-md-6 col-xl-12">
+                                                <div *ngIf="currentQuestionData?.questionType === 2">
+                                                    <label for="questionText">
+                                                        <h4>{{currentQuestionData?.questionText}}</h4>
+                                                    </label>
+                                                    <input type="text" class="form-control"
+                                                        name="{{currentQuestionData?.questionId}}"
+                                                        [(ngModel)]="textInputValue">
+                                                </div>
+                                                <div *ngIf="currentQuestionData?.questionType === 1">
+                                                    <label for="questionText">
+                                                        <h4>{{currentQuestionData?.questionText}}</h4>
+                                                    </label>
+                                                    <br>
+                                                    <ng-container *ngFor="let data of currentQuestionData?.options">
+                                                        <div class="form-check">
+                                                            <input type="radio" [value]="data.optionId"
+                                                                class="form-check-input"
+                                                                name="{{currentQuestionData?.questionId}}" ngModel />
+                                                            <label class="form-check-label ms-2">
+                                                                {{data.optionText}}
+                                                            </label>
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-8">
+                                                <ng-container *ngIf="!finishQuestionniary">
+                                                    <br>
+                                                    <button type="submit"
+                                                        class="btn btn-wide btn-lg btn-primary submit-form me-2">Next</button>
+                                                </ng-container>
+
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                      
-                            <div class="col-12 col-md-12 col-xl-8">
-                                <form (ngSubmit)="saveAnswer(answer)" #answer="ngForm">
-                                  <div class="row">
-                                    <div class="col-12 col-md-6 col-xl-12">
-                                      <div *ngIf="currentQuestionData?.questionType === 2">
-                                        <label for="questionText">
-                                          <h4>{{currentQuestionData?.questionText}}</h4>
-                                        </label>
-                                        <input type="text" class="form-control" name="{{currentQuestionData?.questionId}}" [(ngModel)]="textInputValue">
-                                      </div>
-                                      <div *ngIf="currentQuestionData?.questionType === 1">
-                                        <label for="questionText">
-                                          <h4>{{currentQuestionData?.questionText}}</h4>
-                                        </label>
+                            <div class="card-body" *ngIf="finishQuestionniary">
+                                <div class="col-12 text-center">
+                                    <label for="questionText">
+                                        <h4><strong>Thank you for your responses!</strong></h4>
+                                    </label>
+                                    <ng-container>
                                         <br>
-                                        <ng-container *ngFor="let data of currentQuestionData?.options">
-                                          <div class="form-check">
-                                            <input 
-                                              type="radio" 
-                                              [value]="data.optionId" 
-                                              class="form-check-input" 
-                                              name="{{currentQuestionData?.questionId}}" 
-                                              ngModel
-                                            />
-                                            <label class="form-check-label ms-2">
-                                              {{data.optionText}}
-                                            </label>
-                                          </div>
-                                        </ng-container>
-                                      </div>
-                                    </div>
-                                    <div class="col-12 col-md-6 col-xl-8">
-                                      <ng-container *ngIf="!finishQuestionniary">
-                                        <br>
-                                        <button type="submit" class="btn btn-wide btn-lg btn-primary submit-form me-2">Next</button>
-                                      </ng-container>
-                                      <ng-container *ngIf="finishQuestionniary">
-                                        <br>
-                                        <button type="button" (click)="checkquestionFlow()" class="btn btn-primary submit-form me-2">Question Flow Tested</button>
-                                      </ng-container>
-                                    </div>
-                                  </div>
-                                </form>
-                              </div>
-                              
-                          </div>
+                                        <button type="button" (click)="checkquestionFlow()"
+                                            class="btn btn-primary submit-form me-2">Finish!</button>
+                                    </ng-container>
+                                </div>
+                            </div>
                         </div>
-                      </div>
-                      
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -427,6 +459,6 @@
                 </div>
             </div> 
         </div>
-        
+
     </div>
 </div>

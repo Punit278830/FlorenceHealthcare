@@ -9,6 +9,7 @@ import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } f
 
 import { routes } from 'src/app/shared/routes/routes';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
   selector: 'app-add-questionnaire',
@@ -71,7 +72,8 @@ export class AddQuestionnaireComponent {
     private departmentService: DepartmentService,
     private question: QuestionService,
     private toaster: ToastrService,
-    private modalservice: ModalServiceService) {
+    private modalservice: ModalServiceService,
+    private loadingService: LoadingService) {
 
     this.initlizaQuestForm();
     this.getDepartmentList();
@@ -157,6 +159,8 @@ export class AddQuestionnaireComponent {
 
   getQuestionairewithDepName() {
     this.combineData = [];
+    this.loadingService.showLoader();
+
     const depName$ = this.departmentService.getDepartmentList();
     const questionaire$ = this.question.getAllQuestionaireName();
     forkJoin([depName$, questionaire$]).subscribe(([depName, questionaire]) => {
@@ -177,6 +181,8 @@ export class AddQuestionnaireComponent {
       this.combineData = filteredQuestionaire.map((questName: any) => {
         const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId);
 
+        this.loadingService.hideLoader();
+
         return {
           ...questName,
           deptName: departmentName ? departmentName.departmentName : 'Unknown Name',
@@ -190,6 +196,7 @@ export class AddQuestionnaireComponent {
       }
     });
   }
+
 
   onEditQuestionaire(data: any) {
     this.question.toggleQuestionaireStatus(data).subscribe(res => {
@@ -468,79 +475,47 @@ export class AddQuestionnaireComponent {
     this.currentQuestionIndex = this.questionCounter + 1; // Ensure this is set initially
   }
 
-  // nextQuestion() {
-  //   var subQuestionIndex = -1;
-  //   if (this.nextQuestionId != 0) {
-  //     // const position = this.combindQuestionOption.findIndex(
-  //     //   element => element.mapQuestionId == this.nextQuestionId
-  //     // );
-
-  //     // var totalSubQuestions = 0;
-  //     this.subQuestionCounter += 1;
-
-  //     if (this.currentQuestionData && this.currentQuestionData.options) {
-  //       // totalSubQuestions = this.currentQuestionData.options.length;
-
-  //       const index = this.currentQuestionData.options.findIndex(
-  //         (option: any) => option.mapQuestionId === this.nextQuestionId
-  //       );
-  //       subQuestionIndex = index;
-  //     }
-  //     // else {
-  //     //   subQuestionCounter = -1; // Return -1 if currentQuestionData or options is not defined
-  //     // }
-
-  //     if (subQuestionIndex != -1) {
-  //       // this.combindQuestionOption.map((data: any) => {
-  //       //   if (data.mapQuestionId == this.nextQuestionId) {
-  //       //     this.getNextMappedQuestion();
-  //       //     //this.currentQuestionData = data;
-  //       //     this.nextQuestionId = 0;
-  //       //   }
-  //       // });
-
-  //       this.getNextMappedQuestion();
-  //       this.nextQuestionId = 0;
-  //     }
-  //   } else {
-  //     this.questionCounter++;
-  //     if (this.questionCounter < this.questionLenth) {
-  //       this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-  //     }
-  //   }
-
-  //   this.currentQuestionIndex = this.questionCounter + 1;
-
-  //   if (this.questionCounter >= this.questionLenth - 1 && this.subQuestionCounter == 0) {
-  //     this.finishQuestionniary = true;
-  //   }
-  // }
-
-
   nextQuestion() {
-    // existing logic for handling the question flow
+    var subQuestionIndex = -1;
+
+    // If there's a next question id, it means we need to navigate to a sub-question
     if (this.nextQuestionId != 0) {
-      this.subQuestionCounter++;
-      const subQuestionIndex = this.currentQuestionData?.options?.findIndex(
-        (option: any) => option.mapQuestionId === this.nextQuestionId
-      ) ?? -1;
+      this.subQuestionCounter += 1;
+
+      if (this.currentQuestionData && this.currentQuestionData.options) {
+        // Find the index of the sub-question in the current question's options
+        const index = this.currentQuestionData.options.findIndex(
+          (option: any) => option.mapQuestionId === this.nextQuestionId
+        );
+        subQuestionIndex = index;
+      }
 
       if (subQuestionIndex != -1) {
+        // Navigate to the next mapped question (sub-question)
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
     } else {
+      // Navigate to the next main question
       this.questionCounter++;
       if (this.questionCounter < this.questionLenth) {
         this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-        this.subQuestionCounter = this.currentQuestionData.options?.length ? 1 : -1;
+
+        subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
+        this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
+
+        // Reset sub-question counter for the new main question
+        //this.subQuestionCounter = 0;
       }
     }
 
+    // Update the current question index
     this.currentQuestionIndex = this.questionCounter + 1;
-    const currentTotalCount = this.questionCounter + this.subQuestionCounter;
-    if (currentTotalCount >= this.totalQuestions) {
+
+    // Check if we have reached the end of the main questions and there are no more sub-questions
+    if (this.questionCounter >= this.questionLenth && subQuestionIndex == -1) {
       this.finishQuestionniary = true;
+      this.currentQuestionIndex = this.questionLenth;
     }
 
     this.textInputValue = '';
