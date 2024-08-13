@@ -14,7 +14,7 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { QuestionService } from 'src/app/shared/Services/question/question.service';
 import { IPredefineDiagnosis, IQuestionnaires, Ianswers, Iappointment, Iconsultation, IconsultationFiles, IdownloadFile, IfileUpload, Ilogin, ImedicineMaster, Ioptions, IpatientInfo, IprescribeMedicine, IstaffInfo, Ivital } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
-import * as jspdf from 'jspdf';
+import jsPDF, * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
@@ -198,7 +198,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const contentDataURL = canvas.toDataURL('image/png');
         let pdf = new jsPDF('p', 'mm', 'a4');
         const position = 0;
-
+  
         pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
         pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
       })
