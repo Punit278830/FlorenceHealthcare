@@ -603,12 +603,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   initlizeVitalForm() {
     this.vitalForm = this.fb.group({
 
-      bp: ['', Validators.required],
-      height: ['', Validators.required],
-      weight: ['', Validators.required],
-      pulse: ['', Validators.required],
-      tempurature: ['', Validators.required],
-      oxigenLevel: ['', Validators.required],
+      bp: [' ', Validators.required],
+      height: [' ', Validators.required],
+      weight: [' ', Validators.required],
+      pulse: [' ', Validators.required],
+      tempurature: [' ', Validators.required],
+      oxigenLevel: [' ', Validators.required],
     })
 
   }
@@ -617,10 +617,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   saveVItals(vital: FormGroup) {
+    debugger;
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
 
-
+debugger;
     if (this.copyId != -1 && this.latestId != -1) {
       console.log("1", this.latestId)
       this.vitalDto.appointmentId = this.latestId;
@@ -656,6 +657,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   updateVitals() {
+    debugger;
     const vitalId = this.vitalDto.vitalId;
 
     this.vitalDto = this.vitalForm.value;
