@@ -249,12 +249,12 @@
                                         </div>
 
                                         <div class="documentsOuter">
-                                            <div style="width:30%;">
+                                            <div>
                                                 <label for="Avatar" class="local-top">Upload documents</label>
                                                 <div
-                                                    style="display: flex;gap:20px;justify-content: start;align-items:center;width:169%;">
+                                                    style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                     <input type="file" id="file" (change)=onVfileSelected($event)
-                                                        class="form-control"
+                                                        class="form-control uplddoc"
                                                         style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                     <button type="button" class="uploadbtn"
                                                         (click)="onVFileUpload()">Upload
@@ -415,10 +415,10 @@
                                                 <div class="documentsOuter">
                                                     <div style="width:fit-content">
                                                         <label for="Avatar" class="local-top">Upload documents</label>
-                                                        <div
-                                                            style="display: flex;gap:20px;justify-content: start;align-items:center; width:106%;">
+                                                        <div 
+                                                            style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                             <input type="file" id="file" (change)=onFileSelected($event)
-                                                                class="form-control"
+                                                                class="form-control upldbtn"
                                                                 style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                             <button type="button" class="uploadbtn"
                                                                 (click)="onFileUpload()">Upload file</button>
@@ -906,7 +906,7 @@
                                                             <div class="col-12" *ngIf="_consultationDto.followupDate">
                                                                 <div style="border: 2px solid black;">
                                                                     <h4><strong>Follow up
-                                                                            Date:</strong>{{_consultationDto.followupDate}}
+                                                                            Date:</strong>{{_consultationDto.followupDate| date:'dd-MM-yyyy'}}
                                                                     </h4>
                                                                 </div>
                                                             </div>

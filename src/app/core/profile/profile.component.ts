@@ -20,6 +20,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { LoadingService } from '../../shared/Services/loader/loader.service';
 
 
 @Component({
@@ -29,7 +30,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   providers: [DatePipe]
 })
 
-export class ProfileComponent implements OnInit, OnDestroy {
+export class  ProfileComponent implements OnInit, OnDestroy {
   @ViewChild('printview', { static: false }) pdfview!: ElementRef;
   public routes = routes;
   public appointmentYears: number[] = [];
@@ -120,6 +121,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
+    private loaderService: LoadingService
 
   ) {
 
@@ -150,6 +152,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -187,7 +190,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
   }
+ 
   downloadPreviewAsPdf() {
+     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
       html2canvas(data).then(canvas => {
@@ -203,11 +208,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
         pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
       })
     }
+    this.loaderService.hideLoader();
+
 
   }
   saveAsPDF(): void {
+    this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
+      
       html2canvas(data).then(canvas => {
         const imgWidth = 208;
         const pageHeight = 295;
@@ -259,9 +268,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     } else {
       this.toastr.error('No content to convert', 'Error');
     }
+
+    this.loaderService.hideLoader();
   }
 
   loadSavedAnswers(appointmentId: number) {
+    
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
       this.questionData = res;
       console.log("question answer res", res)
@@ -284,7 +296,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.dispalyPatientQuiz();
     });
   }
-
 
   copyClick(id: number, depId: number) {
 
@@ -541,6 +552,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   submitAnswers() {
+    this.loaderService.showLoader();
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
     console.log("submQues", this.submittedQues, this.selectedques);
 
@@ -585,6 +597,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
     this.answerDto = [];
     this.combindQuestionOption = [];
+    this.loaderService.hideLoader();
   }
 
   getAppointmentFiles(fileid: number) {
@@ -618,10 +631,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   saveVItals(vital: FormGroup) {
     debugger;
+    this.loaderService.showLoader();
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
 
-debugger;
+
     if (this.copyId != -1 && this.latestId != -1) {
       console.log("1", this.latestId)
       this.vitalDto.appointmentId = this.latestId;
@@ -640,7 +654,7 @@ debugger;
 
 
     })
-
+    this.loaderService.hideLoader();
   }
 
 
@@ -658,6 +672,7 @@ debugger;
 
   updateVitals() {
     debugger;
+    
     const vitalId = this.vitalDto.vitalId;
 
     this.vitalDto = this.vitalForm.value;
@@ -677,7 +692,7 @@ debugger;
       this.getQuestionnaireByDepartmentId(this.departmentId);
      
     })
-
+    this.loaderService.hideLoader();
     this.stepper.next();
 
   }
@@ -748,6 +763,8 @@ debugger;
     }
   }
   submitPrescribeMedicine(prescribeMed: FormGroup) {
+
+    this.loaderService.showLoader();
     const prescribeMedicines = prescribeMed.getRawValue();
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
       m.appointmentId = this.latestId;
@@ -755,12 +772,15 @@ debugger;
 
     this.medicineService.submitPrescribeMedicine(prescribeMedicines.medicine).subscribe(res => {
       if (res) {
+        this.loaderService.showLoader();
         this.toaster.success("Medicine add to Prescription", "Add Medicine")
         this.medicine.clear();
         this.searchMedForm.reset();
         this.getPrescribeMedicine();
+        this.loaderService.hideLoader();
       }
     })
+    this.loaderService.hideLoader();
 
   }
 
@@ -819,44 +839,92 @@ debugger;
   }
 
   submitConsultation(consultData: FormGroup) {
+    this.loaderService.showLoader();
     const days = parseInt(consultData.value.followupDate)
-    const currentDate = new Date();
-    const formatDate = (this.addDays(currentDate, days))
-    const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
-    if (x) {
-
-      this.consultForm.get('followupDate')?.patchValue(x);
-    }
-
-    this._consultationDto = consultData.value;
-    console.log("id0", this.latestId)
-    if (this.copyId != -1 && this.latestId != -1) {
-      this._consultationDto.appointmentId = this.latestId;
-      console.log("1", this.copyId);
-    }
-    else {
-      console.log("2");
-      this._consultationDto.appointmentId = this.latestId;
-    }
-    //this._consultationDto.followupDate=this.followupDate;
-    console.log("consult dto", this._consultationDto)
-    this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
-      this.toaster.success("Consultation Data Saved", "Consultation Data")
-      this.toggalUi = false;
-      this.ApiCallsForPreview();
-      this.stepper.next();
-    },
-      error => {
-        console.error('Error adding consultation data:', error);
-        // Handle the error as needed
+    if (days.toString()=="NaN")
+      {
+      const currentDate = new Date();
+      const formatDate = (this.addDays(currentDate,0))
+      const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
+      if (x) {
+  
+        this.consultForm.get('followupDate')?.patchValue(x);
+      }
+  
+      this._consultationDto = consultData.value;
+      console.log("id0", this.latestId)
+      if (this.copyId != -1 && this.latestId != -1) {
+        this._consultationDto.appointmentId = this.latestId;
+        console.log("1", this.copyId);
+      }
+      else {
+        console.log("2");
+        this._consultationDto.appointmentId = this.latestId;
+      }
+      //this._consultationDto.followupDate=this.followupDate;
+      console.log("consult dto", this._consultationDto)
+      this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
+        this.toaster.success("Consultation Data Saved", "Consultation Data")
+        this.toggalUi = false;
+        this.ApiCallsForPreview();
+        this.stepper.next();
       },
-      () => {
-        console.log('Consultation data observable completed');
-      })
+        error => {
+          console.error('Error adding consultation data:', error);
+          // Handle the error as needed
+        },
+        () => {
+          console.log('Consultation data observable completed');
+        })
+        this.loaderService.hideLoader();
+
+   }  
+    else  {
+      this.loaderService.showLoader();
+      const currentDate = new Date();
+      const formatDate = (this.addDays(currentDate, days))
+      const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
+      if (x) {
+  
+        this.consultForm.get('followupDate')?.patchValue(x);
+      }
+  
+      this._consultationDto = consultData.value;
+      console.log("id0", this.latestId)
+      if (this.copyId != -1 && this.latestId != -1) {
+        this._consultationDto.appointmentId = this.latestId;
+        console.log("1", this.copyId);
+      }
+      else {
+        console.log("2");
+        this._consultationDto.appointmentId = this.latestId;
+      }
+      //this._consultationDto.followupDate=this.followupDate;
+      console.log("consult dto", this._consultationDto)
+      this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
+        this.toaster.success("Consultation Data Saved", "Consultation Data")
+        this.toggalUi = false;
+        this.ApiCallsForPreview();
+        this.stepper.next();
+      },
+        error => {
+          console.error('Error adding consultation data:', error);
+          // Handle the error as needed
+        },
+        () => {
+          console.log('Consultation data observable completed');
+        })
+ 
+        this.loaderService.hideLoader();
 
 
+
+    } 
+    
   }
   updateConsultation() {
+    
+    this.loaderService.showLoader();
     const consultId = this._consultationDto.id;
 
     this._consultationDto = this.consultForm.value;
@@ -871,9 +939,9 @@ debugger;
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
       this.ApiCallsForPreview();
-      // this.stepper.next();
+      this.stepper.next();
     })
-
+    this.loaderService.hideLoader();
   }
   
 
@@ -978,7 +1046,7 @@ debugger;
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword","application/jpeg","application/png","application/txt",  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
