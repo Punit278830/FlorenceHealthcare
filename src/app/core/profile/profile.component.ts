@@ -192,7 +192,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   }
  
   downloadPreviewAsPdf() {
-     this.loaderService.showLoader();
+    this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
       html2canvas(data).then(canvas => {
@@ -208,10 +208,10 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
       })
     }
+
     this.loaderService.hideLoader();
-
-
   }
+  
   saveAsPDF(): void {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -253,23 +253,26 @@ export class  ProfileComponent implements OnInit, OnDestroy {
             result => {
               console.log(result);
               this.getUploadedFiles(this.latestId);
+              this.loaderService.hideLoader();
               this.toastr.success('File uploaded Successfully', 'Success');
             },
             error => {
+              this.loaderService.hideLoader();
               console.error('Error uploading file:', error);
               this.toastr.error('File upload failed', 'Error');
             }
           );
         };
       }).catch(error => {
+        this.loaderService.hideLoader();
         console.error('Error generating PDF:', error);
         this.toastr.error('Error generating PDF', 'Error');
       });
     } else {
+      this.loaderService.hideLoader();
       this.toastr.error('No content to convert', 'Error');
     }
 
-    this.loaderService.hideLoader();
   }
 
   loadSavedAnswers(appointmentId: number) {
@@ -630,7 +633,6 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   }
 
   saveVItals(vital: FormGroup) {
-    debugger;
     this.loaderService.showLoader();
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
@@ -670,9 +672,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     })
   }
 
-  updateVitals() {
-    debugger;
-    
+  updateVitals() {   
     const vitalId = this.vitalDto.vitalId;
 
     this.vitalDto = this.vitalForm.value;
@@ -1035,6 +1035,9 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   onFileUpload() {
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
+
+      this.loaderService.showLoader();
+
       const reader = new FileReader();
       reader.onload = () => {
         const base64String = reader.result as string;
@@ -1055,25 +1058,30 @@ export class  ProfileComponent implements OnInit, OnDestroy {
               // Hide spinner if needed
               this.getUploadedFiles(this.latestId);
               this.selectedFile = null;
+              this.loaderService.hideLoader();
               this.toastr.success('File uploaded Successfully', 'Success');
             },
             error => {
+              this.loaderService.hideLoader();
               console.error('Error uploading file:', error);
               this.toastr.error('File upload failed', 'Error');
             }
           );
         } else {
+          this.loaderService.hideLoader();
           this.toastr.error("Unsupported file type", "File Type");
         }
       };
       reader.readAsDataURL(this.selectedFile);
     } else {
+      this.loaderService.hideLoader();
       this.toastr.error("No file selected", "Select a file");
     }
   }
 
   onVFileUpload() {
     if (this.VselectedFile) {
+      this.loaderService.showLoader();
       //this.spinner.show(); 
       const reader1 = new FileReader();
       reader1.onload = () => {
@@ -1094,17 +1102,20 @@ export class  ProfileComponent implements OnInit, OnDestroy {
             //this.spinner.hide();
             this.getUploadedFiles(this.latestId);
             this.VselectedFile = null;
+            this.loaderService.hideLoader();
             this.toastr.success('File uploaded Successfully', 'Success');
 
           });
         }
         else {
+          this.loaderService.hideLoader();
           this.toaster.error("File type not correct", "File Type")
         }
       }
       reader1.readAsDataURL(this.VselectedFile);
     }
     else {
+      this.loaderService.hideLoader();
       this.toaster.error("No file selected", "Select a file")
     }
 
