@@ -15,7 +15,7 @@
                 <a [routerLink]="routes.editProfile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit
                     Profile</a>
             </div> -->
-        </div>
+        </div>      
         <div class="card-box profile-header">
             <div class="row">
                 <div class="col-md-12">
@@ -249,12 +249,12 @@
                                         </div>
 
                                         <div class="documentsOuter">
-                                            <div style="width:30%;">
+                                            <div>
                                                 <label for="Avatar" class="local-top">Upload documents</label>
                                                 <div
                                                     style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                     <input type="file" id="file" (change)=onVfileSelected($event)
-                                                        class="form-control"
+                                                        class="form-control uplddoc"
                                                         style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                     <button type="button" class="uploadbtn"
                                                         (click)="onVFileUpload()">Upload
@@ -415,7 +415,7 @@
                                                 <div class="documentsOuter">
                                                     <div style="width:fit-content">
                                                         <label for="Avatar" class="local-top">Upload documents</label>
-                                                        <div
+                                                        <div 
                                                             style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                             <input type="file" id="file" (change)=onFileSelected($event)
                                                                 class="form-control"
@@ -495,7 +495,7 @@
                                                         </div>
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
-                                                                <label for="name">Pre Define Diagnosis</label>
+                                                                <label for="name">Pre Defined Diagnosis</label>
                                                                 <mat-select class="form-control"
                                                                     (selectionChange)="addPreDefineDiagnosis($event)">
                                                                     <mat-option *ngFor="let data of preDiagnosis"
@@ -507,7 +507,7 @@
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
                                                                 <label for="name">Followup After</label>
-                                                                <input class="form-control"
+                                                                <input class="form-control" type="number"
                                                                     formControlName="followupDate">
                                                             </div>
                                                         </div>
@@ -647,7 +647,7 @@
 
                                                                     </div>
                                                                     <div class="table-responsive" *ngIf="medicineDto.length>0">
-                                                                        <h3 style="font-weight: bold;">Submitted Medicines</h3>
+                                                                        <h3 style="font-weight: bold;">Prescribed Medicines</h3>
                                                                         <table
                                                                             class="table border-0 custom-table comman-table datatable mb-0">
                                                                             <thead>
@@ -906,7 +906,7 @@
                                                             <div class="col-12" *ngIf="_consultationDto.followupDate">
                                                                 <div style="border: 2px solid black;">
                                                                     <h4><strong>Follow up
-                                                                            Date:</strong>{{_consultationDto.followupDate}}
+                                                                            Date:</strong>{{_consultationDto.followupDate| date:'dd-MM-yyyy'}}
                                                                     </h4>
                                                                 </div>
                                                             </div>

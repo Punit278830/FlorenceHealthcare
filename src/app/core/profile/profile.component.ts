@@ -20,6 +20,7 @@ import { NgxSpinnerService } from 'ngx-spinner';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { LoadingService } from '../../shared/Services/loader/loader.service';
 
 
 @Component({
@@ -29,7 +30,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
   providers: [DatePipe]
 })
 
-export class ProfileComponent implements OnInit, OnDestroy {
+export class  ProfileComponent implements OnInit, OnDestroy {
   @ViewChild('printview', { static: false }) pdfview!: ElementRef;
   public routes = routes;
   public appointmentYears: number[] = [];
@@ -120,6 +121,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
+    private loaderService: LoadingService
 
   ) {
 
@@ -150,6 +152,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -187,7 +190,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
   }
+ 
   downloadPreviewAsPdf() {
+    this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
       html2canvas(data).then(canvas => {
@@ -204,10 +209,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
       })
     }
 
+    this.loaderService.hideLoader();
   }
+  
   saveAsPDF(): void {
+    this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
+      
       html2canvas(data).then(canvas => {
         const imgWidth = 208;
         const pageHeight = 295;
@@ -244,24 +253,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
             result => {
               console.log(result);
               this.getUploadedFiles(this.latestId);
+              this.loaderService.hideLoader();
               this.toastr.success('File uploaded Successfully', 'Success');
             },
             error => {
+              this.loaderService.hideLoader();
               console.error('Error uploading file:', error);
               this.toastr.error('File upload failed', 'Error');
             }
           );
         };
       }).catch(error => {
+        this.loaderService.hideLoader();
         console.error('Error generating PDF:', error);
         this.toastr.error('Error generating PDF', 'Error');
       });
     } else {
+      this.loaderService.hideLoader();
       this.toastr.error('No content to convert', 'Error');
     }
+
   }
 
   loadSavedAnswers(appointmentId: number) {
+    
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
       this.questionData = res;
       console.log("question answer res", res)
@@ -284,7 +299,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.dispalyPatientQuiz();
     });
   }
-
 
   copyClick(id: number, depId: number) {
 
@@ -541,6 +555,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   submitAnswers() {
+    this.loaderService.showLoader();
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
     console.log("submQues", this.submittedQues, this.selectedques);
 
@@ -585,6 +600,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
     this.answerDto = [];
     this.combindQuestionOption = [];
+    this.loaderService.hideLoader();
   }
 
   getAppointmentFiles(fileid: number) {
@@ -603,12 +619,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   initlizeVitalForm() {
     this.vitalForm = this.fb.group({
 
-      bp: ['', Validators.required],
-      height: ['', Validators.required],
-      weight: ['', Validators.required],
-      pulse: ['', Validators.required],
-      tempurature: ['', Validators.required],
-      oxigenLevel: ['', Validators.required],
+      bp: [' ', Validators.required],
+      height: [' ', Validators.required],
+      weight: [' ', Validators.required],
+      pulse: [' ', Validators.required],
+      tempurature: [' ', Validators.required],
+      oxigenLevel: [' ', Validators.required],
     })
 
   }
@@ -617,6 +633,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   saveVItals(vital: FormGroup) {
+    this.loaderService.showLoader();
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
 
@@ -639,7 +656,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
 
     })
-
+    this.loaderService.hideLoader();
   }
 
 
@@ -655,7 +672,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
   }
 
-  updateVitals() {
+  updateVitals() {   
     const vitalId = this.vitalDto.vitalId;
 
     this.vitalDto = this.vitalForm.value;
@@ -675,7 +692,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.getQuestionnaireByDepartmentId(this.departmentId);
      
     })
-
+    this.loaderService.hideLoader();
     this.stepper.next();
 
   }
@@ -746,6 +763,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
   submitPrescribeMedicine(prescribeMed: FormGroup) {
+
+    this.loaderService.showLoader();
     const prescribeMedicines = prescribeMed.getRawValue();
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
       m.appointmentId = this.latestId;
@@ -753,12 +772,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.medicineService.submitPrescribeMedicine(prescribeMedicines.medicine).subscribe(res => {
       if (res) {
+        this.loaderService.showLoader();
         this.toaster.success("Medicine add to Prescription", "Add Medicine")
         this.medicine.clear();
         this.searchMedForm.reset();
         this.getPrescribeMedicine();
+        this.loaderService.hideLoader();
       }
     })
+    this.loaderService.hideLoader();
 
   }
 
@@ -817,44 +839,92 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   submitConsultation(consultData: FormGroup) {
+    this.loaderService.showLoader();
     const days = parseInt(consultData.value.followupDate)
-    const currentDate = new Date();
-    const formatDate = (this.addDays(currentDate, days))
-    const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
-    if (x) {
-
-      this.consultForm.get('followupDate')?.patchValue(x);
-    }
-
-    this._consultationDto = consultData.value;
-    console.log("id0", this.latestId)
-    if (this.copyId != -1 && this.latestId != -1) {
-      this._consultationDto.appointmentId = this.latestId;
-      console.log("1", this.copyId);
-    }
-    else {
-      console.log("2");
-      this._consultationDto.appointmentId = this.latestId;
-    }
-    //this._consultationDto.followupDate=this.followupDate;
-    console.log("consult dto", this._consultationDto)
-    this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
-      this.toaster.success("Consultation Data Saved", "Consultation Data")
-      this.toggalUi = false;
-      this.ApiCallsForPreview();
-      this.stepper.next();
-    },
-      error => {
-        console.error('Error adding consultation data:', error);
-        // Handle the error as needed
+    if (days.toString()=="NaN")
+      {
+      const currentDate = new Date();
+      const formatDate = (this.addDays(currentDate,0))
+      const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
+      if (x) {
+  
+        this.consultForm.get('followupDate')?.patchValue(x);
+      }
+  
+      this._consultationDto = consultData.value;
+      console.log("id0", this.latestId)
+      if (this.copyId != -1 && this.latestId != -1) {
+        this._consultationDto.appointmentId = this.latestId;
+        console.log("1", this.copyId);
+      }
+      else {
+        console.log("2");
+        this._consultationDto.appointmentId = this.latestId;
+      }
+      //this._consultationDto.followupDate=this.followupDate;
+      console.log("consult dto", this._consultationDto)
+      this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
+        this.toaster.success("Consultation Data Saved", "Consultation Data")
+        this.toggalUi = false;
+        this.ApiCallsForPreview();
+        this.stepper.next();
       },
-      () => {
-        console.log('Consultation data observable completed');
-      })
+        error => {
+          console.error('Error adding consultation data:', error);
+          // Handle the error as needed
+        },
+        () => {
+          console.log('Consultation data observable completed');
+        })
+        this.loaderService.hideLoader();
+
+   }  
+    else  {
+      this.loaderService.showLoader();
+      const currentDate = new Date();
+      const formatDate = (this.addDays(currentDate, days))
+      const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
+      if (x) {
+  
+        this.consultForm.get('followupDate')?.patchValue(x);
+      }
+  
+      this._consultationDto = consultData.value;
+      console.log("id0", this.latestId)
+      if (this.copyId != -1 && this.latestId != -1) {
+        this._consultationDto.appointmentId = this.latestId;
+        console.log("1", this.copyId);
+      }
+      else {
+        console.log("2");
+        this._consultationDto.appointmentId = this.latestId;
+      }
+      //this._consultationDto.followupDate=this.followupDate;
+      console.log("consult dto", this._consultationDto)
+      this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
+        this.toaster.success("Consultation Data Saved", "Consultation Data")
+        this.toggalUi = false;
+        this.ApiCallsForPreview();
+        this.stepper.next();
+      },
+        error => {
+          console.error('Error adding consultation data:', error);
+          // Handle the error as needed
+        },
+        () => {
+          console.log('Consultation data observable completed');
+        })
+ 
+        this.loaderService.hideLoader();
 
 
+
+    } 
+    
   }
   updateConsultation() {
+    
+    this.loaderService.showLoader();
     const consultId = this._consultationDto.id;
 
     this._consultationDto = this.consultForm.value;
@@ -869,9 +939,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
       this.ApiCallsForPreview();
-      // this.stepper.next();
+      this.stepper.next();
     })
-
+    this.loaderService.hideLoader();
   }
   
 
@@ -965,6 +1035,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   onFileUpload() {
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
+
+      this.loaderService.showLoader();
+
       const reader = new FileReader();
       reader.onload = () => {
         const base64String = reader.result as string;
@@ -976,7 +1049,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword","application/jpeg","application/png","application/txt",  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
@@ -985,25 +1058,30 @@ export class ProfileComponent implements OnInit, OnDestroy {
               // Hide spinner if needed
               this.getUploadedFiles(this.latestId);
               this.selectedFile = null;
+              this.loaderService.hideLoader();
               this.toastr.success('File uploaded Successfully', 'Success');
             },
             error => {
+              this.loaderService.hideLoader();
               console.error('Error uploading file:', error);
               this.toastr.error('File upload failed', 'Error');
             }
           );
         } else {
+          this.loaderService.hideLoader();
           this.toastr.error("Unsupported file type", "File Type");
         }
       };
       reader.readAsDataURL(this.selectedFile);
     } else {
+      this.loaderService.hideLoader();
       this.toastr.error("No file selected", "Select a file");
     }
   }
 
   onVFileUpload() {
     if (this.VselectedFile) {
+      this.loaderService.showLoader();
       //this.spinner.show(); 
       const reader1 = new FileReader();
       reader1.onload = () => {
@@ -1024,17 +1102,20 @@ export class ProfileComponent implements OnInit, OnDestroy {
             //this.spinner.hide();
             this.getUploadedFiles(this.latestId);
             this.VselectedFile = null;
+            this.loaderService.hideLoader();
             this.toastr.success('File uploaded Successfully', 'Success');
 
           });
         }
         else {
+          this.loaderService.hideLoader();
           this.toaster.error("File type not correct", "File Type")
         }
       }
       reader1.readAsDataURL(this.VselectedFile);
     }
     else {
+      this.loaderService.hideLoader();
       this.toaster.error("No file selected", "Select a file")
     }
 
