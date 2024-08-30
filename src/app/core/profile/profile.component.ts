@@ -30,7 +30,7 @@ import { LoadingService } from '../../shared/Services/loader/loader.service';
   providers: [DatePipe]
 })
 
-export class  ProfileComponent implements OnInit, OnDestroy {
+export class ProfileComponent implements OnInit, OnDestroy {
   @ViewChild('printview', { static: false }) pdfview!: ElementRef;
   public routes = routes;
   public appointmentYears: number[] = [];
@@ -98,10 +98,8 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   public vitalDocuments: IconsultationFiles[] = [];
   public documentUrl: SafeResourceUrl | null = null;
   public currentFileName: string | null = null;
-   public seletedAppointmentDate!:Date;
-  public submittedQues:any[]=[];
-
-
+  public seletedAppointmentDate!: Date;
+  public submittedQues: any[] = [];
   // public showAddQuestion=true;
   // public questionnaireId!:number;
 
@@ -152,7 +150,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    
+
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -190,7 +188,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
   }
- 
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -203,7 +201,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         const contentDataURL = canvas.toDataURL('image/png');
         let pdf = new jsPDF('p', 'mm', 'a4');
         const position = 0;
-  
+
         pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
         pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
       })
@@ -211,12 +209,12 @@ export class  ProfileComponent implements OnInit, OnDestroy {
 
     this.loaderService.hideLoader();
   }
-  
+
   saveAsPDF(): void {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
-      
+
       html2canvas(data).then(canvas => {
         const imgWidth = 208;
         const pageHeight = 295;
@@ -276,10 +274,14 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   }
 
   loadSavedAnswers(appointmentId: number) {
-    
+
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
       this.questionData = res;
       console.log("question answer res", res)
+
+      // Push unique submitted questionnaireIds to submittedQues
+      const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
+      this.submittedQues.push(...uniqueQuestionnaireIds);
 
       res.forEach(answer => {
         const questionIndex = this.combindQuestionOption.findIndex(q => q.questionId === answer.questionId);
@@ -403,12 +405,6 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  getQuestionnaireByDepartmentId(depId: number) {
-    this.question.getQuestionnaireByDepId(depId).subscribe(res => {
-      this.questionnaireDto = res;
-      console.log("questionnare", res)
-    })
-  }
 
   // save question answers on next click untill finish questions
 
@@ -420,7 +416,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
       this.currentQuestionData.options.map((res: Ioptions) => {
 
         if (res.optionId == answer.value[answerKey]) {
-          console.log("res.mapQuestionId",res.mapQuestionId)
+          console.log("res.mapQuestionId", res.mapQuestionId)
           this.nextQuestionId = res.mapQuestionId;
         }
       })
@@ -432,7 +428,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
       appointmentId: this.latestId
     }
-    console.log("answer object ",answerObject)
+    console.log("answer object ", answerObject)
     this.answerDto.push(answerObject);
 
     console.log(answer.value)
@@ -450,7 +446,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         this.questionCounter = position;
         if (this.questionCounter <= this.questionLenth) {   //this.currentQuestion=this.nextQuestionId
           this.combindQuestionOption.map((data: any) => {
-            console.log(" question data option ",data);
+            console.log(" question data option ", data);
             if (data.questionId == this.nextQuestionId) {
               this.currentQuestionData = data;
               this.previousQuestionId = this.nextQuestionId;
@@ -460,12 +456,12 @@ export class  ProfileComponent implements OnInit, OnDestroy {
 
           })
         }
-       
+
       }
       else {
         this.finishQuestionniary = true;
       }
-      
+
     }
     else {
       this.questionCounter++;
@@ -531,11 +527,14 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         }
       })
       console.log("issubmitted", this.isSubmitted(questId))
-      if (this.isSubmitted(questId)) {
-        this.loadSavedAnswers(this.latestId);
-      } else {
-        this.dispalyPatientQuiz();
-      }
+
+      this.loadSavedAnswers(this.latestId);
+
+      // if (this.isSubmitted(questId)) {
+      //   this.loadSavedAnswers(this.latestId);
+      // } else {
+      //   this.dispalyPatientQuiz();
+      // }
     })
 
   }
@@ -566,7 +565,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
 
       console.log("answer dto in update", this.answerDto)
 
-      this.question.updateQuestionniareAnswers(this.answerDto,this.latestId,this.selectedques).subscribe(res => {
+      this.question.updateQuestionniareAnswers(this.answerDto, this.latestId, this.selectedques).subscribe(res => {
         console.log(res);
 
         this.toaster.success("Questionniare updated successfully", "Questionniare")
@@ -619,16 +618,16 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   initlizeVitalForm() {
     this.vitalForm = this.fb.group({
 
-      bp: [' ', Validators.required],
-      height: [' ', Validators.required],
-      weight: [' ', Validators.required],
-      pulse: [' ', Validators.required],
-      tempurature: [' ', Validators.required],
-      oxigenLevel: [' ', Validators.required],
+      bp: [''],
+      height: [''],
+      weight: [''],
+      pulse: [''],
+      tempurature: [''],
+      oxigenLevel: [''],
     })
 
   }
-  cancelVitals(){
+  cancelVitals() {
     this.vitalForm.reset();
   }
 
@@ -650,16 +649,14 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     this.question.postVitalInformation(this.vitalDto).subscribe(res => {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
+      this.vitalDto.vitalId = res.vitalId;
       this.toaster.success("Vital detail saved", "Vital data");
       this.getQuestionnaireByDepartmentId(this.departmentId)
       this.stepper.next();
-
-
     })
+
     this.loaderService.hideLoader();
   }
-
-
 
 
   getVitalByAppointment(appointmentId: number) {
@@ -668,35 +665,61 @@ export class  ProfileComponent implements OnInit, OnDestroy {
       this.vitalDto = res;
       console.log("res", res)
       this.patchVitalFormValueForEdit();
-
     })
   }
 
-  updateVitals() {   
+  updateVitals() {
     const vitalId = this.vitalDto.vitalId;
-
     this.vitalDto = this.vitalForm.value;
-    if (this.copyId != -1 && this.latestId != -1) {
-      console.log("1", this.latestId)
-      this.vitalDto.appointmentId = this.latestId;
-    }
-    else {
-      console.log("2", this.latestId)
-      this.vitalDto.appointmentId = this.latestId;
-    }
-    this.vitalDto.vitalId = vitalId;
-    console.log("vitaldto", this.vitalDto);
-    this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(res => {
-      console.log("res",res)
-      this.toaster.success("Vital Info Successfully Updated", "Vital update");
-      this.getQuestionnaireByDepartmentId(this.departmentId);
-     
-    })
-    this.loaderService.hideLoader();
-    this.stepper.next();
 
+    // Ensure appointmentId is set correctly based on copyId and latestId
+    this.vitalDto.appointmentId = (this.copyId != -1 && this.latestId != -1) ? this.latestId : this.latestId;
+    this.vitalDto.vitalId = vitalId;
+    console.log("vitalDto", this.vitalDto);
+
+    // Show loader while updating
+    this.loaderService.showLoader();
+
+    this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(
+      (res) => {
+        console.log("res", res);
+        this.toaster.success("Vital Info Successfully Updated", "Vital update");
+
+        // Call getQuestionnaireByDepartmentId and proceed to next step after completion
+        this.getQuestionnaireByDepartmentId(this.departmentId).then(() => {
+          this.stepper.next();
+          this.loaderService.hideLoader();
+        }).catch((error) => {
+          console.error("Error getting questionnaire:", error);
+          this.loaderService.hideLoader();
+          // Handle error scenario (e.g., show an error message)
+        });
+      },
+      (error) => {
+        console.error("Error updating vital info:", error);
+        this.loaderService.hideLoader();
+        // Handle error scenario (e.g., show an error message)
+      }
+    );
   }
- 
+
+  getQuestionnaireByDepartmentId(depId: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.question.getQuestionnaireByDepId(depId).subscribe(
+        (res) => {
+          this.questionnaireDto = res;
+          this.loadSavedAnswers(this.latestId);
+          console.log("questionnaire", res);
+          resolve();
+        },
+        (error) => {
+          console.error("Error fetching questionnaire:", error);
+          reject(error);
+        }
+      );
+    });
+  }
+
 
   patchVitalFormValueForEdit() {
 
@@ -818,39 +841,38 @@ export class  ProfileComponent implements OnInit, OnDestroy {
       this._consultationDto = res[res.length - 1];
     })
   }
-  
-  getUploadedFiles(id:number) {
+
+  getUploadedFiles(id: number) {
     this.presDocuments = [];
     this.vitalDocuments = [];
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
-        console.log("item",item)
-        if ( item.docName == "prescription") {
+        console.log("item", item)
+        if (item.docName == "prescription") {
           this.presDocuments.push(item);
         }
-        if ( item.docName == "vital") {
+        if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
       })
 
 
     })
-    console.log("pres vit",this.presDocuments,this.vitalDocuments);
+    console.log("pres vit", this.presDocuments, this.vitalDocuments);
   }
 
   submitConsultation(consultData: FormGroup) {
     this.loaderService.showLoader();
     const days = parseInt(consultData.value.followupDate)
-    if (days.toString()=="NaN")
-      {
+    if (days.toString() == "NaN") {
       const currentDate = new Date();
-      const formatDate = (this.addDays(currentDate,0))
+      const formatDate = (this.addDays(currentDate, 0))
       const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
       if (x) {
-  
+
         this.consultForm.get('followupDate')?.patchValue(x);
       }
-  
+
       this._consultationDto = consultData.value;
       console.log("id0", this.latestId)
       if (this.copyId != -1 && this.latestId != -1) {
@@ -876,19 +898,19 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         () => {
           console.log('Consultation data observable completed');
         })
-        this.loaderService.hideLoader();
+      this.loaderService.hideLoader();
 
-   }  
-    else  {
+    }
+    else {
       this.loaderService.showLoader();
       const currentDate = new Date();
       const formatDate = (this.addDays(currentDate, days))
       const x = this.datePipe.transform(formatDate, 'yyyy-MM-dd')
       if (x) {
-  
+
         this.consultForm.get('followupDate')?.patchValue(x);
       }
-  
+
       this._consultationDto = consultData.value;
       console.log("id0", this.latestId)
       if (this.copyId != -1 && this.latestId != -1) {
@@ -914,16 +936,16 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         () => {
           console.log('Consultation data observable completed');
         })
- 
-        this.loaderService.hideLoader();
+
+      this.loaderService.hideLoader();
 
 
 
-    } 
-    
+    }
+
   }
   updateConsultation() {
-    
+
     this.loaderService.showLoader();
     const consultId = this._consultationDto.id;
 
@@ -937,13 +959,18 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     this._consultationDto.id = consultId;
     console.log("consult dto", this._consultationDto);
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
+      this.loaderService.hideLoader();
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
       this.ApiCallsForPreview();
       this.stepper.next();
-    })
-    this.loaderService.hideLoader();
+    },
+      error => {
+        this.loaderService.hideLoader();
+        console.error('Error in updating consultation:', error);
+        this.toastr.error('Consultation update failed!', 'Error');
+      });
   }
-  
+
 
 
 
@@ -970,11 +997,18 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   //    this.consultForm.get('followupDate')?.patchValue(this.followupDate);
   // }
 
+
+
   ApiCallsForPreview() {
     this.appointmentId = this.appointmentService.appointmentId
     this.question.getQuestionwithAnswerByAppointmentId(this.latestId).subscribe(res => {
       this.questionData = res;
-      console.log("ques", res)
+      console.log("ques", res);
+
+      // Push unique submitted questionnaireIds to submittedQues
+      const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
+      
+      this.submittedQues.push(...uniqueQuestionnaireIds);
     })
 
     this.consultService.getConsultData(this.latestId).subscribe(res => {
@@ -1049,7 +1083,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword","application/jpeg","application/png","application/txt",  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
@@ -1082,7 +1116,6 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   onVFileUpload() {
     if (this.VselectedFile) {
       this.loaderService.showLoader();
-      //this.spinner.show(); 
       const reader1 = new FileReader();
       reader1.onload = () => {
         console.log("Vfile", this.VFileUploadDto);
@@ -1090,21 +1123,17 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         this.VFileUploadDto.fileName = this.VselectedFile?.name;
         this.VFileUploadDto.FileType = this.VselectedFile?.type;
         this.VFileUploadDto.fileData = this.base64String;
-        // this.VFileUploadDto.UploadDate = new Date();
         this.VFileUploadDto.docName = "vital";
-        //this.FileUploadDto.FileData= this.base64String;
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        if (this.VselectedFile?.type == "image/jpeg" || this.VselectedFile?.type == "image/png") {
+        if (this.VselectedFile?.type.startsWith('image/')) {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
-            //this.spinner.hide();
             this.getUploadedFiles(this.latestId);
             this.VselectedFile = null;
             this.loaderService.hideLoader();
             this.toastr.success('File uploaded Successfully', 'Success');
-
           });
         }
         else {
