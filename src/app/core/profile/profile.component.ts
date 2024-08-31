@@ -79,6 +79,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public followupDate!: Date;
   public appointmentStatus = true;
   public questionData: any[] = [];
+  groupedQuestionData: any[] = [];
   public toggalUi = true;
   public selectedFile: File | null = null;
   public VselectedFile: File | null = null;
@@ -602,6 +603,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loaderService.hideLoader();
   }
 
+  groupQuestionsByQuestionnaire() {
+    // Step 1: Create a map to group questions by questionnaireId
+    const groupedMap = this.questionData.reduce((map, item) => {
+      const { questionnaireId, questionnaireName } = item;
+      if (!map.has(questionnaireId)) {
+        map.set(questionnaireId, {
+          questionnaireName,
+          questions: []
+        });
+      }
+      map.get(questionnaireId).questions.push(item);
+      return map;
+    }, new Map<number, { questionnaireName: string; questions: any[] }>());
+
+    // Step 2: Convert the map to an array for use in the template
+    this.groupedQuestionData = Array.from(groupedMap.values());
+  }
+
   getAppointmentFiles(fileid: number) {
     console.log();
   }
@@ -1003,6 +1022,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.appointmentId = this.appointmentService.appointmentId
     this.question.getQuestionwithAnswerByAppointmentId(this.latestId).subscribe(res => {
       this.questionData = res;
+      this.groupQuestionsByQuestionnaire();
       console.log("ques", res);
 
       // Push unique submitted questionnaireIds to submittedQues

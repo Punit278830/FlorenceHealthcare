@@ -26,6 +26,9 @@ public class QuestionView
   public string OptionText { get; set; } = null!;
 
   public int QuestionnaireId { get; set; }
+
+  public string QuestionnaireName { get; set; }
+
 }
 
 

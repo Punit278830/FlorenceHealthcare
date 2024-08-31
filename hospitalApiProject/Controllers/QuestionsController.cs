@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Controllers
 {
@@ -105,6 +100,7 @@ namespace hospitalApiProject.Controllers
     {
       var query = from q in _context.Questions
                   join a in _context.Answers on q.QuestionId equals a.QuestionId
+                  join qr in _context.Questionnaires on q.QuestionnaireId equals qr.QuestionnaireId
                   join o in _context.Options on a.SelectedOptionId equals o.OptionId into optionGroup // Group join with Options table
                   from o in optionGroup.DefaultIfEmpty() // Perform left join
                   where a.AppointmentId == appointmentId
@@ -115,7 +111,8 @@ namespace hospitalApiProject.Controllers
                     AnswerText = a.AnswerText ?? "", // Provide a default value when AnswerText is null
                     SelectedOptionId = a.SelectedOptionId ?? 0, // Provide a default value when SelectedOptionId is null
                     OptionText = o.OptionText ?? "", // Provide a default value when OptionText is null
-                    QuestionnaireId = q.QuestionnaireId
+                    QuestionnaireId = q.QuestionnaireId,
+                    QuestionnaireName = qr.QuestionnaireName // Add this line to include the QuestionnaireName
                   };
 
       var res = await query.AsNoTracking().ToListAsync();

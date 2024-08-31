@@ -794,21 +794,24 @@
                                                     <hr>
 
                                                     <div class="row">
-                                                        <div class="col-12" class="questionsOuter"
-                                                            *ngIf="questionData.length>0">
-
-                                                            <ul class="quesansOuter" *ngFor="let item of questionData">
+                                                        <div class="col-12" class="questionsOuter" *ngIf="groupedQuestionData.length > 0">
+                                                          <div class="questionnaireGroup" *ngFor="let group of groupedQuestionData">
+                                                            <br/>
+                                                            <h3><strong>{{ group.questionnaireName }}</strong></h3>
+                                                            <ul class="quesansOuter">
+                                                              <ng-container *ngFor="let item of group.questions">
                                                                 <ng-container *ngIf="item.answerText">
-                                                                    <li>{{item.questionText}}-<strong>{{item.answerText}}</strong>
-                                                                    </li>
+                                                                  <li>{{ item.questionText }} - <strong>{{ item.answerText }}</strong></li>
                                                                 </ng-container>
                                                                 <ng-container *ngIf="item.optionText">
-                                                                    <li>{{item.questionText}}-<strong>{{item.optionText}}</strong>
-                                                                    </li>
+                                                                  <li>{{ item.questionText }} - <strong>{{ item.optionText }}</strong></li>
                                                                 </ng-container>
+                                                              </ng-container>
                                                             </ul>
+                                                          </div>
                                                         </div>
-                                                    </div>
+                                                      </div>
+                                                      
                                                     <div></div>
                                                     <div class="row" *ngIf="vitalDto">
                                                         <!-- <div class="col-12" > -->
