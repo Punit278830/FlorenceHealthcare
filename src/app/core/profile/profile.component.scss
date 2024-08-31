@@ -133,15 +133,28 @@ background-color: white;
     display: flex;
     gap: 10px;
 }
-.questionsOuter{
-    display: flex;
-    width:100%;
-    gap:10px;
-    flex-wrap: wrap;
+
+.questionsOuter {
+    column-count: 2; /* Number of columns */
+    column-gap: 10px; /* Gap between columns */
+    width: 100%;
+    overflow: hidden; /* Ensures no overflow causes gaps */
 }
-.quesansOuter{
-    width:40%
+
+.quesansOuter {
+    break-inside: avoid; /* Prevents breaking inside an element */
+    margin-bottom: 0; /* Removes bottom margin to reduce space between items */
 }
+
+// .questionsOuter{
+//     display: flex;
+//     width:100%;
+//     gap:10px;
+//     flex-wrap: wrap;
+// }
+// .quesansOuter{
+//     width:60%
+// }
 .documentsOuter{
     margin: 7px 7px;
     display: flex;
