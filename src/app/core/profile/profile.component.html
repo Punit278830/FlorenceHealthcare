@@ -507,8 +507,8 @@
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
                                                                 <label for="name">Followup After</label>
-                                                                <input class="form-control" type="number"
-                                                                    formControlName="followupDate">
+                                                                <input class="form-control" (keyup)="allowOnlyNumbers($event)" type="text"
+                                                                    formControlName="followupDate" [(ngModel)]="myNumber">
                                                             </div>
                                                         </div>
 

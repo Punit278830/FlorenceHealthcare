@@ -143,6 +143,8 @@ export class  ProfileComponent implements OnInit, OnDestroy {
 
     //department id Required here
     this.getQuestionnaireByDepartmentId(this.departmentId);
+
+    
   }
 
   initlizeProfileForm() {
@@ -190,7 +192,14 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
   }
- 
+  myNumber: string = '';
+allowOnlyNumbers(event: KeyboardEvent) {
+  debugger;
+      const input = event.target as HTMLInputElement;
+      // Remove any non-numeric characters from the input value
+      input.value = input.value.replace(/[^0-9]/g, '');
+      this.myNumber = input.value;
+    }
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -619,12 +628,12 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   initlizeVitalForm() {
     this.vitalForm = this.fb.group({
 
-      bp: [' ', Validators.required],
-      height: [' ', Validators.required],
-      weight: [' ', Validators.required],
-      pulse: [' ', Validators.required],
-      tempurature: [' ', Validators.required],
-      oxigenLevel: [' ', Validators.required],
+      bp: ['', Validators.required],
+      height: ['', Validators.required],
+      weight: ['', Validators.required],
+      pulse: ['', Validators.required],
+      tempurature: ['', Validators.required],
+      oxigenLevel: ['', Validators.required],
     })
 
   }
@@ -633,6 +642,7 @@ export class  ProfileComponent implements OnInit, OnDestroy {
   }
 
   saveVItals(vital: FormGroup) {
+    debugger;
     this.loaderService.showLoader();
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
@@ -654,9 +664,10 @@ export class  ProfileComponent implements OnInit, OnDestroy {
       this.getQuestionnaireByDepartmentId(this.departmentId)
       this.stepper.next();
 
-
+this.stepper.next;
     })
     this.loaderService.hideLoader();
+    this.stepper.next;
   }
 
 
@@ -769,6 +780,10 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
       m.appointmentId = this.latestId;
     })
+
+   
+
+
 
     this.medicineService.submitPrescribeMedicine(prescribeMedicines.medicine).subscribe(res => {
       if (res) {
@@ -1095,7 +1110,9 @@ export class  ProfileComponent implements OnInit, OnDestroy {
         //this.FileUploadDto.FileData= this.base64String;
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        if (this.VselectedFile?.type == "image/jpeg" || this.VselectedFile?.type == "image/png") {
+        if (this.VselectedFile?.type == "image/jpeg" 
+          || this.VselectedFile?.type == "image/png" 
+          || this.VselectedFile?.type == "image/jpg") {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
