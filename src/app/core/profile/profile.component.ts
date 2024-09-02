@@ -192,14 +192,14 @@ export class  ProfileComponent implements OnInit, OnDestroy {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
   }
-  myNumber: string = '';
-allowOnlyNumbers(event: KeyboardEvent) {
-  debugger;
-      const input = event.target as HTMLInputElement;
-      // Remove any non-numeric characters from the input value
-      input.value = input.value.replace(/[^0-9]/g, '');
-      this.myNumber = input.value;
-    }
+  DobDt: string = '';
+  allowOnlyNumbers(event: Event): void {
+  const inputValue = (event.target as HTMLInputElement).value;
+  const containsAlphabet = /[a-zA-Z]/.test(inputValue);
+  if (containsAlphabet) {
+    alert('Cannot enter alphabet in followup after!');
+  }
+}
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -642,7 +642,7 @@ allowOnlyNumbers(event: KeyboardEvent) {
   }
 
   saveVItals(vital: FormGroup) {
-    debugger;
+    
     this.loaderService.showLoader();
     this.vitalDto = vital.value;
     console.log("entered", this.vitalDto)
@@ -670,10 +670,7 @@ this.stepper.next;
     this.stepper.next;
   }
 
-
-
-
-  getVitalByAppointment(appointmentId: number) {
+getVitalByAppointment(appointmentId: number) {
     this.question.getVitalInfoByAppointmentId(appointmentId).subscribe(res => {
       res ? this.vitalSubmitted = true : this.vitalSubmitted = false;
       this.vitalDto = res;

@@ -154,20 +154,13 @@ export class AddPatientComponent implements OnInit {
     
     let age = today.getFullYear() - dob.getFullYear();
     const monthDiff = today.getMonth() - dob.getMonth();
-    
     const months = this.getMonthDifference(dob, today);
     
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate()))
-    {
-      age--;
-      
-    }
+    {age--;}
     if(age<12 && months<12)
-    {
-     
-     let monthDiffs = "0."+ months;
-     age=parseFloat(monthDiffs);
-    }
+    {let monthDiffs = "0."+ months;
+     age=parseFloat(monthDiffs);}
 
     // Set age value in the form
     this.patientReg.get('age')?.setValue(age);
@@ -176,7 +169,6 @@ export class AddPatientComponent implements OnInit {
   getMonthDifference(startDate: Date, endDate: Date): number {
     const yearDiff = endDate.getFullYear() - startDate.getFullYear();
     const monthDiff = endDate.getMonth() - startDate.getMonth();
-
     return yearDiff * 12 + monthDiff;
   }
   get $trigger(): Observable<void> {

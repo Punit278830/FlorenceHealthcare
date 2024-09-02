@@ -507,8 +507,8 @@
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
                                                                 <label for="name">Followup After</label>
-                                                                <input class="form-control" (keyup)="allowOnlyNumbers($event)" type="text"
-                                                                    formControlName="followupDate" [(ngModel)]="myNumber">
+                                                                <input class="form-control" (blur)="allowOnlyNumbers($event)" type="text"
+                                                                    formControlName="followupDate" [(ngModel)]="DobDt">
                                                             </div>
                                                         </div>
 
@@ -799,11 +799,11 @@
 
                                                             <ul class="quesansOuter" *ngFor="let item of questionData">
                                                                 <ng-container *ngIf="item.answerText">
-                                                                    <li>{{item.questionText}}-<strong>{{item.answerText}}</strong>
+                                                                    <li>{{item.questionText}} - <strong>{{item.answerText}}</strong>
                                                                     </li>
                                                                 </ng-container>
                                                                 <ng-container *ngIf="item.optionText">
-                                                                    <li>{{item.questionText}}-<strong>{{item.optionText}}</strong>
+                                                                    <li>{{item.questionText}} - <strong>{{item.optionText}}</strong>
                                                                     </li>
                                                                 </ng-container>
                                                             </ul>
