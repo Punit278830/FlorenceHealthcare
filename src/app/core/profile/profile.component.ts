@@ -333,6 +333,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.latestId = this.appointmentList[0]?.id;
       console.log("selectedId", this.latestId);
       this.departmentId = this.appointmentList[0]?.departmentid;
+      this.getVitalByAppointment(this.latestId);
+      this.getQuestionnaireByDepartmentId(this.departmentId)
     });
   }
 
