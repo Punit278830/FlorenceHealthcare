@@ -103,7 +103,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public submittedQues: any[] = [];
   // public showAddQuestion=true;
   // public questionnaireId!:number;
-
+  DobDt: string = '';
 
   constructor(private appointmentService: AppointmentService,
     private patientService: PatientService,
@@ -627,6 +627,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   closePdfView() {
     this.pdfUrl = '';
+  }
+
+  allowOnlyNumbers(event: Event): void {
+    const inputValue = (event.target as HTMLInputElement).value;
+    const containsAlphabet = /[a-zA-Z]/.test(inputValue);
+    if (containsAlphabet) {
+      alert('Cannot enter alphabet in followup after!');
+    }
   }
 
   ngOnDestroy() {
