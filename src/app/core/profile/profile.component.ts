@@ -546,7 +546,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-
     if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
       this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
     } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
@@ -1149,7 +1148,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.VFileUploadDto.docName = "vital";
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "image/jpeg", "image/jpeg", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type))
         {
           console.log("fileData", this.VFileUploadDto);

@@ -262,7 +262,7 @@
 
                                                 </div>
                                             </div>
-                                            <div style="width:50%;" *ngIf="vitalDocuments.length > 0"
+                                            <div style="width:47%;" *ngIf="vitalDocuments.length > 0"
                                                 class="filesMainOuter">
                                                 <div *ngFor="let file of vitalDocuments" class="filesOuter">
                                                     <mat-icon>description</mat-icon>
@@ -309,7 +309,7 @@
                                                'inactive': !isSubmitted(data.questionnaireId) && !isActive(data)
                                             }">
                                            <a href="javascript:void(0);"
-                                              (click)="(data.questionnaireId)"
+                                              (click)="mapQuestionAndOptions(data.questionnaireId)"
                                               class="quesText">{{data.questionnaireName}}</a>
                                        </div>
                                        
@@ -425,7 +425,7 @@
 
                                                         </div>
                                                     </div>
-                                                    <div style="width: 60%;" *ngIf="presDocuments.length > 0"
+                                                    <div style="width: 47%;" *ngIf="presDocuments.length > 0"
                                                         class="filesMainOuter">
                                                         <div *ngFor="let file of presDocuments" class="filesOuter">
                                                             <mat-icon>description</mat-icon>
@@ -855,10 +855,10 @@
                                                         </div>
                                                         <!-- </div> -->*
                                                     </div>
-                                                    <div class="imageOuter" *ngIf="vitalDocuments.length > 0">
-                                                        <div *ngFor="let item of vitalDocuments" class="imageContainer">
+                                                    <div class="imageOuter" *ngIf="presDocuments.length > 0">
+                                                        <div *ngFor="let item of presDocuments" class="imageContainer">
                                                             <img style="width: 50%;" [src]="item.fileData"
-                                                                alt="Vital Document" />
+                                                                alt="Pres Document" />
                                                         </div>
                                                     </div>
 
@@ -963,7 +963,7 @@
                                 <div class="docOuter">
                                     <h2 class="heading">Available Documents</h2>
                                     <div class="listOuter">
-                                        <div class="fileOuter" *ngFor="let item of presDocuments">
+                                        <div class="fileOuter" *ngFor="let item of vitalDocuments">
                                             <mat-icon>description</mat-icon>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"
