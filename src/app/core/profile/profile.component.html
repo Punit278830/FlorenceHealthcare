@@ -97,7 +97,7 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <mat-horizontal-stepper [linear]="true" #stepper labelPosition="bottom">
+                        <mat-horizontal-stepper [linear]="false" #stepper labelPosition="bottom">
                             <mat-step label="Medical History">
                                 <div class="row">
                                     <div class="col-12 col-md-6 col-xl-6">
@@ -309,7 +309,7 @@
                                                'inactive': !isSubmitted(data.questionnaireId) && !isActive(data)
                                             }">
                                            <a href="javascript:void(0);"
-                                              (click)="mapQuestionAndOptions(data.questionnaireId)"
+                                              (click)="(data.questionnaireId)"
                                               class="quesText">{{data.questionnaireName}}</a>
                                        </div>
                                        

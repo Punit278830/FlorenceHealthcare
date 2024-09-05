@@ -1105,8 +1105,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-        if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
+        //const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]; 
+        //if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type))
+        if (this.selectedFile?.type.startsWith('image/')) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
@@ -1148,7 +1149,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.VFileUploadDto.docName = "vital";
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        if (this.VselectedFile?.type.startsWith('image/')) {
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type))
+        {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
