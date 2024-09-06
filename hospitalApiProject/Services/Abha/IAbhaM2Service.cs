@@ -7,9 +7,24 @@ namespace hospitalApiProject.Services.Abha
 {
   public interface IAbhaM2Service : ISimpleServiceBase
   {
-    Task<string> LinkCareContext(CareContextModel data);
+    Task LinkCareContext(CareContextModel data);
 
-    Task<string> NotifyMobile(CareContextModel data);
+    Task NotifyContext(CareContextModel data);
+
+    Task NotifyMobile(CareContextModel data);
+
+    Task OnDiscover(OnDiscoverModel data);
+
+    Task OnDiscoverV1(OnDiscoverModel data);
+
+    Task LinkOnInit(CareContextModel data);
+
+    Task LinkOnConfirm(CareContextModel data);
+
+    Task ConsentsOnNotify(CareContextModel data);
+    Task HealthInfoOnRequest(CareContextModel data);
+    Task DataTransferNotification(CareContextModel data);
+    Task HealthInfoNotify(CareContextModel data);
 
 
 
