@@ -101,6 +101,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public currentFileName: string | null = null;
   public seletedAppointmentDate!: Date;
   public submittedQues: any[] = [];
+  dtFollowUp: string = '';
   // public showAddQuestion=true;
   // public questionnaireId!:number;
 
@@ -188,6 +189,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   goToStep(index: number): void {
     this.getUploadedFiles(this.latestId);
     this.stepper.selectedIndex = index;
+  }
+
+  allowOnlyNumbers(event: Event): void {
+    const inputValue = (event.target as HTMLInputElement).value;
+    const containsAlphabet = /[a-zA-Z]/.test(inputValue);
+    if (containsAlphabet) {
+      alert('Cannot enter alphabet in followup after!');
+    }
   }
 
   downloadPreviewAsPdf() {
@@ -334,7 +343,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
       console.log("selectedId", this.latestId);
       this.departmentId = this.appointmentList[0]?.departmentid;
       this.getVitalByAppointment(this.latestId);
-      this.getQuestionnaireByDepartmentId(this.departmentId)
+      this.getQuestionnaireByDepartmentId(this.departmentId);
+      this.getConsultationOnAppointmentId(this.latestId)
+      this.getPrescribeMedicine();
+      this.getDoctorDetails();  
+      this.getUploadedFiles(this.latestId);    
     });
   }
 
