@@ -97,7 +97,7 @@
             <div class="col-sm-12">
                 <div class="card">
                     <div class="card-body">
-                        <mat-horizontal-stepper [linear]="true" #stepper labelPosition="bottom">
+                        <mat-horizontal-stepper [linear]="false" #stepper labelPosition="bottom">
                             <mat-step label="Medical History">
                                 <div class="row">
                                     <div class="col-12 col-md-6 col-xl-6">
@@ -262,7 +262,7 @@
 
                                                 </div>
                                             </div>
-                                            <div style="width:50%;" *ngIf="vitalDocuments.length > 0"
+                                            <div style="width:47%;" *ngIf="vitalDocuments.length > 0"
                                                 class="filesMainOuter">
                                                 <div *ngFor="let file of vitalDocuments" class="filesOuter">
                                                     <mat-icon>description</mat-icon>
@@ -407,7 +407,7 @@
                                         class="btn btn-primary submit-form me-2">Next</button></div>
 
                             </mat-step>
-                            <mat-step label="Prescription">
+                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor' || loggedInUserId.userRole === 'nursing'">
                                 <div class="row">
                                     <div class="card">
                                         <div class="card-body">
@@ -425,7 +425,7 @@
 
                                                         </div>
                                                     </div>
-                                                    <div style="width: 60%;" *ngIf="presDocuments.length > 0"
+                                                    <div style="width: 47%;" *ngIf="presDocuments.length > 0"
                                                         class="filesMainOuter">
                                                         <div *ngFor="let file of presDocuments" class="filesOuter">
                                                             <mat-icon>description</mat-icon>
@@ -503,12 +503,13 @@
                                                                 </mat-select>
                                                             </div>
                                                         </div>
+                                                        
 
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
                                                                 <label for="name">Followup After</label>
                                                                 <input class="form-control" (blur)="allowOnlyNumbers($event)" type="text"
-                                                                    formControlName="followupDate" [(ngModel)]="DobDt">
+                                                                    formControlName="followupDate" [(ngModel)]="dtFollowUp">
                                                             </div>
                                                         </div>
 
@@ -685,7 +686,7 @@
                                                                         *ngIf="medicine.controls.length>0 && appointmentStatus">
                                                                         <div class="doctor-submit text-start">
 
-                                                                            <button type="submit"
+                                                                            <button type="submit" 
                                                                                 class="btn btn-primary submit-form me-2">Submit
                                                                                 Medicine</button>
 
@@ -855,10 +856,10 @@
                                                         </div>
                                                         <!-- </div> -->*
                                                     </div>
-                                                    <div class="imageOuter" *ngIf="vitalDocuments.length > 0">
-                                                        <div *ngFor="let item of vitalDocuments" class="imageContainer">
+                                                    <div class="imageOuter" *ngIf="presDocuments.length > 0">
+                                                        <div *ngFor="let item of presDocuments" class="imageContainer">
                                                             <img style="width: 50%;" [src]="item.fileData"
-                                                                alt="Vital Document" />
+                                                                alt="Pres Document" />
                                                         </div>
                                                     </div>
 
@@ -963,7 +964,13 @@
                                 <div class="docOuter">
                                     <h2 class="heading">Available Documents</h2>
                                     <div class="listOuter">
-                                        <div class="fileOuter" *ngFor="let item of presDocuments">
+                                        <div class="fileOuter" *ngFor="let item of vitalDocuments">
+                                            <mat-icon>description</mat-icon>
+                                            {{ item.fileName }}
+                                            <button type="button" class="uploadbtn"
+                                                (click)="viewDocument(item)">View</button>
+                                        </div>
+                                        <div class="fileOuter" *ngFor="let item of previewFile">
                                             <mat-icon>description</mat-icon>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"

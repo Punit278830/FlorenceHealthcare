@@ -97,10 +97,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public images: any;
   public presDocuments: IconsultationFiles[] = [];
   public vitalDocuments: IconsultationFiles[] = [];
+  public previewFile: IconsultationFiles[] = [];
+
   public documentUrl: SafeResourceUrl | null = null;
   public currentFileName: string | null = null;
   public seletedAppointmentDate!: Date;
   public submittedQues: any[] = [];
+  dtFollowUp: string = '';
   // public showAddQuestion=true;
   // public questionnaireId!:number;
   DobDt: string = '';
@@ -190,6 +193,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.stepper.selectedIndex = index;
   }
 
+  allowOnlyNumbers(event: Event): void {
+    const inputValue = (event.target as HTMLInputElement).value;
+    const containsAlphabet = /[a-zA-Z]/.test(inputValue);
+    if (containsAlphabet) {
+      alert('Cannot enter alphabet in followup after!');
+    }
+  }
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -241,7 +252,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.FileUploadDto.fileName = fileName;
           this.FileUploadDto.FileType = fileType;
           this.FileUploadDto.fileData = base64String;
-          this.FileUploadDto.docName = 'prescription';
+          this.FileUploadDto.docName = 'previewFile';
           this.FileUploadDto.appointmentId = this.latestId;
 
           // Detailed logging for debugging
@@ -333,6 +344,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.latestId = this.appointmentList[0]?.id;
       console.log("selectedId", this.latestId);
       this.departmentId = this.appointmentList[0]?.departmentid;
+      this.getVitalByAppointment(this.latestId);
+      this.getQuestionnaireByDepartmentId(this.departmentId);
+      this.getConsultationOnAppointmentId(this.latestId)
+      this.getPrescribeMedicine();
+      this.getDoctorDetails();
+      this.getUploadedFiles(this.latestId);
     });
   }
 
@@ -544,12 +561,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-
-    if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
-      this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
-    } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
-      this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+    if (this.currentQuestionData != undefined) {
+      if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
+        this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
+      } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
+        this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+      }
     }
+    
     console.log("current", this.currentQuestionData);
 
   }
@@ -881,6 +900,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
+        if(item.docName == "previewFile") {
+          this.previewFile.push(item);
+        }
       })
 
 
@@ -1035,7 +1057,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       // Push unique submitted questionnaireIds to submittedQues
       const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
-      
+
       this.submittedQues.push(...uniqueQuestionnaireIds);
     })
 
@@ -1111,8 +1133,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
-        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-        if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type)) {
+        //const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]; 
+        //if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type))
+        if (this.selectedFile?.type.startsWith('image/')) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
@@ -1154,7 +1177,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.VFileUploadDto.docName = "vital";
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
-        if (this.VselectedFile?.type.startsWith('image/')) {
+        const supportedFileTypes: string[] = ["application/pdf", "application/msword", "image/jpeg", "image/jpeg", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+        if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type)) {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
