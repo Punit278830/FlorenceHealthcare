@@ -407,7 +407,7 @@
                                         class="btn btn-primary submit-form me-2">Next</button></div>
 
                             </mat-step>
-                            <mat-step label="Prescription">
+                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor' || loggedInUserId.userRole === 'nursing'">
                                 <div class="row">
                                     <div class="card">
                                         <div class="card-body">
@@ -503,6 +503,7 @@
                                                                 </mat-select>
                                                             </div>
                                                         </div>
+                                                        
 
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
@@ -685,7 +686,7 @@
                                                                         *ngIf="medicine.controls.length>0 && appointmentStatus">
                                                                         <div class="doctor-submit text-start">
 
-                                                                            <button type="submit"
+                                                                            <button type="submit" 
                                                                                 class="btn btn-primary submit-form me-2">Submit
                                                                                 Medicine</button>
 
@@ -964,6 +965,12 @@
                                     <h2 class="heading">Available Documents</h2>
                                     <div class="listOuter">
                                         <div class="fileOuter" *ngFor="let item of vitalDocuments">
+                                            <mat-icon>description</mat-icon>
+                                            {{ item.fileName }}
+                                            <button type="button" class="uploadbtn"
+                                                (click)="viewDocument(item)">View</button>
+                                        </div>
+                                        <div class="fileOuter" *ngFor="let item of previewFile">
                                             <mat-icon>description</mat-icon>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"

@@ -97,6 +97,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public images: any;
   public presDocuments: IconsultationFiles[] = [];
   public vitalDocuments: IconsultationFiles[] = [];
+  public previewFile: IconsultationFiles[] = [];
+
   public documentUrl: SafeResourceUrl | null = null;
   public currentFileName: string | null = null;
   public seletedAppointmentDate!: Date;
@@ -250,7 +252,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.FileUploadDto.fileName = fileName;
           this.FileUploadDto.FileType = fileType;
           this.FileUploadDto.fileData = base64String;
-          this.FileUploadDto.docName = 'prescription';
+          this.FileUploadDto.docName = 'previewFile';
           this.FileUploadDto.appointmentId = this.latestId;
 
           // Detailed logging for debugging
@@ -346,8 +348,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.getQuestionnaireByDepartmentId(this.departmentId);
       this.getConsultationOnAppointmentId(this.latestId)
       this.getPrescribeMedicine();
-      this.getDoctorDetails();  
-      this.getUploadedFiles(this.latestId);    
+      this.getDoctorDetails();
+      this.getUploadedFiles(this.latestId);
     });
   }
 
@@ -559,11 +561,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-    if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
-      this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
-    } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
-      this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+    if (this.currentQuestionData != undefined) {
+      if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
+        this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
+      } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
+        this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+      }
     }
+    
     console.log("current", this.currentQuestionData);
 
   }
@@ -887,6 +892,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
+        if(item.docName == "previewFile") {
+          this.previewFile.push(item);
+        }
       })
 
 
@@ -1041,7 +1049,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       // Push unique submitted questionnaireIds to submittedQues
       const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
-      
+
       this.submittedQues.push(...uniqueQuestionnaireIds);
     })
 
@@ -1162,8 +1170,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.VFileUploadDto.appointmentId = this.latestId;
         console.log("Vfile", this.VFileUploadDto);
         const supportedFileTypes: string[] = ["application/pdf", "application/msword", "image/jpeg", "image/jpeg", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
-        if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type))
-        {
+        if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type)) {
           console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
             console.log(result);
