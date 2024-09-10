@@ -104,7 +104,7 @@
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </td> -->
-                    <td class="profile-image"><a href="javascript:void(0);"
+                    <td class="profile-image"><a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
                         (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"><img
                           width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
                         {{data.patientFname}}

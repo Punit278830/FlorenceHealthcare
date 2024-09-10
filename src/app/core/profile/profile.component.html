@@ -1,3 +1,6 @@
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
 <div class="page-wrapper">
     <div class="content">
 
@@ -265,10 +268,12 @@
                                             <div style="width:47%;" *ngIf="vitalDocuments.length > 0"
                                                 class="filesMainOuter">
                                                 <div *ngFor="let file of vitalDocuments" class="filesOuter">
-                                                    <mat-icon>description</mat-icon>
+                                                    <i class="fas fa-file-alt"></i>
                                                     <div>{{file.fileName}}</div>
-                                                    <mat-icon style="cursor: pointer;"
-                                                        (click)="deleteFile(file.fileId)">delete</mat-icon>
+                                                    <i class="fas fa-trash-alt" (click)="deleteFile(file.fileId)"></i>
+                                                    <!-- <mat-icon style="cursor: pointer;"
+                                                        (click)="deleteFile(file.fileId)">delete</mat-icon>-->
+                                                        
                                                 </div>
                                             </div>
                                         </div>
@@ -428,10 +433,12 @@
                                                     <div style="width: 47%;" *ngIf="presDocuments.length > 0"
                                                         class="filesMainOuter">
                                                         <div *ngFor="let file of presDocuments" class="filesOuter">
-                                                            <mat-icon>description</mat-icon>
-                                                            <div>{{file.fileName}}</div>
-                                                            <mat-icon style="cursor: pointer;"
-                                                                (click)="deleteFile(file.fileId)">delete</mat-icon>
+                                                             <!--<mat-icon>description</mat-icon>-->
+                                                             <i class="fas fa-file-alt"></i>
+                                                             <div>{{file.fileName}}</div>
+                                                             <i class="fas fa-trash-alt" (click)="deleteFile(file.fileId)"></i>
+                                                            <!--<mat-icon style="cursor: pointer;"
+                                                                (click)="deleteFile(file.fileId)">delete</mat-icon>-->
                                                         </div>
                                                     </div>
                                                 </div>
@@ -965,13 +972,15 @@
                                     <h2 class="heading">Available Documents</h2>
                                     <div class="listOuter">
                                         <div class="fileOuter" *ngFor="let item of vitalDocuments">
-                                            <mat-icon>description</mat-icon>
+                                            <!--<mat-icon>description</mat-icon>-->
+                                            <i class="fas fa-file-alt"></i>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"
                                                 (click)="viewDocument(item)">View</button>
                                         </div>
                                         <div class="fileOuter" *ngFor="let item of previewFile">
-                                            <mat-icon>description</mat-icon>
+                                            <!--<mat-icon>description</mat-icon>-->
+                                            <i class="fas fa-file-alt"></i>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"
                                                 (click)="viewDocument(item)">View</button>
