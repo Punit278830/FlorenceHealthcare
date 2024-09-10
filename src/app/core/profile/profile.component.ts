@@ -344,6 +344,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.departmentId = this.appointmentList[0]?.departmentid;
       this.getVitalByAppointment(this.latestId);
       this.getQuestionnaireByDepartmentId(this.departmentId);
+      this.ApiCallsForPreview();
       this.getConsultationOnAppointmentId(this.latestId)
       this.getPrescribeMedicine();
       this.getDoctorDetails();  
