@@ -106,7 +106,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   dtFollowUp: string = '';
   // public showAddQuestion=true;
   // public questionnaireId!:number;
-
+  DobDt: string = '';
 
   constructor(private appointmentService: AppointmentService,
     private patientService: PatientService,
@@ -126,9 +126,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private loaderService: LoadingService
 
   ) {
+    //this.appointmentStatus = this.appointmentService.appoinmentStatus;
 
-
-    this.appointmentStatus = this.appointmentService.appoinmentStatus;
     this.appointmentId = this.appointmentService.appointmentId;
     this.doctorId = this.doctorService.staffId;
 

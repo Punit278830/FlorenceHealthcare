@@ -52,7 +52,7 @@ export class AddAppointmentComponent implements OnInit {
   // public downLoadList:IdownloadFile[]=[];
 
   public lastIndex = 0;
-  public pageSize = 10;
+  public pageSize = 50;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;

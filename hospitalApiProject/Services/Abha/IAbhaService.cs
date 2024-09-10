@@ -3,6 +3,7 @@ using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.response;
 using hospitalApiProject.Services.Interfaces.Shared;
 using Microsoft.AspNetCore.Mvc;
+using System.Reflection;
 
 namespace hospitalApiProject.Services.Abha
 {
@@ -43,7 +44,15 @@ namespace hospitalApiProject.Services.Abha
     Task<string> ShareProfile(PatientShareRequest request);
 
     Task AddAbhaPatientProfile(PatientProfile request);
+
+    Task ConsentsOnNotifyV3(string request);
+
     //Task<ActionResult<List<AbhaPatientDetails>>> GetScannedPatients();
 
+    Task FetchModes(string abhaAddress);
+
+    Task AbhaAddressAuthInit(string authMode);
+
+    Task AbhaAddressAuthConfirm(string authId, string authCode);
   }
 }

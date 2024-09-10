@@ -1,5 +1,7 @@
+using Azure.Core;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
+using NuGet.Packaging.Signing;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
@@ -203,6 +205,200 @@ namespace hospitalApiProject.Services
       this.StatusCode = response.StatusCode;
       return ErrorMessage;
     }
+
+    public async Task<string> FetchModesAsync(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
+    //todo - remove duplicate of FetchModesAsync and keep a common name
+    public async Task<string> LinkCareContextAsync(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
+    public async Task<string> OnDiscoverAsync(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetClient();
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
+
+    public async Task<string> OnDiscoverWithLogs(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      Console.WriteLine($"Request URL: {URL}");
+
+      var request = new HttpRequestMessage(HttpMethod.Post, URL);
+
+      
+      // Optional: Set additional headers if needed
+      //request.Headers.Accept.ParseAdd("application/json");
+
+
+      var client = GetV3Client();
+      client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+      //client.Headers.Accept.ParseAdd("application/json");
+
+      Console.WriteLine("Request Headers:");
+
+      foreach (var header in client.DefaultRequestHeaders)
+      {
+        Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+      }
+
+      // Log the request body 
+      Console.WriteLine($"Request Body: {content}");
+
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+      Console.WriteLine($"Response Status Code: {(int)response.StatusCode}");
+
+      if (response.IsSuccessStatusCode)
+      {
+        var responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response Body: {responseBody}");
+        return responseBody;
+      }
+
+      // Log error details
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      Console.WriteLine($"Error Message: {this.ErrorMessage}");
+      Console.WriteLine($"Status Code: {this.StatusCode}");
+      return ErrorMessage;
+    }
+
+
+
+    #region M2 V3 Apis
+
+    private HttpClient GetV3Client()
+    {
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+      //client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
+
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      return client;
+    }
+
+    public async Task<string> OnGenerateLinkToken(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetV3Client();
+
+      return await getResponse(content, client);
+    }
+
+    public async Task<string> OnLinkCareContextV3(string baseUrl, string api, string content, string linkToken)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+      var client = GetV3Client();
+      client.DefaultRequestHeaders.Add("X-LINK-TOKEN", linkToken);
+
+      return await getResponse(content, client);
+    }
+
+    public async Task<string> OnConsentsOnNotifyV3(string baseUrl, string api, string content)
+    {
+      URL = string.Format("{0}/{1}", baseUrl, api);
+
+      // Log the request URL
+      Console.WriteLine($"Request URL: {URL}");
+
+      var client = new HttpClient();
+      client.BaseAddress = new Uri(URL);
+      client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
+      client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
+
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+      client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+
+      client.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
+
+      // Log the request headers
+      Console.WriteLine("Request Headers:");
+      foreach (var header in client.DefaultRequestHeaders)
+      {
+        Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
+      }
+
+      Console.WriteLine($"Request Body: {content}");
+
+      return await getResponse(content, client);
+    }
+
+    private async Task<string> getResponse(string content, HttpClient client)
+    {
+      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+      var response = await client.PostAsync(URL, stringContent);
+
+      // Log the response status code
+      Console.WriteLine($"Response Status Code: {(int)response.StatusCode}");
+
+      if (response.IsSuccessStatusCode)
+      {
+        return response.Content.ReadAsStringAsync().Result;
+      }
+
+      this.ErrorMessage = response.ReasonPhrase;
+      this.StatusCode = response.StatusCode;
+      return ErrorMessage;
+    }
+
+
+    #endregion
 
     private void GetAuthToken()
     {
