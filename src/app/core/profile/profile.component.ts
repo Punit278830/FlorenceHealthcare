@@ -648,14 +648,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.pdfUrl = '';
   }
 
-  allowOnlyNumbers(event: Event): void {
-    const inputValue = (event.target as HTMLInputElement).value;
-    const containsAlphabet = /[a-zA-Z]/.test(inputValue);
-    if (containsAlphabet) {
-      alert('Cannot enter alphabet in followup after!');
-    }
-  }
-
   ngOnDestroy() {
     // Clean up the Blob URL
     URL.revokeObjectURL(this.pdfUrl);
