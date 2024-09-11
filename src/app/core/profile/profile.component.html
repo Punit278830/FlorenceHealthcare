@@ -1,6 +1,3 @@
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
 <div class="page-wrapper">
     <div class="content">
 
@@ -268,12 +265,10 @@
                                             <div style="width:47%;" *ngIf="vitalDocuments.length > 0"
                                                 class="filesMainOuter">
                                                 <div *ngFor="let file of vitalDocuments" class="filesOuter">
-                                                    <i class="fas fa-file-alt"></i>
+                                                    <mat-icon>description</mat-icon>
                                                     <div>{{file.fileName}}</div>
-                                                    <i class="fas fa-trash-alt" (click)="deleteFile(file.fileId)"></i>
-                                                    <!-- <mat-icon style="cursor: pointer;"
-                                                        (click)="deleteFile(file.fileId)">delete</mat-icon>-->
-                                                        
+                                                    <mat-icon style="cursor: pointer;"
+                                                        (click)="deleteFile(file.fileId)">delete</mat-icon>
                                                 </div>
                                             </div>
                                         </div>
@@ -412,7 +407,7 @@
                                         class="btn btn-primary submit-form me-2">Next</button></div>
 
                             </mat-step>
-                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor' || loggedInUserId.userRole === 'nursing'">
+                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
                                 <div class="row">
                                     <div class="card">
                                         <div class="card-body">
@@ -433,12 +428,10 @@
                                                     <div style="width: 47%;" *ngIf="presDocuments.length > 0"
                                                         class="filesMainOuter">
                                                         <div *ngFor="let file of presDocuments" class="filesOuter">
-                                                             <!--<mat-icon>description</mat-icon>-->
-                                                             <i class="fas fa-file-alt"></i>
-                                                             <div>{{file.fileName}}</div>
-                                                             <i class="fas fa-trash-alt" (click)="deleteFile(file.fileId)"></i>
-                                                            <!--<mat-icon style="cursor: pointer;"
-                                                                (click)="deleteFile(file.fileId)">delete</mat-icon>-->
+                                                            <mat-icon>description</mat-icon>
+                                                            <div>{{file.fileName}}</div>
+                                                            <mat-icon style="cursor: pointer;"
+                                                                (click)="deleteFile(file.fileId)">delete</mat-icon>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -804,7 +797,6 @@
                                                     <div class="row">
                                                         <div class="col-12" class="questionsOuter" *ngIf="groupedQuestionData.length > 0">
                                                           <div class="questionnaireGroup" *ngFor="let group of groupedQuestionData">
-                                                            <br/>
                                                             <h3><strong>{{ group.questionnaireName }}</strong></h3>
                                                             <ul class="quesansOuter">
                                                               <ng-container *ngFor="let item of group.questions">
@@ -816,6 +808,7 @@
                                                                 </ng-container>
                                                               </ng-container>
                                                             </ul>
+                                                            <br/>
                                                           </div>
                                                         </div>
                                                       </div>
@@ -972,15 +965,13 @@
                                     <h2 class="heading">Available Documents</h2>
                                     <div class="listOuter">
                                         <div class="fileOuter" *ngFor="let item of vitalDocuments">
-                                            <!--<mat-icon>description</mat-icon>-->
-                                            <i class="fas fa-file-alt"></i>
+                                            <mat-icon>description</mat-icon>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"
                                                 (click)="viewDocument(item)">View</button>
                                         </div>
                                         <div class="fileOuter" *ngFor="let item of previewFile">
-                                            <!--<mat-icon>description</mat-icon>-->
-                                            <i class="fas fa-file-alt"></i>
+                                            <mat-icon>description</mat-icon>
                                             {{ item.fileName }}
                                             <button type="button" class="uploadbtn"
                                                 (click)="viewDocument(item)">View</button>
