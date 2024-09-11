@@ -30,9 +30,13 @@ builder.Services.AddCors(options =>
 // Add services to the container
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IAbhaService, ABHAService>();
+builder.Services.AddScoped<IAbhaM2Service, ABHAService>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
+builder.Services.AddScoped<IFhirBundleService, FhirBundleService>();
+builder.Services.AddTransient<FideliusEncryption>();
 
 var app = builder.Build();
 

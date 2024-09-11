@@ -152,8 +152,12 @@ export class AddPatientComponent implements OnInit {
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
     const monthDiff = today.getMonth() - dob.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-      age--;
+    const months = this.getMonthDifference(dob, today);
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) { age--; }
+    if (age < 12 && months < 12) {
+      let monthDiffs = "0." + months;
+      age = parseFloat(monthDiffs);
     }
 
     // Set age value in the form
@@ -161,9 +165,16 @@ export class AddPatientComponent implements OnInit {
     this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
   }
 
+  getMonthDifference(startDate: Date, endDate: Date): number {
+    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
+    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    return yearDiff * 12 + monthDiff;
+  }
+
   get $trigger(): Observable<void> {
     return this.trigger.asObservable();
   }
+
   enableCamera() {
     navigator.mediaDevices.getUserMedia({
       video: {

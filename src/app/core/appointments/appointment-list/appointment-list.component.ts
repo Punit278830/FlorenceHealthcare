@@ -33,7 +33,7 @@ export class AppointmentListComponent implements OnInit {
   public showFilter = false;
   public searchDataValue = '';
   public lastIndex = 0;
-  public pageSize = 10;
+  public pageSize = 50;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;
@@ -132,8 +132,6 @@ export class AppointmentListComponent implements OnInit {
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
     let appointmentData$;
-    this.loadingService.showLoader();
-
     if (from !== null && to !== null) {
       console.log("from to", from, to)
 
@@ -382,6 +380,7 @@ export class AppointmentListComponent implements OnInit {
   }
 
   movetoProfile(patientId: number, appointmentId: number, departmentId: number, status: string, doctorId: number) {
+    this.loadingService.showLoader();
     this.patientService.patientId = patientId;
     this.appointmentService.appointmentId = appointmentId;
     this.departmentService.departmentId = departmentId;
@@ -390,9 +389,10 @@ export class AppointmentListComponent implements OnInit {
       this.appointmentService.appoinmentStatus = false;
     }
 
-
-
-    this.route.navigate([routes.profile]);
+    setTimeout(() => {
+      this.route.navigate([routes.profile]);
+      this.loadingService.hideLoader();
+    }, 0);
 
   }
 
