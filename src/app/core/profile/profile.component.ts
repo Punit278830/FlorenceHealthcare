@@ -106,8 +106,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   dtFollowUp: string = '';
   // public showAddQuestion=true;
   // public questionnaireId!:number;
-  DobDt: string = '';
-
   constructor(private appointmentService: AppointmentService,
     private patientService: PatientService,
     private question: QuestionService,
@@ -199,7 +197,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       alert('Cannot enter alphabet in followup after!');
     }
   }
-
+  
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -620,6 +618,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.answerDto = [];
     this.combindQuestionOption = [];
     this.loaderService.hideLoader();
+    this.loadPatientAppointments();
   }
 
   groupQuestionsByQuestionnaire() {

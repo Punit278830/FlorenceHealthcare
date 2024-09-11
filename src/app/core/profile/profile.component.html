@@ -407,7 +407,7 @@
                                         class="btn btn-primary submit-form me-2">Next</button></div>
 
                             </mat-step>
-                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor' || loggedInUserId.userRole === 'nursing'">
+                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
                                 <div class="row">
                                     <div class="card">
                                         <div class="card-body">
@@ -797,7 +797,6 @@
                                                     <div class="row">
                                                         <div class="col-12" class="questionsOuter" *ngIf="groupedQuestionData.length > 0">
                                                           <div class="questionnaireGroup" *ngFor="let group of groupedQuestionData">
-                                                            <br/>
                                                             <h3><strong>{{ group.questionnaireName }}</strong></h3>
                                                             <ul class="quesansOuter">
                                                               <ng-container *ngFor="let item of group.questions">
@@ -809,6 +808,7 @@
                                                                 </ng-container>
                                                               </ng-container>
                                                             </ul>
+                                                            <br/>
                                                           </div>
                                                         </div>
                                                       </div>

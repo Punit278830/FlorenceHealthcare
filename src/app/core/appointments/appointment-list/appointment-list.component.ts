@@ -53,7 +53,7 @@ export class AppointmentListComponent implements OnInit {
   private isAppointmentDateSelected = false;
   private dateOnly: any;
   public minToDate: Date | null = null;
-
+  isAllowed: boolean = false; // Patient click Not allowed for receptionist
 
   constructor(public data: DataService, private appointmentService: AppointmentService,
     private departmentService: DepartmentService,
@@ -97,6 +97,14 @@ export class AppointmentListComponent implements OnInit {
       id: idhere,
       confirmCallback: () => this.confirmDelete(idhere)
     });
+  }
+
+  handleClick(event: MouseEvent): void {
+    if (!this.isAllowed) {
+      // Prevent default behavior if not allowed
+      event.stopImmediatePropagation(); // Prevent event from propagating
+      return; // Exit the function to avoid further processing
+    }
   }
 
   confirmDelete(idhere: number) {
@@ -146,6 +154,8 @@ export class AppointmentListComponent implements OnInit {
         appointmentData$ = this.appointmentService.getAppointmentByDoctorId(this.loggedIn.loginId);
       }
     }
+
+     this.isAllowed = this.loggedIn.userRole == 'reception' ? false : true;
 
     // if(this.loggedIn.userRole=='admin')
     // {
