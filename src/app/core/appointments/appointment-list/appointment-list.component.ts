@@ -155,13 +155,7 @@ export class AppointmentListComponent implements OnInit {
       }
     }
 
-    if (this.loggedIn.userRole == 'reception') {
-     this.isAllowed = false;
-    }
-    else
-    {
-      this.isAllowed = true;
-    }
+     this.isAllowed = this.loggedIn.userRole == 'reception' ? false : true;
 
     // if(this.loggedIn.userRole=='admin')
     // {
