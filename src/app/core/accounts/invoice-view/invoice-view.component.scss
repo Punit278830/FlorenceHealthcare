@@ -117,5 +117,12 @@
     .part-one,.part-two{
         width: 50%;
     }
-
+    header, footer {
+        display: none !important;
+      }
+    
+      /* Ensure other elements are styled appropriately */
+      .no-print {
+        display: none !important;
+      }
 }
