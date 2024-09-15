@@ -124,9 +124,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private loaderService: LoadingService
 
   ) {
+    //this.appointmentStatus = this.appointmentService.appoinmentStatus;
 
-
-    this.appointmentStatus = this.appointmentService.appoinmentStatus;
     this.appointmentId = this.appointmentService.appointmentId;
     this.doctorId = this.doctorService.staffId;
 
@@ -586,7 +585,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
       this.question.updateQuestionniareAnswers(this.answerDto, this.latestId, this.selectedques).subscribe(res => {
         console.log(res);
-
+        this.ApiCallsForPreview();
         this.toaster.success("Questionniare updated successfully", "Questionniare")
       })
 
@@ -597,7 +596,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.submittedQues.push(this.selectedques);
       this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
         console.log(res);
-
+        this.ApiCallsForPreview();
         this.toaster.success("Questionniare submitted successfully", "Questionniare")
       })
 

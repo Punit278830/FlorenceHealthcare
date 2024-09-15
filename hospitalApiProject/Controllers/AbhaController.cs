@@ -1,5 +1,6 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
+using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Services.Abha;
 using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -16,15 +17,15 @@ namespace hospitalApiProject.Controllers
     protected readonly IAbhaService _service;
     private readonly IPatientInfoService _patientInfoService;
 
-    //protected readonly IAbhaM2Service _abhaM2Service;
+    protected readonly IAbhaM2Service _abhaM2Service;
     private readonly FlorenceDbContext _context;
 
-    public AbhaController(IAbhaService service, FlorenceDbContext context, IPatientInfoService patientInfoService) //, IAbhaM2Service abhaM2Service
+    public AbhaController(IAbhaService service, FlorenceDbContext context, IPatientInfoService patientInfoService, IAbhaM2Service abhaM2Service)
     {
       _service = service;
       _context = context;
       _patientInfoService = patientInfoService;
-      //_abhaM2Service = abhaM2Service;
+      _abhaM2Service = abhaM2Service;
     }
 
     [HttpPost]
@@ -338,41 +339,114 @@ namespace hospitalApiProject.Controllers
 
     #region Verification of ABHA Address
 
-    //[HttpPost]
-    //[Route("LinkCareContext")]
-    //public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
-    //{
-    //  if (data == null)
-    //  {
-    //    return BadRequest();
-    //  }
+    [HttpPost]
+    [Route("FetchModes")]
+    public async Task<IActionResult> FetchModes([FromBody] string abhaAddress) //purpose field
+    {
+      if (abhaAddress == null)
+      {
+        return BadRequest();
+      }
 
-    //  var result = await _abhaM2Service.LinkCareContext(data);
-    //  if (_service.HasError)
-    //  {
-    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
-    //  }
+      await _service.FetchModes(abhaAddress);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
 
-    //  return StatusCode((int)HttpStatusCode.Created, result);
-    //}
+      return StatusCode((int)HttpStatusCode.Accepted);
+    }
 
-    //[HttpPost]
-    //[Route("NotifyMobile")]
-    //public async Task<IActionResult> NotifyMobile([FromBody] CareContextModel data)
-    //{
-    //  if (data == null)
-    //  {
-    //    return BadRequest();
-    //  }
+    [HttpPost]
+    [Route("AbhaAddressAuthInit")]
+    public async Task<IActionResult> AbhaAddressAuthInit([FromBody] string abhaAddress) //purpose field
+    {
+      if (abhaAddress == null)
+      {
+        return BadRequest();
+      }
 
-    //  var result = await _abhaM2Service.NotifyMobile(data);
-    //  if (_service.HasError)
-    //  {
-    //    return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
-    //  }
+      await _service.AbhaAddressAuthInit(abhaAddress);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
 
-    //  return StatusCode((int)HttpStatusCode.Created, result);
-    //}
+      return StatusCode((int)HttpStatusCode.Accepted);
+    }
+
+    [HttpPost]
+    [Route("AbhaAddressAuthConfirm")]
+    public async Task<IActionResult> AbhaAddressAuthConfirm([FromBody] AbhaAuthConfirm request) //purpose field
+    {
+      if (request == null || request.txnId == null || request.authCode == null)
+      {
+        return BadRequest();
+      }
+
+      await _service.AbhaAddressAuthConfirm(request.txnId, request.authCode);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Accepted);
+    }
+
+    [HttpPost]
+    [Route("LinkCareContext")]
+    public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
+    {
+      if (data == null)
+      {
+        return BadRequest();
+      }
+
+      await _abhaM2Service.LinkCareContext(data);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int
+        )HttpStatusCode.Created);
+    }
+
+    [HttpPost]
+    [Route("CareContextNotifyMobile")]
+    public async Task<IActionResult> CareContextNotifyMobile([FromBody] CareContextModel data)
+    {
+      if (data == null)
+      {
+        return BadRequest();
+      }
+
+      await _abhaM2Service.NotifyMobile(data);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created);
+    }
+
+    [HttpPost]
+    [Route("OnDiscover")]
+    public async Task<IActionResult> OnDiscover([FromBody] OnDiscoverModel data)
+    {
+      if (data == null)
+      {
+        return BadRequest();
+      }
+
+      await _abhaM2Service.OnDiscover(data);
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return StatusCode((int)HttpStatusCode.Created);
+    }
 
     [HttpGet]
     [Route("PipedreamTest")]
@@ -410,13 +484,31 @@ namespace hospitalApiProject.Controllers
       return Ok();
     }
 
+    [HttpPost("ConsentOnNotify")]
+    public async Task<IActionResult> ConsentsOnNotify([FromBody] ConsentOnNotify request)
+    {
+      if (request == null)
+      {
+        return BadRequest("Invalid request body");
+      }
+
+      await _service.ConsentsOnNotifyV3(request.ConsentId);
+
+      if (_service.HasError)
+      {
+        return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
+      }
+
+      return Ok();
+    }
+
     [HttpGet("ScanDesk/Patients")]
     public async Task<ActionResult<List<AbhaPatientDetails>>> GetScannedPatients()
     {
       try
       {
         DateOnly today = DateOnly.FromDateTime(DateTime.Today);
-        DateOnly tomorrow = today.AddDays(1); 
+        DateOnly tomorrow = today.AddDays(1);
 
         List<AbhaPatientDetails> patientData = await _context.AbhaPatientDetails
     .Where(e => e.RegistrationDate.HasValue && e.RegistrationDate.Value >= today && e.RegistrationDate.Value < tomorrow)

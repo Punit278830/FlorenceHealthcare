@@ -27,10 +27,15 @@ public class PatientProfile
   public string phoneNumber { get; set; }
 }
 
+public class ConsentOnNotify
+{
+  public string ConsentId { get; set; }
+}
+
 public class Address
 {
   public string? line { get; set; }
-  public string? district { get; set; } 
+  public string? district { get; set; }
   public string? state { get; set; }
   public string? pincode { get; set; }
 }
