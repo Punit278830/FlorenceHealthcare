@@ -104,6 +104,7 @@ export class InvoiceViewComponent implements OnInit {
   public isPaidButtonVisible = true;
   public appointmentList: any[] = [];
   public flag: boolean = false;
+  public IsDoctorSameflag: boolean = false;
   public classes: any;
   public width!: string;
   public thermalvisible: boolean = false;
@@ -249,7 +250,6 @@ export class InvoiceViewComponent implements OnInit {
 
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
-
       // Find the latest appointment and check if it is within the last 7 days
       this.checkLatestAppointmentWithin7Days();
     });
@@ -259,16 +259,21 @@ export class InvoiceViewComponent implements OnInit {
     if (this.appointmentList.length > 0) {
       // Sort the appointments by date in descending order
       this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+      let SelDoctor :Number|null = 0;
       const selectedAppointmentDate = new Date(this.appointmentDetails.date);
+      SelDoctor = this.appointmentDetails.doctorId;
       let previousAppointmentDate: Date | null = null;
+      let previousDoctor :Number|null = 0;
 
-      for (let appointment of this.appointmentList) {
+      for (let appointment of this.appointmentList) {    
+       
         const appointmentDate = new Date(appointment.date);
         if (appointmentDate < selectedAppointmentDate) {
           previousAppointmentDate = appointmentDate;
+          previousDoctor = appointment.doctorId;
           break;
         }
+          
       }
 
       if (previousAppointmentDate) {
@@ -281,6 +286,14 @@ export class InvoiceViewComponent implements OnInit {
 
         // Check if the difference between the selected and previous appointment is within 7 days
         this.flag = differenceInDays <= 7 && differenceInDays >= 0;
+
+        if(previousDoctor == SelDoctor)
+        {
+          this.IsDoctorSameflag =true;       
+        }
+        else{         
+          this.IsDoctorSameflag =false;  
+        }
       } else {
         console.warn("No appointment found before the selected appointment date.");
         this.flag = false;
@@ -290,9 +303,23 @@ export class InvoiceViewComponent implements OnInit {
     }
 
     if (this.flag) {
-      this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
-      this.disc = 100;
+    
+      if(this.IsDoctorSameflag == false)
+      {
+        this.flag = false;
+        this.totalInvoiceAmount = this.totalInvoiceAmount;
+        this.disc = 0;      
+      }
+      if(this.IsDoctorSameflag == true)
+        {     
+          this.flag = true;
+          this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
+          this.disc = 100;
+        }
+
     }
+
+
     console.log("Flag:", this.flag);
   }
 
@@ -376,6 +403,8 @@ export class InvoiceViewComponent implements OnInit {
           this.isPaidButtonVisible = false;
           this.balanceAmount = this.balanceAmount + data.finalAmount;
         }
+        alert(this.totalInvoiceAmount);
+        alert(data.finalAmount);
         this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
       })
       console.log("addi", this.addtionalInoiveItem);
