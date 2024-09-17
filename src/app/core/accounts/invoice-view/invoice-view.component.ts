@@ -110,6 +110,7 @@ export class InvoiceViewComponent implements OnInit {
   public disc: number = 0;
   public loggedIn!: any;
   public Timenow!: string;
+  public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
   formatToTwoDecimalPlaces(value: number): string {
@@ -118,27 +119,27 @@ export class InvoiceViewComponent implements OnInit {
   public ButtonClickName: string;
   public ReferenceTextBoxVal: string;
   buttonColors = {
-    cash: 'lightgray',
-    online: 'lightgray'
+    Cash: 'lightgray',
+    Online: 'lightgray'
   };
   isTextboxVisible = false;
   changeColor(button: string) {
     // Reset all buttons to default color
-    this.buttonColors.cash = 'lightgray';
-    this.buttonColors.online = 'lightgray';
+    this.buttonColors.Cash = 'lightgray';
+    this.buttonColors.Online = 'lightgray';
 
     // Change the color of the clicked button
-    if (button === 'cash') {
-      this.buttonColors.cash = 'orange';
+    if (button === 'Cash') {
+      this.buttonColors.Cash = 'orange';
       this.isTextboxVisible = false;
-      this.ButtonClickName = 'cash';
+      this.ButtonClickName = 'Cash';
       this.isReferenceLabelVisible = false;
       
-    } else if (button === 'online') {
+    } else if (button === 'Online') {
       
-      this.buttonColors.online = 'green';
+      this.buttonColors.Online = 'green';
       this.isTextboxVisible = !this.isTextboxVisible;
-      this.ButtonClickName = 'online';
+      this.ButtonClickName = 'Online';
       this.isReferenceLabelVisible = true;
     }
   }
@@ -163,6 +164,7 @@ export class InvoiceViewComponent implements OnInit {
     }
     this.ButtonClickName = ''; 
     this.ReferenceTextBoxVal = '';
+    this.ConsultationPaidStatus = '';
   }
 
   getInvoiceDetails() {
@@ -172,6 +174,7 @@ export class InvoiceViewComponent implements OnInit {
       if (res.status == 'Paid') {
         this.isPaidButtonVisible = false;
         this.isAllowed = true;
+        
       }
       else {
         this.isPaidButtonVisible = true;
@@ -294,6 +297,25 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   paidinvoice(id: number) {
+
+    if(this.ButtonClickName == '')
+      {
+        alert('Please select payment mode first!');
+        return;
+      }
+
+      if(this.ButtonClickName != '')
+        {
+            if(this.ButtonClickName == 'Online')
+            {
+                if (this.RefNoInput.nativeElement.value == '') {
+                  alert('Please enter online payment reference number!');
+                  return;
+                }                
+            }       
+        }
+    
+
     this.invoiceDetails.status = 'Paid';
     if (this.invoiceDetails.status == 'Paid') { 
       this.isAllowed = true;
@@ -366,6 +388,23 @@ export class InvoiceViewComponent implements OnInit {
 
 
   paidsubInvoiceItem(id: number) {
+    if(this.ButtonClickName == '')
+      {
+        alert('Please select payment mode first!');
+        return;
+      }
+
+      if(this.ButtonClickName != '')
+        {
+            if(this.ButtonClickName == 'Online')
+            {
+                if (this.RefNoInput.nativeElement.value == '') {
+                  alert('Please enter online payment reference number!');
+                  return;
+                }                
+            }       
+        }
+    
     this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result: any) => {
       result.status = 'Paid';
       if (result.status == 'Paid') { 
