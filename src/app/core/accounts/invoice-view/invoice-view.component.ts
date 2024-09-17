@@ -8,10 +8,9 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { Iappointment, Iinvoice, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
-
+import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
 import preset from "jss-preset-default";
-
 const styles = {
   singleLine: `
     margin-top: 0.25rem;
@@ -83,14 +82,15 @@ const styles = {
 // const { classes } = sheet.attach();
 
 
-
 @Component({
   selector: 'app-invoice-view',
   templateUrl: './invoice-view.component.html',
-  styleUrls: ['./invoice-view.component.scss']
+  styleUrls: ['./invoice-view.component.scss'],
+  providers: [DecimalPipe]  // Add DecimalPipe to providers
 })
 export class InvoiceViewComponent implements OnInit {
   @ViewChild('printview', { static: false }) printView!: ElementRef;
+  @ViewChild('RefNoInput') RefNoInput!: ElementRef;
   public routes = routes;
   private sheets!: SheetsRegistry;
   public invoiceDetails!: Iinvoice;
@@ -110,19 +110,59 @@ export class InvoiceViewComponent implements OnInit {
   public disc: number = 0;
   public loggedIn!: any;
   public Timenow!: string;
+  isAllowed: boolean = false; // disable print button incase of unpaid
+  public isReferenceLabelVisible = false;
+  formatToTwoDecimalPlaces(value: number): string {
+    return value.toFixed(2); // Converts to a string with 2 decimal places
+  }
+  public ButtonClickName: string;
+  public ReferenceTextBoxVal: string;
+  buttonColors = {
+    cash: 'lightgray',
+    online: 'lightgray'
+  };
+  isTextboxVisible = false;
+  changeColor(button: string) {
+    // Reset all buttons to default color
+    this.buttonColors.cash = 'lightgray';
+    this.buttonColors.online = 'lightgray';
+
+    // Change the color of the clicked button
+    if (button === 'cash') {
+      this.buttonColors.cash = 'orange';
+      this.isTextboxVisible = false;
+      this.ButtonClickName = 'cash';
+      this.isReferenceLabelVisible = false;
+      
+    } else if (button === 'online') {
+      
+      this.buttonColors.online = 'green';
+      this.isTextboxVisible = !this.isTextboxVisible;
+      this.ButtonClickName = 'online';
+      this.isReferenceLabelVisible = true;
+    }
+  }
+
+
+  toggleTextbox() {
+    this.isTextboxVisible = !this.isTextboxVisible;
+  }
 
   constructor(private invoiceService: InvoiceService,
     private patientService: PatientService,
     private appointmentService: AppointmentService,
     private staffService: StaffService,
     private toastr: ToastrService,
+    private decimalPipe: DecimalPipe,
+    
     private route: Router) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     console.log("invoiceId", this.invoiceService.invoiceId);
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
     }
-
+    this.ButtonClickName = ''; 
+    this.ReferenceTextBoxVal = '';
   }
 
   getInvoiceDetails() {
@@ -131,9 +171,11 @@ export class InvoiceViewComponent implements OnInit {
     this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
       if (res.status == 'Paid') {
         this.isPaidButtonVisible = false;
+        this.isAllowed = true;
       }
       else {
         this.isPaidButtonVisible = true;
+        this.isAllowed =false;
       }
       this.invoiceDetails = res;
       console.log("invoice details", res)
@@ -141,14 +183,13 @@ export class InvoiceViewComponent implements OnInit {
         //this.isPaidButtonVisible=false;
         this.balanceAmount = this.balanceAmount + res.amount;
       }
-      this.totalInvoiceAmount += res.amount;
-
+      
+      
+      //this.totalInvoiceAmount += res.amount;
+      this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
       this.getPatientDetails(res.patientId);
       this.getAppointDetails(res.appoitmentId);
-      this.getAddtionalItems(this.invoiceId)
-
-
-
+      this.getAddtionalItems(this.invoiceId);
 
     })
 
@@ -173,6 +214,13 @@ export class InvoiceViewComponent implements OnInit {
       this.patientDetails = res;
 
     })
+  }
+  handleClick(event: MouseEvent): void {
+    if (!this.isAllowed) {
+      // Prevent default behavior if not allowed
+      event.stopImmediatePropagation(); // Prevent event from propagating
+      return; // Exit the function to avoid further processing
+    }
   }
 
 
@@ -245,18 +293,20 @@ export class InvoiceViewComponent implements OnInit {
     console.log("Flag:", this.flag);
   }
 
-
-
-
-
   paidinvoice(id: number) {
     this.invoiceDetails.status = 'Paid';
+    if (this.invoiceDetails.status == 'Paid') { 
+      this.isAllowed = true;
+    }
+    else {         
+      this.isAllowed =false;
+    }
     this.invoiceService.updateInvoice(id, this.invoiceDetails).subscribe(res => {
       if (res) {
         this.getInvoiceDetails();
         this.balanceAmount = 0;
         this.toastr.success("Invoice Paid Successfully", "Update Invoice");
-
+        
       }
     })
 
@@ -266,13 +316,23 @@ export class InvoiceViewComponent implements OnInit {
     this.thermalvisible = true;
     var dateToday = new Date();
     this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes()<10 ? '0':''}${dateToday.getMinutes()}`;
+    
+    if (this.isTextboxVisible == false) {
 
+      this.ReferenceTextBoxVal = 'NA';
+    }
+    else{
+      const inputValue = this.RefNoInput.nativeElement.value;
+      this.ReferenceTextBoxVal = inputValue;
+    }
+
+    
     setTimeout(() => {
       if (this.printView) {
         const tpm = new ThermalPrinterService('80mm');
         const styles = this.sheets.toString();
-        console.log(this.printView.nativeElement.innerHTML);
-        console.log(styles);
+        //console.log(this.printView.nativeElement.innerHTML);
+        //console.log(styles);
         tpm.setStyles(styles);
         tpm.addRawHtml(this.printView.nativeElement.innerHTML);
         tpm.print();
@@ -308,6 +368,12 @@ export class InvoiceViewComponent implements OnInit {
   paidsubInvoiceItem(id: number) {
     this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result: any) => {
       result.status = 'Paid';
+      if (result.status == 'Paid') { 
+        this.isAllowed = true;
+      }
+      else {         
+        this.isAllowed =false;
+      }
       this.invoiceService.updateSubInvoiceItem(id, result).subscribe(res => {
         this.toastr.success("Invoice Paid", 'Paid');
         this.balanceAmount = 0;
@@ -332,6 +398,7 @@ class ThermalPrinterService {
   cssStyles = ``;
 
   constructor(private paperWidth: "80mm" | "58mm") { }
+  
 
   addRawHtml(htmlEl: string) {
     this.printContent += `\n${htmlEl}`;
@@ -356,6 +423,7 @@ class ThermalPrinterService {
     this.cssStyles = cssStyles;
   }
 
+  
 
   print() {
     

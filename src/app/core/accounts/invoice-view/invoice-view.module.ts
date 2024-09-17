@@ -14,4 +14,4 @@ import { InvoiceViewComponent } from './invoice-view.component';
     InvoiceViewRoutingModule
   ]
 })
-export class InvoiceViewModule { }
+export class InvoiceViewModule {  }
