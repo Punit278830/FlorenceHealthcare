@@ -12,7 +12,7 @@ import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-uploa
 import { MedicineService } from 'src/app/shared/Services/medicine/medicine.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { QuestionService } from 'src/app/shared/Services/question/question.service';
-import { IPredefineDiagnosis, IQuestionnaires, Ianswers, Iappointment, Iconsultation, IconsultationFiles, IdownloadFile, IfileUpload, Ilogin, ImedicineMaster, Ioptions, IpatientInfo, IprescribeMedicine, IstaffInfo, Ivital } from 'src/app/shared/models/models';
+import { IPredefineDiagnosis, Iquestion, IQuestionnaires, Ianswers, Iappointment, Iconsultation, IconsultationFiles, IdownloadFile, IfileUpload, Ilogin, ImedicineMaster, Ioptions, IpatientInfo, IprescribeMedicine, IstaffInfo, Ivital } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import jsPDF, * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -104,6 +104,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public seletedAppointmentDate!: Date;
   public submittedQues: any[] = [];
   dtFollowUp: string = '';
+
+  public allOptions: Ioptions[] = [];
+  textInputValue: string = '';
+  currentQuestionIndex: number = 1;
+  public subQuestionCounter = 0;
+  questionList!: Iquestion[];
+
+
   // public showAddQuestion=true;
   // public questionnaireId!:number;
   constructor(private appointmentService: AppointmentService,
@@ -165,6 +173,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getCurrentAppointmentDetils();
     // this.getConsultationFiles();
     this.getPreDiagnosisTemplate();
+
+    this.loadQuestions();
+    this.fetchAllOptions();
+
     // this.getUploadedFiles(this.latestId);
     //     this.preDiagnosis=[
     //   {
@@ -453,47 +465,70 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   nextQuestion() {
+    var subQuestionIndex = -1;
 
+    // If there's a next question id, it means we need to navigate to a sub-question
     if (this.nextQuestionId != 0) {
+      this.subQuestionCounter += 1;
 
-      if (this.previousQuestionId != this.nextQuestionId) {
-
-        const position = this.combindQuestionOption.findIndex(element => element.questionId == this.nextQuestionId)
-        this.questionCounter = position;
-        if (this.questionCounter <= this.questionLenth) {   //this.currentQuestion=this.nextQuestionId
-          this.combindQuestionOption.map((data: any) => {
-            console.log(" question data option ", data);
-            if (data.questionId == this.nextQuestionId) {
-              this.currentQuestionData = data;
-              this.previousQuestionId = this.nextQuestionId;
-              this.nextQuestionId = 0;
-
-            }
-
-          })
-        }
-
-      }
-      else {
-        this.finishQuestionniary = true;
+      if (this.currentQuestionData && this.currentQuestionData.options) {
+        // Find the index of the sub-question in the current question's options
+        const index = this.currentQuestionData.options.findIndex(
+          (option: any) => option.mapQuestionId === this.nextQuestionId
+        );
+        subQuestionIndex = index;
       }
 
-    }
-    else {
+      if (subQuestionIndex != -1) {
+        // Navigate to the next mapped question (sub-question)
+        this.getNextMappedQuestion();
+        this.nextQuestionId = 0;
+      }
+    } else {
+      // Navigate to the next main question
       this.questionCounter++;
       if (this.questionCounter < this.questionLenth) {
-
         this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
+
+        subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
+        this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
+
+        // Reset sub-question counter for the new main question
+        //this.subQuestionCounter = 0;
       }
     }
-    if (this.questionCounter >= this.questionLenth) {
+
+    // Update the current question index
+    this.currentQuestionIndex = this.questionCounter + 1;
+
+    // Check if we have reached the end of the main questions and there are no more sub-questions
+    if (this.questionCounter >= this.questionLenth && subQuestionIndex == -1) {
       this.finishQuestionniary = true;
+      this.currentQuestionIndex = this.questionLenth;
     }
 
-    console.log("this.questionCounter ", this.questionCounter);
-    console.log(" this.nextQuestionId", this.nextQuestionId);
-    console.log(" this.previousQuestionId", this.previousQuestionId);
+    this.textInputValue = '';
+  }
 
+  getNextMappedQuestion() {
+    const nextQuestion = this.questionList.find(
+      question => question.questionId === this.nextQuestionId
+    );
+
+    if (nextQuestion) {
+      this.currentQuestionData = nextQuestion;
+      // this.mapQuestionAndOptions(this.currentQuestionData.questionnaireId);
+      //this.fetchAllOptions();
+      this.currentQuestionData.options = this.getOptionsForQuestion(this.nextQuestionId);
+
+
+    } else {
+      console.log('Question not found');
+    }
+  }
+
+  getOptionsForQuestion(questId: number): Ioptions[] {
+    return this.allOptions.filter(option => option.questionId === questId)
   }
 
   isCompleted(data: IQuestionnaires): boolean {
@@ -555,6 +590,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
+  loadQuestions(): void {
+    this.question.getAllQuestions().subscribe(
+      (res) => {
+        this.questionList = res;
+      },
+      (error) => {
+        console.error('Error fetching questions:', error);
+      }
+    );
+  }
+
+  
+  fetchAllOptions() {
+    this.question.getAllOptions().subscribe(res => {
+      if (res) {
+        this.allOptions = res;
+      }
+    });
+  }
 
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
