@@ -66,25 +66,31 @@
                                 <div [ngClass]="classes.singleLine">&nbsp;</div>
                                 <div class="col-sm-6 col-lg-12 m-b-20">
                                     <button
-        (click)="changeColor('cash')"
-        [style.backgroundColor]="buttonColors.cash"
+        (click)="changeColor('Cash')" class="custom-badge"
+        [style.backgroundColor]="buttonColors.Cash"
       >
         Cash
       </button>
-    
+      &nbsp;&nbsp;
       <button
-        (click)="changeColor('online')"
-        [style.backgroundColor]="buttonColors.online"
+        (click)="changeColor('Online')" class="custom-badge"
+        [style.backgroundColor]="buttonColors.Online"
       >
         Online
       </button>
       <div [ngClass]="classes.singleLine">&nbsp;</div>
       <div *ngIf="isTextboxVisible">
-       Reference No. <input 
-        id="RefNo"
+        <div class="col-12 col-md-6 col-xl-4">
+            <div class="form-group local-forms">
+                Reference No. <input 
+        id="RefNo" class="form-control"
         type="text"
         #RefNoInput
       />
+
+            </div>
+        </div>
+      
       </div>
       
                                 </div>
@@ -119,8 +125,8 @@
                                                     [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
                                                     class="custom-badge">{{invoiceDetails.status}}</button></td>
                                             <td>
-                                                <button type="button" (click)="paidinvoice(invoiceDetails.invoiceId)"
-                                                    class="btn btn-primary custom-badge">Pay</button>
+                                                <button type="button" (click)="paidinvoice(invoiceDetails.invoiceId)" [disabled]="invoiceDetails.status === 'Paid'"
+                                                class="btn btn-primary custom-badge">{{invoiceDetails.status == 'Paid' ? 'Paid' : 'Pay'}}</button>
                                             </td>
 
 
@@ -220,8 +226,9 @@
         date:'dd-MMMM-yyyy'}} </div>
     <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM': 'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
+    <div [ngClass]="classes.textRight"><strong>Payment Mode: {{ButtonClickName}}</strong></div>          
+    <div [ngClass]="classes.textRight"><label *ngIf="isReferenceLabelVisible"><strong>Reference No.: {{ReferenceTextBoxVal}}</strong></label></div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
             <div style="width: 10mm;"><strong>SR.</strong></div>
@@ -236,7 +243,7 @@
         <div style="display: flex;flex-direction: column;">
             <div [ngClass]="classes.wrapper" *ngFor="let data of appointmentList; let i = index">
                 <div style="width:3mm;">{{ i + 1 }}</div>
-                <div style="width: 20mm;">Consultation </div>
+                <div style="width:20mm;">Consultation </div>
                 <!-- <div style="width: 1%;">1</div>-->
                 <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
                 <div style="width: 10mm;">{{ flag ? 100 : 0 }} </div>
@@ -254,23 +261,16 @@
 
         </div>
 
-
-
-        <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
-        <div [ngClass]="classes.singleLine">&nbsp;</div>
-        <div [ngClass]="classes.textRight" style="width: 50mm">
-            <strong>Total: ₹{{formatToTwoDecimalPlaces(totalInvoiceAmount)}}</strong>
-            <div [ngClass]="classes.singleLine">&nbsp;</div>
-            <strong>Cash/Online: {{ButtonClickName}}</strong>
-            
-            <div [ngClass]="classes.singleLine">&nbsp;</div>
-            <label *ngIf="isReferenceLabelVisible"><strong>Reference No.: {{ReferenceTextBoxVal}}</strong></label>
-            
-        </div>
-
     </div>
 
-    <div [ngClass]="classes.textLeft">Terms and Conditions</div>
+    <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
+    <div [ngClass]="classes.textRight">
+        <strong>Total: ₹{{formatToTwoDecimalPlaces(totalInvoiceAmount)}}</strong>   
+    </div>
+
+
+    <!--<div [ngClass]="classes.textLeft">Terms and Conditions</div>-->
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.textLeft"><strong>Terms and Conditions</strong> </div>
     <div [ngClass]="classes.textLeft">OPD Prescription valid for 7(seven) days including today</div>

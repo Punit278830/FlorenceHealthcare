@@ -104,12 +104,14 @@ export class InvoiceViewComponent implements OnInit {
   public isPaidButtonVisible = true;
   public appointmentList: any[] = [];
   public flag: boolean = false;
+  public IsDoctorSameflag: boolean = false;
   public classes: any;
   public width!: string;
   public thermalvisible: boolean = false;
   public disc: number = 0;
   public loggedIn!: any;
   public Timenow!: string;
+  public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
   formatToTwoDecimalPlaces(value: number): string {
@@ -118,27 +120,27 @@ export class InvoiceViewComponent implements OnInit {
   public ButtonClickName: string;
   public ReferenceTextBoxVal: string;
   buttonColors = {
-    cash: 'lightgray',
-    online: 'lightgray'
+    Cash: 'lightgray',
+    Online: 'lightgray'
   };
   isTextboxVisible = false;
   changeColor(button: string) {
     // Reset all buttons to default color
-    this.buttonColors.cash = 'lightgray';
-    this.buttonColors.online = 'lightgray';
+    this.buttonColors.Cash = 'lightgray';
+    this.buttonColors.Online = 'lightgray';
 
     // Change the color of the clicked button
-    if (button === 'cash') {
-      this.buttonColors.cash = 'orange';
+    if (button === 'Cash') {
+      this.buttonColors.Cash = 'orange';
       this.isTextboxVisible = false;
-      this.ButtonClickName = 'cash';
+      this.ButtonClickName = 'Cash';
       this.isReferenceLabelVisible = false;
       
-    } else if (button === 'online') {
+    } else if (button === 'Online') {
       
-      this.buttonColors.online = 'green';
+      this.buttonColors.Online = 'green';
       this.isTextboxVisible = !this.isTextboxVisible;
-      this.ButtonClickName = 'online';
+      this.ButtonClickName = 'Online';
       this.isReferenceLabelVisible = true;
     }
   }
@@ -163,6 +165,7 @@ export class InvoiceViewComponent implements OnInit {
     }
     this.ButtonClickName = ''; 
     this.ReferenceTextBoxVal = '';
+    this.ConsultationPaidStatus = '';
   }
 
   getInvoiceDetails() {
@@ -172,6 +175,7 @@ export class InvoiceViewComponent implements OnInit {
       if (res.status == 'Paid') {
         this.isPaidButtonVisible = false;
         this.isAllowed = true;
+        
       }
       else {
         this.isPaidButtonVisible = true;
@@ -246,7 +250,6 @@ export class InvoiceViewComponent implements OnInit {
 
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
-
       // Find the latest appointment and check if it is within the last 7 days
       this.checkLatestAppointmentWithin7Days();
     });
@@ -256,16 +259,21 @@ export class InvoiceViewComponent implements OnInit {
     if (this.appointmentList.length > 0) {
       // Sort the appointments by date in descending order
       this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+      let SelDoctor :Number|null = 0;
       const selectedAppointmentDate = new Date(this.appointmentDetails.date);
+      SelDoctor = this.appointmentDetails.doctorId;
       let previousAppointmentDate: Date | null = null;
+      let previousDoctor :Number|null = 0;
 
-      for (let appointment of this.appointmentList) {
+      for (let appointment of this.appointmentList) {    
+       
         const appointmentDate = new Date(appointment.date);
         if (appointmentDate < selectedAppointmentDate) {
           previousAppointmentDate = appointmentDate;
+          previousDoctor = appointment.doctorId;
           break;
         }
+          
       }
 
       if (previousAppointmentDate) {
@@ -278,6 +286,14 @@ export class InvoiceViewComponent implements OnInit {
 
         // Check if the difference between the selected and previous appointment is within 7 days
         this.flag = differenceInDays <= 7 && differenceInDays >= 0;
+
+        if(previousDoctor == SelDoctor)
+        {
+          this.IsDoctorSameflag =true;       
+        }
+        else{         
+          this.IsDoctorSameflag =false;  
+        }
       } else {
         console.warn("No appointment found before the selected appointment date.");
         this.flag = false;
@@ -287,13 +303,46 @@ export class InvoiceViewComponent implements OnInit {
     }
 
     if (this.flag) {
-      this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
-      this.disc = 100;
+    
+      if(this.IsDoctorSameflag == false)
+      {
+        this.flag = false;
+        this.totalInvoiceAmount = this.totalInvoiceAmount;
+        this.disc = 0;      
+      }
+      if(this.IsDoctorSameflag == true)
+        {     
+          this.flag = true;
+          this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
+          this.disc = 100;
+        }
+
     }
+
+
     console.log("Flag:", this.flag);
   }
 
   paidinvoice(id: number) {
+
+    if(this.ButtonClickName == '')
+      {
+        alert('Please select payment mode first!');
+        return;
+      }
+
+      if(this.ButtonClickName != '')
+        {
+            if(this.ButtonClickName == 'Online')
+            {
+                if (this.RefNoInput.nativeElement.value == '') {
+                  alert('Please enter online payment reference number!');
+                  return;
+                }                
+            }       
+        }
+    
+
     this.invoiceDetails.status = 'Paid';
     if (this.invoiceDetails.status == 'Paid') { 
       this.isAllowed = true;
@@ -354,6 +403,8 @@ export class InvoiceViewComponent implements OnInit {
           this.isPaidButtonVisible = false;
           this.balanceAmount = this.balanceAmount + data.finalAmount;
         }
+        alert(this.totalInvoiceAmount);
+        alert(data.finalAmount);
         this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
       })
       console.log("addi", this.addtionalInoiveItem);
@@ -366,6 +417,23 @@ export class InvoiceViewComponent implements OnInit {
 
 
   paidsubInvoiceItem(id: number) {
+    if(this.ButtonClickName == '')
+      {
+        alert('Please select payment mode first!');
+        return;
+      }
+
+      if(this.ButtonClickName != '')
+        {
+            if(this.ButtonClickName == 'Online')
+            {
+                if (this.RefNoInput.nativeElement.value == '') {
+                  alert('Please enter online payment reference number!');
+                  return;
+                }                
+            }       
+        }
+    
     this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result: any) => {
       result.status = 'Paid';
       if (result.status == 'Paid') { 
