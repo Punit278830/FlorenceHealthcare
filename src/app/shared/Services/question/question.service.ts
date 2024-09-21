@@ -68,6 +68,11 @@ export class QuestionService {
     return this.http.get(this.apiUrl+'Questions/questionnareId/'+id);
    }
 
+   getQuestionsAndAnswers(id:number, appointmentId: number):Observable<any>
+   {
+    return this.http.get(this.apiUrl+'Questions/questionnareId/'+id+ '/'+appointmentId);
+   }
+
    //*********Option related API******* */
 
    createOption(questionOption:any[]):Observable<any>

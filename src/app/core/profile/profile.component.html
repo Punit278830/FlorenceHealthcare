@@ -346,7 +346,16 @@
                                             <div class="card-body">
                                                 <div class="col-12">
                                                     <div class="form-heading">
-                                                        <h4 class="h4heading">Questions</h4>
+                                                        <h4 class="h4heading" *ngIf="combindQuestionOption.length > 1 && subQuestionCounter > 0">
+                                                            Question {{currentQuestionIndex}}.{{subQuestionCounter}} of
+                                                            {{questionLenth}}
+                                                        </h4>
+                                                        <h4  class="h4heading" *ngIf="combindQuestionOption.length > 1 && subQuestionCounter <= 0">
+                                                            Question {{currentQuestionIndex}} of {{questionLenth}}
+                                                        </h4>
+                                                        <h4 class="h4heading" *ngIf="combindQuestionOption.length <= 1">
+                                                            Question
+                                                        </h4>
                                                     </div>
                                                 </div>
                                                 <div class="col-12 col-md-12 col-xl-8">
@@ -375,7 +384,7 @@
                                                                             <input type="radio" [value]="data.optionId"
                                                                                    class="form-check-input"
                                                                                    name="{{currentQuestionData.questionId}}"
-                                                                                   [(ngModel)]="currentQuestionData.savedSelectedOptionId">
+                                                                                   [(ngModel)]="currentQuestionData.selectedOptionId">
                                                                         </div>
                                                                     </ng-container>
                                                                 </div>

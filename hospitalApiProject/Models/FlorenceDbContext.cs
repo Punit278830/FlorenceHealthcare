@@ -125,6 +125,7 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.AppointmentId).HasColumnName("appointmentId");
       entity.Property(e => e.ParticipantId).HasColumnName("ParticipantID");
       entity.Property(e => e.QuestionId).HasColumnName("QuestionID");
+      entity.Property(e => e.QuestionnaireId).HasColumnName("QuestionnaireId");
       entity.Property(e => e.SelectedOptionId).HasColumnName("SelectedOptionID");
 
       entity.HasOne(d => d.Question).WithMany(p => p.Answers)

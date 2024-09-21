@@ -19,6 +19,7 @@ public partial class Question
 }
 public class QuestionView
 {
+  public int AnswerId { get; set; }
   public int QuestionId { get; set; }
   public string QuestionText { get; set; } = null!;
   public string AnswerText { get; set; } = null!;

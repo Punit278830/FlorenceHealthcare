@@ -4,7 +4,7 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { forkJoin, tap } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { ConsultService } from 'src/app/shared/Services/consultation/consult.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
@@ -111,7 +111,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public subQuestionCounter = 0;
   questionList!: Iquestion[];
 
-
   // public showAddQuestion=true;
   // public questionnaireId!:number;
   constructor(private appointmentService: AppointmentService,
@@ -209,7 +208,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       alert('Cannot enter alphabet in followup after!');
     }
   }
-  
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -308,11 +307,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const questionIndex = this.combindQuestionOption.findIndex(q => q.questionId === answer.questionId);
         if (questionIndex !== -1) {
           const question = this.combindQuestionOption[questionIndex];
-
+          question.answerId = answer.answerId;
           if (question.questionType === 2) {
             question.savedAnswerText = answer.answerText;
           } else if (question.questionType === 1) {
-            question.savedSelectedOptionId = answer.selectedOptionId;
+            question.selectedOptionId = answer.selectedOptionId;
           }
           console.log("saved question", question);
           console.log("saved answer", answer);
@@ -451,6 +450,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
     const answerObject: Ianswers = {
       questionId: this.currentQuestionData.questionId,
+      answerId: this.currentQuestionData.answerId,
+      questionnaireId: this.selectedques,
       participantId: this.loggedInUserId.loginId,
       answerText: typeof answer.value[answerKey] === 'string' ? answer.value[answerKey] : '',
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
@@ -520,8 +521,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       // this.mapQuestionAndOptions(this.currentQuestionData.questionnaireId);
       //this.fetchAllOptions();
       this.currentQuestionData.options = this.getOptionsForQuestion(this.nextQuestionId);
-
-
+      this.getQuestionsAndAnswers(this.selectedques, this.latestId);
     } else {
       console.log('Question not found');
     }
@@ -547,48 +547,96 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return this.submittedQues.includes(questionnaireId);
   }
 
+  getQuestionsAnswers() {
+    return this.question.getQuestionwithAnswerByAppointmentId(this.latestId).pipe(
+      tap((res: any[]) => {
+        this.questionData = res;
+      })
+    );
+  }
+
+  getQuestionsAndAnswers(questId: number, appointmentId: number) {
+    this.question.getQuestionsAndAnswers(questId, appointmentId).subscribe(
+        (res) => {
+            this.combindQuestionOption = res;
+            this.dispalyPatientQuiz(); // Call displayPatientQuiz after data is loaded
+        },
+        (error) => {
+            console.error('Error fetching questions/answers:', error);
+        }
+    );
+}
+
   mapQuestionAndOptions(questId: number) {
+    this.currentQuestionIndex = 1;
+    this.subQuestionCounter = 0;
     this.selectedques = questId;
     this.combindQuestionOption = [];
     this.displayVitalCard = false;
-    const question$ = this.question.getQuestionByQuestionaireId(questId)
-    const options$ = this.question.getAllOptions();
 
-    forkJoin([question$, options$]).subscribe(([question, options]) => {
+    this.getQuestionsAndAnswers(questId, this.latestId)
+    // this.question.getQuestionsAndAnswers(questId, this.latestId).pipe(
+    //   tap((res: any[]) => {
+    //     this.combindQuestionOption = res;
+    //   })
+    // );
 
-      this.combindQuestionOption = question.map((quest: any) => {
-        options.map(e => {
-          if (e.questionId == quest.questionId) {
-            const optData: any = {};
-            optData.optionId = e.optionId,
-              optData.optionText = e.optionText
-            optData.mapQuestionId = e.mapQuestionId
-            quest.options.push(optData);
-          }
-        })
+    // this.dispalyPatientQuiz();
+    // const question$ = this.question.getQuestionByQuestionaireId(questId);
+    // const options$ = this.question.getAllOptions();
 
-        const opt = options.find(e => e.questionId == quest.questionId);
+    // forkJoin([question$, options$]).subscribe(([question, options]) => {
+    //     this.combindQuestionOption = question.map((quest: any) => {
+    //         // Initialize options for the current question
+    //         quest.options = [];
 
-        return {
-          ...quest,
-          mapQuestionId: opt ? opt.mapQuestionId : 0,
-          savedAnswerText: '',  // Add default value for saved answer text
-          savedSelectedOptionId: null
+    //         options.forEach(e => {
+    //             if (e.questionId === quest.questionId) {
+    //                 const optData: any = {
+    //                     optionId: e.optionId,
+    //                     optionText: e.optionText,
+    //                     mapQuestionId: e.mapQuestionId,
+    //                 };
+    //                 quest.options.push(optData);
+    //             }
+    //         });
 
-        }
-      })
-      console.log("issubmitted", this.isSubmitted(questId))
+    //         const opt = options.find(e => e.questionId === quest.questionId);
 
-      this.loadSavedAnswers(this.latestId);
+    //         return {
+    //             ...quest,
+    //             mapQuestionId: opt ? opt.mapQuestionId : 0,
+    //             savedAnswerText: '',  // Default value for saved answer text
+    //             savedSelectedOptionId: null
+    //         };
+    //     });
 
-      // if (this.isSubmitted(questId)) {
-      //   this.loadSavedAnswers(this.latestId);
-      // } else {
-      //   this.dispalyPatientQuiz();
-      // }
-    })
+    //     console.log("issubmitted", this.isSubmitted(questId));
 
+    //     // Call getQuestionsAnswers and process the data
+    //     this.getQuestionsAnswers().subscribe(() => {
+    //         // Loop through questionData to build combinedQuestionOption
+    //         this.questionData.forEach(answer => {
+    //             const questionIndex = this.combindQuestionOption.findIndex(q => q.questionId === answer.questionId);
+    //             if (questionIndex !== -1) {
+    //                 const question = this.combindQuestionOption[questionIndex];
+
+    //                 // Map the answerId and other relevant data
+    //                 question.answerId = answer.answerId;
+    //                 if (question.questionType === 2) {
+    //                     question.savedAnswerText = answer.answerText;
+    //                 } else if (question.questionType === 1) {
+    //                     question.savedSelectedOptionId = answer.selectedOptionId;
+    //                 }
+    //             }
+    //         });
+
+    //         // Finally, call your display function
+    //         this.dispalyPatientQuiz();
+    //     });
+    // });
   }
+
 
   loadQuestions(): void {
     this.question.getAllQuestions().subscribe(
@@ -601,7 +649,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  
+
   fetchAllOptions() {
     this.question.getAllOptions().subscribe(res => {
       if (res) {
@@ -614,13 +662,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
     if (this.currentQuestionData != undefined) {
-      if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.savedAnswerText) {
+      if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.answers[0].answerText) {
         this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
-      } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.savedSelectedOptionId) {
-        this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
+      } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.answers[0].selectedOptionId) {
+        this.currentQuestionData.selectedOptionId = this.currentQuestionData.answers[0].selectedOptionId;
       }
     }
-    
+
     console.log("current", this.currentQuestionData);
 
   }
@@ -945,7 +993,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
-        if(item.docName == "previewFile") {
+        if (item.docName == "previewFile") {
           this.previewFile.push(item);
         }
       })

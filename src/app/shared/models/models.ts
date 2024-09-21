@@ -282,6 +282,7 @@ export interface Ioptions {
 export interface Ianswers {
   answerId?: number,
   questionId: number,
+  questionnaireId?: number,
   participantId: number,
   answerText?: string,
   selectedOptionId?: number,

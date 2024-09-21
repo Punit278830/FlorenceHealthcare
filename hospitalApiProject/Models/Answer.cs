@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -8,6 +8,8 @@ public partial class Answer
     public int AnswerId { get; set; }
 
     public int? QuestionId { get; set; }
+
+    public int? QuestionnaireId { get; set; }
 
     public int? ParticipantId { get; set; }
 

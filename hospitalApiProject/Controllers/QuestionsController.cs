@@ -51,6 +51,141 @@ namespace hospitalApiProject.Controllers
       return question;
     }
 
+    [HttpGet("questionnareId/{id}/{appointmentId}")]
+    public async Task<ActionResult<IEnumerable<Question>>> GetQAByQuestionnaireAndAppointmentId(int id, int appointmentId)
+    {
+      // Fetch all options, answers, and questions in one go
+      var options = await _context.Options.ToListAsync(); // Fetch all options at once
+
+      var answers = await _context.Answers
+          .Where(a => a.QuestionnaireId == id && a.AppointmentId == appointmentId)
+          .ToListAsync(); // Fetch answers for the specific questionnaire and appointment
+
+      // Fetch all questions associated with the questionnaire
+      var questions = await _context.Questions
+          .Where(q => q.QuestionnaireId == id)
+          .ToListAsync(); // Fetch questions for the given questionnaire
+
+      if (questions == null || !questions.Any())
+      {
+        return NotFound();
+      }
+
+      // Map options and answers to each question
+      var combinedQuestions = questions.Select(question =>
+      {
+        // Filter options that belong to this specific question
+        var questionOptions = options
+            .Where(o => o.QuestionId == question.QuestionId)
+            .Select(o => new Option
+            {
+              OptionId = o.OptionId,
+              OptionText = o.OptionText,
+              MapQuestionId = o.MapQuestionId
+            })
+            .ToList();
+
+        // Get the latest answer for the question based on the appointment
+        var latestAnswer = answers
+            .Where(a => a.QuestionId == question.QuestionId)
+            .OrderByDescending(a => a.AnswerId)
+            .FirstOrDefault();
+
+        // Return a fully mapped Question object
+        return new Question
+        {
+          QuestionId = question.QuestionId,
+          QuestionText = question.QuestionText,
+          QuestionType = question.QuestionType,
+          QuestionnaireId = question.QuestionnaireId,
+          Options = questionOptions, // Attach the mapped options
+          Answers = latestAnswer != null
+                ? new List<Answer>
+                {
+                    new Answer
+                    {
+                        AnswerId = latestAnswer.AnswerId,
+                        AnswerText = latestAnswer.AnswerText,
+                        SelectedOptionId = latestAnswer.SelectedOptionId,
+                        AppointmentId = appointmentId
+                    }
+                }
+                : new List<Answer>() // Return an empty list if no answer is found
+        };
+      }).ToList();
+
+      return Ok(combinedQuestions); // Return the list of questions with options and answers
+    }
+
+
+    [HttpGet("questionnareId/{id}/{appointmentId}")]
+    public async Task<ActionResult<IEnumerable<Question>>> GetQASelections(int id, int appointmentId)
+    {
+      // Fetch all options, answers, and questions in one go
+      var options = await _context.Options.ToListAsync(); // Fetch all options at once
+
+      var answers = await _context.Answers
+          .Where(a => a.QuestionnaireId == id && a.AppointmentId == appointmentId)
+          .ToListAsync(); // Fetch answers for the specific questionnaire and appointment
+
+      // Fetch all questions associated with the questionnaire
+      var questions = await _context.Questions
+          .Where(q => q.QuestionnaireId == id)
+          .ToListAsync(); // Fetch questions for the given questionnaire
+
+      if (questions == null || !questions.Any())
+      {
+        return NotFound();
+      }
+
+      // Map options and answers to each question
+      var combinedQuestions = questions.Select(question =>
+      {
+        // Filter options that belong to this specific question
+        var questionOptions = options
+            .Where(o => o.QuestionId == question.QuestionId)
+            .Select(o => new Option
+            {
+              OptionId = o.OptionId,
+              OptionText = o.OptionText,
+              MapQuestionId = o.MapQuestionId
+            })
+            .ToList();
+
+        // Get the latest answer for the question based on the appointment
+        var latestAnswer = answers
+            .Where(a => a.QuestionId == question.QuestionId)
+            .OrderByDescending(a => a.AnswerId)
+            .FirstOrDefault();
+
+        // Return a fully mapped Question object
+        return new Question
+        {
+          QuestionId = question.QuestionId,
+          QuestionText = question.QuestionText,
+          QuestionType = question.QuestionType,
+          QuestionnaireId = question.QuestionnaireId,
+          Options = questionOptions, // Attach the mapped options
+          Answers = latestAnswer != null
+                ? new List<Answer>
+                {
+                    new Answer
+                    {
+                        AnswerId = latestAnswer.AnswerId,
+                        AnswerText = latestAnswer.AnswerText,
+                        SelectedOptionId = latestAnswer.SelectedOptionId,
+                        AppointmentId = appointmentId
+                    }
+                }
+                : new List<Answer>() // Return an empty list if no answer is found
+        };
+      }).ToList();
+
+      return Ok(combinedQuestions); // Return the list of questions with options and answers
+    }
+
+
+
     // PUT: api/Questions/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
@@ -104,8 +239,10 @@ namespace hospitalApiProject.Controllers
                   join o in _context.Options on a.SelectedOptionId equals o.OptionId into optionGroup // Group join with Options table
                   from o in optionGroup.DefaultIfEmpty() // Perform left join
                   where a.AppointmentId == appointmentId
+                        //&& a.QuestionnaireId == qr.QuestionnaireId // Ensure the questionnaireId matches
                   select new QuestionView
                   {
+                    AnswerId = a.AnswerId,
                     QuestionId = q.QuestionId,
                     QuestionText = q.QuestionText,
                     AnswerText = a.AnswerText ?? "", // Provide a default value when AnswerText is null
