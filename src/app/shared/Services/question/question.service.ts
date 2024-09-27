@@ -73,6 +73,11 @@ export class QuestionService {
     return this.http.get(this.apiUrl+'Questions/questionnareId/'+id+ '/'+appointmentId);
    }
 
+   
+   getQAMappings(id:number, appointmentId: number):Observable<any>
+   {
+    return this.http.get(this.apiUrl+'Questions/answers/questionnareId/'+id+ '/'+appointmentId);
+   }
    //*********Option related API******* */
 
    createOption(questionOption:any[]):Observable<any>
@@ -84,6 +89,12 @@ export class QuestionService {
    {
     return this.http.get(this.apiUrl+'Options');
    }
+
+   getAllOptionsByAppointmentId(id: number):Observable<Ioptions[]>
+   {
+    return this.http.get(this.apiUrl+'Options/ByAppointmentId' + id);
+   }
+
 
    deleteOption(id: number): Observable<any> {
     return this.http.delete(this.apiUrl+ 'Options/' + id);

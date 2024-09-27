@@ -323,7 +323,7 @@ namespace hospitalApiProject.Services
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
       //client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
 

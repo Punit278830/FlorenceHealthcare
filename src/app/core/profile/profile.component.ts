@@ -60,6 +60,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public previousQuestionId!: number;
   public answerDto: Ianswers[] = [];
   public combindQuestionOption: any[] = [];
+  public questionAnswerMappings: any[] = [];
   public questionCounter = 0;
   public questionLenth = 0;
   private appointmentId!: number;
@@ -174,7 +175,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getPreDiagnosisTemplate();
 
     this.loadQuestions();
-    this.fetchAllOptions();
+    this.fetchAllOptionsByAppointmentId();
 
     // this.getUploadedFiles(this.latestId);
     //     this.preDiagnosis=[
@@ -521,7 +522,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       // this.mapQuestionAndOptions(this.currentQuestionData.questionnaireId);
       //this.fetchAllOptions();
       this.currentQuestionData.options = this.getOptionsForQuestion(this.nextQuestionId);
-      this.getQuestionsAndAnswers(this.selectedques, this.latestId);
+      this.dispalyPatientQuiz1();
     } else {
       console.log('Question not found');
     }
@@ -553,6 +554,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.questionData = res;
       })
     );
+  }
+
+  getQaMappings(questId: number, appointmentId: number)
+  {
+    this.question.getQAMappings(questId, appointmentId).subscribe(
+      (res) => {
+          this.questionAnswerMappings = res;
+      },
+      (error) => {
+          console.error('Error fetching questions/answers:', error);
+      }
+  );
   }
 
   getQuestionsAndAnswers(questId: number, appointmentId: number) {
@@ -658,9 +671,32 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  fetchAllOptionsByAppointmentId() {
+    this.question.getAllOptionsByAppointmentId(this.latestId).subscribe(res => {
+      if (res) {
+        this.allOptions = res;
+      }
+    });
+  }
+
   dispalyPatientQuiz() {
     this.questionLenth = this.combindQuestionOption.length;
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
+    if (this.currentQuestionData != undefined) {
+      if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.answers[0].answerText) {
+        this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;
+      } else if (this.currentQuestionData.questionType === 1 && this.currentQuestionData.answers[0].selectedOptionId) {
+        this.currentQuestionData.selectedOptionId = this.currentQuestionData.answers[0].selectedOptionId;
+      }
+    }
+
+    console.log("current", this.currentQuestionData);
+
+  }
+
+  dispalyPatientQuiz1() {
+    this.questionLenth = this.combindQuestionOption.length;
+    var currentQuestionData = this.combindQuestionOption[this.questionCounter];
     if (this.currentQuestionData != undefined) {
       if (this.currentQuestionData.questionType === 2 && this.currentQuestionData.answers[0].answerText) {
         this.currentQuestionData.savedAnswerText = this.currentQuestionData.savedAnswerText;

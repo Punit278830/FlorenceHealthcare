@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace hospitalApiProject.Models;
@@ -11,7 +11,7 @@ public partial class Option
 
     public string OptionText { get; set; } = null!;
 
-    public int MapQuestionId { get; set; }
+    public int? MapQuestionId { get; set; }
 
     public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
 
