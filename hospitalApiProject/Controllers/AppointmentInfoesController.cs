@@ -267,22 +267,29 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<AppointmentInfo>> PostAppointmentInfo(AppointmentInfo appointmentInfo)
     {
+      try { 
       _context.AppointmentInfos.Add(appointmentInfo);
       await _context.SaveChangesAsync();
 
-      if (AppointmentInfoExists(appointmentInfo.Id))
-      {
-        var InvoiceInfo = new InvoiceInfo()
+        if (AppointmentInfoExists(appointmentInfo.Id))
         {
-          Amount = appointmentInfo.Fee,
-          AppoitmentId = appointmentInfo.Id,
-          CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
-          PatientId = appointmentInfo.PatientId,
-          Status = appointmentInfo.AppointmentStatus
-        };
+          var InvoiceInfo = new InvoiceInfo()
+          {
+            Amount = appointmentInfo.Fee,
+            AppoitmentId = appointmentInfo.Id,
+            CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
+            PatientId = appointmentInfo.PatientId,
+            Status = appointmentInfo.AppointmentStatus
+          };
 
-        _context.InvoiceInfos.Add(InvoiceInfo);
-        await _context.SaveChangesAsync();
+          _context.InvoiceInfos.Add(InvoiceInfo);
+          await _context.SaveChangesAsync();
+        }        
+      }
+      catch (Exception ex)
+      {
+        var message = ex.ToString();
+        throw;
       }
 
       return CreatedAtAction("GetAppointmentInfo", new { id = appointmentInfo.Id }, appointmentInfo);
