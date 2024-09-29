@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
-import {  IinvoiceItem, Iinvoice } from '../../models/models';
+import {  IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto } from '../../models/models';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -18,22 +19,23 @@ export class InvoiceService {
       console.log();
      }
   
-  
-  getAllInvoice():Observable<Iinvoice[]>
-  {
-    return this.http.get(this.apiUrl+'InvoiceInfoes')
+  getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
+    const params = new HttpParams().set('paymentMode', paymentMode); // Set query string params
+    return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
+  }
+
+  getPaymentDetails(): Observable<ITotalPaymentDetails> {
+    return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`);
   }
   
   getInvoiceById(id:number):Observable<Iinvoice>
   {
-    return this.http.get(this.apiUrl+'InvoiceInfoes/'+id);
-  
+    return this.http.get(this.apiUrl+'InvoiceInfoes/'+id);  
   }
   
-  updateInvoice(id:number,invoiceData:Iinvoice):Observable<any>
+  updateInvoice(id:number,invoiceData:IInvoicePaymentDto):Observable<any>
   {
-    return this.http.put(this.apiUrl+'InvoiceInfoes/'+id,invoiceData);
-  
+    return this.http.put(this.apiUrl+'InvoiceInfoes/'+id,invoiceData);  
   }
   
   getAddtionalInvoiceItemById(id:number):Observable<any[]>
@@ -56,10 +58,10 @@ export class InvoiceService {
     return this.http.post(this.apiUrl+'AdditionalInvoiceItems',data);
   }
   
-  
-  updateSubInvoiceItem(id: number,data:any): Observable<any> {
+  updateSubInvoiceItem(id: number, data:ISubItemInvoicePaymentDto): Observable<any> {
     return this.http.put(this.apiUrl + 'AdditionalInvoiceItems/' + id, data);
   }
+
   getInvoiceItem()
    {
      return this.http.get(this.apiUrl+'InvoiceItemMaster/');

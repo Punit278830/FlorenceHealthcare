@@ -11,17 +11,17 @@ import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo } from
 import { routes } from 'src/app/shared/routes/routes';
 
 interface data {
-  value: string ;
+  value: string;
 }
 @Component({
   selector: 'app-invoices',
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss']
 })
-export class InvoicesComponent  implements OnInit{
+export class InvoicesComponent implements OnInit {
   public routes = routes;
-  public selectedValue !: string  ;
-  public invoices:any[] = [];
+  public selectedValue !: string;
+  public invoices: any[] = [];
   dataSource!: MatTableDataSource<Iinvoice>;
 
   public showFilter = false;
@@ -37,56 +37,85 @@ export class InvoicesComponent  implements OnInit{
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
-  public img="assets/img/profiles/avatar-08.jpg";
-  public combinedData:any[]=[];
+  public img = "assets/img/profiles/avatar-08.jpg";
+  public combinedData: any[] = [];
+  selectedPaymentMode: string = 'All';
+  totalPaymentAmount: number = 0;
 
-  constructor(public data : DataService,
-    private invoiceService:InvoiceService,
-    private patientService:PatientService,
-    private route:Router,
-    private loadingService: LoadingService){
+  constructor(public data: DataService,
+    private invoiceService: InvoiceService,
+    private patientService: PatientService,
+    private route: Router,
+    private loadingService: LoadingService) {
 
   }
   ngOnInit() {
     this.getTableData();
   }
-  private getTableData(): void {
-    this.loadingService.showLoader();
-    const invoices$=this.invoiceService.getAllInvoice();
-    const Patients$=this.patientService.getPatientList();
-    forkJoin([invoices$,Patients$]).subscribe(([invoice,patient])=>{
-      
-      this.combinedData=invoice.map((invoice:Iinvoice)=>{
-      const patients=patient.find((id:IpatientInfo)=>id.patientId===invoice.patientId);
-return{
-  ...invoice,
-  patientFname: patients? patients.firstName:'Unknon Patients',
-      patientLname: patients? patients.lastName:'Unknon Patients',
-} 
 
-      })
-      this.invoices = [];
+ private getTableData(paymentMode: string = "All"): void {
+  this.loadingService.showLoader();
+
+  const invoices$ = this.invoiceService.getAllInvoice(paymentMode);
+  const Patients$ = this.patientService.getPatientList();
+  const paymentDetails$ = this.invoiceService.getPaymentDetails(); // Fetch payment details
+
+  forkJoin([invoices$, Patients$, paymentDetails$]).subscribe(([invoice, patient, paymentDetails]) => {
+    console.log(invoice);
+
+    // Assuming paymentDetails is an object containing total amounts for all payment modes
+    // Adjust according to your actual paymentDetails structure
+    if (paymentMode === "All") {
+      this.totalPaymentAmount = paymentDetails.totalAmount; // Total amount for all payments
+    } else if (paymentMode === "Cash") {
+      this.totalPaymentAmount = paymentDetails.totalCashAmount; // Total cash amount
+    } else if (paymentMode === "Online") {
+      this.totalPaymentAmount = paymentDetails.totalOnlineAmount; // Total online amount
+    } else {
+      this.totalPaymentAmount = 0; // Default to 0 if mode doesn't match
+    }
+
+    // Mapping invoices and patient details
+    this.combinedData = invoice.map((invoice: Iinvoice) => {
+      const patients = patient.find((id: IpatientInfo) => id.patientId === invoice.patientId);
+      return {
+        ...invoice,
+        patientFname: patients ? patients.firstName : 'Unknown Patient',
+        patientLname: patients ? patients.lastName : 'Unknown Patient',
+      };
+    });
+
+    // Initialize required arrays
+    this.invoices = [];
     this.serialNumberArray = [];
-   
-      this.totalData = this.combinedData.length;
-      this.combinedData.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-         
-          this.invoices.push(res);
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-      this.dataSource = new MatTableDataSource<any>(this.invoices);
-      this.calculateTotalPages(this.totalData, this.pageSize);
-      this.loadingService.hideLoader();
-      
-    })
-   
-    
-    //});
-  }
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
+    // Handle pagination and setting the invoices
+    this.totalData = this.combinedData.length;
+    this.combinedData.map((res: any, index: number) => {
+      const serialNumber = index + 1;
+      if (index >= this.skip && serialNumber <= this.limit) {
+        this.invoices.push(res);
+        this.serialNumberArray.push(serialNumber);
+      }
+    });
+
+    this.dataSource = new MatTableDataSource<any>(this.invoices);
+    this.calculateTotalPages(this.totalData, this.pageSize);
+    this.loadingService.hideLoader();
+  });
+}
+
+  
+
+// Method to get payment modes for a specific invoice
+private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
+    // Mocking the logic to get payment modes for an invoice
+    // This should reflect the actual logic of determining payment modes for the given invoice
+    return ["cash", "online"]; // Example payment modes
+}
+
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
     this.dataSource.filter = value.trim().toLowerCase();
     this.invoices = this.dataSource.filteredData;
@@ -159,23 +188,33 @@ return{
     }
   }
   selectedList: data[] = [
-    {value: 'Select Payment Status'},
-    {value: 'Paid'},
-    {value: 'Un Paid'},   
+    { value: 'Select Payment Status' },
+    { value: 'Paid' },
+    { value: 'Un Paid' },
   ];
 
+  paymentModeList: data[] = [
+    { value: 'Select Payment Mode' },
+    { value: 'All' },
+    { value: 'Cash' },
+    { value: 'Online' },
+  ];
 
-  movetoInvoiceView(Id:number,patienId:number)
-  {
-    this.invoiceService.invoiceId=Id;
-    this.patientService.patientId=patienId
+  movetoInvoiceView(Id: number, patienId: number) {
+    this.invoiceService.invoiceId = Id;
+    this.patientService.patientId = patienId
     this.route.navigate(['/accounts/invoice-view'])
   }
 
-  moveToEditInvoice(id:number)
-  {
-    this.invoiceService.invoiceId=id;
+  moveToEditInvoice(id: number) {
+    this.invoiceService.invoiceId = id;
     this.route.navigate(['/invoice/edit-invoice'])
 
   }
+
+  onPaymentModeChange(event: any) {
+    this.selectedPaymentMode = event.value;
+    this.getTableData(event.value);
+  }
+
 }

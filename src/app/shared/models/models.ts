@@ -311,7 +311,14 @@ export interface Iinvoice {
   patientId: number,
   createdDate: Date,
   amount: number,
-  status: string
+  status: string,
+  paymentModes: string
+}
+
+export interface ITotalPaymentDetails {
+  totalAmount: number,
+  totalCashAmount: number,
+  totalOnlineAmount: number
 }
 
 export interface IinvoiceItem {
@@ -324,6 +331,23 @@ export interface IinvoiceItem {
   createdBy: number,
   finalAmount: number,
   status: string
+}
+
+export interface IPaymentMode {
+  invoiceId: number,
+  paymentMode: string,
+  transactionId: string | null,
+  amount: number
+}
+
+export interface IInvoicePaymentDto {
+  invoiceInfo: Iinvoice;
+  paymentModeInfo: IPaymentMode;
+}
+
+export interface ISubItemInvoicePaymentDto {
+  additionalInvoiceItem: any;
+  paymentModeInfo: IPaymentMode;
 }
 
 export interface assetsList {
