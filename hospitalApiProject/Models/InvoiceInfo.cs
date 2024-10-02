@@ -17,4 +17,6 @@ public partial class InvoiceInfo
 
   public string? Status { get; set; }
 
+  public bool? IsConsultationPaid { get; set; }
+
 }

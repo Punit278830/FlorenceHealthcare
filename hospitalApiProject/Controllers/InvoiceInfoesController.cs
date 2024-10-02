@@ -124,7 +124,7 @@ namespace hospitalApiProject.Controllers
 
       try
       {
-        await _context.SaveChangesAsync();
+        //await _context.SaveChangesAsync();
 
         if (invoicePaymentDto.PaymentModeInfo != null && invoicePaymentDto.PaymentModeInfo.InvoiceId != 0)
         {

@@ -354,27 +354,22 @@ export class InvoiceViewComponent implements OnInit {
       this.paymentModeDetails.transactionId = null;
     }
 
+    this.invoiceDetails.status = 'Paid';
+    this.invoiceDetails.isConsultationPaid = true;
+    this.isAllowed = true;
+
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = invoiceDetails.amount;
 
-    this.invoiceDetails.status = 'Paid';
-    if (this.invoiceDetails.status == 'Paid') {
-      this.isAllowed = true;
-    }
-    else {
-      this.isAllowed = false;
-    }
-
     this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
 
-    this.invoiceService.updateInvoice(invoiceDetails.id, this.invoicePaymentDto).subscribe(res => {
+    this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
       if (res) {
         this.getInvoiceDetails();
         this.balanceAmount = 0;
         this.toastr.success("Invoice Paid Successfully", "Update Invoice");
-
       }
     })
 

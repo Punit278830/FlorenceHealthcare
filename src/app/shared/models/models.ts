@@ -312,7 +312,8 @@ export interface Iinvoice {
   createdDate: Date,
   amount: number,
   status: string,
-  paymentModes: string
+  paymentModes: string,
+  isConsultationPaid: boolean
 }
 
 export interface ITotalPaymentDetails {
