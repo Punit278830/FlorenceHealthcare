@@ -335,6 +335,36 @@ export class InvoiceViewComponent implements OnInit {
     console.log("Flag:", this.flag);
   }
 
+  payAll(invoiceId: number){
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
+      }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
+    }
+    else {
+      this.paymentModeDetails.transactionId = null;
+    }
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
+    this.paymentModeDetails.amount = 0;
+
+    this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
+        this.getInvoiceDetails();
+        this.balanceAmount = 0;
+        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
+    })
+
+  }
+
   paidinvoice(invoiceDetails: any) {
 
     if (this.paymentMode == '') {

@@ -37,7 +37,13 @@ export class InvoiceService {
   {
     return this.http.put(this.apiUrl+'InvoiceInfoes/'+id,invoiceData);  
   }
+
   
+  payAll(id:number,paymentModeInfo: IPaymentMode):Observable<any>
+  {
+    return this.http.put(this.apiUrl+'AdditionalInvoiceItems/payAll/'+id, paymentModeInfo);  
+  }
+
   getAddtionalInvoiceItemById(id:number):Observable<any[]>
   {
     return this.http.get(this.apiUrl+'AdditionalInvoiceItems/invoiceId/'+id);

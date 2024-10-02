@@ -116,7 +116,7 @@
 
                                             <td><button
                                                     [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
-                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' : 'Unpaid'}}</button></td>
+                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' : 'un Paid'}}</button></td>
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"
@@ -194,8 +194,8 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
-                <!-- <a href="javascript:;" class="btn btn-primary submit-form me-2"
-                    (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a> -->
+                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' }" class="btn btn-primary submit-form me-2"
+                    (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay' : 'Paid'}}</a>
                 <a href="javascript:;" [ngClass]="{ 'disabled': !isAllowed }" class="btn btn-primary submit-form me-2"
                     (click)="print()"><i class="feather icon-printer me-2"></i>Print</a>
                 <a href="javascript:;" class="btn btn-primary submit-form me-2"
