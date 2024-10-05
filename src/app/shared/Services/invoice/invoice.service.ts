@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
-import {  IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto } from '../../models/models';
+import {  IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto } from '../../models/models';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 
@@ -36,6 +36,11 @@ export class InvoiceService {
   updateInvoice(id:number,invoiceData:IInvoicePaymentDto):Observable<any>
   {
     return this.http.put(this.apiUrl+'InvoiceInfoes/'+id,invoiceData);  
+  }
+
+  createInvoice(patientId: number, invoiceData:ICreateInvoiceDto):Observable<any>
+  {
+    return this.http.post(this.apiUrl+'InvoiceInfoes/createInvoice/'+ patientId, invoiceData);  
   }
 
   

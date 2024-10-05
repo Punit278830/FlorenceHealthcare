@@ -20,104 +20,178 @@
 
                 <div class="card ">
                     <div class="card-body">
-                        <form>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-heading">
-                                        <h4>Add Invoice</h4>
-                                    </div>
+
+                        <div *ngIf="flag == false" class="table-responsive">
+                            <div class="col-12">
+                                <div class="form-heading">
+                                    <h4><b>Select Patient</b></h4>
                                 </div>
-                                <div class="col-sm-12">
-
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div class="page-table-header mb-2">
-                                                <div class="row align-items-center">
-                                                    <div class="col">
-                                                        <div class="doctor-table-blk">
-                                                            <h3>Search Patient</h3>
-                                                            <div class="doctor-search-blk">
-                                                                <div class="top-nav-search table-search-blk">
-                                                                    <input #searchDataValue type="text"
-                                                                        class="form-control"
-                                                                        placeholder="Search Patient"
-                                                                        (keyup)="searchData(searchDataValue.value)">
-                                                                    <a class="btn"><img
-                                                                            src="assets/img/icons/search-normal.svg"
-                                                                            alt=""></a>
-                                                                </div>
-                                                                <div class="add-group">
-                                                                    <a [routerLink]="routes.addPatient"
-                                                                        class="btn btn-primary add-pluss ms-2"><img
-                                                                            src="assets/img/icons/plus.svg" alt=""></a>
-                                                                    <a href="javascript:;"
-                                                                        class="btn btn-primary doctor-refresh ms-2"><img
-                                                                            src="assets/img/icons/re-fresh.svg"
-                                                                            (click)="refresh()" alt=""></a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
+                            </div>
+                            <table matSort (matSortChange)="sortData($event)"
+                                class="table border-0 custom-table comman-table datatable mb-0">
+                                <thead>
+                                    <tr>
+                                        <th mat-sort-header="name">Name</th>
+                                        <th mat-sort-header="department">Age</th>
+                                        <th mat-sort-header="specialization">Mobile</th>
+                                        <th mat-sort-header="degree">Email</th>
+                                        <th mat-sort-header="mobile">Gender</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let data of patientlist">
+                                        <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
+                                            (keydown.enter)="postDatatoAppointment(data.patientId)">
+                                            <a href="javascript:;"> {{data.firstName}}
+                                                {{data.lastName}}</a>
+                                        </td>
+                                        <td>{{data.ageinYear}}</td>
+                                        <td><a href="javascript:;">{{data.mobile}}</a></td>
+                                        <td>{{data.email}}</td>
+                                        <td>{{data.gender}}</td>
+                                        <td class="text-end">
+                                            <div class="dropdown dropdown-action">
+                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle"
+                                                    data-bs-toggle="dropdown" aria-expanded="false"><i
+                                                        class="fa fa-ellipsis-v"></i></a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" [routerLink]="routes.editPatient"
+                                                        (click)="onEditPatient(data.patientId)"><i
+                                                            class=" fa-solid fa-pen-to-square m-r-5"></i>
+                                                        Edit</a>
+                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="deletePatient(data.patientId)"><i
+                                                            class="fa fa-trash-alt m-r-5"></i>
+                                                        Delete</a>
                                                 </div>
                                             </div>
-                                        </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="table_footer">
+                                <div class="col-sm-12 col-md-5">
+                                    <div class="dataTables_info">
+                                        Showing {{ serialNumberArray[0] }} to
+                                        {{ serialNumberArray[serialNumberArray.length - 1] }} of
+                                        {{ totalData }} entries
                                     </div>
                                 </div>
+
+                                <div class="col-sm-12 col-md-7">
+                                    <div class="pagination_section">
+                                        <ul class="pagination">
+                                            <li class="page-item" [ngClass]="{
+                                    disabled: currentPage === 1
+                                  }">
+                                                <a (click)="getMoreData('previous')" class="page-link"
+                                                    href="javascript:void(0);" tabindex="-1">Previous</a>
+                                            </li>
+
+                                            <ng-container *ngFor="let item of pageNumberArray; let i = index">
+                                                <li class="page-item" [class.active]="item === currentPage" [ngClass]="
+                                      (pageNumberArray[currentPage - 2] > item &&
+                                        item !== 1 &&
+                                        pageNumberArray.length > 6) ||
+                                      (pageNumberArray[currentPage] < item &&
+                                        item !== 1 &&
+                                        pageNumberArray.length > 6 &&
+                                        pageNumberArray.length !== item)
+                                        ? 'hide-page-no'
+                                        : 'show-page-no'
+                                    ">
+                                                    <a (click)="moveToPage(item)" class="page-link"
+                                                        href="javascript:void(0);">
+                                                        {{ item }}
+                                                    </a>
+                                                </li>
+                                                <li class="page-item" *ngIf="
+                                      i === 0 &&
+                                      pageNumberArray.length > 6 &&
+                                      currentPage > 2
+                                    " [hidden]="currentPage === 1" (click)="moveToPage(currentPage - 2)"
+                                                    (keyup.enter)="moveToPage(currentPage - 2)" tabindex="0">
+                                                    <a class="page-link" href="javascript:void(0);">
+                                                        ...
+                                                    </a>
+                                                </li>
+                                                <li *ngIf="
+                                      i === pageNumberArray.length - 2 &&
+                                      pageNumberArray.length > 6
+                                    " [hidden]="
+                                      currentPage >=
+                                        pageNumberArray[pageNumberArray.length - 2] ||
+                                      totalData <
+                                        serialNumberArray[serialNumberArray.length - 1]
+                                    " class="page-item" (click)="moveToPage(currentPage + 2)"
+                                                    (keyup.enter)="moveToPage(currentPage + 2)" tabindex="0">
+                                                    <a class="page-link" href="javascript:void(0);">
+                                                        ...
+                                                    </a>
+                                                </li>
+                                            </ng-container>
+
+                                            <li class="page-item" [ngClass]="{
+                                    disabled:
+                                      currentPage ===
+                                        pageNumberArray[pageNumberArray.length - 1] ||
+                                        patientlist.length === 0
+                                  }">
+                                                <a (click)="getMoreData('next')" class="page-link"
+                                                    href="javascript:void(0);">Next
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+
+                        <!-- remove this -->
+                        <form [formGroup]="bookappointment" (ngSubmit)="bookAppointment(bookappointment)">
+                            <div class="row" *ngFor="let appointment of patientAppointmentData">
+                                <div class="col-12">
+                                    <div class="form-heading">
+                                        <h4><b>Add Invoice</b></h4>
+                                    </div>
+                                    <table class="table border-0 custom-table comman-table datatable mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Patient Name</th>
+                                                <th scope="col">Age</th>
+                                                <th scope="col">Mobile</th>
+                                                <th scope="col">Gender</th>
+                                                <th scope="col">Email</th>
+                                                <!-- Add more headers based on your patient details -->
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>{{appointment.firstName}}
+                                                    {{appointment.lastName}}</td>
+                                                <td>{{appointment.ageinYear}}</td>
+                                                <td>{{appointment.mobile}}</td>
+                                                <td>{{appointment.gender}}</td>
+                                                <td>{{appointment.email}}</td>
+                                                <!-- Add more cells based on your patient details -->
+                                            </tr>
+                                            <!-- Add more rows for additional patients -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                        </form>
+
+                        <form *ngIf="flag">
+                            <div class="row">
 
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="page-table-header mb-2">
-                                            <div class="table-responsive">
-                                                <table matSort
-                                                    class="table border-0 custom-table comman-table datatable mb-0"
-                                                    *ngIf="searchResults.length>0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th mat-sort-header="checkbox">
-                                                                <div class="form-check check-tables">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        value="something">
-                                                                </div>
-                                                            </th>
-                                                            <th mat-sort-header="name">Name</th>
-                                                            <th mat-sort-header="department">Date of birth</th>
-                                                            <th mat-sort-header="specialization">Mobile</th>
-                                                            <th mat-sort-header="degree">Email</th>
-                                                            <th mat-sort-header="mobile">Gender</th>
-                                                            <th></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr *ngFor="let data of searchResults">
-                                                            <td>
-                                                                <div class="form-check check-tables">
-                                                                    <input class="form-check-input" type="checkbox"
-                                                                        value="something">
-                                                                </div>
-                                                            </td>
-                                                            <td class="profile-image"
-                                                                (click)="postDatatoAppointment(data.patientId)"
-                                                                (keydown.enter)="postDatatoAppointment(data.patientId)"
-                                                                tabindex="0">
-                                                                <img width="28" height="28" class="rounded-circle m-r-5"
-                                                                    alt="">{{data.firstName}} {{data.lastName}}
-                                                            </td>
-                                                            <td>{{data.dob}}</td>
-                                                            <td><a href="javascript:;">{{data.mobile}}</a></td>
-                                                            <td>{{data.email}}</td>
-                                                            <td>{{data.gender}}</td>
-                                                            <td class="text-end">
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-
-
-
-
-                                            </div>
-
                                             <div class="row">
                                                 <div class="col-sm-12">
 
@@ -128,30 +202,26 @@
                                                                     <label for="InvoiceItem">Invoice Item <span
                                                                             class="login-danger">*</span></label>
                                                                     <mat-select formControlName="InvoiceItem"
-                                                                        (selectionChange)="addItemToInvoice($event)"
+                                                                        (selectionChange)="onItemSelectionChange($event)"
                                                                         class="form-control select">
                                                                         <mat-option *ngFor="let data of allnvoiceItems"
                                                                             [value]="data.itemId">
                                                                             {{data.itemName}}
                                                                         </mat-option>
                                                                     </mat-select>
-
-
                                                                 </div>
                                                             </form>
                                                         </div>
                                                     </div>
 
-                                                    <div *ngIf="flag" class="card ">
+                                                    <div *ngIf="addItemflag" class="card ">
                                                         <div class="card-body">
-
-
                                                             <form [formGroup]="addItemFormGroup"
-                                                                (submit)="submitItemToInvoice(addItemFormGroup)">
+                                                                (submit)="onItemSelectionChange(addItemFormGroup)">
                                                                 <div class="row">
                                                                     <div class="col-12">
                                                                         <div class="form-heading">
-                                                                            <h4>Add Invoice Items</h4>
+                                                                            <h4>Invoice Item Details</h4>
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-12 col-md-6 col-xl-6">
@@ -203,8 +273,9 @@
 
                                                                     <div class="col-12">
                                                                         <div class="doctor-submit text-end">
-                                                                            <button type="submit"
-                                                                                class="btn btn-primary submit-form me-2">Submit</button>
+                                                                            <button type="button"
+                                                                                class="btn btn-primary submit-form me-2"
+                                                                                (click)="addItem()">Add</button>
                                                                             <button type="button"
                                                                                 class="btn btn-primary cancel-form">Cancel</button>
                                                                         </div>
@@ -213,195 +284,115 @@
                                                             </form>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
 
-                                            <!-- remove this -->
-                                            <form [formGroup]="bookappointment"
-                                                (ngSubmit)="bookAppointment(bookappointment)">
-                                                <div class="row" *ngFor="let appointment of patientAppointmentData">
-                                                    <div class="col-12">
+                                                    <div class="card">
+                                                        <div class="wrapperClass">
+                                                            <div class="table-responsive">
+                                                                <table
+                                                                    class="table table-hover border-0 custom-table invoice-table">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>#</th>
+                                                                            <th>Item</th>
+                                                                            <th>Description</th>
+                                                                            <th>Fee</th>
+                                                                            <th>Discount (%)</th>
+                                                                            <th>Total</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <ng-container
+                                                                            *ngIf="additionalInvoiceItems.length>0">
+                                                                            <tr
+                                                                                *ngFor="let data of additionalInvoiceItems; let i=index">
 
-                                                        <table
-                                                            class="table border-0 custom-table comman-table datatable mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th scope="col">Patient Name</th>
-                                                                    <th scope="col">Age</th>
-                                                                    <th scope="col">Mobile</th>
-                                                                    <th scope="col">Gender</th>
-                                                                    <th scope="col">Email</th>
-                                                                    <!-- Add more headers based on your patient details -->
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    <td>{{appointment.firstName}}
-                                                                        {{appointment.lastName}}</td>
-                                                                    <td>{{appointment.ageinYear}}</td>
-                                                                    <td>{{appointment.mobile}}</td>
-                                                                    <td>{{appointment.gender}}</td>
-                                                                    <td>{{appointment.email}}</td>
-                                                                    <!-- Add more cells based on your patient details -->
-                                                                </tr>
-                                                                <!-- Add more rows for additional patients -->
-                                                            </tbody>
-                                                        </table>
-                                                        <div class="row">
-                                                            <div class="col-12">
-                                                                <div class="form-heading mt-4">
-                                                                    <h4>Invoice Details</h4>
-                                                                </div>
+                                                                                <td>{{i+1}}</td>
+                                                                                <td>{{data.itemName}}</td>
+                                                                                <td>{{data.description}}</td>
+                                                                                <td>{{data.fee}}</td>
+                                                                                <td>{{data.discount}} </td>
+                                                                                <td>{{ data.fee - ((data.discount/100) *
+                                                                                    data.fee) }}</td>
+                                                                            </tr>
+                                                                        </ng-container>
+                                                                    </tbody>
+                                                                </table>
                                                             </div>
 
-                                                            <div class="col-12">
-                                                                <div class="doctor-submit text-end">
-                                                                    <button type="submit"
-                                                                        class="btn btn-primary submit-form me-2">Submit</button>
-                                                                    <button type="button"
-                                                                        class="btn btn-primary cancel-form"
-                                                                        (click)="OnCancel()">Cancel</button>
+
+                                                            <div class="row invoice-payment">
+                                                                <div class="col-sm-7">
                                                                 </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                            </form>
-
-                                            <div *ngIf="flag == false" class="table-responsive">
-                                                <table matSort (matSortChange)="sortData($event)"
-                                                    class="table border-0 custom-table comman-table datatable mb-0">
-                                                    <thead>
-                                                        <tr>
-                                                            <th mat-sort-header="name">Name</th>
-                                                            <th mat-sort-header="department">Age</th>
-                                                            <th mat-sort-header="specialization">Mobile</th>
-                                                            <th mat-sort-header="degree">Email</th>
-                                                            <th mat-sort-header="mobile">Gender</th>
-                                                            <th></th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr *ngFor="let data of patientlist">
-                                                            <td class="profile-image"
-                                                                (click)="postDatatoAppointment(data.patientId)"
-                                                                (keydown.enter)="postDatatoAppointment(data.patientId)">
-                                                                <a href="javascript:;"> {{data.firstName}}
-                                                                    {{data.lastName}}</a>
-                                                            </td>
-                                                            <td>{{data.ageinYear}}</td>
-                                                            <td><a href="javascript:;">{{data.mobile}}</a></td>
-                                                            <td>{{data.email}}</td>
-                                                            <td>{{data.gender}}</td>
-                                                            <td class="text-end">
-                                                                <div class="dropdown dropdown-action">
-                                                                    <a href="javascript:void(0);"
-                                                                        class="action-icon dropdown-toggle"
-                                                                        data-bs-toggle="dropdown"
-                                                                        aria-expanded="false"><i
-                                                                            class="fa fa-ellipsis-v"></i></a>
-                                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                                        <a class="dropdown-item"
-                                                                            [routerLink]="routes.editPatient"
-                                                                            (click)="onEditPatient(data.patientId)"><i
-                                                                                class=" fa-solid fa-pen-to-square m-r-5"></i>
-                                                                            Edit</a>
-                                                                        <a class="dropdown-item"
-                                                                            href="javascript:void(0);"
-                                                                            (click)="deletePatient(data.patientId)"><i
-                                                                                class="fa fa-trash-alt m-r-5"></i>
-                                                                            Delete</a>
+                                                                <div class="col-sm-5">
+                                                                    <div class="m-b-20">
+                                                                        <div class="table-responsive no-border">
+                                                                            <table
+                                                                                class="table mb-0 border-0 custom-table invoices-table total-fonts">
+                                                                                <tbody>
+                                                                                    <!-- <tr>
+                                                                                        <td class="float-end">Balance :
+                                                                                            ₹{{balanceAmount}}</td>
+                                                                                    </tr> -->
+                                                                                    <tr class="bold-total-invoice">
+                                                                                        <td class="float-end">
+                                                                                            <h5>Total
+                                                                                                :₹{{totalInvoiceAmount}}
+                                                                                            </h5>
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </div>
                                                                     </div>
                                                                 </div>
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                                <div class="table_footer">
-                                                    <div class="col-sm-12 col-md-5">
-                                                        <div class="dataTables_info">
-                                                            Showing {{ serialNumberArray[0] }} to
-                                                            {{ serialNumberArray[serialNumberArray.length - 1] }} of
-                                                            {{ totalData }} entries
+                                                            </div>
+                                                            <div class="col-sm-6 col-lg-12 m-b-20">
+                                                                <button (click)="changeColor('Cash')"
+                                                                    class="custom-badge"
+                                                                    [style.backgroundColor]="buttonColors.Cash">
+                                                                    Cash
+                                                                </button>
+                                                                &nbsp;&nbsp;
+                                                                <button (click)="changeColor('Online')"
+                                                                    class="custom-badge"
+                                                                    [style.backgroundColor]="buttonColors.Online">
+                                                                    Online
+                                                                </button>
+                                                                <!-- <div [ngClass]="classes.singleLine">&nbsp;</div> -->
+                                                                <div *ngIf="isTextboxVisible">
+                                                                    <div class="col-12 col-md-6 col-xl-4">
+                                                                        <div class="form-group local-forms">
+                                                                            Reference No. <input id="RefNo"
+                                                                                class="form-control" type="text"
+                                                                                #RefNoInput />
+
+                                                                        </div>
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+                                                            <div class="invoice-info">
+                                                                <h5>Terms & Condition</h5>
+                                                                <p class="text-muted">OPD Prescription valid for
+                                                                    7(seven) days including
+                                                                    today.Audiometry services are subject to
+                                                                    availability and warranty services are only
+                                                                    being provided by selling company. Authorized
+                                                                    Signatory</p>
+                                                            </div>
+                                                            <div class="col-12">
+                                                                <div class="doctor-submit float-end">
+                                                                    <a href="javascript:;"
+                                                                        class="btn btn-primary submit-form me-2"
+                                                                        (click)="createInvoice()">Pay</a>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                    </div>
 
-                                                    <div class="col-sm-12 col-md-7">
-                                                        <div class="pagination_section">
-                                                            <ul class="pagination">
-                                                                <li class="page-item" [ngClass]="{
-                                                        disabled: currentPage === 1
-                                                      }">
-                                                                    <a (click)="getMoreData('previous')"
-                                                                        class="page-link" href="javascript:void(0);"
-                                                                        tabindex="-1">Previous</a>
-                                                                </li>
-
-                                                                <ng-container
-                                                                    *ngFor="let item of pageNumberArray; let i = index">
-                                                                    <li class="page-item"
-                                                                        [class.active]="item === currentPage" [ngClass]="
-                                                          (pageNumberArray[currentPage - 2] > item &&
-                                                            item !== 1 &&
-                                                            pageNumberArray.length > 6) ||
-                                                          (pageNumberArray[currentPage] < item &&
-                                                            item !== 1 &&
-                                                            pageNumberArray.length > 6 &&
-                                                            pageNumberArray.length !== item)
-                                                            ? 'hide-page-no'
-                                                            : 'show-page-no'
-                                                        ">
-                                                                        <a (click)="moveToPage(item)" class="page-link"
-                                                                            href="javascript:void(0);">
-                                                                            {{ item }}
-                                                                        </a>
-                                                                    </li>
-                                                                    <li class="page-item" *ngIf="
-                                                          i === 0 &&
-                                                          pageNumberArray.length > 6 &&
-                                                          currentPage > 2
-                                                        " [hidden]="currentPage === 1"
-                                                                        (click)="moveToPage(currentPage - 2)"
-                                                                        (keyup.enter)="moveToPage(currentPage - 2)"
-                                                                        tabindex="0">
-                                                                        <a class="page-link" href="javascript:void(0);">
-                                                                            ...
-                                                                        </a>
-                                                                    </li>
-                                                                    <li *ngIf="
-                                                          i === pageNumberArray.length - 2 &&
-                                                          pageNumberArray.length > 6
-                                                        " [hidden]="
-                                                          currentPage >=
-                                                            pageNumberArray[pageNumberArray.length - 2] ||
-                                                          totalData <
-                                                            serialNumberArray[serialNumberArray.length - 1]
-                                                        " class="page-item" (click)="moveToPage(currentPage + 2)"
-                                                                        (keyup.enter)="moveToPage(currentPage + 2)"
-                                                                        tabindex="0">
-                                                                        <a class="page-link" href="javascript:void(0);">
-                                                                            ...
-                                                                        </a>
-                                                                    </li>
-                                                                </ng-container>
-
-                                                                <li class="page-item" [ngClass]="{
-                                                        disabled:
-                                                          currentPage ===
-                                                            pageNumberArray[pageNumberArray.length - 1] ||
-                                                            patientlist.length === 0
-                                                      }">
-                                                                    <a (click)="getMoreData('next')" class="page-link"
-                                                                        href="javascript:void(0);">Next
-                                                                    </a>
-                                                                </li>
-                                                            </ul>
-                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-
                                         </div>
                                     </div>
                                 </div>
@@ -412,5 +403,6 @@
                 </div>
             </div>
         </div>
+
     </div>
 </div>

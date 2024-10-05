@@ -190,30 +190,29 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   getInvoiceDetails() {
-
     this.invoiceId = this.invoiceService.invoiceId;
-    this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
-      this.isPaidButtonVisible = res.status != 'Paid'
-      this.isAllowed = res.status == 'Paid';
+    if (this.invoiceId > 0) {
+      this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
+        this.isPaidButtonVisible = res.status != 'Paid'
+        this.isAllowed = res.status == 'Paid';
 
-      this.invoiceDetails = res;
-      console.log("invoice details", res)
-      if (res.status == 'un Paid') {
-        //this.isPaidButtonVisible=false;
-        this.balanceAmount = this.balanceAmount + res.amount;
-      }
+        this.invoiceDetails = res;
+        console.log("invoice details", res)
+        if (res.status == 'un Paid') {
+          //this.isPaidButtonVisible=false;
+          this.balanceAmount = this.balanceAmount + res.amount;
+        }
 
+        //this.totalInvoiceAmount += res.amount;
+        this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
+        this.getPatientDetails(res.patientId);
+        this.getAddtionalItems(this.invoiceId);
 
-      //this.totalInvoiceAmount += res.amount;
-      this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
-      this.getPatientDetails(res.patientId);
-      this.getAppointDetails(res.appoitmentId);
-      this.getAddtionalItems(this.invoiceId);
-
-    })
-
-
-
+        if (res.appoitmentId > 0) {
+          this.getAppointDetails(res.appoitmentId);
+        }
+      });
+    }
   }
 
   ngOnInit() {
@@ -335,7 +334,7 @@ export class InvoiceViewComponent implements OnInit {
     console.log("Flag:", this.flag);
   }
 
-  payAll(invoiceId: number){
+  payAll(invoiceId: number) {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
@@ -358,9 +357,9 @@ export class InvoiceViewComponent implements OnInit {
     this.paymentModeDetails.amount = 0;
 
     this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
-        this.getInvoiceDetails();
-        this.balanceAmount = 0;
-        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
+      this.getInvoiceDetails();
+      this.balanceAmount = 0;
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
     })
 
   }

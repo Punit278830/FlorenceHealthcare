@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
-import { Iappointment, Idepartment, IinvoiceItem, Ilogin, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
+import { Iappointment, ICreateInvoiceDto, Idepartment, IinvoiceItem, Ilogin, IpatientInfo, IPaymentMode, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
@@ -12,6 +12,7 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
 import { DatePipe } from '@angular/common';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 
 
@@ -60,7 +61,59 @@ export class CreateInvoiceComponent {
   public total = 0;
   private IinvoiceDto!: IinvoiceItem;
   public addItemflag: boolean = false;
-  private loggedInUser!: Ilogin;
+  loggedInUser!: Ilogin;
+
+  public additionalInvoiceItems: any[] = [];
+  public selectedItem: any;
+
+  public searchDataValue = '';
+  searchSubject = new Subject<string>();
+
+  public patientList: Array<IpatientInfo> = [];
+  public allpatientList: Array<IpatientInfo> = [];
+  public minToDate: Date | null = null;
+  public dateForm!: FormGroup;
+  public totalInvoiceAmount = 0;
+  decimalPipe: any;
+  public paymentMode: string;
+  public isReferenceLabelVisible = false;
+  public ReferenceTextBoxVal: string;
+  public paymentModeDetails!: IPaymentMode;
+  public newInvoiceDto!: ICreateInvoiceDto;
+
+  @ViewChild('RefNoInput') RefNoInput!: ElementRef;
+
+  
+  buttonColors = {
+    Cash: 'lightgray',
+    Online: 'lightgray'
+  };
+  isTextboxVisible = false;
+  changeColor(button: string) {
+    // Reset all buttons to default color
+    this.buttonColors.Cash = 'lightgray';
+    this.buttonColors.Online = 'lightgray';
+
+    // Change the color of the clicked button
+    if (button === 'Cash') {
+      this.buttonColors.Cash = 'orange';
+      this.isTextboxVisible = false;
+      this.paymentMode = 'Cash';
+      this.isReferenceLabelVisible = false;
+
+    } else if (button === 'Online') {
+
+      this.buttonColors.Online = 'green';
+      this.isTextboxVisible = !this.isTextboxVisible;
+      this.paymentMode = 'Online';
+      this.isReferenceLabelVisible = true;
+    }
+  }
+
+
+  toggleTextbox() {
+    this.isTextboxVisible = !this.isTextboxVisible;
+  }
 
 
   constructor(private patientService: PatientService,
@@ -74,6 +127,8 @@ export class CreateInvoiceComponent {
     private datePipe: DatePipe,
     private invoiceService: InvoiceService
   ) {
+    this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
+
     this.getTableData();
 
     this.initlizeInvoiceMasterForm();
@@ -83,6 +138,21 @@ export class CreateInvoiceComponent {
       console.log("dis fee", this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value)
       this.updateTotal(this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value);
     });
+
+    this.paymentMode = '';
+    this.ReferenceTextBoxVal = '';
+
+    this.paymentModeDetails = {
+      invoiceId: 0,
+      paymentMode: '',
+      transactionId: '',
+      amount: 0
+    };
+
+    this.newInvoiceDto = {
+      additionalInvoiceItems: this.additionalInvoiceItems,
+      paymentModeInfo: this.paymentModeDetails
+    }
   }
 
   bookAppointment(appointment: any) {
@@ -147,47 +217,34 @@ export class CreateInvoiceComponent {
     })
   }
 
-  selectedList1: data[] = [
-    { value: 'Select  Department' },
-    { value: 'Orthopedics' },
-    { value: 'Radiology' },
-    { value: 'Dentist' },
-  ];
-  selectedList2: data[] = [
-    { value: 'Select  Tax' },
-    { value: 'VAT' },
-    { value: 'GST' },
-    { value: 'No GST' },
-  ];
-  selectedList3: data[] = [
-    { value: 'Select Payment Method' },
-    { value: 'Debit Card' },
-    { value: 'Gpay' },
-  ];
-  selectedList4: data[] = [
-    { value: 'Select  Tax' },
-    { value: 'Paid' },
-    { value: 'Un Paid' },
-    { value: 'Partially Paid' },
-  ];
+  ngOnInit() {
+    this.searchSubject.pipe(
+      debounceTime(300), // Wait for 300ms pause in events
+      distinctUntilChanged() // Only emit when the value changes
+    ).subscribe((searchTerm) => {
+      this.searchData(searchTerm);
+    });
+  }
+
+  onSearchInputChange(searchValue: string) {
+    this.searchSubject.next(searchValue); // Pass the search term to the Subject
+  }
 
 
   searchData(data: string) {
     this.searchResults = [];
-    this.patientService.serarchPatient(data).subscribe((result: any) => {
-
-      result.map((res: any) => {
-
-        this.searchResults.push(res);
-        this.searchResults = this.searchResults.slice(0, 3)
-      })
-    })
+    if (data.trim().length > 0) { // Only search if there's input
+      this.patientService.serarchPatient(data).subscribe((result: any) => {
+        this.searchResults = result.slice(0, 3); // Limit results to 3 items
+      });
+    }
   }
 
 
   refresh() {
-    this.patientAppointmentData = []
-    this.flag = false
+    this.patientAppointmentData = [];
+    this.searchDataValue = '';
+    this.flag = false;
   }
 
   postDatatoAppointment(id: number) {
@@ -490,7 +547,7 @@ export class CreateInvoiceComponent {
     })
   }
 
-  addItemToInvoice(event: any) {
+  onItemSelectionChange(event: any) {
     const id = event.value;
     const data = this.allnvoiceItems.find(e => e.itemId == id)
     this.addItemFormGroup.get('itemName')?.patchValue(data.itemName);
@@ -499,7 +556,26 @@ export class CreateInvoiceComponent {
     this.addItemFormGroup.get('fee')?.patchValue(data.fee);
     this.updateTotal(data.discount, data.fee);
     this.addItemflag = true;
+
+    const selectedInvoiceItem = {
+      itemName: data.itemName,
+      description: data.description,
+      discount: data.discount,
+      fee: data.fee,
+      finalAmount: this.updateTotal(data.discount, data.fee), // Assume you have a method to calculate total
+      createdBy: this.loggedInUser.loginId,
+      invoiceId: 0,
+      status: 'un Paid'
+    };
+
+    this.selectedItem = selectedInvoiceItem;
   }
+
+  addItem() {
+    this.additionalInvoiceItems.push(this.selectedItem); // Add item to the collection
+    this.totalInvoiceAmount += this.total;
+  }
+
 
   submitItemToInvoice(formData: FormGroup) {
     this.IinvoiceDto = formData.getRawValue();
@@ -512,11 +588,7 @@ export class CreateInvoiceComponent {
       this.addItemFormGroup.reset();
       this.invoiceService.invoiceId = this.IinvoiceDto.invoiceId;
       this.route.navigate(['/accounts/invoice-view'])
-
     })
-
-
-
   }
 
   updateTotal(dis: any, fee: any) {
@@ -532,4 +604,62 @@ export class CreateInvoiceComponent {
       this.addItemFormGroup.get('finalAmount')?.patchValue(this.total);
     }
   }
+
+  movetoProfile(id: number) {
+    this.patientService.patientId = id;
+  }
+
+  onDobDateChange(event: any, dateType: string): void {
+    // Extract the date part only
+    // const datePipe = new DatePipe('en-US');
+    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    if (dateType == 'from') {
+      this.minToDate = event.value
+      this.dateForm.get('from')?.setValue(dateOnly)
+
+    }
+    if (dateType == 'to') {
+      this.dateForm.get('to')?.setValue(dateOnly)
+    }
+    const from = this.dateForm.get('from')?.value || null;
+    const to = this.dateForm.get('to')?.value || null;
+    if (from !== null && to !== null) {
+
+      this.getTableData();
+    }
+  }
+
+  createInvoice(){
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
+      }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
+    }
+    else {
+      this.paymentModeDetails.transactionId = null;
+    }
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = 0;
+    this.paymentModeDetails.amount = this.totalInvoiceAmount;
+
+    this.newInvoiceDto = {
+      additionalInvoiceItems: this.additionalInvoiceItems,
+      paymentModeInfo: this.paymentModeDetails
+    }
+
+    this.invoiceService.createInvoice(this.patientId, this.newInvoiceDto).subscribe(res => {
+        this.toaster.success("Invoice Paid Successfully", "Update Invoice");
+    })
+
+  }
+
 }

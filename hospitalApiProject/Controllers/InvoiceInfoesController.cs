@@ -110,6 +110,55 @@ namespace hospitalApiProject.Controllers
       return Ok(totalPayment);
     }
 
+    [HttpPost("createInvoice/{patientId}")]
+    public async Task<ActionResult> PostInvoiceWithAdditionalItems(int patientId, NewInvoiceDto request)
+    {
+      if (request.additionalInvoiceItems == null || !request.additionalInvoiceItems.Any())
+      {
+        return BadRequest("No invoice items provided.");
+      }
+
+      // Create Invoice
+      var invoiceInfo = new InvoiceInfo()
+      {
+        Amount = 0,
+        AppoitmentId = 0,
+        CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+        PatientId = patientId,
+        Status = "Paid",
+        IsConsultationPaid = true
+      };
+
+      // Add invoice to the context and save to generate the InvoiceId
+      _context.InvoiceInfos.Add(invoiceInfo);
+      await _context.SaveChangesAsync();  // Save to generate the InvoiceId
+
+      // Retrieve the generated InvoiceId
+      int generatedInvoiceId = invoiceInfo.InvoiceId;
+
+      // Add each item to the context and associate it with the newly created invoice
+      foreach (var additionalInvoiceItem in request.additionalInvoiceItems)
+      {
+        additionalInvoiceItem.InvoiceId = generatedInvoiceId; // Set the generated InvoiceId
+        additionalInvoiceItem.Status = "Paid";
+        _context.AdditionalInvoiceItems.Add(additionalInvoiceItem);
+      }
+
+      // Add payment mode details
+      if (request.PaymentModeInfo != null)
+      {
+        request.PaymentModeInfo.InvoiceId = generatedInvoiceId;
+        await AddPaymentModeInfo(request.PaymentModeInfo);
+      }
+
+      // Save all changes to the database
+      await _context.SaveChangesAsync();
+
+      return Ok("New invoice is created successfully.");
+    }
+
+
+
     // PUT: api/InvoiceInfoes/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]

@@ -351,6 +351,11 @@ export interface ISubItemInvoicePaymentDto {
   paymentModeInfo: IPaymentMode;
 }
 
+export interface ICreateInvoiceDto {
+  additionalInvoiceItems: any[];
+  paymentModeInfo: IPaymentMode;
+}
+
 export interface assetsList {
   assetId: string;
   assetUser: string;

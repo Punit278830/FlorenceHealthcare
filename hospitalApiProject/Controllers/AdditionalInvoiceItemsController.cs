@@ -195,9 +195,6 @@ namespace hospitalApiProject.Controllers
 
 
 
-
-
-
     // DELETE: api/AdditionalInvoiceItems/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAdditionalInvoiceItem(int id)
