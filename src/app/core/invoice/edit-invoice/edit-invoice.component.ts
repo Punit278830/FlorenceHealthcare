@@ -77,7 +77,7 @@ export class EditInvoiceComponent implements OnInit {
     this.addItemFormGroup = this.fb.group({
       itemName: [{ value: '', disabled: true }, Validators.required],
       description: [{ value: '', disabled: true }, Validators.required],
-      discount: [{ value: '', disabled: false }, Validators.required],
+      discount: [{ value: '', disabled: true }, Validators.required],
       fee: [{ value: '', disabled: true }, Validators.required],
       finalAmount: [{ value: '', disabled: true }, Validators.required]
     });

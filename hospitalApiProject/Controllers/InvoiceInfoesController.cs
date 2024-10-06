@@ -154,7 +154,7 @@ namespace hospitalApiProject.Controllers
       // Save all changes to the database
       await _context.SaveChangesAsync();
 
-      return Ok("New invoice is created successfully.");
+      return Ok(invoiceInfo);
     }
 
 
@@ -171,7 +171,7 @@ namespace hospitalApiProject.Controllers
 
       _context.Entry(invoicePaymentDto.InvoiceInfo).State = EntityState.Modified;
 
-      try
+      tryc
       {
         //await _context.SaveChangesAsync();
 

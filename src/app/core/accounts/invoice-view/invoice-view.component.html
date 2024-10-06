@@ -128,7 +128,7 @@
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
 
-                                                <td>{{i+2}}</td>
+                                                <td *ngIf="doctorDetails === undefined">{{doctorDetails === undefined ? i+1 : i+2}}</td>
                                                 <td>{{data.itemName}}</td>
                                                 <td>{{data.description}}</td>
                                                 <td>{{data.fee}}</td>

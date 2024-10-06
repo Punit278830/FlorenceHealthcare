@@ -357,6 +357,7 @@ export class InvoiceViewComponent implements OnInit {
     this.paymentModeDetails.amount = 0;
 
     this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
+      this.totalInvoiceAmount = 0;
       this.getInvoiceDetails();
       this.balanceAmount = 0;
       this.toastr.success("Invoice Paid Successfully", "Update Invoice");

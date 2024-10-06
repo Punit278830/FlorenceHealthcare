@@ -83,7 +83,7 @@ export class CreateInvoiceComponent {
 
   @ViewChild('RefNoInput') RefNoInput!: ElementRef;
 
-  
+
   buttonColors = {
     Cash: 'lightgray',
     Online: 'lightgray'
@@ -535,7 +535,7 @@ export class CreateInvoiceComponent {
     this.addItemFormGroup = this.fb.group({
       itemName: [{ value: '', disabled: true }, Validators.required],
       description: [{ value: '', disabled: true }, Validators.required],
-      discount: [{ value: '', disabled: false }, Validators.required],
+      discount: [{ value: '', disabled: true }, Validators.required],
       fee: [{ value: '', disabled: true }, Validators.required],
       finalAmount: [{ value: '', disabled: true }, Validators.required]
     });
@@ -562,7 +562,7 @@ export class CreateInvoiceComponent {
       description: data.description,
       discount: data.discount,
       fee: data.fee,
-      finalAmount: this.updateTotal(data.discount, data.fee), // Assume you have a method to calculate total
+      finalAmount: this.total, 
       createdBy: this.loggedInUser.loginId,
       invoiceId: 0,
       status: 'un Paid'
@@ -598,15 +598,19 @@ export class CreateInvoiceComponent {
     else {
 
       this.total = fee - (fee * dis / 100);
-      console.log("total", this.total)
       this.total = Math.round(this.total);
-      console.log("total", this.total)
       this.addItemFormGroup.get('finalAmount')?.patchValue(this.total);
     }
   }
 
   movetoProfile(id: number) {
     this.patientService.patientId = id;
+  }
+
+  movetoInvoiceView(Id: number, patienId: number) {
+    this.invoiceService.invoiceId = Id;
+    this.patientService.patientId = patienId
+    this.route.navigate(['/accounts/invoice-view'])
   }
 
   onDobDateChange(event: any, dateType: string): void {
@@ -629,7 +633,7 @@ export class CreateInvoiceComponent {
     }
   }
 
-  createInvoice(){
+  createInvoice() {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
@@ -657,8 +661,11 @@ export class CreateInvoiceComponent {
     }
 
     this.invoiceService.createInvoice(this.patientId, this.newInvoiceDto).subscribe(res => {
+      if (res && !res.error) {
         this.toaster.success("Invoice Paid Successfully", "Update Invoice");
-    })
+        this.movetoInvoiceView(res.invoiceId, this.patientId);
+      }
+    });
 
   }
 
