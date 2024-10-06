@@ -247,10 +247,9 @@ export class CreateInvoiceComponent {
     this.flag = false;
   }
 
-  postDatatoAppointment(id: number) {
+  selectPatient(id: number) {
     this.flag = true;
     this.patientAppointmentData = [];
-    //const inputField:HTMLInputElement=this.searchInput.nativeElement;
     this.patientId = id;
     if (this.searchResults.length > 0) {
       this.searchResults.filter(res => {
@@ -312,96 +311,7 @@ export class CreateInvoiceComponent {
     if (value) {
       this.appointmentDto.fee = value.consultationFee;
     }
-
   }
-
-  async loadDoctorData(event: any) {
-    this.doctorList = [];
-    const doctorOnLeave: number[] = [];
-    const allDocSchedule: Istaffschedule[] = [];
-    console.log(event.value);
-    this.appointmentDto.departmentid = event.value;
-
-
-    await this.staffScheduleService.getStaffOnLeve(event.value, this.formattedDateTime).subscribe(res => {
-      if (res.length > 0) {
-        res.map(e => doctorOnLeave.push(e.staffId))
-
-      }
-    })
-    await this.staffService.getScheduleList().subscribe(data => {
-      console.log("schedule ress", data)
-      data.forEach(item => {
-        allDocSchedule.push(item)
-      })
-
-    })
-    await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-      console.log("doctoronleave", doctorOnLeave);
-      data.map((res: any) => {
-        console.log("doc res", res);
-
-        const available = doctorOnLeave.find(e => e == res.staffId)
-        console.log("doc avai", available);
-        if (!available) {
-          if (this.bookappointment.value.appointTime != null) {
-            console.log("entered book appoint.time")
-            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1 && item.status == "Approved")
-            console.log("doc sche", docschedule);
-            if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
-              const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
-              const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
-
-
-              // Check if appointment time falls within doctor's available time range
-              if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
-                console.log("Doctor added based on time:", res);
-                this.doctorList.push(res);
-              }
-            }
-            else {
-              console.log("Doctor added without time check:", res);
-              this.doctorList.push(res);
-            }
-          }
-          else {
-
-            console.log("Doctor added without appointTime value entered:", res);
-            this.doctorList.push(res);
-          }
-        }
-
-      })
-
-    })
-
-  }
-
-  convertToComparableTime(time: string, postfix: string): Date | null {
-    if (!time) return null;
-
-    // Parse time string to date object
-    const parsedTime = new Date(`2000-01-01 ${time} ${postfix}`);
-    return parsedTime;
-  }
-
-  isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
-    const appointmentHours = appointmentTime.getHours();
-    const appointmentMinutes = appointmentTime.getMinutes();
-    console.log("app 1", appointmentHours)
-    console.log("app 1", appointmentMinutes)
-    const fromHours = fromTime.getHours();
-    const fromMinutes = fromTime.getMinutes();
-    const toHours = toTime.getHours();
-    const toMinutes = toTime.getMinutes();
-
-    const appointmentTotalMinutes = appointmentHours * 60 + appointmentMinutes;
-    const fromTotalMinutes = fromHours * 60 + fromMinutes;
-    const toTotalMinutes = toHours * 60 + toMinutes;
-
-    return appointmentTotalMinutes >= fromTotalMinutes && appointmentTotalMinutes <= toTotalMinutes;
-  }
-
 
 
   calculateDateDifference(dob: Date) {
@@ -466,29 +376,6 @@ export class CreateInvoiceComponent {
     }
   }
 
-  onEditPatient(id: number) {
-    this.patientService.patientId = id;
-
-  }
-
-  deletePatient(idhere: number) {
-    this.modalservice.openModal({
-      type: 'patient',
-      id: idhere,
-      confirmCallback: () => this.confirmDelete(idhere)
-    });
-  }
-
-  confirmDelete(idhere: number) {
-    this.patientService.deletePatient(idhere).subscribe(res => {
-      if (res == null) {
-        this.toaster.success("Patient is deleted!")
-        this.getTableData()
-      }
-    })
-
-  }
-
   public sortData(sort: Sort) {
     const data = this.patientlist.slice();
 
@@ -509,20 +396,6 @@ export class CreateInvoiceComponent {
     this.patientAppointmentData = []
     this.flag = false
     this.route.navigate([routes.appointmentList])
-  }
-
-  updateFormattedDateTime(event: any) {
-    const currentDate = new Date();
-    console.log("currentDate" + currentDate)
-
-    this.formattedDateTime = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    //this.formattedDateTime=currentDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    console.log("formattedDateTime" + this.formattedDateTime);
-    this.bookappointment.get('doctorId')?.patchValue('');
-    this.bookappointment.get('departmentid')?.patchValue('');
-    this.bookappointment.get('appointTime')?.patchValue(null);
-
-    //this.bookappointment.get('')?.patchValue('')
   }
 
   getInvoiceMaster() {
@@ -603,36 +476,12 @@ export class CreateInvoiceComponent {
     }
   }
 
-  movetoProfile(id: number) {
-    this.patientService.patientId = id;
-  }
-
   movetoInvoiceView(Id: number, patienId: number) {
     this.invoiceService.invoiceId = Id;
     this.patientService.patientId = patienId
     this.route.navigate(['/accounts/invoice-view'])
   }
-
-  onDobDateChange(event: any, dateType: string): void {
-    // Extract the date part only
-    // const datePipe = new DatePipe('en-US');
-    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    if (dateType == 'from') {
-      this.minToDate = event.value
-      this.dateForm.get('from')?.setValue(dateOnly)
-
-    }
-    if (dateType == 'to') {
-      this.dateForm.get('to')?.setValue(dateOnly)
-    }
-    const from = this.dateForm.get('from')?.value || null;
-    const to = this.dateForm.get('to')?.value || null;
-    if (from !== null && to !== null) {
-
-      this.getTableData();
-    }
-  }
-
+  
   createInvoice() {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
