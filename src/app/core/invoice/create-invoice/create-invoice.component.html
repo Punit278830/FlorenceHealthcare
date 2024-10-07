@@ -133,8 +133,8 @@
 
 
                         <!-- remove this -->
-                        <form [formGroup]="bookappointment" (ngSubmit)="bookAppointment(bookappointment)">
-                            <div class="row" *ngFor="let appointment of patientAppointmentData">
+                        <form [formGroup]="bookappointment">
+                            <div class="row" *ngFor="let patient of patientInfo">
                                 <div class="col-12">
                                     <div class="form-heading">
                                         <h4><b>Add Invoice</b></h4>
@@ -152,12 +152,12 @@
                                         </thead>
                                         <tbody>
                                             <tr>
-                                                <td>{{appointment.firstName}}
-                                                    {{appointment.lastName}}</td>
-                                                <td>{{appointment.ageinYear}}</td>
-                                                <td>{{appointment.mobile}}</td>
-                                                <td>{{appointment.gender}}</td>
-                                                <td>{{appointment.email}}</td>
+                                                <td>{{patient.firstName}}
+                                                    {{patient.lastName}}</td>
+                                                <td>{{patient.ageinYear}}</td>
+                                                <td>{{patient.mobile}}</td>
+                                                <td>{{patient.gender}}</td>
+                                                <td>{{patient.email}}</td>
                                                 <!-- Add more cells based on your patient details -->
                                             </tr>
                                             <!-- Add more rows for additional patients -->

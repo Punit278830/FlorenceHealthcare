@@ -171,7 +171,7 @@ namespace hospitalApiProject.Controllers
 
       _context.Entry(invoicePaymentDto.InvoiceInfo).State = EntityState.Modified;
 
-      tryc
+      try
       {
         //await _context.SaveChangesAsync();
 

@@ -33,7 +33,7 @@ export class CreateInvoiceComponent {
   private formattedDateTime: any;
 
   public searchResults: IpatientInfo[] = [];
-  public patientAppointmentData: IpatientInfo[] = [];
+  public patientInfo: IpatientInfo[] = [];
   public flag: boolean = false;
   public age!: number;
   private patientId!: number;
@@ -117,14 +117,10 @@ export class CreateInvoiceComponent {
 
 
   constructor(private patientService: PatientService,
-    private modalservice: ModalServiceService,
     private toaster: ToastrService,
     private appointmentService: AppointmentService,
     private route: Router,
     private fb: FormBuilder,
-    private staffService: StaffService,
-    private staffScheduleService: StaffScheduleService,
-    private datePipe: DatePipe,
     private invoiceService: InvoiceService
   ) {
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
@@ -153,55 +149,6 @@ export class CreateInvoiceComponent {
       additionalInvoiceItems: this.additionalInvoiceItems,
       paymentModeInfo: this.paymentModeDetails
     }
-  }
-
-  bookAppointment(appointment: any) {
-    if (this.bookappointment.valid) {
-      let formattedTime = ""
-      if (appointment.value.appointTime) {
-        console.log("value", appointment.value.appointTime)
-        const appointTime = new Date(appointment.value.appointTime);
-
-        let hours = appointTime.getHours();
-        let minutes = appointTime.getMinutes();
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-
-        // Convert hours to 12-hour format
-        hours = hours % 12;
-        hours = hours ? hours : 12; // Handle midnight (0 hours)
-
-        formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-      }
-
-
-
-
-      const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = this.formattedDateTime;
-      this.appointmentDto.doctorId = appointment.value.doctorId;
-      this.appointmentDto.notes = appointment.value.notes;
-      this.appointmentDto.patientId = this.patientId;
-      this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-
-      this.appointmentDto.appointTime = formattedTime;
-      console.log("tme", this.appointmentDto)
-      //this.appointmentDto.departmentId=3;
-      this.appointmentDto.scheduledByid = userData.loginId;
-      this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
-        console.log("result", result);
-        this.toaster.success("Appointment booked succesfully", "Book Appointment");
-        this.bookappointment.reset();
-        this.route.navigate([routes.invoices])
-
-      });
-
-    }
-    else {
-      this.bookappointment.markAllAsTouched();
-    }
-
-
-
   }
 
   appointmentFormInitlize() {
@@ -242,21 +189,21 @@ export class CreateInvoiceComponent {
 
 
   refresh() {
-    this.patientAppointmentData = [];
+    this.patientInfo = [];
     this.searchDataValue = '';
     this.flag = false;
   }
 
   selectPatient(id: number) {
     this.flag = true;
-    this.patientAppointmentData = [];
+    this.patientInfo = [];
     this.patientId = id;
     if (this.searchResults.length > 0) {
       this.searchResults.filter(res => {
         if (res.patientId == id) {
           this.age = this.appointmentService.calculateDateDifference(res.dob)
           res.ageinYear = this.age;
-          this.patientAppointmentData.push(res)
+          this.patientInfo.push(res)
 
         }
       })
@@ -265,7 +212,7 @@ export class CreateInvoiceComponent {
       this.patientService.getPatientData(id).subscribe(res => {
         this.age = this.appointmentService.calculateDateDifference(res.dob)
         res.ageinYear = this.age;
-        this.patientAppointmentData.push(res)
+        this.patientInfo.push(res)
       })
 
 
@@ -274,7 +221,7 @@ export class CreateInvoiceComponent {
 
     this.searchResults = [];
     //inputField.value=''
-    console.log("appointmentData", this.patientAppointmentData);
+    console.log("appointmentData", this.patientInfo);
     //this.route.navigate([routes.addAppointment])
 
   }
@@ -393,7 +340,7 @@ export class CreateInvoiceComponent {
   }
 
   OnCancel() {
-    this.patientAppointmentData = []
+    this.patientInfo = []
     this.flag = false
     this.route.navigate([routes.appointmentList])
   }
@@ -481,7 +428,7 @@ export class CreateInvoiceComponent {
     this.patientService.patientId = patienId
     this.route.navigate(['/accounts/invoice-view'])
   }
-  
+
   createInvoice() {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
@@ -511,7 +458,7 @@ export class CreateInvoiceComponent {
 
     this.invoiceService.createInvoice(this.patientId, this.newInvoiceDto).subscribe(res => {
       if (res && !res.error) {
-        this.toaster.success("Invoice Paid Successfully", "Update Invoice");
+        this.toaster.success("Invoice Paid Successfully", "Create Invoice");
         this.movetoInvoiceView(res.invoiceId, this.patientId);
       }
     });
