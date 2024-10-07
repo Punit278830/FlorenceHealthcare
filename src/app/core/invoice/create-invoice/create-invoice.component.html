@@ -6,7 +6,7 @@
             <div class="row">
                 <div class="col-sm-12">
                     <ul class="breadcrumb">
-                        <li class="breadcrumb-item"><a [routerLink]="routes.invoices">Accounts </a></li>
+                        <li class="breadcrumb-item"><a [routerLink]="routes.invoices">Invoices </a></li>
                         <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
                         <li class="breadcrumb-item active">Add Invoice</li>
                     </ul>
@@ -20,35 +20,97 @@
 
                 <div class="card ">
                     <div class="card-body">
+                        <!-- Table Header -->
+                        <div class="page-table-header mb-2">
+                            <div class="row align-items-center">
+                                <div class="col">
+                                    <div class="doctor-table-blk">
+                                        <h3>Patient List</h3>
+                                        <div class="doctor-search-blk">
+                                            <div class="top-nav-search table-search-blk">
+                                                <input type="text" class="form-control" placeholder="Search here"
+                                                    [(ngModel)]="searchDataValue"
+                                                    (ngModelChange)="searchData(searchDataValue)">
+                                                <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
+                                            </div>
+                                            <div class="add-group">
+                                                <a [routerLink]="routes.addPatient"
+                                                    class="btn btn-primary add-pluss ms-2"><img
+                                                        src="assets/img/icons/plus.svg" alt=""></a>
+                                                <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2"
+                                                    (click)="onRefresh()"><img src="assets/img/icons/re-fresh.svg"
+                                                        alt=""></a>
+                                            </div>
+                                            <!-- <div class="col-12 col-md-6 col-xl-3 mt-2  ms-2"> -->
+                                            <form [formGroup]="dateForm">
+                                                <div class="top-nav-search">
+                                                    <!-- <label for="Birth">From <span class="login-danger">*</span></label> -->
+                                                    <input class="form-control datetimepicker"
+                                                        (dateChange)="onDobDateChange($event,'from')"
+                                                        formControlName="from" placeholder="From" type="text" matInput
+                                                        [matDatepicker]="From">
+                                                    <mat-datepicker #From></mat-datepicker>
+                                                    <mat-datepicker-toggle matIconSuffix
+                                                        [for]="From"></mat-datepicker-toggle>
 
+                                                </div>
+                                                <!-- <div class="col-12 col-md-6 col-xl-3 mt-2  ms-2"> -->
+                                                <div class="top-nav-search">
+                                                    <!-- <label for="Birth">To <span class="login-danger">*</span></label> -->
+                                                    <input class="form-control datetimepicker"
+                                                        (dateChange)="onDobDateChange($event,'to')" placeholder="To"
+                                                        formControlName="to" type="text" matInput [matDatepicker]="To"
+                                                        [min]="minToDate">
+                                                    <mat-datepicker #To></mat-datepicker>
+                                                    <mat-datepicker-toggle matIconSuffix
+                                                        [for]="To"></mat-datepicker-toggle>
+
+                                                    <!-- </div> -->
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /Table Header -->
                         <div *ngIf="flag == false" class="table-responsive">
-                            <div class="col-12">
+                            <!-- <div class="col-12">
                                 <div class="form-heading">
                                     <h4><b>Select Patient</b></h4>
                                 </div>
-                            </div>
+                            </div> -->
                             <table matSort (matSortChange)="sortData($event)"
                                 class="table border-0 custom-table comman-table datatable mb-0">
                                 <thead>
                                     <tr>
+                                        <th>Sr. No.</th>
+                                        <th mat-sort-header="name">Patient Id</th>
                                         <th mat-sort-header="name">Name</th>
-                                        <th mat-sort-header="department">Age</th>
-                                        <th mat-sort-header="specialization">Mobile</th>
-                                        <th mat-sort-header="degree">Email</th>
-                                        <th mat-sort-header="mobile">Gender</th>
+                                        <th mat-sort-header="gender">Gender</th>
+                                        <th mat-sort-header="Age">Age</th>
+                                        <th mat-sort-header="mobile">Mobile</th>
+                                        <th mat-sort-header="email">Email</th>
+                                        <th mat-sort-header="name">Registration Date</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let data of patientlist">
-                                        <td class="profile-image" (click)="selectPatient(data.patientId)"
-                                            (keydown.enter)="selectPatient(data.patientId)">
-                                            <a href="javascript:;"> {{data.firstName}}
-                                                {{data.lastName}}</a>
+                                    <tr *ngFor="let data of patientList; let i=index"
+                                        (click)="selectPatient(data.patientId)">
+                                        <td>{{serialNumberArray[i]}}</td>
+                                        <td>{{data.patientId}}</td>
+                                        <td class="profile-image">
+                                            <a href="javascript:;">
+                                                {{data.firstName}}
+                                                {{data.lastName}}
+                                            </a>
                                         </td>
+                                        <td>{{data.gender}}</td>
                                         <td>{{data.ageinYear}}</td>
                                         <td><a href="javascript:;">{{data.mobile}}</a></td>
                                         <td>{{data.email}}</td>
-                                        <td>{{data.gender}}</td>
+                                        <td>{{data.regstrationDate}}</td>
                                     </tr>
                                 </tbody>
                             </table>

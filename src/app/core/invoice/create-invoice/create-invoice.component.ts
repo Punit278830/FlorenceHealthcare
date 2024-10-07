@@ -2,17 +2,16 @@ import { Component, ElementRef, ViewChild } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { Iappointment, ICreateInvoiceDto, Idepartment, IinvoiceItem, Ilogin, IpatientInfo, IPaymentMode, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
-import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
-import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
 import { DatePipe } from '@angular/common';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
+import { MatTableDataSource } from '@angular/material/table';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 
 
@@ -70,6 +69,8 @@ export class CreateInvoiceComponent {
   searchSubject = new Subject<string>();
 
   public patientList: Array<IpatientInfo> = [];
+  dataSource!: MatTableDataSource<IpatientInfo>;
+
   public allpatientList: Array<IpatientInfo> = [];
   public minToDate: Date | null = null;
   public dateForm!: FormGroup;
@@ -82,7 +83,6 @@ export class CreateInvoiceComponent {
   public newInvoiceDto!: ICreateInvoiceDto;
 
   @ViewChild('RefNoInput') RefNoInput!: ElementRef;
-
 
   buttonColors = {
     Cash: 'lightgray',
@@ -118,14 +118,14 @@ export class CreateInvoiceComponent {
 
   constructor(private patientService: PatientService,
     private toaster: ToastrService,
+    private datePipe: DatePipe,
     private appointmentService: AppointmentService,
     private route: Router,
     private fb: FormBuilder,
-    private invoiceService: InvoiceService
+    private invoiceService: InvoiceService,
+    private loadingService: LoadingService
   ) {
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
-
-    this.getTableData();
 
     this.initlizeInvoiceMasterForm();
     this.InitlizeInvoiceItemForm();
@@ -164,34 +164,8 @@ export class CreateInvoiceComponent {
     })
   }
 
-  ngOnInit() {
-    this.searchSubject.pipe(
-      debounceTime(300), // Wait for 300ms pause in events
-      distinctUntilChanged() // Only emit when the value changes
-    ).subscribe((searchTerm) => {
-      this.searchData(searchTerm);
-    });
-  }
-
   onSearchInputChange(searchValue: string) {
     this.searchSubject.next(searchValue); // Pass the search term to the Subject
-  }
-
-
-  searchData(data: string) {
-    this.searchResults = [];
-    if (data.trim().length > 0) { // Only search if there's input
-      this.patientService.serarchPatient(data).subscribe((result: any) => {
-        this.searchResults = result.slice(0, 3); // Limit results to 3 items
-      });
-    }
-  }
-
-
-  refresh() {
-    this.patientInfo = [];
-    this.searchDataValue = '';
-    this.flag = false;
   }
 
   selectPatient(id: number) {
@@ -228,28 +202,61 @@ export class CreateInvoiceComponent {
 
   private getTableData(): void {
 
-    this.patientlist = [];
+    this.patientList = [];
     this.serialNumberArray = [];
+    const from = this.dateForm.get('from')?.value || null;
+    const to = this.dateForm.get('to')?.value || null;
 
-    this.patientService.getPatientList().subscribe((data: any) => {
-      this.totalData = data.length;
-      // this.staffList.push(data);
+    this.loadingService.showLoader();
 
-      console.log(data)
-      data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.calculateDateDifference(res.dob);
-          res.ageinYear = this.age;
+    if (from !== null && to !== null) {
+      // this.dateForm.reset();
+      this.patientService.getPatientdateange(from, to).subscribe((data: any) => {
+        this.totalData = data.length;
+        // this.staffList.push(data);
+        this.allpatientList = data;
 
-          this.patientlist.push(res);
-          console.log(res.DOJ)
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
+        console.log(data);
+        this.loadingService.hideLoader();
 
-      this.calculateTotalPages(this.totalData, this.pageSize);
-    })
+        data.map((res: any, index: number) => {
+          const serialNumber = index + 1;
+          if (index >= this.skip && serialNumber <= this.limit) {
+            this.calculateDateDifference(res.dob);
+            res.ageinYear = this.age;
+
+            this.patientList.push(res);
+            console.log(res.DOJ)
+            this.serialNumberArray.push(serialNumber);
+          }
+        });
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      })
+    }
+    else {
+      this.patientService.getPatientList().subscribe((data: any) => {
+        this.totalData = data.length;
+        // this.staffList.push(data);
+        this.allpatientList = data;
+        console.log("allpatients", this.allpatientList)
+        this.loadingService.hideLoader();
+
+        console.log(data)
+        data.map((res: any, index: number) => {
+          const serialNumber = index + 1;
+          if (index >= this.skip && serialNumber <= this.limit) {
+            this.calculateDateDifference(res.dob);
+            res.ageinYear = this.age;
+            this.patientList.push(res);
+            this.serialNumberArray.push(serialNumber);
+          }
+        });
+        this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
+        this.calculateTotalPages(this.totalData, this.pageSize);
+      })
+    }  
   }
 
   addFee(event: any) {
@@ -464,5 +471,70 @@ export class CreateInvoiceComponent {
     });
 
   }
+
+  public searchData(value: any): void {
+    if (value != '') {
+      console.log("value", value)
+      console.log("datasource", this.dataSource)
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.patientList = this.dataSource.filteredData;
+      console.log("value", this.patientList)
+      if (this.patientList.length > 0) {
+        this.patientList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.patientList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+    }
+    else {
+      this.getTableData()
+    }
+  }
+  
+  initlizeDateForm() {
+    this.dateForm = this.fb.group({
+      from: [null],
+      to: [null]
+    });
+  }
+
+  ngOnInit() {
+    this.initlizeDateForm();
+    this.getTableData();
+  }
+
+  onRefresh() {
+    this.patientList = [];
+    this.searchDataValue = '';
+    this.dateForm.reset();
+    this.getTableData()
+  }
+
+  onDobDateChange(event: any, dateType: string): void {
+    // Extract the date part only
+    // const datePipe = new DatePipe('en-US');
+    const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    if (dateType == 'from') {
+      this.minToDate = event.value
+      this.dateForm.get('from')?.setValue(dateOnly)
+
+    }
+    if (dateType == 'to') {
+      this.dateForm.get('to')?.setValue(dateOnly)
+    }
+    const from = this.dateForm.get('from')?.value || null;
+    const to = this.dateForm.get('to')?.value || null;
+    if (from !== null && to !== null) {
+
+      this.getTableData();
+    }
+  }
+
 
 }
