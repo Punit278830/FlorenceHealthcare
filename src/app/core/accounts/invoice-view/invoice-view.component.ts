@@ -198,7 +198,7 @@ export class InvoiceViewComponent implements OnInit {
 
         this.invoiceDetails = res;
         console.log("invoice details", res)
-        if (res.status == 'un Paid') {
+        if (!res.isConsultationPaid && (res.status == 'un Paid' || res.status == "Partially Paid")) {
           //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
         }
@@ -365,8 +365,17 @@ export class InvoiceViewComponent implements OnInit {
 
   }
 
-  paidinvoice(invoiceDetails: any) {
+  removeItem(itemName: string): void {
+    this.invoiceService.deleteSubInvoiceItem(this.invoiceId, itemName).subscribe(res => {
+      this.totalInvoiceAmount = 0;
+      this.balanceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Additional item deleted Successfully", "Update Invoice")
+    });
+  }
 
+  paidinvoice(invoiceDetails: any) {
+ 
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;

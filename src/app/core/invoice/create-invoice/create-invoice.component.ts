@@ -83,6 +83,7 @@ export class CreateInvoiceComponent {
   public newInvoiceDto!: ICreateInvoiceDto;
 
   @ViewChild('RefNoInput') RefNoInput!: ElementRef;
+  alreadyAddedItems: Set<number> = new Set();
 
   buttonColors = {
     Cash: 'lightgray',
@@ -256,7 +257,7 @@ export class CreateInvoiceComponent {
         this.dataSource = new MatTableDataSource<IpatientInfo>(this.allpatientList);
         this.calculateTotalPages(this.totalData, this.pageSize);
       })
-    }  
+    }
   }
 
   addFee(event: any) {
@@ -376,33 +377,52 @@ export class CreateInvoiceComponent {
 
   onItemSelectionChange(event: any) {
     const id = event.value;
-    const data = this.allnvoiceItems.find(e => e.itemId == id)
-    this.addItemFormGroup.get('itemName')?.patchValue(data.itemName);
-    this.addItemFormGroup.get('description')?.patchValue(data.description);
-    this.addItemFormGroup.get('discount')?.patchValue(data.discount);
-    this.addItemFormGroup.get('fee')?.patchValue(data.fee);
-    this.updateTotal(data.discount, data.fee);
-    this.addItemflag = true;
 
-    const selectedInvoiceItem = {
-      itemName: data.itemName,
-      description: data.description,
-      discount: data.discount,
-      fee: data.fee,
-      finalAmount: this.total, 
-      createdBy: this.loggedInUser.loginId,
-      invoiceId: 0,
-      status: 'un Paid'
-    };
+    if (this.alreadyAddedItems.has(id)) {
+      // If the item is already added, disable the Add button
+      this.addItemflag = false;
+    } else {
+      const data = this.allnvoiceItems.find(e => e.itemId == id);
+      this.addItemFormGroup.get('itemName')?.patchValue(data.itemName);
+      this.addItemFormGroup.get('description')?.patchValue(data.description);
+      this.addItemFormGroup.get('discount')?.patchValue(data.discount);
+      this.addItemFormGroup.get('fee')?.patchValue(data.fee);
+      this.updateTotal(data.discount, data.fee);
+      this.addItemflag = true;
 
-    this.selectedItem = selectedInvoiceItem;
+      const selectedInvoiceItem = {
+        itemId: data.itemId,
+        itemName: data.itemName,
+        description: data.description,
+        discount: data.discount,
+        fee: data.fee,
+        finalAmount: this.total,
+        createdBy: this.loggedInUser.loginId,
+        invoiceId: 0,
+        status: 'un Paid'
+      };
+
+      this.selectedItem = selectedInvoiceItem;
+    }
   }
+
 
   addItem() {
-    this.additionalInvoiceItems.push(this.selectedItem); // Add item to the collection
-    this.totalInvoiceAmount += this.total;
+    if (!this.alreadyAddedItems.has(this.selectedItem.itemId)) {
+      this.additionalInvoiceItems.push(this.selectedItem);  // Add item to the collection
+      this.totalInvoiceAmount += this.total;
+
+      // Mark this item as added
+      this.alreadyAddedItems.add(this.selectedItem.itemId);
+
+      // Disable Add button until new selection
+      this.addItemflag = false;
+    }
   }
 
+  removeItem(index: number): void {
+    this.additionalInvoiceItems.splice(index, 1); // Removes the item at the given index
+  }
 
   submitItemToInvoice(formData: FormGroup) {
     this.IinvoiceDto = formData.getRawValue();
@@ -496,7 +516,7 @@ export class CreateInvoiceComponent {
       this.getTableData()
     }
   }
-  
+
   initlizeDateForm() {
     this.dateForm = this.fb.group({
       from: [null],

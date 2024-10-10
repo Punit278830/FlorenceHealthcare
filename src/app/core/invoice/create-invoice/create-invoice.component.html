@@ -318,6 +318,7 @@
                                                                     <div class="col-12">
                                                                         <div class="doctor-submit text-end">
                                                                             <button type="button"
+                                                                                [disabled]="!addItemflag"
                                                                                 class="btn btn-primary submit-form me-2"
                                                                                 (click)="addItem()">Add</button>
                                                                             <button type="button"
@@ -342,6 +343,7 @@
                                                                             <th>Fee</th>
                                                                             <th>Discount (%)</th>
                                                                             <th>Total</th>
+                                                                            <th>Remove</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -357,6 +359,12 @@
                                                                                 <td>{{data.discount}} </td>
                                                                                 <td>{{ data.fee - ((data.discount/100) *
                                                                                     data.fee) }}</td>
+                                                                                <td>
+                                                                                    <a href="javascript:void(0);"
+                                                                                        class="remove-btn"><i
+                                                                                            class="fa fa-trash-alt"
+                                                                                            (click)="removeItem(i)"></i></a>
+                                                                                </td>
                                                                             </tr>
                                                                         </ng-container>
                                                                     </tbody>

@@ -70,13 +70,17 @@ export class InvoiceService {
     return this.http.put(this.apiUrl + 'AdditionalInvoiceItems/' + id, data);
   }
 
+  deleteSubInvoiceItem(invoiceId: number, itemName: string): Observable<any> {
+    return this.http.delete(this.apiUrl + 'AdditionalInvoiceItems/' + invoiceId + '/' + itemName);
+  }
+
   getInvoiceItem() {
     return this.http.get(this.apiUrl + 'InvoiceItemMaster/');
   }
 
   postInvoiceItem(InvoiceItemMaster: IinvoiceItem) {
     return this.http.post(this.apiUrl + 'InvoiceItemMaster/', InvoiceItemMaster);
-  }
+  } 
 
 
 

@@ -22,7 +22,7 @@
                         <div class="invoice-head-clinic">
                             <div class="row">
                                 <div class="col-12 col-md-6">
-                                    <div class="invoice-counts">
+                                    <div class="invoice-counts" *ngIf="invoiceDetails != undefined">
                                         <h4>Invoice <span>#INV-{{invoiceDetails.invoiceId}}</span></h4>
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                             <div class="col-12 col-md-6 m-b-20 part-two">
                                 <div class="invoice-details">
                                     <h3>Bill To:</h3>
-                                    <ul class="list-unstyled invoice-clinic">
+                                    <ul class="list-unstyled invoice-clinic" *ngIf="patientDetails != undefined">
                                         <li>{{patientDetails.firstName}} {{patientDetails.lastName}}</li>
                                         <li>{{patientDetails.mobile}}</li>
 
@@ -102,6 +102,7 @@
                                             <th>Total</th>
                                             <th>Status</th>
                                             <th>Action</th>
+                                            <th>Remove</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -116,19 +117,19 @@
 
                                             <td><button
                                                     [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
-                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' : 'un Paid'}}</button></td>
+                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' :
+                                                    'un Paid'}}</button></td>
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"
-                                                    class="btn btn-primary custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' : 'Pay'}}</button>
+                                                    class="btn btn-primary custom-badge">{{invoiceDetails.isConsultationPaid
+                                                    ? 'Paid' : 'Pay'}}</button>
                                             </td>
-
-
                                         </tr>
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
 
-                                                <td *ngIf="doctorDetails === undefined">{{doctorDetails === undefined ? i+1 : i+2}}</td>
+                                                <td>{{doctorDetails === undefined ? i+1 : i+2}}</td>
                                                 <td>{{data.itemName}}</td>
                                                 <td>{{data.description}}</td>
                                                 <td>{{data.fee}}</td>
@@ -144,7 +145,8 @@
                                                         class="btn btn-primary custom-badge">{{data.status == 'Paid' ?
                                                         'Paid' : 'Pay'}}</button>
                                                 </td>
-
+                                                <td><a href="javascript:void(0);" class="remove-btn" *ngIf="data.status !== 'Paid'"><i
+                                                    class="fa fa-trash-alt" (click)="removeItem(data.itemName)"></i></a></td>
                                             </tr>
                                         </ng-container>
                                     </tbody>
@@ -194,8 +196,10 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
-                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' }" class="btn btn-primary submit-form me-2"
-                    (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' : 'Paid'}}</a>
+                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' }"
+                    class="btn btn-primary submit-form me-2"
+                    (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' :
+                    'Paid'}}</a>
                 <a href="javascript:;" [ngClass]="{ 'disabled': !isAllowed }" class="btn btn-primary submit-form me-2"
                     (click)="print()"><i class="feather icon-printer me-2"></i>Print</a>
                 <a href="javascript:;" class="btn btn-primary submit-form me-2"

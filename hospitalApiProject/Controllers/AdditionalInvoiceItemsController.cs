@@ -192,9 +192,6 @@ namespace hospitalApiProject.Controllers
       return CreatedAtAction("GetAdditionalInvoiceItem", new { id = additionalInvoiceItem.Id }, additionalInvoiceItem);
     }
 
-
-
-
     // DELETE: api/AdditionalInvoiceItems/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAdditionalInvoiceItem(int id)
@@ -210,6 +207,55 @@ namespace hospitalApiProject.Controllers
 
       return NoContent();
     }
+
+    // DELETE: api/AdditionalInvoiceItems/invoiceId/itemName
+    [HttpDelete("{invoiceId}/{itemName}")]
+    public async Task<IActionResult> DeleteAdditionalInvoiceItem(int invoiceId, string itemName)
+    {
+      try
+      {
+        // Find the additional item to delete by invoiceId and itemName
+        var additionalInvoiceItem = await _context.AdditionalInvoiceItems
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && i.ItemName == itemName);
+
+        if (additionalInvoiceItem == null)
+        {
+          return NotFound(new { message = "Additional invoice item not found." });
+        }
+
+        // Remove the additional invoice item
+        _context.AdditionalInvoiceItems.Remove(additionalInvoiceItem);
+
+        // Save changes to the database
+        await _context.SaveChangesAsync();
+
+        // Check if any unpaid items remain for the invoice
+        var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
+            .AnyAsync(e => e.InvoiceId == invoiceId && e.Status != "Paid");
+
+        // Update the overall payment status of the invoice
+        var invoiceInfo = await _context.InvoiceInfos
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+
+        if (invoiceInfo != null)
+        {
+          invoiceInfo.Status = hasUnpaidInvoiceItems ? "Partially Paid" : "Paid";
+          _context.InvoiceInfos.Update(invoiceInfo);
+          await _context.SaveChangesAsync();
+        }
+
+        return NoContent();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Concurrency issue occurred while deleting the item." });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while deleting the item.", error = ex.Message });
+      }
+    }
+
 
     private bool AdditionalInvoiceItemExists(int id)
     {
