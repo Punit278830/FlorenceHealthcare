@@ -146,7 +146,6 @@
                     <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
                     <td>{{data.appoitmentId}}</td>
                     <td>{{data.amount}}</td>
-
                     <td><button
                         [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
                         class="custom-badge">{{data.status}}</button></td>

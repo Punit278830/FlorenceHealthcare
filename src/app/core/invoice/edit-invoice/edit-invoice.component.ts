@@ -24,6 +24,8 @@ export class EditInvoiceComponent implements OnInit {
   private IinvoiceDto!: IinvoiceItem;
   private loggedInUser!: Ilogin;
   public flag: boolean = false;
+  alreadyAddedItems: Set<string> = new Set();
+  public selectedItem: any;
 
   constructor(private fb: FormBuilder,
     private invoiceService: InvoiceService,
@@ -58,6 +60,7 @@ export class EditInvoiceComponent implements OnInit {
     this.initlizeInvoiceMasterForm();
     this.InitlizeInvoiceItemForm();
     this.getInvoiceMaster();
+    this.getAddtionalItemsForInvoice(this.invoiceService.invoiceId);
     this.addItemFormGroup.get('discount')?.valueChanges.subscribe(() => {
       console.log("dis fee", this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value)
       this.updateTotal(this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value);
@@ -99,24 +102,27 @@ export class EditInvoiceComponent implements OnInit {
     this.addItemFormGroup.get('fee')?.patchValue(data.fee);
     this.updateTotal(data.discount, data.fee);
     this.flag = true;
+
+    this.selectedItem = data;
   }
 
   submitItemToInvoice(formData: FormGroup) {
-    this.IinvoiceDto = formData.getRawValue();
-    this.IinvoiceDto.createdBy = this.loggedInUser.loginId;
-    this.IinvoiceDto.invoiceId = this.invoiceService.invoiceId;
-    this.IinvoiceDto.status = 'un Paid';
-    //delete this.IinvoiceDto.total;
-    this.invoiceService.addToaddtionalItemInvoice(this.IinvoiceDto).subscribe(res => {
-      this.toastr.success("Item Added to Invoice", "Invoice Item");
-      this.addItemFormGroup.reset();
-      this.invoiceService.invoiceId = this.IinvoiceDto.invoiceId;
-      this.route.navigate(['/accounts/invoice-view'])
-
-    })
-
-
-
+    if (this.alreadyAddedItems.has(this.selectedItem.itemName)) {
+      this.toastr.error("Additional item already exists!");
+    } else {
+      this.alreadyAddedItems.add(this.selectedItem.itemName);
+      this.IinvoiceDto = formData.getRawValue();
+      this.IinvoiceDto.createdBy = this.loggedInUser.loginId;
+      this.IinvoiceDto.invoiceId = this.invoiceService.invoiceId;
+      this.IinvoiceDto.status = 'un Paid';
+      //delete this.IinvoiceDto.total;
+      this.invoiceService.addToaddtionalItemInvoice(this.IinvoiceDto).subscribe(res => {
+        this.toastr.success("Item Added to Invoice", "Invoice Item");
+        this.addItemFormGroup.reset();
+        this.invoiceService.invoiceId = this.IinvoiceDto.invoiceId;
+        this.route.navigate(['/accounts/invoice-view']);
+      });
+    }
   }
 
   updateTotal(dis: any, fee: any) {
@@ -131,11 +137,13 @@ export class EditInvoiceComponent implements OnInit {
       console.log("total", this.total)
       this.addItemFormGroup.get('finalAmount')?.patchValue(this.total);
     }
+  }
 
-
-
-
-
-
+  getAddtionalItemsForInvoice(id: number) {
+    this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res: any) => {
+      res.map((data: any) => {
+        this.alreadyAddedItems.add(data.itemName);
+      })
+    })
   }
 }

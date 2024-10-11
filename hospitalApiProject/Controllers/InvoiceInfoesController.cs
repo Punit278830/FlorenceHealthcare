@@ -15,7 +15,7 @@ namespace hospitalApiProject.Controllers
     {
       _context = context;
     }
-
+    
     [HttpGet]
     public async Task<List<InvoiceInfoResponse>> GetInvoiceWithPaymentsAsync([FromQuery] string paymentMode = "All")
     {
@@ -32,7 +32,7 @@ namespace hospitalApiProject.Controllers
             .Contains(paymentMode.ToLower())); // Filter by the specified payment mode
       }
 
-      // Select the invoice data and join it with payment modes
+      // Select the invoice data and join it with payment modes and additional items
       var result = await query
           .Select(invoice => new InvoiceInfoResponse
           {
@@ -40,18 +40,27 @@ namespace hospitalApiProject.Controllers
             AppointmentId = invoice.AppoitmentId,
             PatientId = invoice.PatientId,
             CreatedDate = invoice.CreatedDate,
-            Amount = invoice.Amount,
+
+            // Set Amount to the total of base amount + additional items' amounts
+            Amount = invoice.Amount + _context.AdditionalInvoiceItems
+                  .Where(ai => ai.InvoiceId == invoice.InvoiceId)
+                  .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
+
             Status = invoice.Status,
+
+            // Payment details for the invoice
             PaymentDetails = _context.PaymentModeInfo
-                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                    .Select(pm => new PaymentModeInfo
-                    {
-                      PaymentId = pm.PaymentId,
-                      PaymentMode = pm.PaymentMode,
-                      TransactionId = pm.TransactionId,
-                      PaymentDate = pm.PaymentDate,
-                      Amount = pm.Amount
-                    }).ToList(),
+                  .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                  .Select(pm => new PaymentModeInfo
+                  {
+                    PaymentId = pm.PaymentId,
+                    PaymentMode = pm.PaymentMode,
+                    TransactionId = pm.TransactionId,
+                    PaymentDate = pm.PaymentDate,
+                    Amount = pm.Amount
+                  }).ToList(),
+
+            // Concatenated list of payment modes for the invoice
             PaymentModes = _context.PaymentModeInfo
                   .Where(pm => pm.InvoiceId == invoice.InvoiceId)
                   .Select(pm => pm.PaymentMode)
