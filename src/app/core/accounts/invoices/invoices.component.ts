@@ -1,4 +1,6 @@
+import { DatePipe } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -16,7 +18,8 @@ interface data {
 @Component({
   selector: 'app-invoices',
   templateUrl: './invoices.component.html',
-  styleUrls: ['./invoices.component.scss']
+  styleUrls: ['./invoices.component.scss'],
+  providers: [DatePipe]
 })
 export class InvoicesComponent implements OnInit {
   public routes = routes;
@@ -40,79 +43,125 @@ export class InvoicesComponent implements OnInit {
   public img = "assets/img/profiles/avatar-08.jpg";
   public combinedData: any[] = [];
   selectedPaymentMode: string = 'All';
+  selectedPaymentStatus: string = 'All';
   totalPaymentAmount: number = 0;
+  public searchForm!: FormGroup;
 
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
     private patientService: PatientService,
     private route: Router,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private fb: FormBuilder,
+    private datePipe: DatePipe
+  ) {
 
   }
   ngOnInit() {
+    this.initSearchForm();  // Initialize the search form
     this.getTableData();
   }
 
- private getTableData(paymentMode: string = "All"): void {
-  this.loadingService.showLoader();
+  // Initialize the search form with From, To, Payment Status, and Payment Mode
+  initSearchForm() {
+    const today = new Date();
+    const formattedToday = this.datePipe.transform(today, 'yyyy-MM-dd');
 
-  const invoices$ = this.invoiceService.getAllInvoice(paymentMode);
-  const Patients$ = this.patientService.getPatientList();
-  const paymentDetails$ = this.invoiceService.getPaymentDetails(); // Fetch payment details
-
-  forkJoin([invoices$, Patients$, paymentDetails$]).subscribe(([invoice, patient, paymentDetails]) => {
-    console.log(invoice);
-
-    // Assuming paymentDetails is an object containing total amounts for all payment modes
-    // Adjust according to your actual paymentDetails structure
-    if (paymentMode === "All") {
-      this.totalPaymentAmount = paymentDetails.totalAmount; // Total amount for all payments
-    } else if (paymentMode === "Cash") {
-      this.totalPaymentAmount = paymentDetails.totalCashAmount; // Total cash amount
-    } else if (paymentMode === "Online") {
-      this.totalPaymentAmount = paymentDetails.totalOnlineAmount; // Total online amount
-    } else {
-      this.totalPaymentAmount = 0; // Default to 0 if mode doesn't match
-    }
-
-    // Mapping invoices and patient details
-    this.combinedData = invoice.map((invoice: Iinvoice) => {
-      const patients = patient.find((id: IpatientInfo) => id.patientId === invoice.patientId);
-      return {
-        ...invoice,
-        patientFname: patients ? patients.firstName : 'Unknown Patient',
-        patientLname: patients ? patients.lastName : 'Unknown Patient',
-      };
+    this.searchForm = this.fb.group({
+      from: [formattedToday, Validators.required],
+      to: [formattedToday, Validators.required],
+      paymentStatus: ['All'],
+      paymentMode: ['All']
     });
+  }
 
-    // Initialize required arrays
-    this.invoices = [];
-    this.serialNumberArray = [];
+  // Method to search invoices based on form data
+  public searchInvoices(): void {
+    // Call getTableData with filtered parameters
+    this.getTableData();
+  }
 
-    // Handle pagination and setting the invoices
-    this.totalData = this.combinedData.length;
-    this.combinedData.map((res: any, index: number) => {
-      const serialNumber = index + 1;
-      if (index >= this.skip && serialNumber <= this.limit) {
-        this.invoices.push(res);
-        this.serialNumberArray.push(serialNumber);
+  // Private method to extract form data and return it
+  private getFormData() {
+    const formData = this.searchForm.value;
+    const today = new Date();
+
+    const fromDate: string = formData.from
+      ? this.datePipe.transform(formData.from, 'yyyy-MM-dd')!
+      : this.datePipe.transform(today, 'yyyy-MM-dd')!; // Default to today's date
+
+    const toDate: string = formData.to
+      ? this.datePipe.transform(formData.to, 'yyyy-MM-dd')!
+      : this.datePipe.transform(today, 'yyyy-MM-dd')!; // Default to today's date
+
+    const paymentMode: string = formData.paymentMode || 'All'; // Fallback to 'All' if paymentMode is null
+    const paymentStatus: string = formData.paymentStatus || 'All'; // Assign 'All' if null
+
+    return { paymentMode, paymentStatus, fromDate, toDate };
+  }
+
+  // Now you can call getFormData in getTableData directly
+  private getTableData(): void {
+    const { paymentMode, paymentStatus, fromDate, toDate } = this.getFormData();
+
+    this.loadingService.showLoader();
+
+    // Fetch invoices with the specified parameters
+    const invoices$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
+    const Patients$ = this.patientService.getPatientList();
+    const paymentDetails$ = this.invoiceService.getPaymentDetails(fromDate, toDate); // Fetch payment details
+
+    forkJoin([invoices$, Patients$, paymentDetails$]).subscribe(([invoice, patient, paymentDetails]) => {
+      console.log(invoice);
+
+      // Assuming paymentDetails is an object containing total amounts for all payment modes
+      if (paymentMode === "All") {
+        this.totalPaymentAmount = paymentDetails.totalAmount; // Total amount for all payments
+      } else if (paymentMode === "Cash") {
+        this.totalPaymentAmount = paymentDetails.totalCashAmount; // Total cash amount
+      } else if (paymentMode === "Online") {
+        this.totalPaymentAmount = paymentDetails.totalOnlineAmount; // Total online amount
+      } else {
+        this.totalPaymentAmount = 0; // Default to 0 if mode doesn't match
       }
+
+      // Mapping invoices and patient details
+      this.combinedData = invoice.map((invoice: Iinvoice) => {
+        const patients = patient.find((id: IpatientInfo) => id.patientId === invoice.patientId);
+        return {
+          ...invoice,
+          patientFname: patients ? patients.firstName : 'Unknown Patient',
+          patientLname: patients ? patients.lastName : 'Unknown Patient',
+        };
+      });
+
+      // Initialize required arrays
+      this.invoices = [];
+      this.serialNumberArray = [];
+
+      // Handle pagination and setting the invoices
+      this.totalData = this.combinedData.length;
+      this.combinedData.forEach((res: any, index: number) => {
+        const serialNumber = index + 1;
+        if (index >= this.skip && serialNumber <= this.limit) {
+          this.invoices.push(res);
+          this.serialNumberArray.push(serialNumber);
+        }
+      });
+
+      this.dataSource = new MatTableDataSource<any>(this.invoices);
+      this.calculateTotalPages(this.totalData, this.pageSize);
+      this.loadingService.hideLoader();
     });
+  }
 
-    this.dataSource = new MatTableDataSource<any>(this.invoices);
-    this.calculateTotalPages(this.totalData, this.pageSize);
-    this.loadingService.hideLoader();
-  });
-}
 
-  
-
-// Method to get payment modes for a specific invoice
-private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
+  // Method to get payment modes for a specific invoice
+  private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
     // Mocking the logic to get payment modes for an invoice
     // This should reflect the actual logic of determining payment modes for the given invoice
     return ["cash", "online"]; // Example payment modes
-}
+  }
 
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -189,8 +238,10 @@ private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
   }
   selectedList: data[] = [
     { value: 'Select Payment Status' },
+    { value: 'All' },
     { value: 'Paid' },
     { value: 'Un Paid' },
+    { value: 'Partially Paid' },
   ];
 
   paymentModeList: data[] = [
@@ -214,7 +265,6 @@ private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
 
   onPaymentModeChange(event: any) {
     this.selectedPaymentMode = event.value;
-    this.getTableData(event.value);
+    this.getTableData();
   }
-
 }

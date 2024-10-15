@@ -2,6 +2,7 @@ using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace hospitalApiProject.Controllers
 {
@@ -15,9 +16,9 @@ namespace hospitalApiProject.Controllers
     {
       _context = context;
     }
-    
+
     [HttpGet]
-    public async Task<List<InvoiceInfoResponse>> GetInvoiceWithPaymentsAsync([FromQuery] string paymentMode = "All")
+    public async Task<List<InvoiceInfoResponse>> GetInvoiceWithPaymentsAsync([FromQuery] string paymentMode, [FromQuery] string paymentStatus, [FromQuery] string fromDate, [FromQuery] string toDate)
     {
       // Start building the query for invoices
       var query = _context.InvoiceInfos.AsQueryable();
@@ -32,6 +33,21 @@ namespace hospitalApiProject.Controllers
             .Contains(paymentMode.ToLower())); // Filter by the specified payment mode
       }
 
+      // Parse the fromDate and toDate just once at the beginning.
+      var fromDateParsed = DateTime.Parse(fromDate).Date;
+      var toDateParsed = DateTime.Parse(toDate).Date;
+      var fromDateOnly = DateOnly.FromDateTime(fromDateParsed); // Convert DateTime to DateOnly
+      var toDateOnly = DateOnly.FromDateTime(toDateParsed); // Convert DateTime to DateOnly
+
+      // Apply date filtering for both fromDate and toDate
+      query = query.Where(invoice => invoice.CreatedDate >= fromDateOnly && invoice.CreatedDate <= toDateOnly);
+
+      // Apply paymentStatus filtering
+      if (paymentStatus.ToLower() != "all")
+      {
+        query = query.Where(invoice => invoice.Status.ToLower() == paymentStatus.ToLower());
+      }
+
       // Select the invoice data and join it with payment modes and additional items
       var result = await query
           .Select(invoice => new InvoiceInfoResponse
@@ -43,32 +59,32 @@ namespace hospitalApiProject.Controllers
 
             // Set Amount to the total of base amount + additional items' amounts
             Amount = invoice.Amount + _context.AdditionalInvoiceItems
-                  .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                  .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
+                    .Where(ai => ai.InvoiceId == invoice.InvoiceId)
+                    .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
 
             Status = invoice.Status,
 
             // Payment details for the invoice
             PaymentDetails = _context.PaymentModeInfo
-                  .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                  .Select(pm => new PaymentModeInfo
-                  {
-                    PaymentId = pm.PaymentId,
-                    PaymentMode = pm.PaymentMode,
-                    TransactionId = pm.TransactionId,
-                    PaymentDate = pm.PaymentDate,
-                    Amount = pm.Amount
-                  }).ToList(),
+                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                    .Select(pm => new PaymentModeInfo
+                    {
+                      PaymentId = pm.PaymentId,
+                      PaymentMode = pm.PaymentMode,
+                      TransactionId = pm.TransactionId,
+                      PaymentDate = pm.PaymentDate,
+                      Amount = pm.Amount
+                    }).ToList(),
 
             // Concatenated list of payment modes for the invoice
             PaymentModes = _context.PaymentModeInfo
-                  .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                  .Select(pm => pm.PaymentMode)
-                  .Distinct()
-                  .Any() ? string.Join(", ", _context.PaymentModeInfo
-                  .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                  .Select(pm => pm.PaymentMode)
-                  .Distinct()) : null
+                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                    .Select(pm => pm.PaymentMode)
+                    .Distinct()
+                    .Any() ? string.Join(", ", _context.PaymentModeInfo
+                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                    .Select(pm => pm.PaymentMode)
+                    .Distinct()) : null
           })
           .OrderByDescending(o => o.InvoiceId)
           .ToListAsync();
@@ -76,7 +92,6 @@ namespace hospitalApiProject.Controllers
       return result;
     }
 
-    // GET: api/InvoiceInfoes/5
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
     {
@@ -92,14 +107,23 @@ namespace hospitalApiProject.Controllers
 
     // GET: api/InvoiceInfoes
     [HttpGet("totalAmount")]
-    public async Task<ActionResult<TotalPaymentDetailsResponse>> GetTotalPaymentAmount()
+    public async Task<ActionResult<TotalPaymentDetailsResponse>> GetTotalPaymentAmount([FromQuery] string fromDate, [FromQuery] string toDate)
     {
-      var today = DateOnly.FromDateTime(DateTime.Today); // Get today's date
+      // If fromDate or toDate is not provided, default to today's date
+      var today = DateOnly.FromDateTime(DateTime.Today);
 
-      // Retrieve total payment amounts based on today's date in a single query
+      var fromDateParsed = !string.IsNullOrEmpty(fromDate)
+          ? DateOnly.Parse(fromDate)
+          : today; // Default to today's date if not provided
+
+      var toDateParsed = !string.IsNullOrEmpty(toDate)
+          ? DateOnly.Parse(toDate)
+          : today; // Default to today's date if not provided
+
       var result = await _context.PaymentModeInfo
           .Where(payment => payment.PaymentDate.HasValue &&
-                           DateOnly.FromDateTime(payment.PaymentDate.Value) == today)
+                            DateOnly.FromDateTime(payment.PaymentDate.Value) >= fromDateParsed &&
+                            DateOnly.FromDateTime(payment.PaymentDate.Value) <= toDateParsed)
           .GroupBy(payment => payment.PaymentMode.ToLower()) // Group by payment mode
           .Select(group => new
           {
@@ -111,7 +135,7 @@ namespace hospitalApiProject.Controllers
       // Initialize response object
       var totalPayment = new TotalPaymentDetailsResponse
       {
-        TotalAmount = result.Sum(r => r.TotalAmount),
+        TotalAmount = result.Sum(r => r.TotalAmount), // Total of all payment modes
         TotalCashAmount = result.FirstOrDefault(r => r.PaymentMode == "cash")?.TotalAmount ?? 0,
         TotalOnlineAmount = result.FirstOrDefault(r => r.PaymentMode == "online")?.TotalAmount ?? 0
       };

@@ -19,13 +19,38 @@ export class InvoiceService {
     console.log();
   }
 
-  getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
-    const params = new HttpParams().set('paymentMode', paymentMode); // Set query string params
+  // getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
+  //   const params = new HttpParams().set('paymentMode', paymentMode); // Set query string params
+  //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
+  // }
+
+  getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<Iinvoice[]> {
+    let params = new HttpParams()
+      .set('paymentMode', paymentMode)
+      .set('paymentStatus', paymentStatus);
+
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+
     return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   }
 
-  getPaymentDetails(): Observable<ITotalPaymentDetails> {
-    return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`);
+  getPaymentDetails(fromDate: string, toDate: string): Observable<ITotalPaymentDetails> {
+    let params = new HttpParams();
+    if (fromDate) {
+      params = params.set('fromDate', fromDate);
+    }
+
+    if (toDate) {
+      params = params.set('toDate', toDate);
+    }
+    
+    return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`, { params });
   }
 
   getInvoiceById(id: number): Observable<Iinvoice> {
@@ -80,7 +105,7 @@ export class InvoiceService {
 
   postInvoiceItem(InvoiceItemMaster: IinvoiceItem) {
     return this.http.post(this.apiUrl + 'InvoiceItemMaster/', InvoiceItemMaster);
-  } 
+  }
 
 
 

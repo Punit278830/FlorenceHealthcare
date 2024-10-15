@@ -56,61 +56,57 @@
             </div>
             <!-- /Table Header -->
             <div class="staff-search-table">
-              <form>
+              <form [formGroup]="searchForm" (submit)="searchInvoices()">
                 <div class="row">
-                  <div class="col-12 col-md-6 col-xl-4">
-                    <div class="form-group local-forms">
-                      <label for="From">From </label>
-                      <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1">
-                      <mat-datepicker #picker1></mat-datepicker>
-                      <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="form-group local-forms">
+                            <label for="from">From </label>
+                            <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1" formControlName="from">
+                            <mat-datepicker #picker1></mat-datepicker>
+                            <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                        </div>
                     </div>
-                  </div>
-                  <div class="col-12 col-md-6 col-xl-4">
-                    <div class="form-group local-forms">
-                      <label for="To">To </label>
-                      <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2">
-                      <mat-datepicker #picker2></mat-datepicker>
-                      <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="form-group local-forms">
+                            <label for="to">To </label>
+                            <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2" formControlName="to">
+                            <mat-datepicker #picker2></mat-datepicker>
+                            <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+                        </div>
                     </div>
-                  </div>
-                  <div class="col-12 col-md-6 col-xl-4 ">
-                    <div class="form-group local-forms">
-                      <label for="Payment">Payment Status </label>
-
-                      <mat-select [(ngModel)]="selectedValue" [ngModelOptions]="{standalone: true}"
-                        class="form-control select" placeholder="Select Payment Status">
-                        <mat-option *ngFor="let data of selectedList" [value]="data.value">
-                          {{data.value}}
-                        </mat-option>
-                      </mat-select>
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="form-group local-forms">
+                            <label for="paymentStatus">Payment Status </label>
+                            <mat-select formControlName="paymentStatus" class="form-control select" placeholder="Select Payment Status">
+                                <mat-option *ngFor="let data of selectedList" [value]="data.value">
+                                    {{data.value}}
+                                </mat-option>
+                            </mat-select>
+                        </div>
                     </div>
-                  </div>
-                  <div class="col-12 col-md-6 col-xl-4 ">
-                    <div class="form-group local-forms">
-                      <label for="Payment">Payment Mode </label>
-
-                      <mat-select [(ngModel)]="selectedPaymentMode" [ngModelOptions]="{standalone: true}"
-                      (selectionChange)="onPaymentModeChange($event)"
-                        class="form-control select" placeholder="Select Payment Mode">
-                        <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
-                          {{data.value}}
-                        </mat-option>
-                      </mat-select>
+                    <div class="col-12 col-md-6 col-xl-4">
+                        <div class="form-group local-forms">
+                            <label for="paymentMode">Payment Mode </label>
+                            <mat-select formControlName="paymentMode" (selectionChange)="onPaymentModeChange($event)" class="form-control select" placeholder="Select Payment Mode">
+                                <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
+                                    {{data.value}}
+                                </mat-option>
+                            </mat-select>
+                        </div>
                     </div>
-                  </div>
-                  <div class="col-12 col-md-6 col-xl-4 ">
+                    <div class="col-12 col-md-6 col-xl-4">
                     <div class="form-group local-for ms">
                       <p>Total Amount for the Day ({{ selectedPaymentMode }}): {{ totalPaymentAmount | currency: 'INR' }}</p>
                     </div>
                   </div>
                   <div class="col-12 col-md-6 col-xl-4 ms-auto">
-                    <div class="doctor-submit">
-                      <button type="submit" class="btn btn-primary submit-list-form me-2">Search</button>
+                        <div class="doctor-submit">
+                            <button type="submit" class="btn btn-primary submit-list-form me-2">Search</button>
+                        </div>
                     </div>
-                  </div>
                 </div>
-              </form>
+            </form>
+            
             </div>
             <div class="table-responsive">
               <table matSort (matSortChange)="sortData($event)"
