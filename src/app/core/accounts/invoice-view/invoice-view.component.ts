@@ -190,30 +190,29 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   getInvoiceDetails() {
-
     this.invoiceId = this.invoiceService.invoiceId;
-    this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
-      this.isPaidButtonVisible = res.status != 'Paid'
-      this.isAllowed = res.status == 'Paid';
+    if (this.invoiceId > 0) {
+      this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
+        this.isPaidButtonVisible = res.status != 'Paid'
+        this.isAllowed = res.status == 'Paid';
 
-      this.invoiceDetails = res;
-      console.log("invoice details", res)
-      if (res.status == 'un Paid') {
-        //this.isPaidButtonVisible=false;
-        this.balanceAmount = this.balanceAmount + res.amount;
-      }
+        this.invoiceDetails = res;
+        console.log("invoice details", res)
+        if (!res.isConsultationPaid && (res.status == 'Un Paid' || res.status == "Partially Paid")) {
+          //this.isPaidButtonVisible=false;
+          this.balanceAmount = this.balanceAmount + res.amount;
+        }
 
+        //this.totalInvoiceAmount += res.amount;
+        this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
+        this.getPatientDetails(res.patientId);
+        this.getAddtionalItems(this.invoiceId);
 
-      //this.totalInvoiceAmount += res.amount;
-      this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
-      this.getPatientDetails(res.patientId);
-      this.getAppointDetails(res.appoitmentId);
-      this.getAddtionalItems(this.invoiceId);
-
-    })
-
-
-
+        if (res.appointmentId > 0) {
+          this.getAppointDetails(res.appointmentId);
+        }
+      });
+    }
   }
 
   ngOnInit() {
@@ -335,8 +334,7 @@ export class InvoiceViewComponent implements OnInit {
     console.log("Flag:", this.flag);
   }
 
-  paidinvoice(invoiceDetails: any) {
-
+  payAll(invoiceId: number) {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
@@ -356,26 +354,61 @@ export class InvoiceViewComponent implements OnInit {
 
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
-    this.paymentModeDetails.amount = invoiceDetails.amount;
+    this.paymentModeDetails.amount = 0;
 
-    this.invoiceDetails.status = 'Paid';
-    if (this.invoiceDetails.status == 'Paid') {
-      this.isAllowed = true;
+    this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
+      this.totalInvoiceAmount = 0;
+      this.getInvoiceDetails();
+      this.balanceAmount = 0;
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
+    })
+
+  }
+
+  removeItem(itemName: string): void {
+    this.invoiceService.deleteSubInvoiceItem(this.invoiceId, itemName).subscribe(res => {
+      this.totalInvoiceAmount = 0;
+      this.balanceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Additional item deleted Successfully", "Update Invoice")
+    });
+  }
+
+  paidinvoice(invoiceDetails: any) {
+
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
+      }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
     }
     else {
-      this.isAllowed = false;
+      this.paymentModeDetails.transactionId = null;
     }
+
+    this.invoiceDetails.status = 'Paid';
+    this.invoiceDetails.isConsultationPaid = true;
+    this.isAllowed = true;
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
+    this.paymentModeDetails.amount = invoiceDetails.amount;
 
     this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
 
-    this.invoiceService.updateInvoice(invoiceDetails.id, this.invoicePaymentDto).subscribe(res => {
-      if (res) {
-        this.getInvoiceDetails();
-        this.balanceAmount = 0;
-        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
-
-      }
+    this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
+      this.balanceAmount = 0;
+      this.totalInvoiceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
     })
 
   }

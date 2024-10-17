@@ -307,12 +307,21 @@ export interface IPredefineDiagnosis {
 
 export interface Iinvoice {
   invoiceId: number,
-  appoitmentId: number,
+  appointmentId: number,
   patientId: number,
   createdDate: Date,
   amount: number,
+  totalUnpaidAmount: number,
   status: string,
-  paymentModes: string
+  paymentModes: string,
+  isConsultationPaid: boolean
+}
+
+export interface IInvoiceSummaryResponse {
+  invoices: Iinvoice[],
+  totalAmount: number,
+  totalCashAmount: number,
+  totalOnlineAmount: number
 }
 
 export interface ITotalPaymentDetails {
@@ -347,6 +356,11 @@ export interface IInvoicePaymentDto {
 
 export interface ISubItemInvoicePaymentDto {
   additionalInvoiceItem: any;
+  paymentModeInfo: IPaymentMode;
+}
+
+export interface ICreateInvoiceDto {
+  additionalInvoiceItems: any[];
   paymentModeInfo: IPaymentMode;
 }
 

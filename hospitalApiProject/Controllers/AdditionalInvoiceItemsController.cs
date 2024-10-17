@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+//using Hl7.Fhir.Model;
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Controllers
 {
@@ -28,7 +24,7 @@ namespace hospitalApiProject.Controllers
       return await _context.AdditionalInvoiceItems.ToListAsync();
     }
 
-    // GET: api/AdditionalInvoiceItems/5
+    // GET: api/AdditionalInvoiceItems/5  
     [HttpGet("{id}")]
     public async Task<ActionResult<AdditionalInvoiceItem>> GetAdditionalInvoiceItem(int id)
     {
@@ -78,6 +74,19 @@ namespace hospitalApiProject.Controllers
           await AddPaymentModeInfo(request.PaymentModeInfo);
         }
 
+        // update the overall payment status of invoice
+        var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
+                                  .AnyAsync(e => e.InvoiceId == request.additionalInvoiceItem.InvoiceId && e.Status != "Paid");
+
+        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == request.additionalInvoiceItem.InvoiceId);
+
+        if (invoiceInfo != null)
+        {
+          invoiceInfo.Status = hasUnpaidInvoiceItems ? "Partially Paid" : "Paid";
+          _context.InvoiceInfos.Update(invoiceInfo);
+          await _context.SaveChangesAsync();
+        }
+
         await _context.SaveChangesAsync();
       }
       catch (DbUpdateConcurrencyException)
@@ -97,6 +106,66 @@ namespace hospitalApiProject.Controllers
         throw;
       }
 
+
+      return NoContent();
+    }
+
+    [HttpPut("payAll/{id}")]
+    public async Task<IActionResult> PayAllInvoiceItems(int invoiceId, PaymentModeInfo paymentModeInfo)
+    {
+      if (paymentModeInfo.InvoiceId == 0)
+      {
+        return BadRequest();
+      }
+
+      try
+      {
+        // update the overall payment status of invoice
+        var unpaidInvoiceItems = await _context.AdditionalInvoiceItems
+                                        .Where(item => item.Status != "Paid" && item.InvoiceId == paymentModeInfo.InvoiceId)
+                                        .ToListAsync();
+
+        // Calculate the sum of unpaid items' amounts
+        int? unpaidAmount = unpaidInvoiceItems.Sum(x => x.FinalAmount);
+
+        // Update the status of each unpaid item to "Paid"
+        foreach (var item in unpaidInvoiceItems)
+        {
+          item.Status = "Paid";
+        }
+
+        // Save the changes to the database
+        await _context.SaveChangesAsync();
+
+        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == paymentModeInfo.InvoiceId);
+
+        if (invoiceInfo != null)
+        {
+          if (invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value)
+          {
+            unpaidAmount += invoiceInfo.Amount;
+            invoiceInfo.IsConsultationPaid = true;
+          }
+
+          invoiceInfo.Status = "Paid";
+          _context.InvoiceInfos.Update(invoiceInfo);
+          await _context.SaveChangesAsync();
+
+          if (paymentModeInfo != null && paymentModeInfo.InvoiceId != 0 && (unpaidInvoiceItems.Count != 0 ||
+            (invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value)))
+          {
+            paymentModeInfo.Amount = unpaidAmount;
+            await AddPaymentModeInfo(paymentModeInfo);
+          }
+
+        }
+
+      }
+      catch (Exception ex)
+      {
+        var message = ex.ToString();
+        throw;
+      }
 
       return NoContent();
     }
@@ -123,12 +192,6 @@ namespace hospitalApiProject.Controllers
       return CreatedAtAction("GetAdditionalInvoiceItem", new { id = additionalInvoiceItem.Id }, additionalInvoiceItem);
     }
 
-
-
-
-
-
-
     // DELETE: api/AdditionalInvoiceItems/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAdditionalInvoiceItem(int id)
@@ -144,6 +207,55 @@ namespace hospitalApiProject.Controllers
 
       return NoContent();
     }
+
+    // DELETE: api/AdditionalInvoiceItems/invoiceId/itemName
+    [HttpDelete("{invoiceId}/{itemName}")]
+    public async Task<IActionResult> DeleteAdditionalInvoiceItem(int invoiceId, string itemName)
+    {
+      try
+      {
+        // Find the additional item to delete by invoiceId and itemName
+        var additionalInvoiceItem = await _context.AdditionalInvoiceItems
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && i.ItemName == itemName);
+
+        if (additionalInvoiceItem == null)
+        {
+          return NotFound(new { message = "Additional invoice item not found." });
+        }
+
+        // Remove the additional invoice item
+        _context.AdditionalInvoiceItems.Remove(additionalInvoiceItem);
+
+        // Save changes to the database
+        await _context.SaveChangesAsync();
+
+        // Check if any unpaid items remain for the invoice
+        var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
+            .AnyAsync(e => e.InvoiceId == invoiceId && e.Status != "Paid");
+
+        // Update the overall payment status of the invoice
+        var invoiceInfo = await _context.InvoiceInfos
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+
+        if (invoiceInfo != null)
+        {
+          invoiceInfo.Status = hasUnpaidInvoiceItems ? "Partially Paid" : "Paid";
+          _context.InvoiceInfos.Update(invoiceInfo);
+          await _context.SaveChangesAsync();
+        }
+
+        return NoContent();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Concurrency issue occurred while deleting the item." });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(StatusCodes.Status500InternalServerError, new { message = "An error occurred while deleting the item.", error = ex.Message });
+      }
+    }
+
 
     private bool AdditionalInvoiceItemExists(int id)
     {

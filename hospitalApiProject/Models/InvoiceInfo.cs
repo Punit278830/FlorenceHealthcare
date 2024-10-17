@@ -9,12 +9,14 @@ public partial class InvoiceInfo
 
   public int PatientId { get; set; }
 
-  public int AppoitmentId { get; set; }
+  public int AppointmentId { get; set; }
 
   public DateOnly? CreatedDate { get; set; }
 
   public int? Amount { get; set; }
 
   public string? Status { get; set; }
+
+  public bool? IsConsultationPaid { get; set; }
 
 }
