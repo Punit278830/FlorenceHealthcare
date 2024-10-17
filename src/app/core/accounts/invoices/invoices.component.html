@@ -121,8 +121,9 @@
                     <th mat-sort-header="invoiceNumber">Invoice Number</th>
                     <th mat-sort-header="patient">Patient Name</th>
                     <th mat-sort-header="createdDate">Created Date</th>
-                    <th mat-sort-header="appoitmentId">Appointment Id</th>
+                    <th mat-sort-header="appointmentId">Appointment Id</th>
                     <th mat-sort-header="amount">Amount</th>
+                    <th mat-sort-header="totalUnpaidAmount">Unpaid Amount</th>
                     <th mat-sort-header="status">Status</th>
                     <th mat-sort-header="paymentMode">Payment Mode</th>
                     <th></th>
@@ -140,8 +141,9 @@
                     <td> {{data.patientFname}} {{data.patientLname}}</td>
 
                     <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
-                    <td>{{data.appoitmentId}}</td>
+                    <td>{{data.appointmentId}}</td>
                     <td>{{data.amount}}</td>
+                    <td>{{data.totalUnpaidAmount}}</td>
                     <td><button
                         [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
                         class="custom-badge">{{data.status}}</button></td>

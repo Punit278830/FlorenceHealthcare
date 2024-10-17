@@ -109,7 +109,7 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.InvoiceId).HasColumnName("invoiceId");
 
       entity.Property(e => e.PatientId).HasColumnName("patientId");
-      entity.Property(e => e.AppoitmentId).HasColumnName("appoitmentId");
+      entity.Property(e => e.AppointmentId).HasColumnName("appoitmentId");
       entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
       entity.Property(e => e.Amount).HasColumnName("amount");
       entity.Property(e => e.Status).HasColumnName("status");

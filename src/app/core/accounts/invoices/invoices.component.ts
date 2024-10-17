@@ -103,42 +103,41 @@ export class InvoicesComponent implements OnInit {
   // Now you can call getFormData in getTableData directly
   private getTableData(): void {
     const { paymentMode, paymentStatus, fromDate, toDate } = this.getFormData();
-
+  
     this.loadingService.showLoader();
-
+  
     // Fetch invoices with the specified parameters
-    const invoices$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
-    const Patients$ = this.patientService.getPatientList();
-    const paymentDetails$ = this.invoiceService.getPaymentDetails(fromDate, toDate); // Fetch payment details
-
-    forkJoin([invoices$, Patients$, paymentDetails$]).subscribe(([invoice, patient, paymentDetails]) => {
-      console.log(invoice);
-
-      // Assuming paymentDetails is an object containing total amounts for all payment modes
+    const invoicesSummary$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
+    const patients$ = this.patientService.getPatientList();
+  
+    forkJoin([invoicesSummary$, patients$]).subscribe(([invoicesSummary, patients]) => {
+      console.log(invoicesSummary);
+  
+      // Set total payment amounts based on paymentMode
       if (paymentMode === "All") {
-        this.totalPaymentAmount = paymentDetails.totalAmount; // Total amount for all payments
+        this.totalPaymentAmount = invoicesSummary.totalAmount; // Total amount for all payments
       } else if (paymentMode === "Cash") {
-        this.totalPaymentAmount = paymentDetails.totalCashAmount; // Total cash amount
+        this.totalPaymentAmount = invoicesSummary.totalCashAmount; // Total cash amount
       } else if (paymentMode === "Online") {
-        this.totalPaymentAmount = paymentDetails.totalOnlineAmount; // Total online amount
+        this.totalPaymentAmount = invoicesSummary.totalOnlineAmount; // Total online amount
       } else {
         this.totalPaymentAmount = 0; // Default to 0 if mode doesn't match
       }
-
-      // Mapping invoices and patient details
-      this.combinedData = invoice.map((invoice: Iinvoice) => {
-        const patients = patient.find((id: IpatientInfo) => id.patientId === invoice.patientId);
+  
+      // Now properly map invoices from the invoices array in the response
+      this.combinedData = invoicesSummary?.invoices.map((invoice: Iinvoice) => {
+        const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
         return {
           ...invoice,
-          patientFname: patients ? patients.firstName : 'Unknown Patient',
-          patientLname: patients ? patients.lastName : 'Unknown Patient',
+          patientFname: patient ? patient.firstName : 'Unknown Patient',
+          patientLname: patient ? patient.lastName : 'Unknown Patient',
         };
       });
-
+  
       // Initialize required arrays
       this.invoices = [];
       this.serialNumberArray = [];
-
+  
       // Handle pagination and setting the invoices
       this.totalData = this.combinedData.length;
       this.combinedData.forEach((res: any, index: number) => {
@@ -148,13 +147,13 @@ export class InvoicesComponent implements OnInit {
           this.serialNumberArray.push(serialNumber);
         }
       });
-
+  
       this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.calculateTotalPages(this.totalData, this.pageSize);
       this.loadingService.hideLoader();
     });
   }
-
+  
 
   // Method to get payment modes for a specific invoice
   private getPaymentModesForInvoice(invoice: Iinvoice): string[] {

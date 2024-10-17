@@ -18,7 +18,11 @@ namespace hospitalApiProject.Controllers
     }
 
     [HttpGet]
-    public async Task<List<InvoiceInfoResponse>> GetInvoiceWithPaymentsAsync([FromQuery] string paymentMode, [FromQuery] string paymentStatus, [FromQuery] string fromDate, [FromQuery] string toDate)
+    public async Task<InvoiceSummaryResponse> GetInvoiceWithPaymentsAsync(
+    [FromQuery] string paymentMode,
+    [FromQuery] string paymentStatus,
+    [FromQuery] string fromDate,
+    [FromQuery] string toDate)
     {
       // Start building the query for invoices
       var query = _context.InvoiceInfos.AsQueryable();
@@ -48,48 +52,74 @@ namespace hospitalApiProject.Controllers
         query = query.Where(invoice => invoice.Status.ToLower() == paymentStatus.ToLower());
       }
 
-      // Select the invoice data and join it with payment modes and additional items
-      var result = await query
+      // Retrieve invoice data and payment details
+      var invoices = await query
           .Select(invoice => new InvoiceInfoResponse
           {
             InvoiceId = invoice.InvoiceId,
-            AppointmentId = invoice.AppoitmentId,
+            AppointmentId = invoice.AppointmentId,
             PatientId = invoice.PatientId,
             CreatedDate = invoice.CreatedDate,
 
             // Set Amount to the total of base amount + additional items' amounts
             Amount = invoice.Amount + _context.AdditionalInvoiceItems
-                    .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                    .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
+                      .Where(ai => ai.InvoiceId == invoice.InvoiceId)
+                      .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
 
             Status = invoice.Status,
 
             // Payment details for the invoice
             PaymentDetails = _context.PaymentModeInfo
-                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                    .Select(pm => new PaymentModeInfo
-                    {
-                      PaymentId = pm.PaymentId,
-                      PaymentMode = pm.PaymentMode,
-                      TransactionId = pm.TransactionId,
-                      PaymentDate = pm.PaymentDate,
-                      Amount = pm.Amount
-                    }).ToList(),
+                      .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                      .Select(pm => new PaymentModeInfo
+                      {
+                        PaymentId = pm.PaymentId,
+                        PaymentMode = pm.PaymentMode,
+                        TransactionId = pm.TransactionId,
+                        PaymentDate = pm.PaymentDate,
+                        Amount = pm.Amount
+                      }).ToList(),
 
             // Concatenated list of payment modes for the invoice
             PaymentModes = _context.PaymentModeInfo
-                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                    .Select(pm => pm.PaymentMode)
-                    .Distinct()
-                    .Any() ? string.Join(", ", _context.PaymentModeInfo
-                    .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                    .Select(pm => pm.PaymentMode)
-                    .Distinct()) : null
+                      .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                      .Select(pm => pm.PaymentMode)
+                      .Distinct()
+                      .Any() ? string.Join(", ", _context.PaymentModeInfo
+                      .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                      .Select(pm => pm.PaymentMode)
+                      .Distinct()) : null,
+
+            // Total unpaid amount calculation: Amount - total paid from PaymentDetails
+            TotalUnpaidAmount = invoice.Amount + _context.AdditionalInvoiceItems
+                      .Where(ai => ai.InvoiceId == invoice.InvoiceId)
+                      .Sum(ai => ai.FinalAmount) - _context.PaymentModeInfo
+                      .Where(pm => pm.InvoiceId == invoice.InvoiceId)
+                      .Sum(pm => pm.Amount) ?? 0
           })
           .OrderByDescending(o => o.InvoiceId)
           .ToListAsync();
 
-      return result;
+      // Aggregating totals for online, cash, and all payments across all invoices
+      var totalOnlineAmount = invoices.Sum(inv => inv.PaymentDetails
+          .Where(pm => pm.PaymentMode.ToLower() == "online")
+          .Sum(pm => pm.Amount)) ?? 0;
+
+      var totalCashAmount = invoices.Sum(inv => inv.PaymentDetails
+          .Where(pm => pm.PaymentMode.ToLower() == "cash")
+          .Sum(pm => pm.Amount)) ?? 0;
+
+      var totalAmount = invoices.Sum(inv => inv.PaymentDetails
+          .Sum(pm => pm.Amount)) ?? 0; // Sum of all payment amounts for all invoices
+
+      // Returning the result with summary data
+      return new InvoiceSummaryResponse
+      {
+        Invoices = invoices,              // Return the list of invoices
+        TotalOnlineAmount = totalOnlineAmount,  // Sum of online payments
+        TotalCashAmount = totalCashAmount,      // Sum of cash payments
+        TotalAmount = totalAmount               // Total of all payments
+      };
     }
 
     [HttpGet("{id}")]
@@ -155,7 +185,7 @@ namespace hospitalApiProject.Controllers
       var invoiceInfo = new InvoiceInfo()
       {
         Amount = 0,
-        AppoitmentId = 0,
+        AppointmentId = 0,
         CreatedDate = DateOnly.FromDateTime(DateTime.Now),
         PatientId = patientId,
         Status = "Paid",
@@ -207,6 +237,20 @@ namespace hospitalApiProject.Controllers
       try
       {
         //await _context.SaveChangesAsync();
+
+        // Check if any unpaid items remain for the invoice
+        var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
+            .AnyAsync(e => e.InvoiceId == id && e.Status != "Paid");
+
+        // Update the overall payment status of the invoice
+        var invoiceInfo = await _context.InvoiceInfos
+            .FirstOrDefaultAsync(i => i.InvoiceId == id);
+
+        if (invoiceInfo != null)
+        {
+          invoiceInfo.Status = hasUnpaidInvoiceItems ? "Partially Paid" : "Paid";
+          _context.InvoiceInfos.Update(invoiceInfo);
+        }
 
         if (invoicePaymentDto.PaymentModeInfo != null && invoicePaymentDto.PaymentModeInfo.InvoiceId != 0)
         {

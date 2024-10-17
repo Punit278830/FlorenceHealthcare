@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
-import { IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto } from '../../models/models';
+import { IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto, IInvoiceSummaryResponse } from '../../models/models';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 
@@ -24,7 +24,7 @@ export class InvoiceService {
   //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   // }
 
-  getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<Iinvoice[]> {
+  getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<IInvoiceSummaryResponse> {
     let params = new HttpParams()
       .set('paymentMode', paymentMode)
       .set('paymentStatus', paymentStatus);
@@ -49,7 +49,7 @@ export class InvoiceService {
     if (toDate) {
       params = params.set('toDate', toDate);
     }
-    
+
     return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`, { params });
   }
 

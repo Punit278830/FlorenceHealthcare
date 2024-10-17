@@ -198,7 +198,7 @@ export class InvoiceViewComponent implements OnInit {
 
         this.invoiceDetails = res;
         console.log("invoice details", res)
-        if (!res.isConsultationPaid && (res.status == 'un Paid' || res.status == "Partially Paid")) {
+        if (!res.isConsultationPaid && (res.status == 'Un Paid' || res.status == "Partially Paid")) {
           //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
         }
@@ -208,8 +208,8 @@ export class InvoiceViewComponent implements OnInit {
         this.getPatientDetails(res.patientId);
         this.getAddtionalItems(this.invoiceId);
 
-        if (res.appoitmentId > 0) {
-          this.getAppointDetails(res.appoitmentId);
+        if (res.appointmentId > 0) {
+          this.getAppointDetails(res.appointmentId);
         }
       });
     }
@@ -375,7 +375,7 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   paidinvoice(invoiceDetails: any) {
- 
+
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
@@ -405,11 +405,10 @@ export class InvoiceViewComponent implements OnInit {
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
 
     this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
-      if (res) {
-        this.getInvoiceDetails();
-        this.balanceAmount = 0;
-        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
-      }
+      this.balanceAmount = 0;
+      this.totalInvoiceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
     })
 
   }

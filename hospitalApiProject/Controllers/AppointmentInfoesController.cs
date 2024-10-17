@@ -276,7 +276,7 @@ namespace hospitalApiProject.Controllers
           var InvoiceInfo = new InvoiceInfo()
           {
             Amount = appointmentInfo.Fee,
-            AppoitmentId = appointmentInfo.Id,
+            AppointmentId = appointmentInfo.Id,
             CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
             PatientId = appointmentInfo.PatientId,
             Status = "Un Paid",

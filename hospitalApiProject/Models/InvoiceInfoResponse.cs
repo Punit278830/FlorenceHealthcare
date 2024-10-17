@@ -14,6 +14,8 @@ namespace hospitalApiProject.Models
 
     public int? Amount { get; set; }
 
+    public decimal TotalUnpaidAmount { get; set; }
+
     public string? Status { get; set; }
 
     // A list of payment modes associated with this invoice
