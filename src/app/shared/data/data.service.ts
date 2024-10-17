@@ -448,25 +448,63 @@ export class DataService {
             },
           ],
         },
+        // {
+        //   menuValue: 'Invoice',
+        //   hasSubRoute: true,
+        //   showSubRoute: false,
+        //   base: routes.invoices,
+        //   route: routes.invoices,
+        //   icon: 'fa-columns',
+        //   faIcon: true,
+        //   subMenus: [
+        //     {
+        //       menuValue: 'Invoices List',
+        //       route: routes.invoices,
+        //       base: routes.invoices,
+        //     },
+        //     {
+        //       menuValue: 'Create Invoice',
+        //       route: routes.createInvoice,
+        //       base: routes.createInvoice,
+        //     },
+        //     {
+        //       menuValue: 'Add Invoice Item',
+        //       route: routes.addInvoiceItem,
+        //       base: routes.addInvoiceItem,
+        //     }
+        //   ],
+        // },
         {
-          menuValue: 'Invoice',
-          hasSubRoute: true,
+          menuValue: 'Invoices List',
+          hasSubRoute: false,
           showSubRoute: false,
-          base: routes.invoices,
+          base: 'components',
           route: routes.invoices,
-          icon: 'fa-columns',
-          faIcon: true,
+          img: 'assets/img/icons/menu-icon-13.svg',
           subMenus: [
-            {
-              menuValue: 'Invoices List',
-              route: routes.invoices,
-              base: routes.invoices,
-            },
-            {
-              menuValue: 'Add Invoice Item ',
-              route: routes.addInvoiceItem,
-              base: routes.addInvoiceItem,
-            }
+
+          ],
+        },
+        {
+          menuValue: 'Create Invoice',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.createInvoice,
+          img: 'assets/img/icons/edit.svg',
+          subMenus: [
+
+          ],
+        },
+        {
+          menuValue: 'Add Invoice Item',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.addInvoiceItem,
+          img: 'assets/img/icons/plus.svg',
+          subMenus: [
+
           ],
         },
         {
