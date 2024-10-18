@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using hospitalApiProject.Models.Abha;
+using hospitalApiProject.Models.Response;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Models;
@@ -55,6 +56,7 @@ public partial class FlorenceDbContext : DbContext
   public virtual DbSet<VitalInfo> VitalInfos { get; set; }
   public virtual DbSet<AbhaPatientDetails> AbhaPatientDetails { get; set; }
 
+  public virtual DbSet<PaymentModeInfo> PaymentModeInfo { get; set; }
 
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -107,11 +109,20 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.InvoiceId).HasColumnName("invoiceId");
 
       entity.Property(e => e.PatientId).HasColumnName("patientId");
-      entity.Property(e => e.AppoitmentId).HasColumnName("appoitmentId");
+      entity.Property(e => e.AppointmentId).HasColumnName("appoitmentId");
       entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
       entity.Property(e => e.Amount).HasColumnName("amount");
       entity.Property(e => e.Status).HasColumnName("status");
 
+    });
+
+    modelBuilder.Entity<PaymentModeInfo>(entity =>
+    {
+      entity.HasKey(e => e.PaymentId);  // Define primary key
+      entity.Property(e => e.PaymentMode).HasMaxLength(100);  // Define column properties
+      entity.Property(e => e.TransactionId).HasMaxLength(100);
+      entity.Property(e => e.PaymentDate).HasDefaultValueSql("GETDATE()");  // Default value for PaymentDate
+      entity.Property(e => e.Amount);
     });
 
     modelBuilder.Entity<Answer>(entity =>

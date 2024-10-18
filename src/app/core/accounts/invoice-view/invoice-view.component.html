@@ -22,7 +22,7 @@
                         <div class="invoice-head-clinic">
                             <div class="row">
                                 <div class="col-12 col-md-6">
-                                    <div class="invoice-counts">
+                                    <div class="invoice-counts" *ngIf="invoiceDetails != undefined">
                                         <h4>Invoice <span>#INV-{{invoiceDetails.invoiceId}}</span></h4>
                                     </div>
                                 </div>
@@ -47,7 +47,7 @@
                             <div class="col-12 col-md-6 m-b-20 part-two">
                                 <div class="invoice-details">
                                     <h3>Bill To:</h3>
-                                    <ul class="list-unstyled invoice-clinic">
+                                    <ul class="list-unstyled invoice-clinic" *ngIf="patientDetails != undefined">
                                         <li>{{patientDetails.firstName}} {{patientDetails.lastName}}</li>
                                         <li>{{patientDetails.mobile}}</li>
 
@@ -55,8 +55,8 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">  
-                            
+                        <div class="row">
+
                             <div class="col-sm-6 col-lg-12 m-b-20">
                                 <div class="invoice-details">
                                     <h4>Invoice Date : <i
@@ -65,28 +65,27 @@
                                 </div>
                                 <div [ngClass]="classes.singleLine">&nbsp;</div>
                                 <div class="col-sm-6 col-lg-12 m-b-20">
-                                    <button
-        (click)="changeColor('cash')"
-        [style.backgroundColor]="buttonColors.cash"
-      >
-        Cash
-      </button>
-    
-      <button
-        (click)="changeColor('online')"
-        [style.backgroundColor]="buttonColors.online"
-      >
-        Online
-      </button>
-      <div [ngClass]="classes.singleLine">&nbsp;</div>
-      <div *ngIf="isTextboxVisible">
-       Reference No. <input 
-        id="RefNo"
-        type="text"
-        #RefNoInput
-      />
-      </div>
-      
+                                    <button (click)="changeColor('Cash')" class="custom-badge"
+                                        [style.backgroundColor]="buttonColors.Cash">
+                                        Cash
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button (click)="changeColor('Online')" class="custom-badge"
+                                        [style.backgroundColor]="buttonColors.Online">
+                                        Online
+                                    </button>
+                                    <div [ngClass]="classes.singleLine">&nbsp;</div>
+                                    <div *ngIf="isTextboxVisible">
+                                        <div class="col-12 col-md-6 col-xl-4">
+                                            <div class="form-group local-forms">
+                                                Reference No. <input id="RefNo" class="form-control" type="text"
+                                                    #RefNoInput />
+
+                                            </div>
+                                        </div>
+
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
@@ -103,10 +102,11 @@
                                             <th>Total</th>
                                             <th>Status</th>
                                             <th>Action</th>
+                                            <th>Remove</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr>
+                                        <tr *ngIf="doctorDetails !== undefined">
                                             <td>1</td>
                                             <td>Consultation</td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
@@ -116,19 +116,20 @@
                                             </td>
 
                                             <td><button
-                                                    [ngClass]="{'status-orange' : invoiceDetails.status === 'Partially Paid','status-green' : invoiceDetails.status === 'Paid', 'status-pink' : invoiceDetails.status === 'un Paid'}"
-                                                    class="custom-badge">{{invoiceDetails.status}}</button></td>
+                                                    [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
+                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' :
+                                                    'un Paid'}}</button></td>
                                             <td>
-                                                <button type="button" (click)="paidinvoice(invoiceDetails.invoiceId)"
-                                                    class="btn btn-primary custom-badge">Pay</button>
+                                                <button type="button" (click)="paidinvoice(invoiceDetails)"
+                                                    [disabled]="invoiceDetails.isConsultationPaid"
+                                                    class="btn btn-primary custom-badge">{{invoiceDetails.isConsultationPaid
+                                                    ? 'Paid' : 'Pay'}}</button>
                                             </td>
-
-
                                         </tr>
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
 
-                                                <td>{{i+2}}</td>
+                                                <td>{{doctorDetails === undefined ? i+1 : i+2}}</td>
                                                 <td>{{data.itemName}}</td>
                                                 <td>{{data.description}}</td>
                                                 <td>{{data.fee}}</td>
@@ -139,12 +140,14 @@
                                                         [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
                                                         class="custom-badge">{{data.status}}</button></td>
                                                 <td>
-                                                    <button type="button" (click)="paidsubInvoiceItem(data.id)"
+                                                    <button type="button" (click)="paidsubInvoiceItem(data)"
                                                         [disabled]="data.status === 'Paid'"
-                                                        class="btn btn-primary custom-badge">{{data.status == 'Paid' ? 'Paid' : 'Pay'}}</button>
+                                                        class="btn btn-primary custom-badge">{{data.status == 'Paid' ?
+                                                        'Paid' : 'Pay'}}</button>
                                                 </td>
-
-                                            </tr> 
+                                                <td><a href="javascript:void(0);" class="remove-btn" *ngIf="data.status !== 'Paid'"><i
+                                                    class="fa fa-trash-alt" (click)="removeItem(data.itemName)"></i></a></td>
+                                            </tr>
                                         </ng-container>
                                     </tbody>
                                 </table>
@@ -193,10 +196,12 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
-                <!-- <a href="javascript:;" class="btn btn-primary submit-form me-2"
-                    (click)="paidinvoice(invoiceDetails.invoiceId)">Paid</a> -->
-                <a href="javascript:;" [ngClass]="{ 'disabled': !isAllowed }" class="btn btn-primary submit-form me-2" (click)="print()"><i
-                        class="feather icon-printer me-2"></i>Print</a>
+                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' }"
+                    class="btn btn-primary submit-form me-2"
+                    (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' :
+                    'Paid'}}</a>
+                <a href="javascript:;" [ngClass]="{ 'disabled': !isAllowed }" class="btn btn-primary submit-form me-2"
+                    (click)="print()"><i class="feather icon-printer me-2"></i>Print</a>
                 <a href="javascript:;" class="btn btn-primary submit-form me-2"
                     (click)="moveToEditInvoice(invoiceDetails.invoiceId)">Add Item</a>
             </div>
@@ -207,21 +212,26 @@
 <div *ngIf="thermalvisible" #printview [ngClass]="[classes.printAreaContainer, classes.fontMono]"
     [ngStyle]="{ width: width }">
     <div [ngClass]="classes.textCenter"><strong>Florence Healthcare RMEE2225901</strong></div>
-    <div [ngClass]="classes.textCenter"><strong>Kheri Road, Near Don Bosco School Lakhimpur Kheri UP - 262701</strong></div>
+    <div [ngClass]="classes.textCenter"><strong>Kheri Road, Near Don Bosco School Lakhimpur Kheri UP - 262701</strong>
+    </div>
     <div [ngClass]="classes.textCenter"><strong>Ph.No:6388803534</strong></div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
 
     <div [ngClass]="classes.textCenter"><strong>Receipt / Invoice / Bill</strong> </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-    <div [ngClass]="classes.textLeft"><strong>Patient Name - </strong>{{patientDetails.firstName}} {{patientDetails.lastName}}</div>
-   
+    <div [ngClass]="classes.textLeft"><strong>Patient Name - </strong>{{patientDetails.firstName}}
+        {{patientDetails.lastName}}</div>
+
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.textRight"><strong>Date-</strong>{{invoiceDetails.createdDate |
         date:'dd-MMMM-yyyy'}} </div>
-    <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM': 'AM'}} </div>
+    <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM':
+        'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
+    <div [ngClass]="classes.textRight"><strong>Payment Mode: {{paymentMode}}</strong></div>
+    <div [ngClass]="classes.textRight"><label *ngIf="paymentMode == 'Online'"><strong>Reference No.:
+                {{ReferenceTextBoxVal}}</strong></label></div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
             <div style="width: 10mm;"><strong>SR.</strong></div>
@@ -236,7 +246,7 @@
         <div style="display: flex;flex-direction: column;">
             <div [ngClass]="classes.wrapper" *ngFor="let data of appointmentList; let i = index">
                 <div style="width:3mm;">{{ i + 1 }}</div>
-                <div style="width: 20mm;">Consultation </div>
+                <div style="width:20mm;">Consultation </div>
                 <!-- <div style="width: 1%;">1</div>-->
                 <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
                 <div style="width: 10mm;">{{ flag ? 100 : 0 }} </div>
@@ -254,23 +264,16 @@
 
         </div>
 
-
-
-        <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
-        <div [ngClass]="classes.singleLine">&nbsp;</div>
-        <div [ngClass]="classes.textRight" style="width: 50mm">
-            <strong>Total: ₹{{formatToTwoDecimalPlaces(totalInvoiceAmount)}}</strong>
-            <div [ngClass]="classes.singleLine">&nbsp;</div>
-            <strong>Cash/Online: {{ButtonClickName}}</strong>
-            
-            <div [ngClass]="classes.singleLine">&nbsp;</div>
-            <label *ngIf="isReferenceLabelVisible"><strong>Reference No.: {{ReferenceTextBoxVal}}</strong></label>
-            
-        </div>
-
     </div>
 
-    <div [ngClass]="classes.textLeft">Terms and Conditions</div>
+    <div [ngClass]="[classes.gridBorder, classes.gridBorderSolid]"></div>
+    <div [ngClass]="classes.singleLine">&nbsp;</div>
+    <div [ngClass]="classes.textRight">
+        <strong>Total: ₹{{formatToTwoDecimalPlaces(totalInvoiceAmount)}}</strong>
+    </div>
+
+
+    <!--<div [ngClass]="classes.textLeft">Terms and Conditions</div>-->
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.textLeft"><strong>Terms and Conditions</strong> </div>
     <div [ngClass]="classes.textLeft">OPD Prescription valid for 7(seven) days including today</div>

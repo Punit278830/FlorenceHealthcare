@@ -11,6 +11,7 @@ import { routes } from 'src/app/shared/routes/routes';
 import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
 import preset from "jss-preset-default";
+import { IInvoicePaymentDto, IPaymentMode, ISubItemInvoicePaymentDto } from '../../../shared/models/models';
 const styles = {
   singleLine: `
     margin-top: 0.25rem;
@@ -94,6 +95,9 @@ export class InvoiceViewComponent implements OnInit {
   public routes = routes;
   private sheets!: SheetsRegistry;
   public invoiceDetails!: Iinvoice;
+  public paymentModeDetails!: IPaymentMode;
+  public invoicePaymentDto!: IInvoicePaymentDto;
+  public subInvoicePaymentDto!: ISubItemInvoicePaymentDto;
   private invoiceId!: number;
   public patientDetails!: IpatientInfo;
   public appointmentDetails!: Iappointment;
@@ -104,41 +108,43 @@ export class InvoiceViewComponent implements OnInit {
   public isPaidButtonVisible = true;
   public appointmentList: any[] = [];
   public flag: boolean = false;
+  public IsDoctorSameflag: boolean = false;
   public classes: any;
   public width!: string;
   public thermalvisible: boolean = false;
   public disc: number = 0;
   public loggedIn!: any;
   public Timenow!: string;
+  public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
   formatToTwoDecimalPlaces(value: number): string {
     return value.toFixed(2); // Converts to a string with 2 decimal places
   }
-  public ButtonClickName: string;
+  public paymentMode: string;
   public ReferenceTextBoxVal: string;
   buttonColors = {
-    cash: 'lightgray',
-    online: 'lightgray'
+    Cash: 'lightgray',
+    Online: 'lightgray'
   };
   isTextboxVisible = false;
   changeColor(button: string) {
     // Reset all buttons to default color
-    this.buttonColors.cash = 'lightgray';
-    this.buttonColors.online = 'lightgray';
+    this.buttonColors.Cash = 'lightgray';
+    this.buttonColors.Online = 'lightgray';
 
     // Change the color of the clicked button
-    if (button === 'cash') {
-      this.buttonColors.cash = 'orange';
+    if (button === 'Cash') {
+      this.buttonColors.Cash = 'orange';
       this.isTextboxVisible = false;
-      this.ButtonClickName = 'cash';
+      this.paymentMode = 'Cash';
       this.isReferenceLabelVisible = false;
-      
-    } else if (button === 'online') {
-      
-      this.buttonColors.online = 'green';
+
+    } else if (button === 'Online') {
+
+      this.buttonColors.Online = 'green';
       this.isTextboxVisible = !this.isTextboxVisible;
-      this.ButtonClickName = 'online';
+      this.paymentMode = 'Online';
       this.isReferenceLabelVisible = true;
     }
   }
@@ -154,47 +160,59 @@ export class InvoiceViewComponent implements OnInit {
     private staffService: StaffService,
     private toastr: ToastrService,
     private decimalPipe: DecimalPipe,
-    
+
     private route: Router) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     console.log("invoiceId", this.invoiceService.invoiceId);
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
     }
-    this.ButtonClickName = ''; 
+    this.paymentMode = '';
     this.ReferenceTextBoxVal = '';
+    this.ConsultationPaidStatus = '';
+
+    this.paymentModeDetails = {
+      invoiceId: 0,
+      paymentMode: '',
+      transactionId: '',
+      amount: 0
+    };
+
+    this.subInvoicePaymentDto = {
+      additionalInvoiceItem: null,
+      paymentModeInfo: this.paymentModeDetails
+    }
+
+    this.invoicePaymentDto = {
+      invoiceInfo: this.invoiceDetails,
+      paymentModeInfo: this.paymentModeDetails
+    };
   }
 
   getInvoiceDetails() {
-
     this.invoiceId = this.invoiceService.invoiceId;
-    this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
-      if (res.status == 'Paid') {
-        this.isPaidButtonVisible = false;
-        this.isAllowed = true;
-      }
-      else {
-        this.isPaidButtonVisible = true;
-        this.isAllowed =false;
-      }
-      this.invoiceDetails = res;
-      console.log("invoice details", res)
-      if (res.status == 'un Paid') {
-        //this.isPaidButtonVisible=false;
-        this.balanceAmount = this.balanceAmount + res.amount;
-      }
-      
-      
-      //this.totalInvoiceAmount += res.amount;
-      this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
-      this.getPatientDetails(res.patientId);
-      this.getAppointDetails(res.appoitmentId);
-      this.getAddtionalItems(this.invoiceId);
+    if (this.invoiceId > 0) {
+      this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
+        this.isPaidButtonVisible = res.status != 'Paid'
+        this.isAllowed = res.status == 'Paid';
 
-    })
+        this.invoiceDetails = res;
+        console.log("invoice details", res)
+        if (!res.isConsultationPaid && (res.status == 'Un Paid' || res.status == "Partially Paid")) {
+          //this.isPaidButtonVisible=false;
+          this.balanceAmount = this.balanceAmount + res.amount;
+        }
 
+        //this.totalInvoiceAmount += res.amount;
+        this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
+        this.getPatientDetails(res.patientId);
+        this.getAddtionalItems(this.invoiceId);
 
-
+        if (res.appointmentId > 0) {
+          this.getAppointDetails(res.appointmentId);
+        }
+      });
+    }
   }
 
   ngOnInit() {
@@ -246,7 +264,6 @@ export class InvoiceViewComponent implements OnInit {
 
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
-
       // Find the latest appointment and check if it is within the last 7 days
       this.checkLatestAppointmentWithin7Days();
     });
@@ -256,16 +273,21 @@ export class InvoiceViewComponent implements OnInit {
     if (this.appointmentList.length > 0) {
       // Sort the appointments by date in descending order
       this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
+      let SelDoctor: Number | null = 0;
       const selectedAppointmentDate = new Date(this.appointmentDetails.date);
+      SelDoctor = this.appointmentDetails.doctorId;
       let previousAppointmentDate: Date | null = null;
+      let previousDoctor: Number | null = 0;
 
       for (let appointment of this.appointmentList) {
+
         const appointmentDate = new Date(appointment.date);
         if (appointmentDate < selectedAppointmentDate) {
           previousAppointmentDate = appointmentDate;
+          previousDoctor = appointment.doctorId;
           break;
         }
+
       }
 
       if (previousAppointmentDate) {
@@ -278,6 +300,13 @@ export class InvoiceViewComponent implements OnInit {
 
         // Check if the difference between the selected and previous appointment is within 7 days
         this.flag = differenceInDays <= 7 && differenceInDays >= 0;
+
+        if (previousDoctor == SelDoctor) {
+          this.IsDoctorSameflag = true;
+        }
+        else {
+          this.IsDoctorSameflag = false;
+        }
       } else {
         console.warn("No appointment found before the selected appointment date.");
         this.flag = false;
@@ -287,27 +316,99 @@ export class InvoiceViewComponent implements OnInit {
     }
 
     if (this.flag) {
-      this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
-      this.disc = 100;
+
+      if (this.IsDoctorSameflag == false) {
+        this.flag = false;
+        this.totalInvoiceAmount = this.totalInvoiceAmount;
+        this.disc = 0;
+      }
+      if (this.IsDoctorSameflag == true) {
+        this.flag = true;
+        this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
+        this.disc = 100;
+      }
+
     }
+
+
     console.log("Flag:", this.flag);
   }
 
-  paidinvoice(id: number) {
-    this.invoiceDetails.status = 'Paid';
-    if (this.invoiceDetails.status == 'Paid') { 
-      this.isAllowed = true;
+  payAll(invoiceId: number) {
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
     }
-    else {         
-      this.isAllowed =false;
-    }
-    this.invoiceService.updateInvoice(id, this.invoiceDetails).subscribe(res => {
-      if (res) {
-        this.getInvoiceDetails();
-        this.balanceAmount = 0;
-        this.toastr.success("Invoice Paid Successfully", "Update Invoice");
-        
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
       }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
+    }
+    else {
+      this.paymentModeDetails.transactionId = null;
+    }
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
+    this.paymentModeDetails.amount = 0;
+
+    this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
+      this.totalInvoiceAmount = 0;
+      this.getInvoiceDetails();
+      this.balanceAmount = 0;
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
+    })
+
+  }
+
+  removeItem(itemName: string): void {
+    this.invoiceService.deleteSubInvoiceItem(this.invoiceId, itemName).subscribe(res => {
+      this.totalInvoiceAmount = 0;
+      this.balanceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Additional item deleted Successfully", "Update Invoice")
+    });
+  }
+
+  paidinvoice(invoiceDetails: any) {
+
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
+      }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
+    }
+    else {
+      this.paymentModeDetails.transactionId = null;
+    }
+
+    this.invoiceDetails.status = 'Paid';
+    this.invoiceDetails.isConsultationPaid = true;
+    this.isAllowed = true;
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
+    this.paymentModeDetails.amount = invoiceDetails.amount;
+
+    this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
+    this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+
+    this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
+      this.balanceAmount = 0;
+      this.totalInvoiceAmount = 0;
+      this.getInvoiceDetails();
+      this.toastr.success("Invoice Paid Successfully", "Update Invoice");
     })
 
   }
@@ -315,18 +416,18 @@ export class InvoiceViewComponent implements OnInit {
   print() {
     this.thermalvisible = true;
     var dateToday = new Date();
-    this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes()<10 ? '0':''}${dateToday.getMinutes()}`;
-    
+    this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
+
     if (this.isTextboxVisible == false) {
 
       this.ReferenceTextBoxVal = 'NA';
     }
-    else{
+    else {
       const inputValue = this.RefNoInput.nativeElement.value;
       this.ReferenceTextBoxVal = inputValue;
     }
 
-    
+
     setTimeout(() => {
       if (this.printView) {
         const tpm = new ThermalPrinterService('80mm');
@@ -354,6 +455,7 @@ export class InvoiceViewComponent implements OnInit {
           this.isPaidButtonVisible = false;
           this.balanceAmount = this.balanceAmount + data.finalAmount;
         }
+
         this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
       })
       console.log("addi", this.addtionalInoiveItem);
@@ -365,16 +467,41 @@ export class InvoiceViewComponent implements OnInit {
   }
 
 
-  paidsubInvoiceItem(id: number) {
-    this.invoiceService.getAddtionalSubInvoiceItemById(id).subscribe((result: any) => {
+  paidsubInvoiceItem(data: any) {
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
+
+    if (this.paymentMode == 'Online') {
+      if (this.RefNoInput.nativeElement.value == '') {
+        alert('Please enter online payment reference number!');
+        return;
+      }
+
+      this.paymentModeDetails.transactionId = this.RefNoInput.nativeElement.value;
+    }
+    else {
+      this.paymentModeDetails.transactionId = null;
+    }
+
+    this.paymentModeDetails.paymentMode = this.paymentMode;
+    this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
+    this.paymentModeDetails.amount = data.finalAmount;
+
+    this.invoiceService.getAddtionalSubInvoiceItemById(data.id).subscribe((result: any) => {
       result.status = 'Paid';
-      if (result.status == 'Paid') { 
+      if (result.status == 'Paid') {
         this.isAllowed = true;
       }
-      else {         
-        this.isAllowed =false;
+      else {
+        this.isAllowed = false;
       }
-      this.invoiceService.updateSubInvoiceItem(id, result).subscribe(res => {
+
+      this.subInvoicePaymentDto.additionalInvoiceItem = result;
+      this.subInvoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+
+      this.invoiceService.updateSubInvoiceItem(data.id, this.subInvoicePaymentDto).subscribe(res => {
         this.toastr.success("Invoice Paid", 'Paid');
         this.balanceAmount = 0;
         this.totalInvoiceAmount = 0;
@@ -398,7 +525,7 @@ class ThermalPrinterService {
   cssStyles = ``;
 
   constructor(private paperWidth: "80mm" | "58mm") { }
-  
+
 
   addRawHtml(htmlEl: string) {
     this.printContent += `\n${htmlEl}`;
@@ -423,10 +550,10 @@ class ThermalPrinterService {
     this.cssStyles = cssStyles;
   }
 
-  
+
 
   print() {
-    
+
     const printerWindow = window.open(``, `_blank`);
     if (printerWindow) {
       printerWindow.document.write(`
