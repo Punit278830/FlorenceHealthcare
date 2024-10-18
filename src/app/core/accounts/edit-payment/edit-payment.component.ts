@@ -30,6 +30,6 @@ export class EditPaymentComponent {
     {value: 'Select Payment Status'},
     {value: 'Paid'},
     {value: 'Partially Paid'},
-    {value: 'Un Paid'},
+    {value: 'Unpaid'},
   ];
 }

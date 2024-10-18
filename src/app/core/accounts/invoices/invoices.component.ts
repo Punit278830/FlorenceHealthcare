@@ -239,7 +239,7 @@ export class InvoicesComponent implements OnInit {
     { value: 'Select Payment Status' },
     { value: 'All' },
     { value: 'Paid' },
-    { value: 'Un Paid' },
+    { value: 'Unpaid' },
     { value: 'Partially Paid' },
   ];
 
