@@ -117,7 +117,7 @@
                                         <td>{{data.paymentType}}</td>
                                         <td>{{data.paidDate}}</td>
                                         <td>{{data.paidAmount}}</td>
-                                        <td><button [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Un Paid', 'status-orange' : data.status === 'Partially Paid'}" class="custom-badge">{{data.status}}</button></td>
+                                        <td><button [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid', 'status-orange' : data.status === 'Partially Paid'}" class="custom-badge">{{data.status}}</button></td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
                                                 <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
