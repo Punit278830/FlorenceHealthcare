@@ -118,7 +118,7 @@
                                             <td><button
                                                     [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
                                                     class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' :
-                                                    'un Paid'}}</button></td>
+                                                    'Unpaid'}}</button></td>
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"
@@ -137,7 +137,7 @@
                                                 <td>{{ data.fee - ((data.discount/100) * data.fee) }}</td>
                                                 <!-- <td>{{data.finalAmount}}</td> -->
                                                 <td><button
-                                                        [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
+                                                        [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
                                                         class="custom-badge">{{data.status}}</button></td>
                                                 <td>
                                                     <button type="button" (click)="paidsubInvoiceItem(data)"

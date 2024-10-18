@@ -132,7 +132,7 @@ export class PaymentsComponent implements OnInit {
   selectedList: data[] = [
     {value: 'Select Payment Status'},
     {value: 'Paid'},
-    {value: 'Un Paid'},
+    {value: 'Unpaid'},
     {value: 'Partially Paid'},
   ];
 }

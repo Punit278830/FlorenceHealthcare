@@ -279,7 +279,7 @@ namespace hospitalApiProject.Controllers
             AppointmentId = appointmentInfo.Id,
             CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
             PatientId = appointmentInfo.PatientId,
-            Status = "Un Paid",
+            Status = "Unpaid",
             IsConsultationPaid = false
           };
 
