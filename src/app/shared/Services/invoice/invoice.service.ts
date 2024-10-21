@@ -52,6 +52,10 @@ export class InvoiceService {
 
     return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`, { params });
   }
+  getTotalAmount():Observable<number>
+   {
+      return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmountDashboard`);
+   }
 
   getInvoiceById(id: number): Observable<Iinvoice> {
     return this.http.get(this.apiUrl + 'InvoiceInfoes/' + id);

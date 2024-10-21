@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
+//import { api_Url } from 'src/environment/environment';
 import { api_Url } from 'src/environment/environment';
 import { Iappointment, IstaffInfo } from '../../models/models';
 import { BehaviorSubject, Observable } from 'rxjs';
@@ -67,13 +68,16 @@ export class AppointmentService {
 
    getEarningByDoctorId(id:number):Observable<number>
    {
-      return this._http.get(this.apiUrl+'AppointmentInfoes/Earning/'+id);
+      // return this._http.get(this.apiUrl+'AppointmentInfoes/Earning/'+id);
+      return this._http.get(this.apiUrl+'AppointmentInfoes/TodayEarningforDoctorDashboard/'+id);
    }
 
-   getEarning():Observable<number>
-   {
-      return this._http.get(this.apiUrl+'AppointmentInfoes/Earning');
-   }
+   // getEarning():Observable<number>
+   // {
+   //    return this._http.get(this.apiUrl+'AppointmentInfoes/TotalEarning');
+   // }
+
+   
 
    createAppointment(apointmentData:Iappointment)
    {

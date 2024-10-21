@@ -18,6 +18,7 @@ import { Sort } from '@angular/material/sort';
 import { DataService } from 'src/app/shared/data/data.service';
 import { Iappointment, IpatientInfo, apiResultFormat, recentPatients, upcomingAppointments } from 'src/app/shared/models/models';
 import { AuthService } from 'src/app/shared/auth/auth.service';
+import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { forkJoin } from 'rxjs';
@@ -75,6 +76,7 @@ export class AdminDashboardComponent implements OnInit {
   public appCount=0;
   public consultatCount=0;
   public earning=0;
+  public totalAmount=0;
   public combinedData:any[]  = [];
   public departments:any[]  = []
  
@@ -82,6 +84,7 @@ export class AdminDashboardComponent implements OnInit {
     private _auth:AuthService,
     private appointmentService:AppointmentService,
   private patientService:PatientService,
+  private invoiceService:InvoiceService,
 private staffService:StaffService,
 private departmentService:DepartmentService,private route : Router) {
     this.chartOptionsOne = {
@@ -209,7 +212,8 @@ public ngOnInit(){
 this.userName=data.fname +" "+data.lname;
 this.appointmentCount();
 this.consultationCount();
-this.totalEarning();
+//this.totalEarning();
+this.totalAmounts();
 this.loadRecentPatients();
     // this.loadUpcomingAppointments();
     this.fetchCombineData()
@@ -314,15 +318,20 @@ public getGreetingMsg()
 
   }
 
-  totalEarning()
+  // totalEarning()
+  // {
+  //   this.appointmentService.getEarning().subscribe(res=>{
+  //     res>0?this.earning=res:this.earning=0;
+  //   })
+
+  // }
+
+  totalAmounts()
   {
-    this.appointmentService.getEarning().subscribe(res=>{
-      res>0?this.earning=res:this.earning=0;
-    })
+    this.invoiceService.getTotalAmount().subscribe(res=>{
+      res>0?this.totalAmount=res:this.totalAmount=0;
+    }) }
 
-  }
-
-  
   public sortData(sort: Sort) {
     const data = this.recentPatients.slice();
     const datas = this.upcomingAppointments.slice();

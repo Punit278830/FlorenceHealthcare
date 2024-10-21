@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using NuGet.Protocol;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace hospitalApiProject.Controllers
 {
@@ -64,7 +66,7 @@ namespace hospitalApiProject.Controllers
     {
       var currentDate = DateTime.Now.Date;
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.DoctorId == id)
+          .Where(e => e.DoctorId == id && e.Date == currentDate)
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -101,7 +103,7 @@ namespace hospitalApiProject.Controllers
     {
       var currentDate = DateTime.Now.Date;
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.DoctorId == id && e.AppointmentStatus == "In Active")
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate)
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -119,7 +121,7 @@ namespace hospitalApiProject.Controllers
       var currentDate = DateTime.Now.Date;
       var Earning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.DoctorId == id).ToListAsync();
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active").ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -136,13 +138,13 @@ namespace hospitalApiProject.Controllers
     }
 
     //Total Earning
-    [HttpGet("Earning/")]
+    [HttpGet("TotalEarning/")]
     public async Task<ActionResult<int>> GetEarning()
     {
-      var currentDate = DateTime.Now.Date;
+     // var currentDate = DateTime.Now.Date;
       var Earning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate).ToListAsync();
+          .ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -158,7 +160,52 @@ namespace hospitalApiProject.Controllers
       return Ok(Earning);
     }
 
+    //Today Earning
+    [HttpGet("TodayEarning/")]
+    public async Task<ActionResult<int>> GetTodayEarning()
+    {
+      var currentDate = DateTime.Now.Date;
+      var TodayEarning = 0;
+      var appointments = await _context.AppointmentInfos
+          .Where(e => e.Date == currentDate).ToListAsync();
 
+      if (!appointments.Any()) // Check if appointments were found
+      {
+        return Ok(new { message = "No consultation found for the current date" });
+      }
+
+      foreach (var appointment in appointments)
+      {
+        TodayEarning += appointment.Fee;
+
+      }
+
+      return Ok(TodayEarning);
+    }
+
+    //Today Earning
+    [HttpGet("TodayEarningforDoctorDashboard/{id}")]
+    public async Task<ActionResult<int>> GetTodayEarningDoctor(int id)
+    {
+      DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+      int? TodayEarning = 0;
+      var totalAmount = await _context.InvoiceInfos
+        .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
+          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate == currentDate).ToListAsync();
+
+      if (!totalAmount.Any()) // Check if appointments were found
+      {
+        return Ok(new { message = "No consultation found for the current date" });
+      }
+
+      foreach (var appointment in totalAmount)
+      {
+        TodayEarning += appointment.v1.Amount;
+
+      }
+
+      return Ok(TodayEarning);
+    }
 
 
 

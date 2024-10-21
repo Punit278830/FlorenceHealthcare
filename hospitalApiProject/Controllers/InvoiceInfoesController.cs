@@ -1,8 +1,11 @@
+using Hl7.Fhir.ElementModel.Types;
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
 using System;
+using DateTime = System.DateTime;
 
 namespace hospitalApiProject.Controllers
 {
@@ -172,6 +175,19 @@ namespace hospitalApiProject.Controllers
 
       return Ok(totalPayment);
     }
+
+    //Get api/Invoiceinfoes
+    [HttpGet("totalAmountDashboard")]
+
+    public async Task<ActionResult<int>> GetTotalAmount()
+    {
+
+      var result = _context.PaymentModeInfo
+       .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0)
+       .Sum(all => (decimal?)all.Amount) ?? 0;
+      return Ok(result);
+    }
+
 
     [HttpPost("createInvoice/{patientId}")]
     public async Task<ActionResult> PostInvoiceWithAdditionalItems(int patientId, NewInvoiceDto request)
