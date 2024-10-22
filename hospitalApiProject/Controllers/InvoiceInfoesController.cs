@@ -181,7 +181,6 @@ namespace hospitalApiProject.Controllers
 
     public async Task<ActionResult<int>> GetTotalAmount()
     {
-
       var result = _context.PaymentModeInfo
        .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0)
        .Sum(all => (decimal?)all.Amount) ?? 0;

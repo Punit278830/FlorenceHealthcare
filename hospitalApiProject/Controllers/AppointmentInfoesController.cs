@@ -84,7 +84,7 @@ namespace hospitalApiProject.Controllers
     {
       var currentDate = DateTime.Now.Date;
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.AppointmentStatus == "In Active")
+          .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active")
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -177,14 +177,13 @@ namespace hospitalApiProject.Controllers
       foreach (var appointment in appointments)
       {
         TodayEarning += appointment.Fee;
-
       }
 
       return Ok(TodayEarning);
     }
 
     //Today Earning
-    [HttpGet("TodayEarningforDoctorDashboard/{id}")]
+    [HttpGet("TotalEarnings/Doctor/{id}")]
     public async Task<ActionResult<int>> GetTodayEarningDoctor(int id)
     {
       DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
@@ -193,7 +192,7 @@ namespace hospitalApiProject.Controllers
         .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
           .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate == currentDate).ToListAsync();
 
-      if (!totalAmount.Any()) // Check if appointments were found
+      if (totalAmount.Count == 0) // Check if appointments were found
       {
         return Ok(new { message = "No consultation found for the current date" });
       }
