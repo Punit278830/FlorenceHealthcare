@@ -399,7 +399,7 @@ export class CreateInvoiceComponent {
         finalAmount: this.total,
         createdBy: this.loggedInUser.loginId,
         invoiceId: 0,
-        status: 'un Paid'
+        status: 'Unpaid'
       };
 
       this.selectedItem = selectedInvoiceItem;
@@ -428,7 +428,7 @@ export class CreateInvoiceComponent {
     this.IinvoiceDto = formData.getRawValue();
     this.IinvoiceDto.createdBy = this.loggedInUser.loginId;
     this.IinvoiceDto.invoiceId = this.invoiceService.invoiceId;
-    this.IinvoiceDto.status = 'un Paid';
+    this.IinvoiceDto.status = 'Unpaid';
     //delete this.IinvoiceDto.total;
     this.invoiceService.addToaddtionalItemInvoice(this.IinvoiceDto).subscribe(res => {
       this.toaster.success("Item Added to Invoice", "Invoice Item");

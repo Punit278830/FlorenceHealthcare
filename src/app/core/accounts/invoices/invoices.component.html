@@ -55,57 +55,77 @@
               </div>
             </div>
             <!-- /Table Header -->
-            <div class="staff-search-table">
-              <form [formGroup]="searchForm" (submit)="searchInvoices()">
-                <div class="row">
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="form-group local-forms">
-                            <label for="from">From </label>
-                            <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1" formControlName="from">
-                            <mat-datepicker #picker1></mat-datepicker>
-                            <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="form-group local-forms">
-                            <label for="to">To </label>
-                            <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2" formControlName="to">
-                            <mat-datepicker #picker2></mat-datepicker>
-                            <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="form-group local-forms">
-                            <label for="paymentStatus">Payment Status </label>
-                            <mat-select formControlName="paymentStatus" class="form-control select" placeholder="Select Payment Status">
-                                <mat-option *ngFor="let data of selectedList" [value]="data.value">
-                                    {{data.value}}
-                                </mat-option>
-                            </mat-select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-4">
-                        <div class="form-group local-forms">
-                            <label for="paymentMode">Payment Mode </label>
-                            <mat-select formControlName="paymentMode" (selectionChange)="onPaymentModeChange($event)" class="form-control select" placeholder="Select Payment Mode">
-                                <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
-                                    {{data.value}}
-                                </mat-option>
-                            </mat-select>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-xl-4">
-                    <div class="form-group local-for ms">
-                      <p>Total Amount for the Day ({{ selectedPaymentMode }}): {{ totalPaymentAmount | currency: 'INR' }}</p>
+           <!-- /Table Header -->
+           <div class="staff-search-table">
+            <form [formGroup]="searchForm" (submit)="searchInvoices()">
+              <div class="row">
+                <!-- First Row: Start Date, End Date -->
+                <div class="col-12 col-md-6">
+                  <div class="form-group local-forms">
+                    <label for="from">From </label>
+                    <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1" formControlName="from">
+                    <mat-datepicker #picker1></mat-datepicker>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                  </div>
+                </div>
+            
+                <div class="col-12 col-md-6">
+                  <div class="form-group local-forms">
+                    <label for="to">To </label>
+                    <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2" formControlName="to">
+                    <mat-datepicker #picker2></mat-datepicker>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="row">
+                <!-- Second Row: Payment Status, Payment Mode -->
+                <div class="col-12 col-md-6">
+                  <div class="form-group local-forms">
+                    <label for="paymentStatus">Payment Status </label>
+                    <mat-select formControlName="paymentStatus" class="form-control select" placeholder="Select Payment Status">
+                      <mat-option *ngFor="let data of selectedList" [value]="data.value">
+                        {{data.value}}
+                      </mat-option>
+                    </mat-select>
+                  </div>
+                </div>
+            
+                <div class="col-12 col-md-6">
+                  <div class="form-group local-forms">
+                    <label for="paymentMode">Payment Mode </label>
+                    <mat-select formControlName="paymentMode" (selectionChange)="onPaymentModeChange($event)" class="form-control select" placeholder="Select Payment Mode">
+                      <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
+                        {{data.value}}
+                      </mat-option>
+                    </mat-select>
+                  </div>
+                </div>
+              </div>
+            
+              <div class="row">
+                <!-- Third Row: Search Button, Total Amount for the Day -->
+                <div class="col-12 col-md-6">
+                  <div class="doctor-submit" style="margin-top: 10px;"> <!-- Adjusted margin -->
+                    <button type="submit" class="btn btn-primary submit-list-form me-2" style="padding: 10px 15px;">Search</button> <!-- Optional padding adjustment -->
+                  </div>
+                </div>
+            
+                <div class="col-12 col-md-6">
+                  <div class="dash-widget" style="margin-bottom: 10px;">
+                    <div class="dash-content dash-count" style="margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between;">
+                      <h4 style="margin-right: 10px; margin-bottom: 5px;">Total Amount for the Day ({{ selectedPaymentMode }})</h4>
+                      <h2 style="margin-bottom: 5px;">
+                        <span  class="counter-up" [countUp]="totalPaymentAmount" [options]="{duration: 10}">{{ totalPaymentAmount | currency: 'INR' }}</span>
+                      </h2>
                     </div>
                   </div>
-                  <div class="col-12 col-md-6 col-xl-4 ms-auto">
-                        <div class="doctor-submit">
-                            <button type="submit" class="btn btn-primary submit-list-form me-2">Search</button>
-                        </div>
-                    </div>
                 </div>
+              </div>
             </form>
+          
+          
             
             </div>
             <div class="table-responsive">
@@ -137,7 +157,7 @@
                                             </div>
                                         </td> -->
                     <td><a href="javascript:void(0);"
-                        (click)="movetoInvoiceView(data.invoiceId,data.patientId)">#INV-{{data.invoiceId}}</a></td>
+                        (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
                     <td> {{data.patientFname}} {{data.patientLname}}</td>
 
                     <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
@@ -145,7 +165,7 @@
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
                     <td><button
-                        [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'un Paid'}"
+                        [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
                         class="custom-badge">{{data.status}}</button></td>
                     <td><button
                       [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"

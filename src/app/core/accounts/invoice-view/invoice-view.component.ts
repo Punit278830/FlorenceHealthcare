@@ -198,7 +198,7 @@ export class InvoiceViewComponent implements OnInit {
 
         this.invoiceDetails = res;
         console.log("invoice details", res)
-        if (!res.isConsultationPaid && (res.status == 'Un Paid' || res.status == "Partially Paid")) {
+        if (!res.isConsultationPaid && (res.status == 'Unpaid' || res.status == "Partially Paid")) {
           //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
         }
@@ -451,7 +451,7 @@ export class InvoiceViewComponent implements OnInit {
 
       this.addtionalInoiveItem = res;
       res.map((data: any) => {
-        if (data.status == 'un Paid') {
+        if (data.status == 'Unpaid') {
           this.isPaidButtonVisible = false;
           this.balanceAmount = this.balanceAmount + data.finalAmount;
         }

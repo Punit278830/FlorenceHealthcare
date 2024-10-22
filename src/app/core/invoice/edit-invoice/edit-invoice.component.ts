@@ -52,7 +52,7 @@ export class EditInvoiceComponent implements OnInit {
   selectedList4: data[] = [
     { value: 'Select  Tax' },
     { value: 'Paid' },
-    { value: 'Un Paid' },
+    { value: 'Unpaid' },
     { value: 'Partially Paid' },
   ];
 
@@ -114,7 +114,7 @@ export class EditInvoiceComponent implements OnInit {
       this.IinvoiceDto = formData.getRawValue();
       this.IinvoiceDto.createdBy = this.loggedInUser.loginId;
       this.IinvoiceDto.invoiceId = this.invoiceService.invoiceId;
-      this.IinvoiceDto.status = 'un Paid';
+      this.IinvoiceDto.status = 'Unpaid';
       //delete this.IinvoiceDto.total;
       this.invoiceService.addToaddtionalItemInvoice(this.IinvoiceDto).subscribe(res => {
         this.toastr.success("Item Added to Invoice", "Invoice Item");
