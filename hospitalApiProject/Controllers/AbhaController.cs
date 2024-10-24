@@ -468,7 +468,7 @@ namespace hospitalApiProject.Controllers
         return BadRequest("Invalid request body");
       }
 
-      var result = await _service.ShareProfile(request);
+      var result = await _service.ShareProfile(request); 
 
       if (_service.HasError)
       {

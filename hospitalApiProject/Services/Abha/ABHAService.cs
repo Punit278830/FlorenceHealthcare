@@ -308,9 +308,9 @@ namespace hospitalApiProject.Services.Abha
           abhaAddress = request.healthId,
           profile = new
           {
-            context = 123,
-            tokenNumber = 100,
-            expiry = 600
+            context = "123",
+            tokenNumber = "100",
+            expiry = "600"
           }
         },
         response = new
