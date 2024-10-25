@@ -42,8 +42,39 @@ namespace hospitalApiProject.Controllers
 
       return NotFound();
     }
+    // GET: api/PatientInfoes/PatientCountByGender
+    [HttpGet("PatientCountByGender")]
+    public async Task<ActionResult<PatientInfo>> GetPatientCountByGender()
+    {
+      var maleCount = await _context.PatientInfos
+                                .Where(p => p.Gender == "male")
+                                .CountAsync();
+      var femaleCount = await _context.PatientInfos
+                                       .Where(p => p.Gender == "female")
+                                       .CountAsync();
+      var transgenderCount = await _context.PatientInfos
+                                            .Where(p => p.Gender == "transgender")
+                                            .CountAsync();
 
-    // GET: api/PatientInfoes/5
+      // Calculate total count
+      var totalCount = maleCount + femaleCount + transgenderCount;
+
+      // Calculate percentages 
+      var malePercentage = totalCount > 0 ? (int)((maleCount / (double)totalCount) * 100) : 0;
+      var femalePercentage = totalCount > 0 ? (int)((femaleCount / (double)totalCount) * 100) : 0;
+      var transgenderPercentage = totalCount > 0 ? (int)((transgenderCount / (double)totalCount) * 100) : 0;
+
+      var result = new
+      {
+        Male = malePercentage,
+        Female= femalePercentage,
+        Transgender = transgenderPercentage
+      };
+
+      return Ok(result);
+    }
+
+    //GET: api/PatientInfoes/5
     [HttpGet("{id}")]
     public async Task<ActionResult<PatientInfo>> GetPatientInfo(int id)
     {

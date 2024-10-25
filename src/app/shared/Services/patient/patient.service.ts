@@ -33,6 +33,10 @@ export class PatientService {
 
   }
 
+  getPatientCountByGender(): Observable<IpatientInfo[]> {
+    return this._http.get(this.apiUrl + 'PatientInfoes/PatientCountByGender')
+  }
+
   getPatientdateange(sdate: any, edate: any): Observable<IpatientInfo[]> {
     return this._http.get(this.apiUrl + 'PatientInfoes/regestrationDateRange/' + sdate + '/' + edate)
 

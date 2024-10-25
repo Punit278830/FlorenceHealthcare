@@ -64,10 +64,11 @@ interface data {
 export class AdminDashboardComponent implements OnInit {
   public routes = routes;
   public selectedValue ! : string  ;
+  public currentYear!: number;
+  public recentYears: number[] = [];
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptionsOne: Partial<ChartOptions>;
   public chartOptionsTwo: Partial<ChartOptions>;
-
   public recentPatients: Array<any> = [];
   public upcomingAppointments: Array<any> = [];
   public CurrentTime=0;
@@ -79,14 +80,16 @@ export class AdminDashboardComponent implements OnInit {
   public totalAmount=0;
   public combinedData:any[]  = [];
   public departments:any[]  = []
- 
+  public patientCountByGender: any[]=[];
+
   constructor(public data : DataService,
     private _auth:AuthService,
     private appointmentService:AppointmentService,
   private patientService:PatientService,
   private invoiceService:InvoiceService,
 private staffService:StaffService,
-private departmentService:DepartmentService,private route : Router) {
+private departmentService:DepartmentService,private route : Router) 
+{
     this.chartOptionsOne = {
       chart: {
         height: 230,
@@ -217,7 +220,34 @@ this.totalAmounts();
 this.loadRecentPatients();
     // this.loadUpcomingAppointments();
     this.fetchCombineData()
+    this.currentYear = new Date().getFullYear(); // Get the current year
+    this.generateRecentYears();
+    this.getPatientCountByGender();
 }
+
+getPatientCountByGender(): void {
+  this.patientService.getPatientCountByGender().subscribe((data: any) => {
+      console.log('Fetched data:', data); // Log the response
+
+      // Convert object to array format
+      if (data && typeof data === 'object') {
+          this.patientCountByGender = [
+              { gender: 'male', count: data.male || 0 },
+              { gender: 'female', count: data.female || 0 },
+              { gender: 'transgender', count: data.transgender || 0 }
+          ];
+      } else {
+          console.error('Unexpected data format:', data);
+      }
+  });
+}
+  
+generateRecentYears() {
+  const numberOfYears = 5; // Number of years to show in the dropdown
+  for (let i = 0; i <= numberOfYears; i++) {
+    this.recentYears.push(this.currentYear - i); // Add the current and recent years
+  }
+  }
 
 loadRecentPatients(): void {
   this.patientService.getPatientList().subscribe((result) => {
@@ -358,6 +388,8 @@ public getGreetingMsg()
     }
   }
   selecedList: data[] = [
+    {value:'2024'},
+    {value: '2023'},
     {value: '2022'},
     {value: '2021'},
     {value: '2020'},

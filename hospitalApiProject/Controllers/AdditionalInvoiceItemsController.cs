@@ -42,9 +42,16 @@ namespace hospitalApiProject.Controllers
     [HttpGet("invoiceId/{id}")]
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAllAdditionalInvoiceItem(int id)
     {
-      var additionalInvoiceItems = await _context.AdditionalInvoiceItems
-                                                  .Where(e => e.InvoiceId == id)
-                                                  .ToListAsync();
+      var additionalInvoiceItems = await (from a in _context.AdditionalInvoiceItems
+                                          join b in _context.PaymentModeInfo
+                                          on a.InvoiceId equals b.InvoiceId
+                                          where a.InvoiceId == id // condition to filter specific InvoiceId
+                                          select new
+                                          {
+                                            a.InvoiceId,a.Id,a.Fee,a.Description,a.Discount,a.FinalAmount,a.ItemName,a.Status,b.TransactionId
+                                          }).ToListAsync();
+
+      
 
       if (additionalInvoiceItems.Count == 0)
       {

@@ -124,7 +124,7 @@ namespace hospitalApiProject.Controllers
         TotalAmount = totalAmount               // Total of all payments
       };
     }
-
+ 
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
     {
@@ -136,6 +136,19 @@ namespace hospitalApiProject.Controllers
       }
 
       return invoiceInfo;
+    }
+
+    [HttpGet("GetInvoiceinfoByPatientId")]
+    public async Task<ActionResult<int>> GetInvoiceInfoByPatientId(int patientId)
+    {
+      var maxInvoiceId = await _context.InvoiceInfos
+        .Where(i => i.PatientId == patientId)
+        .MaxAsync(i => i.InvoiceId); // Cast to nullable int to handle case with no results
+      if(maxInvoiceId == 0)
+      {
+        return NotFound();
+      }
+      return Ok(maxInvoiceId);
     }
 
     // GET: api/InvoiceInfoes
@@ -188,7 +201,7 @@ namespace hospitalApiProject.Controllers
       return Ok(result);
     }
 
-
+    //POST /api/InvoiceInfoes/createInvoice/{patientId}
     [HttpPost("createInvoice/{patientId}")]
     public async Task<ActionResult> PostInvoiceWithAdditionalItems(int patientId, NewInvoiceDto request)
     {

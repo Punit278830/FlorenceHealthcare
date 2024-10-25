@@ -38,7 +38,7 @@
                         <img src="assets/img/icons/calendar.svg" alt="">
                     </div> -->
                     <div class="dash-content dash-count">
-                        <h4>Appointments</h4>
+                        <h4>'Total Appointments for Today</h4>
                         <h2><span class="counter-up" [countUp]="appCount" [options]="{duration: 10}">{{appCount}}</span>
                         </h2>
 
@@ -51,7 +51,7 @@
                         <img src="assets/img/icons/profile-add.svg" alt="">
                     </div> -->
                     <div class="dash-content dash-count">
-                        <h4>Consultations</h4>
+                        <h4>Total Patients visited Today</h4>
                         <h2><span class="counter-up" [countUp]="consultatCount"
                                 [options]="{duration: 10}">{{consultatCount}}</span></h2>
                         <!-- <p><span class="passive-view"><i class="feather icon-arrow-up-right me-1"></i>20%</span> vs last
@@ -78,7 +78,7 @@
                         <img src="assets/img/icons/empty-wallet.svg" alt="">
                     </div> -->
                     <div class="dash-content dash-count">
-                        <h4>Earnings</h4>
+                        <h4>Total Earnings for Today</h4>
                         <h2>₹<span class="counter-up" [countUp]="totalAmount" [options]="{duration: 10}">{{totalAmount}}</span>
                         </h2>
 
@@ -104,19 +104,28 @@
                             <h4>Patient Visit by Gender</h4>
                             <div>
                                 <ul class="nav chat-user-total">
-                                    <li><i class="fa fa-circle current-users" aria-hidden="true"></i>Male 70%</li>
-                                    <li><i class="fa fa-circle old-users" aria-hidden="true"></i> Female 20%</li>
-                                    <li><i class="fa fa-circle current-users" aria-hidden="true"></i>Transgender 10%</li>
+                                    <li>
+                                        <i class="fa fa-circle current-users" aria-hidden="true"></i>
+                                        Male {{ patientCountByGender[0]?.count }}%
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-circle old-users" aria-hidden="true"></i>
+                                        Female {{ patientCountByGender[1]?.count }}%
+                                    </li>
+                                    <li>
+                                        <i class="fa fa-circle current-users" aria-hidden="true"></i>
+                                        Transgpender {{ patientCountByGender[2]?.count }}%
+                                    </li>
                                 </ul>
                             </div>
                             <div class="form-group mb-0">
-                                <mat-select [(ngModel)]="selectedValue" class="form-control select" placeholder="2022">
-                                    <mat-option *ngFor="let data of selecedList" [value]="data.value">
-                                        {{data.value}}
-                                    </mat-option>
+                                <mat-select [(ngModel)]="selectedValue" class="form-control select" placeholder="{{currentYear}}" >
+                                    <mat-option *ngFor="let year of recentYears" [value]="year">
+                                        {{ year }}
+                                      </mat-option>
                                 </mat-select>
+                              </div>                              
                             </div>
-                        </div>
                         <div id="patient-chart">
                             <apx-chart [series]="chartOptionsOne.series" [chart]="chartOptionsOne.chart"
                                 [dataLabels]="chartOptionsOne.dataLabels" [plotOptions]="chartOptionsOne.plotOptions"
