@@ -195,7 +195,7 @@ export class InvoiceViewComponent implements OnInit {
       console.log("invoiceId", this.tempInvoiceID);
   
     });
-    debugger;
+    
 
     if (this.tempInvoiceID == null || this.tempInvoiceID == undefined) {
       this.invoiceId = this.invoiceService.invoiceId;
@@ -263,6 +263,7 @@ export class InvoiceViewComponent implements OnInit {
       return; // Exit the function to avoid further processing
     }
   }
+
 
 
   getAppointDetails(id: number) {
@@ -559,6 +560,7 @@ export class InvoiceViewComponent implements OnInit {
     this.route.navigate(['/invoice/edit-invoice'])
 
   }
+  
 
 }
 
@@ -631,5 +633,6 @@ class ThermalPrinterService {
     }
     // mywindow.close();
   }
+
 }
 

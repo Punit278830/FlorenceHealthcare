@@ -251,8 +251,11 @@ export class InvoicesComponent implements OnInit {
   ];
 
   movetoInvoiceView(Id: number, patienId: number) {
-    this.invoiceService.invoiceId = Id;
-    this.patientService.patientId = patienId
+    // this.invoiceService.invoiceId = Id;
+    this.invoiceService.sendInvoiceId(Id);
+    this.patientService.patientId = patienId;
+
+    
     this.route.navigate(['/accounts/invoice-view'])
   }
 
