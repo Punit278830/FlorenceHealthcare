@@ -18,11 +18,6 @@ export class InvoiceService {
     console.log();
   }
 
-  // getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
-  //   const params = new HttpParams().set('paymentMode', paymentMode); // Set query string params
-  //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
-  // }
-
   getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<IInvoiceSummaryResponse> {
     let params = new HttpParams()
       .set('paymentMode', paymentMode)
@@ -53,10 +48,9 @@ export class InvoiceService {
 
     return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`, { params });
   }
-  getTotalAmount():Observable<number>
-   {
-      return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmountDashboard`);
-   }
+  getTotalAmount(): Observable<number> {
+    return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmountDashboard`);
+  }
 
    GetAllDatafromInvoice():Observable<Iinvoice>
    {
