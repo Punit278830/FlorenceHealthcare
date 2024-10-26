@@ -38,7 +38,7 @@ namespace hospitalApiProject.Controllers
       return additionalInvoiceItem;
     }
 
-    // GET: api/AdditionalInvoiceItems/5
+    // GET: api/AdditionalInvoiceItems/invoiceId
     [HttpGet("invoiceId/{id}")]
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAllAdditionalInvoiceItem(int id)
     {

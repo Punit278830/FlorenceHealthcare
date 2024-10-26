@@ -30,7 +30,7 @@ export class InvoicesComponent implements OnInit {
   public showFilter = false;
   public searchDataValue = '';
   public lastIndex = 0;
-  public pageSize = 10;
+  public pageSize = 30;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;
