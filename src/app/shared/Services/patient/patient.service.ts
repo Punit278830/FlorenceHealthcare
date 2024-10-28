@@ -12,7 +12,7 @@ export class PatientService {
   //private staffDto!:IstaffInfo;
   //private readonly apiUrl="https://localhost:44320/api/";
   private readonly apiUrl = api_Url;
-  public patientId!: number;
+  public patientId!: any;
   public patintDataForOPD!: IpatientInfo;
   //public patientId!:number
 
@@ -31,6 +31,10 @@ export class PatientService {
   getPatientList(): Observable<IpatientInfo[]> {
     return this._http.get(this.apiUrl + 'PatientInfoes')
 
+  }
+
+  getPatientCountByGender(): Observable<IpatientInfo[]> {
+    return this._http.get(this.apiUrl + 'PatientInfoes/PatientCountByGender')
   }
 
   getPatientdateange(sdate: any, edate: any): Observable<IpatientInfo[]> {

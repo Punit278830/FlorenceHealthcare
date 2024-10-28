@@ -8,6 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using NuGet.Protocol;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Azure.Core.HttpHeader;
+using static Hl7.Fhir.Model.Appointment;
 
 namespace hospitalApiProject.Controllers
 {
@@ -260,19 +262,41 @@ namespace hospitalApiProject.Controllers
 
     //Get Appointment Data for a purticular Date 
     [HttpGet("date/{from}/{to}")]
-    public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentByDate(DateTime from, DateTime to)
+    public async Task<ActionResult> GetAppointmentByDate(DateTime from, DateTime to)
     {
 
-      var appointmentInfo = await _context.AppointmentInfos
+
+      var appointmentWithInvoices = await _context.AppointmentInfos
           .Where(e => e.Date >= from && e.Date <= to)
+          .Join(
+              _context.InvoiceInfos,
+              appointment => appointment.Id,      // AppointmentInfos.Id
+              invoice => invoice.AppointmentId,   // InvoiceInfos.AppointmentId
+              (appointment, invoice) => new AppointmentWithInvoiceDto  // Single object projection
+              {
+                Id = appointment.Id,                  // Assuming AppointmentInfo.Id
+                PatientId = appointment.PatientId,              // Date from Appointment
+                Departmentid = appointment.Departmentid,  // Appointment-specific field
+                DoctorId = appointment.DoctorId,       // Invoice-specific field
+                IsConsultationPaid = invoice.IsConsultationPaid ,     // to show the payment status in appoinment list get the consultationpaid data here
+                ScheduledByid = appointment.ScheduledByid,
+                Date = appointment.Date,
+                Notes = appointment.Notes,
+                AppointTime = appointment.AppointTime,
+                AppointmentStatus = appointment.AppointmentStatus,
+                Fee = appointment.Fee,
+              }
+          )
           .ToListAsync();
 
-      if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found
+
+
+      if (appointmentWithInvoices == null) // Check if appointments were found
       {
         return NotFound();
       }
 
-      return appointmentInfo;
+      return Ok(appointmentWithInvoices);
     }
 
 

@@ -118,11 +118,13 @@ export class InvoiceViewComponent implements OnInit {
   public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
+  tempInvoiceID: any;
+  patientId: any;
   formatToTwoDecimalPlaces(value: number): string {
     return value.toFixed(2); // Converts to a string with 2 decimal places
   }
-  public paymentMode: string;
-  public ReferenceTextBoxVal: string;
+  public paymentMode!: string;
+  public ReferenceTextBoxVal!: string;
   buttonColors = {
     Cash: 'lightgray',
     Online: 'lightgray'
@@ -163,10 +165,6 @@ export class InvoiceViewComponent implements OnInit {
 
     private route: Router) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
-    console.log("invoiceId", this.invoiceService.invoiceId);
-    if (!this.invoiceService.invoiceId) {
-      this.route.navigate(['/accounts/invoices'])
-    }
     this.paymentMode = '';
     this.ReferenceTextBoxVal = '';
     this.ConsultationPaidStatus = '';
@@ -187,10 +185,35 @@ export class InvoiceViewComponent implements OnInit {
       invoiceInfo: this.invoiceDetails,
       paymentModeInfo: this.paymentModeDetails
     };
+  
   }
 
   getInvoiceDetails() {
-    this.invoiceId = this.invoiceService.invoiceId;
+
+    this.invoiceService.getInvoiceId().subscribe(data => {
+      this.tempInvoiceID = data.data;
+      console.log("invoiceId", this.tempInvoiceID);
+  
+    });
+    
+
+    if (this.tempInvoiceID == null || this.tempInvoiceID == undefined) {
+      this.invoiceId = this.invoiceService.invoiceId;
+
+      if (this.invoiceId == null) {
+        this.route.navigate(['/accounts/invoices'])
+      }
+    }
+    else{
+      this.invoiceId = this.tempInvoiceID;
+
+      if (!this.invoiceId) {
+        this.route.navigate(['/accounts/invoices'])
+      }
+    }
+
+
+
     if (this.invoiceId > 0) {
       this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
         this.isPaidButtonVisible = res.status != 'Paid'
@@ -242,6 +265,7 @@ export class InvoiceViewComponent implements OnInit {
   }
 
 
+
   getAppointDetails(id: number) {
     this.appointmentService.getAppointmentById(id).subscribe(res => {
       this.appointmentDetails = res;
@@ -262,12 +286,26 @@ export class InvoiceViewComponent implements OnInit {
     this.appointmentList = [];
     const currentYear = new Date().getFullYear();
 
-    this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
-      this.appointmentList = res;
-      // Find the latest appointment and check if it is within the last 7 days
-      this.checkLatestAppointmentWithin7Days();
+    this.invoiceService.getPatientId().subscribe(data =>{
+      console.log('data ', data);
+      
+      this.patientId = data;
     });
-  }
+    
+    // const patientId = this.patientService.patientId;
+    console.log('patientId:', this.patientId); // Log the patientId
+
+    if (!this.patientId) {
+        console.error('Patient ID is undefined. Check patientService for correct initialization.');
+        return; // Exit if patientId is undefined
+    }
+
+    this.appointmentService.getAppointmentListByPatientId(this.patientId.data, currentYear).subscribe(res => {
+        this.appointmentList = res;
+        this.checkLatestAppointmentWithin7Days();
+    });
+}
+
 
   checkLatestAppointmentWithin7Days() {
     if (this.appointmentList.length > 0) {
@@ -414,6 +452,11 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   print() {
+
+    if (this.paymentMode == '') {
+      alert('Please select payment mode first!');
+      return;
+    }
     this.thermalvisible = true;
     var dateToday = new Date();
     this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
@@ -446,9 +489,9 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   getAddtionalItems(id: number) {
-
-    this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res: any) => {
-
+   
+    
+    this.invoiceService.getInvoiceById(id).subscribe((res: any) => {
       this.addtionalInoiveItem = res;
       res.map((data: any) => {
         if (data.status == 'Unpaid') {
@@ -517,6 +560,7 @@ export class InvoiceViewComponent implements OnInit {
     this.route.navigate(['/invoice/edit-invoice'])
 
   }
+  
 
 }
 
@@ -589,5 +633,6 @@ class ThermalPrinterService {
     }
     // mywindow.close();
   }
+
 }
 
