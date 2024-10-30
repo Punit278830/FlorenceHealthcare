@@ -10,6 +10,7 @@ import { HttpErrorResponse, HttpParams } from '@angular/common/http';
 })
 export class InvoiceService {
 
+
   private readonly apiUrl = api_Url;
   public diagnosisId!: number;
   public invoiceId!: number;
@@ -17,6 +18,11 @@ export class InvoiceService {
   constructor(private http: ApiHttpService,) {
     console.log();
   }
+
+  // getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
+  //   const params = new HttpParams().set('paymentMode', paymentMode); // Set query string params
+  //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
+  // }
 
   getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<IInvoiceSummaryResponse> {
     let params = new HttpParams()
@@ -34,8 +40,6 @@ export class InvoiceService {
     return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   }
 
- 
-
   getPaymentDetails(fromDate: string, toDate: string): Observable<ITotalPaymentDetails> {
     let params = new HttpParams();
     if (fromDate) {
@@ -48,21 +52,13 @@ export class InvoiceService {
 
     return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmount`, { params });
   }
-  getTotalAmount(): Observable<number> {
-    return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmountDashboard`);
-  }
-
-   GetAllDatafromInvoice():Observable<Iinvoice>
+  getTotalAmount():Observable<number>
    {
-    return this.http.get(this.apiUrl + 'InvoiceInfoes/AllDataFromInvoice');
+      return this.http.get(`${this.apiUrl}InvoiceInfoes/totalAmountDashboard`);
    }
 
   getInvoiceById(id: number): Observable<Iinvoice> {
     return this.http.get(this.apiUrl + 'InvoiceInfoes/' + id);
-  }
-
-  getInvoiceByPatientId(id: number): Observable<Iinvoice> {
-    return this.http.get(this.apiUrl + 'InvoiceInfoes/GetInvoiceinfoByPatientId?patientId=' + id);
   }
 
   updateInvoice(id: number, invoiceData: IInvoicePaymentDto): Observable<any> {
@@ -115,29 +111,6 @@ export class InvoiceService {
     return this.http.post(this.apiUrl + 'InvoiceItemMaster/', InvoiceItemMaster);
   }
 
-
-
-  //data sharing
-  private getInvoiceId$ = new BehaviorSubject<{ data: any }>(null!); // Initialize with null
-
-  getInvoiceId() {
-    return this.getInvoiceId$.asObservable();
-  }
-  sendInvoiceId(data: any) {
-    this.getInvoiceId$.next({ data });
-
-  }
-
-  
-  private getPatientId$ = new BehaviorSubject<{ data: any }>(null!); // Initialize with null
-
-  getPatientId() {
-    return this.getPatientId$.asObservable();
-  }
-  sendPatientId(data: any) {
-    this.getPatientId$.next({ data });
-
-  }
 
 
 }

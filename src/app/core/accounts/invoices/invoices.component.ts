@@ -251,8 +251,8 @@ export class InvoicesComponent implements OnInit {
   ];
 
   movetoInvoiceView(Id: number, patienId: number) {
-    // this.invoiceService.invoiceId = Id;
-    this.invoiceService.sendInvoiceId(Id);
+    this.invoiceService.invoiceId = Id;
+    // this.invoiceService.sendInvoiceId(Id);
     this.patientService.patientId = patienId;
 
     
