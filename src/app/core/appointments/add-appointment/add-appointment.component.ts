@@ -14,6 +14,7 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 interface data {
   value: string;
 }
@@ -68,8 +69,10 @@ export class AddAppointmentComponent implements OnInit {
   @ViewChild('searchDataValue') searchInput!: ElementRef;
 
   //public searchDataValue = '';
-  constructor(private patierntService: PatientService, private route: Router,
+  constructor(private patierntService: PatientService, 
+    private route: Router,
     private appointmentService: AppointmentService,
+    private invoiceService: InvoiceService,
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private staffService: StaffService,
@@ -369,9 +372,6 @@ export class AddAppointmentComponent implements OnInit {
         formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
       }
 
-
-
-
       const userData = JSON.parse(localStorage.getItem('data') || '');
       this.appointmentDto.date = this.formattedDateTime;
       this.appointmentDto.doctorId = appointment.value.doctorId;
@@ -387,8 +387,8 @@ export class AddAppointmentComponent implements OnInit {
         console.log("result", result);
         this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
-        this.route.navigate([routes.invoices])
-
+        this.invoiceService.invoiceId = result.invoiceId;
+        this.route.navigate(['/accounts/invoice-view']);
       });
 
     }
