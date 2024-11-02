@@ -12,7 +12,7 @@ export class PatientService {
   //private staffDto!:IstaffInfo;
   //private readonly apiUrl="https://localhost:44320/api/";
   private readonly apiUrl = api_Url;
-  public patientId!: any;
+  public patientId!: number;
   public patintDataForOPD!: IpatientInfo;
   //public patientId!:number
 

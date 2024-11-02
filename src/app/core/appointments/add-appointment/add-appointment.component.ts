@@ -15,7 +15,6 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
-import { Subscription } from 'rxjs';
 interface data {
   value: string;
 }
@@ -70,8 +69,10 @@ export class AddAppointmentComponent implements OnInit {
   @ViewChild('searchDataValue') searchInput!: ElementRef;
 
   //public searchDataValue = '';
-  constructor(private patierntService: PatientService, private route: Router,
-    private appointmentService: AppointmentService, private invoiceService: InvoiceService,
+  constructor(private patierntService: PatientService, 
+    private route: Router,
+    private appointmentService: AppointmentService,
+    private invoiceService: InvoiceService,
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private staffService: StaffService,
@@ -81,7 +82,6 @@ export class AddAppointmentComponent implements OnInit {
     private toater: ToastrService,
     private patientService: PatientService,
     private modalservice: ModalServiceService,
-
 
   ) {
 
@@ -97,8 +97,6 @@ export class AddAppointmentComponent implements OnInit {
     this.patientService.patientId = id;
 
   }
-
-
 
   deletePatient(idhere: number) {
     this.modalservice.openModal({
@@ -250,12 +248,12 @@ export class AddAppointmentComponent implements OnInit {
 
   }
 
-  clearOtherFields() {
+  clearOtherFields(){
     this.bookappointment.patchValue({
-
+      
       doctorId: '',
-      departmentid: ''
-
+      departmentid:''
+      
 
     })
 
@@ -352,7 +350,7 @@ export class AddAppointmentComponent implements OnInit {
     this.bookappointment.get('doctorId')?.patchValue('');
     this.bookappointment.get('departmentid')?.patchValue('');
     this.bookappointment.get('appointTime')?.patchValue(null);
-
+    
     //this.bookappointment.get('')?.patchValue('')
   }
 
@@ -374,49 +372,33 @@ export class AddAppointmentComponent implements OnInit {
         formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
       }
 
-
-
-
       const userData = JSON.parse(localStorage.getItem('data') || '');
       this.appointmentDto.date = this.formattedDateTime;
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-      // console.log("this.patientId; ", this.patientService.patienId)
-      
+
       this.appointmentDto.appointTime = formattedTime;
       console.log("tme", this.appointmentDto)
       //this.appointmentDto.departmentId=3;
       this.appointmentDto.scheduledByid = userData.loginId;
-      
-
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
         console.log("result", result);
         this.toater.success("Appointment booked succesfully", "Book Appointment");
-            this.invoiceService.getInvoiceByPatientId(this.appointmentDto.patientId)
-            .subscribe(data => {
-              this.invoiceService.sendInvoiceId(data);
-              this.invoiceService.sendPatientId(this.appointmentDto.patientId);
-              console.log('data.invoiceId ', data);
-              
-              this.route.navigate(['/accounts/invoice-view']);
-             
-            });
-  
         this.bookappointment.reset();
-     
-      
-         
-     });
+        this.invoiceService.invoiceId = result.invoiceId;
+        this.route.navigate(['/accounts/invoice-view']);
+      });
 
     }
     else {
       this.bookappointment.markAllAsTouched();
     }
+
+
+
   }
-
-
   // calculateDateDifference(dob:Date) {
   //   const start = new Date(dob);
   //   const end = new Date();
@@ -462,10 +444,10 @@ export class AddAppointmentComponent implements OnInit {
 
     })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-      console.log("doctoronleave", doctorOnLeave);
+      console.log("doctoronleave",doctorOnLeave);
       data.map((res: any) => {
         console.log("doc res", res);
-
+        
         const available = doctorOnLeave.find(e => e == res.staffId)
         console.log("doc avai", available);
         if (!available) {
@@ -476,7 +458,7 @@ export class AddAppointmentComponent implements OnInit {
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
               const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
-
+              
 
               // Check if appointment time falls within doctor's available time range
               if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
@@ -490,7 +472,7 @@ export class AddAppointmentComponent implements OnInit {
             }
           }
           else {
-
+            
             console.log("Doctor added without appointTime value entered:", res);
             this.doctorList.push(res);
           }
@@ -513,20 +495,20 @@ export class AddAppointmentComponent implements OnInit {
   isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
     const appointmentHours = appointmentTime.getHours();
     const appointmentMinutes = appointmentTime.getMinutes();
-    console.log("app 1", appointmentHours)
-    console.log("app 1", appointmentMinutes)
+    console.log("app 1",appointmentHours)
+    console.log("app 1",appointmentMinutes)
     const fromHours = fromTime.getHours();
     const fromMinutes = fromTime.getMinutes();
     const toHours = toTime.getHours();
     const toMinutes = toTime.getMinutes();
-
+  
     const appointmentTotalMinutes = appointmentHours * 60 + appointmentMinutes;
     const fromTotalMinutes = fromHours * 60 + fromMinutes;
     const toTotalMinutes = toHours * 60 + toMinutes;
-
+  
     return appointmentTotalMinutes >= fromTotalMinutes && appointmentTotalMinutes <= toTotalMinutes;
   }
-
+  
 
   addFee(event: any) {
 
@@ -671,4 +653,3 @@ export class AddAppointmentComponent implements OnInit {
     this.route.navigate([routes.appointmentList])
   }
 }
-

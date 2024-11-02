@@ -61,7 +61,7 @@ export class AppointmentService {
       return this._http.get(this.apiUrl + 'AppointmentInfoes/TotalEarnings/Doctor/' + id);
    }
 
-   createAppointment(apointmentData: Iappointment) {
+   createAppointment(apointmentData: Iappointment): Observable<any>  {
       return this._http.post(this.apiUrl + 'appointmentInfoes/', apointmentData);
    }
 

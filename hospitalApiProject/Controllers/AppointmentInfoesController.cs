@@ -1,15 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+using hospitalApiProject.Models;
+using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using hospitalApiProject.Models;
-using NuGet.Protocol;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Azure.Core.HttpHeader;
-using static Hl7.Fhir.Model.Appointment;
 
 namespace hospitalApiProject.Controllers
 {
@@ -264,8 +256,6 @@ namespace hospitalApiProject.Controllers
     [HttpGet("date/{from}/{to}")]
     public async Task<ActionResult> GetAppointmentByDate(DateTime from, DateTime to)
     {
-
-
       var appointmentWithInvoices = await _context.AppointmentInfos
           .Where(e => e.Date >= from && e.Date <= to)
           .Join(
@@ -335,15 +325,20 @@ namespace hospitalApiProject.Controllers
     // POST: api/AppointmentInfoes
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<AppointmentInfo>> PostAppointmentInfo(AppointmentInfo appointmentInfo)
+    public async Task<ActionResult<AppointmentInvoiceResponse>> PostAppointmentInfo(AppointmentInfo appointmentInfo)
     {
-      try { 
-      _context.AppointmentInfos.Add(appointmentInfo);
-      await _context.SaveChangesAsync();
+      int invoiceId = 0;
+
+      try
+      {
+        // Add and save the appointment information
+        _context.AppointmentInfos.Add(appointmentInfo);
+        await _context.SaveChangesAsync();
 
         if (AppointmentInfoExists(appointmentInfo.Id))
         {
-          var InvoiceInfo = new InvoiceInfo()
+          // Create and save the invoice information
+          var invoiceInfo = new InvoiceInfo()
           {
             Amount = appointmentInfo.Fee,
             AppointmentId = appointmentInfo.Id,
@@ -353,9 +348,12 @@ namespace hospitalApiProject.Controllers
             IsConsultationPaid = false
           };
 
-          _context.InvoiceInfos.Add(InvoiceInfo);
+          _context.InvoiceInfos.Add(invoiceInfo);
           await _context.SaveChangesAsync();
-        }        
+
+          // Get the newly created invoiceId
+          invoiceId = invoiceInfo.InvoiceId;
+        }
       }
       catch (Exception ex)
       {
@@ -363,7 +361,14 @@ namespace hospitalApiProject.Controllers
         throw;
       }
 
-      return CreatedAtAction("GetAppointmentInfo", new { id = appointmentInfo.Id }, appointmentInfo);
+      // Create the response with appointment info and invoiceId
+      var response = new AppointmentInvoiceResponse
+      {
+        AppointmentInfo = appointmentInfo,
+        InvoiceId = invoiceId
+      };
+
+      return CreatedAtAction("GetAppointmentInfo", new { id = appointmentInfo.Id }, response);
     }
 
     // DELETE: api/AppointmentInfoes/5
