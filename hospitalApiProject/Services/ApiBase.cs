@@ -150,7 +150,7 @@ namespace hospitalApiProject.Services
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
       return client;
     }
@@ -180,8 +180,8 @@ namespace hospitalApiProject.Services
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      //client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
-      client.DefaultRequestHeaders.Add("TIMESTAMP", timeStamp);
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
+      //client.DefaultRequestHeaders.Add("TIMESTAMP", timeStamp);
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
 
@@ -194,16 +194,20 @@ namespace hospitalApiProject.Services
       var client = ClientForScan(timestamp);
 
       var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-      var response = await client.PostAsync(URL, stringContent);
 
-      if (response.IsSuccessStatusCode)
+      Console.WriteLine("Request Headers:");
+
+      foreach (var header in client.DefaultRequestHeaders)
       {
-        return response.Content.ReadAsStringAsync().Result;
+        Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
       }
 
-      this.ErrorMessage = response.ReasonPhrase;
-      this.StatusCode = response.StatusCode;
-      return ErrorMessage;
+      // Log the request body 
+      Console.WriteLine($"Request Body: {content}");
+
+      var response = await SendPostRequestAsync(URL, client, stringContent);
+
+      return response;
     }
 
     public async Task<string> FetchModesAsync(string baseUrl, string api, string content)
@@ -276,7 +280,7 @@ namespace hospitalApiProject.Services
 
       var request = new HttpRequestMessage(HttpMethod.Post, URL);
 
-      
+
       // Optional: Set additional headers if needed
       //request.Headers.Accept.ParseAdd("application/json");
 
@@ -323,7 +327,7 @@ namespace hospitalApiProject.Services
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
       //client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
 
@@ -358,7 +362,7 @@ namespace hospitalApiProject.Services
       var client = new HttpClient();
       client.BaseAddress = new Uri(URL);
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.sss'Z'"));
+      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
       client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
 
@@ -409,5 +413,52 @@ namespace hospitalApiProject.Services
         _token = _tokenService.GetTokenFromCache();
       }
     }
+
+    public async Task<string> SendPostRequestAsync(string url, HttpClient client, HttpContent content)
+    {
+      try
+      {
+        // Send the POST request
+        HttpResponseMessage response = await client.PostAsync(url, content);
+
+        // Read the response
+        return await HandleResponseAsync(response);
+      }
+      catch (Exception ex)
+      {
+        Console.WriteLine($"Exception caught: {ex.Message}");
+      }
+
+      return string.Empty;
+    }
+
+    private async Task<string> HandleResponseAsync(HttpResponseMessage response)
+    {
+      // Check if the request was successful
+      if (response.IsSuccessStatusCode)
+      {
+        // Success - read the response content
+        string responseBody = await response.Content.ReadAsStringAsync();
+        Console.WriteLine($"Response body: {responseBody}");
+        return responseBody;
+      }
+      else
+      {
+        // If unsuccessful, handle errors and reason phrases
+        Console.WriteLine($"Status Code: {(int)response.StatusCode}");
+        Console.WriteLine($"Reason Phrase: {response.ReasonPhrase}");
+
+        // Try to get the error message from the response content (if any)
+        string errorContent = await response.Content.ReadAsStringAsync();
+        if (!string.IsNullOrEmpty(errorContent))
+        {
+          Console.WriteLine($"Error Content: {errorContent}");
+          return errorContent;
+        }
+
+        return response.ReasonPhrase;
+      }
+    }
+
   }
 }
