@@ -67,8 +67,8 @@ export class AdminDashboardComponent implements OnInit {
   public currentYear!: number;
   public recentYears: number[] = [];
   @ViewChild('chart') chart!: ChartComponent;
-  public chartOptionsOne: Partial<ChartOptions>;
-  public chartOptionsTwo: Partial<ChartOptions>;
+  public chartOptionsOne: Partial<ChartOptions> = {};
+  public chartOptionsTwo: Partial<ChartOptions> = {};
   public recentPatients: Array<any> = [];
   public upcomingAppointments: Array<any> = [];
   public CurrentTime=0;
@@ -171,8 +171,37 @@ private departmentService:DepartmentService,private route : Router)
           },
         },
     };
+
+    //     this.recentPatients = this.data.getPatientsList().slice(0, 5);
+// this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
+    
+  }
+  public ngOnInit(){
+    this.getGreetingMsg();
+    const data=JSON.parse(localStorage.getItem('data')||'')
+  this.userName=data.fname +" "+data.lname;
+  this.appointmentCount();
+  this.consultationCount();
+  //this.totalEarning();
+  this.totalAmounts();
+  this.loadRecentPatients();
+      // this.loadUpcomingAppointments();
+      this.fetchCombineData()
+      this.currentYear = new Date().getFullYear(); // Get the current year
+      this.generateRecentYears();
+      this.getPatientCountByGender();
+      this.getPatientCountByDepartment();
+      
+  }
+  
+  
+  getPatientCountByDepartment():void {
+    this.patientService.getPatientCountByDepartment().subscribe((data: any) => {
+        console.log('Fetched data:', data);
+
     this.chartOptionsTwo = {
-      series: [44, 55, 41, 17],
+      series: data?.map((x:any) => x.patientCount),
+      labels: data?.map((x:any) => x.departmentName),
       chart: {
         type: 'donut',
         height: 200,
@@ -205,24 +234,7 @@ private departmentService:DepartmentService,private route : Router)
         }
     }],
     };
-//     this.recentPatients = this.data.getPatientsList().slice(0, 5);
-// this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
-    
-  }
-public ngOnInit(){
-  this.getGreetingMsg();
-  const data=JSON.parse(localStorage.getItem('data')||'')
-this.userName=data.fname +" "+data.lname;
-this.appointmentCount();
-this.consultationCount();
-//this.totalEarning();
-this.totalAmounts();
-this.loadRecentPatients();
-    // this.loadUpcomingAppointments();
-    this.fetchCombineData()
-    this.currentYear = new Date().getFullYear(); // Get the current year
-    this.generateRecentYears();
-    this.getPatientCountByGender();
+  });
 }
 
 getPatientCountByGender(): void {
