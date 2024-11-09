@@ -1,4 +1,5 @@
 //using Hl7.Fhir.Model;
+using Hl7.Fhir.Utility;
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
@@ -42,11 +43,41 @@ namespace hospitalApiProject.Controllers
     [HttpGet("invoiceId/{id}")]
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAllAdditionalInvoiceItem(int id)
     {
-      var additionalInvoiceItems = await _context.AdditionalInvoiceItems
-                                                  .Where(e => e.InvoiceId == id)
-                                                  .ToListAsync();
+      
 
-      if (additionalInvoiceItems.Count == 0)
+      var singleTransactionId = await _context.PaymentModeInfo
+     .Where(p => p.InvoiceId == id)
+     .Select(p => p.TransactionId)
+     .Distinct()
+     .ToListAsync();
+
+      // Check if there's only one unique transaction ID
+      string transactionIdForInvoice = singleTransactionId.Count == 1 ? singleTransactionId.First() : null;
+
+      var additionalInvoiceItems = await _context.AdditionalInvoiceItems
+          .Where(e => e.InvoiceId == id)
+          .Select(e => new
+          {
+            e.Id,
+            e.InvoiceId,
+            e.ItemName,
+            e.Description,
+            e.Discount,
+            e.Fee,
+            e.CreatedBy,
+            e.FinalAmount,
+            e.Status,
+            // Assign the single TransactionId if it exists; otherwise fetch based on conditions
+            TransactionId = transactionIdForInvoice ?? _context.PaymentModeInfo
+                  .Where(p => p.InvoiceId == e.InvoiceId && p.itemName == e.ItemName)
+                  .OrderByDescending(p => p.PaymentDate)
+                  .Select(p => p.TransactionId)
+                  .FirstOrDefault()
+          })
+          .ToListAsync();
+
+
+      if (additionalInvoiceItems.Count== 0)
       {
         return NotFound();
       }

@@ -314,7 +314,8 @@ export interface Iinvoice {
   totalUnpaidAmount: number,
   status: string,
   paymentModes: string,
-  isConsultationPaid: boolean
+  isConsultationPaid: boolean,
+  transactionId: string
 }
 
 export interface IInvoiceSummaryResponse {
@@ -346,7 +347,8 @@ export interface IPaymentMode {
   invoiceId: number,
   paymentMode: string,
   transactionId: string | null,
-  amount: number
+  amount: number,
+  itemName:string
 }
 
 export interface IInvoicePaymentDto {

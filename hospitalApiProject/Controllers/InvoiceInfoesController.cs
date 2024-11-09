@@ -128,14 +128,36 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
     {
-      var invoiceInfo = await _context.InvoiceInfos.FindAsync(id);
+      //var invoiceInfo = await _context.InvoiceInfos.FindAsync(id);
+
+      var invoiceInfo = await _context.InvoiceInfos
+    .Where(i => i.InvoiceId == id)
+    .Select(i => new
+    {
+      i.InvoiceId,
+      i.PatientId,
+      i.AppointmentId,
+      i.CreatedDate,
+      i.Amount,
+      i.Status,
+      i.IsConsultationPaid,
+      TransactionId = (bool)i.IsConsultationPaid
+            ? _context.PaymentModeInfo
+                .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation") // Assuming "Consultation" is the item name you're matching
+                .OrderByDescending(p => p.PaymentDate)
+                .Select(p => p.TransactionId)
+                .FirstOrDefault()
+            : null // If not consultation paid, no transaction id fetched
+    })
+    .FirstOrDefaultAsync();
+
 
       if (invoiceInfo == null)
       {
         return NotFound();
       }
 
-      return invoiceInfo;
+      return Ok(invoiceInfo);
     }
 
     [HttpGet("GetInvoiceinfoByPatientId")]
