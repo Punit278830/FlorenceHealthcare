@@ -102,7 +102,7 @@ export class InvoiceViewComponent implements OnInit {
   public subInvoicePaymentDto!: ISubItemInvoicePaymentDto;
   private invoiceId!: number;
   public transactionId?: string; 
-  
+  uniqueTransactionIds: { transactionId: string }[] = []; 
   public patientDetails!: IpatientInfo;
   public appointmentDetails!: Iappointment;
   public doctorDetails!: IstaffInfo;
@@ -237,6 +237,7 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   ngOnInit() {
+    
     this.getInvoiceDetails();
     const jss = create(preset());
     this.sheets = new SheetsRegistry();
@@ -245,7 +246,32 @@ export class InvoiceViewComponent implements OnInit {
     this.classes = sheet.attach().classes;
     this.width = '80mm';
 
+  }
 
+// Method to merge transaction IDs and remove duplicates in JSON format
+getMergedTransactionIds(): { transactionId: string }[] {
+  const transactionIds: { transactionId: string }[] = [];
+
+  // Check and add the transactionId from invoiceDetails if it exists
+  if (this.invoiceDetails && this.invoiceDetails.transactionId) {
+    transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
+  }
+
+  // Check and add transactionIds from additionalInvoiceItem array
+  if (this.addtionalInoiveItem && this.addtionalInoiveItem.length > 0) {
+    this.addtionalInoiveItem.forEach(item => {
+      if (item.transactionId) {
+        transactionIds.push({ transactionId: item.transactionId });
+      }
+    });
+  }
+
+  // Remove duplicates using Set (by converting objects to strings)
+  const uniqueTransactionIds = Array.from(new Set(transactionIds.map(a => JSON.stringify(a))))
+    .map(e => JSON.parse(e));
+
+  console.log('Unique Transaction IDs:', uniqueTransactionIds);
+  return uniqueTransactionIds;
   }
 
   getPatientDetails(id: number) {
@@ -440,10 +466,8 @@ export class InvoiceViewComponent implements OnInit {
 
   print() {
 
-    if (this.paymentMode == '') {
-      alert('Please select payment mode first!');
-      return;
-    }
+    this.getMergedTransactionIds();
+   
     this.thermalvisible = true;
     var dateToday = new Date();
     this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
@@ -496,6 +520,7 @@ export class InvoiceViewComponent implements OnInit {
       console.log("addi", this.addtionalInoiveItem);
       console.log("appo", this.appointmentDetails);
       console.log("doc", this.doctorDetails);
+      
 
 
     })

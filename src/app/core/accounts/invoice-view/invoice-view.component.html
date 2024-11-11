@@ -252,9 +252,19 @@
     <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM':
         'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
-    <div [ngClass]="classes.textRight"><strong>Payment Mode: {{paymentMode}}</strong></div>
-    <div [ngClass]="classes.textRight"><label *ngIf="paymentMode == 'Online'"><strong>TransactionId No :
-                {{tempDoctorModels.transactionId}}</strong></label></div>
+    <div [ngClass]="classes.textRight">
+        <strong>Payment Mode: 
+          {{ getMergedTransactionIds().length > 0 ? 'Online' : 'Cash Payment' }}
+        </strong>
+      </div>
+      <div *ngIf="getMergedTransactionIds().length > 0" [ngClass]="classes.textRight">
+        <label>
+          <strong>TransactionId No:</strong>
+          <div *ngFor="let item of getMergedTransactionIds(); let last = last">
+            <span>{{ item.transactionId  }}</span><span *ngIf="!last">, </span>
+          </div>
+        </label>
+      </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
@@ -284,6 +294,9 @@
                 <div style="width: 10mm;">{{data.fee}}</div>
                 <div style="width: 10mm;">{{data.discount}} </div>
                 <div style="width: 10mm;">{{data.finalAmount}}</div>
+           
+
+                
             </div>
 
         </div>
