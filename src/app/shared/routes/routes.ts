@@ -392,4 +392,11 @@ export class routes {
   public static get abhaScanDesk(): string {
     return this.baseUrl + '/abha/scanDesk';
   } 
+
+
+
+  
+  public static get editInvoiceItem(): string {
+    return this.baseUrl + '/invoice/add-invoice-item';
+  }
 }

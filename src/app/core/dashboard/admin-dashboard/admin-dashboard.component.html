@@ -38,7 +38,7 @@
                         <img src="assets/img/icons/calendar.svg" alt="">
                     </div> -->
                     <div class="dash-content dash-count">
-                        <h4>'Total Appointments for Today</h4>
+                        <h4>Total Appointments for Today</h4>
                         <h2><span class="counter-up" [countUp]="appCount" [options]="{duration: 10}">{{appCount}}</span>
                         </h2>
 
@@ -154,22 +154,39 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-12 col-md-12  col-xl-4">
+            <div class="col-12 col-md-12 col-xl-4">
                 <div class="card top-departments">
                     <div class="card-header">
-                        <h4 class="card-title mb-0">Recent Departments</h4>
+                        <h4 class="card-title mb-0">Recent Invoices</h4>
                     </div>
                     <div class="card-body">
-                        <div class="activity-top" *ngFor="let data of departments">
-                            <div class="activity-boxs comman-flex-center">
-                                <img src="assets/img/icons/dep-icon-01.svg" alt="">
-                            </div>
-                            <div class="departments-list">
-                                <h4>{{data.departmentName}}</h4>
-                                <!-- <p>35%</p> -->
-                            </div>
+                        <div class="table-responsive">
+                            <table class="table mb-0 border-0 custom-table">
+                                <thead>
+                                    <tr>
+                                        <th >Invoice ID</th>
+                                        <th class="text-center">Status</th>
+                                    </tr>
+                                </thead>                                
+                                <tbody>
+                                    <tr *ngFor="let data of invoices">
+                                        <td>{{ data.invoiceId }}</td>
+                                        <td>
+                                            <span
+                                                [ngClass]="{
+                                                    'status-green': data.status === 'Paid',
+                                                    'status-pink': data.status === 'Unpaid'
+                                                }"
+                                                class="custom-badge">
+                                                {{ data.status }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <!-- <div class="activity-top">
+
+                           <!-- <div class="activity-top">
                             <div class="activity-boxs comman-flex-center">
                                 <img src="assets/img/icons/dep-icon-02.svg" alt="">
                             </div>
@@ -205,10 +222,13 @@
                                 <p>20%</p>
                             </div>
                         </div> -->
+
+
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-12  col-xl-8">
+            
+            <div class="col-12 col-md-12  col-xl-8"> 
                 <div class="card">
                     <div class="card-header">
                         <h4 class="card-title d-inline-block">Recent Appointments</h4> <a

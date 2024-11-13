@@ -79,7 +79,7 @@ export class AdminDashboardComponent implements OnInit {
   public earning=0;
   public totalAmount=0;
   public combinedData:any[]  = [];
-  public departments:any[]  = []
+  public invoices:any[] =[];
   public patientCountByGender: any[]=[];
 
   constructor(public data : DataService,
@@ -288,12 +288,14 @@ fetchCombineData() {
   
 
  
-  const departmentData$ = this.departmentService.getDepartmentList();
+ 
   const staffData$ = this.staffService.getDoctorsList();
   const patientData$ = this.patientService.getPatientList();
-  forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
+  const invoiceData$ = this.invoiceService.getInvoicesForToday();
+  forkJoin([appointmentData$, staffData$, patientData$,invoiceData$ ]).subscribe(([appointments, staffs, patient,invoices]) => {
     // Combine data based on departmentId    
-    this.departments=departments.slice(0,5);
+    this.invoices=invoices.slice(-5);
+   
 
     if (appointments.message === "No records found") {
       this.upcomingAppointments=[];
@@ -302,14 +304,12 @@ fetchCombineData() {
       this.combinedData = appointments.map((appointment: any) => {
         const doctor = staffs.find((doctor: any) => doctor.staffId === appointment.doctorId)
         const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
-        const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
-
+        const invoice = invoices.find((invoice:any) => invoice.appointmentId === appointment.id)
 
         return {
           ...appointment,
           doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
           doctorLname: doctor ? doctor.lastName : '',
-          departmentName: department ? department.departmentName : 'Unknown Department',
           patientFname: patients ? patients.firstName : 'Unknon Patients',
           patientLname: patients ? patients.lastName : 'Unknon Patients',
           patientId: patients ? patients.patientId : 'Unknon Patients'

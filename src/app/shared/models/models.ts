@@ -340,7 +340,8 @@ export interface IinvoiceItem {
   fee: number,
   createdBy: number,
   finalAmount: number,
-  status: string
+  status: string,
+  itemId: number,
 }
 
 export interface IPaymentMode {

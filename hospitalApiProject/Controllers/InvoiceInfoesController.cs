@@ -124,7 +124,28 @@ namespace hospitalApiProject.Controllers
         TotalAmount = totalAmount               // Total of all payments
       };
     }
- 
+
+    [HttpGet("GetInvoicesForToday")]
+    public async Task<IActionResult> GetInvoicesForTodayAsync()
+    {
+      // Get today's date
+      var today = DateOnly.FromDateTime(DateTime.Now);
+
+      // Retrieve all invoices created today
+      var invoicesToday = await _context.InvoiceInfos
+          .Where(invoice => invoice.CreatedDate == today)
+          .ToListAsync();
+
+      // If no invoices are found, return a 404 (Not Found)
+      if (invoicesToday == null || !invoicesToday.Any())
+      {
+        return NotFound("No invoices found for today.");
+      }
+
+      // Return the invoices as the response
+      return Ok(invoicesToday);
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
     {
