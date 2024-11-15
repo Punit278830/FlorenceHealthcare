@@ -6,7 +6,7 @@ import { AppointmentService } from 'src/app/shared/Services/appointment/appointm
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { Iappointment, Iinvoice, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
+import { Iappointment, Iinvoice,IinvoiceTemp, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
@@ -97,6 +97,7 @@ export class InvoiceViewComponent implements OnInit {
   public routes = routes;
   private sheets!: SheetsRegistry;
   public invoiceDetails!: Iinvoice;
+  public tempinvoiceDetails!: IinvoiceTemp;
   public paymentModeDetails!: IPaymentMode;
   public invoicePaymentDto!: IInvoicePaymentDto;
   public subInvoicePaymentDto!: ISubItemInvoicePaymentDto;
@@ -189,7 +190,8 @@ export class InvoiceViewComponent implements OnInit {
       paymentMode: '',
       transactionId: '',
       amount: 0,
-      itemName:''
+      itemName:'',
+      itemId:''
     };
 
     this.subInvoicePaymentDto = {
@@ -214,9 +216,16 @@ export class InvoiceViewComponent implements OnInit {
       this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
         this.isPaidButtonVisible = res.status != 'Paid'
         this.isAllowed = res.status == 'Paid';
-
+        
         this.invoiceDetails = res;
-        console.log("invoice details", res)
+        this.tempinvoiceDetails = {
+          ...res,            // Spread the properties of Iinvoice
+          tempItemName: 'Consultation'   // Add the missing tempItemName property
+        };
+        // this.tempinvoiceDetails = res;
+        // this.tempinvoiceDetails.tempItemName = 'Consultation';
+        console.log("invoice details", res);
+        console.log("tempinvoiceDetails ", this.tempinvoiceDetails);
         if (!res.isConsultationPaid && (res.status == 'Unpaid' || res.status == "Partially Paid")) {
           //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
@@ -245,6 +254,8 @@ export class InvoiceViewComponent implements OnInit {
     this.sheets.add(sheet);
     this.classes = sheet.attach().classes;
     this.width = '80mm';
+    
+
 
   }
 
@@ -254,13 +265,16 @@ getMergedTransactionIds(): { transactionId: string }[] {
 
   // Check and add the transactionId from invoiceDetails if it exists
   if (this.invoiceDetails && this.invoiceDetails.transactionId) {
-    transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
+    // Ignore "Cash Payment"
+    if (this.invoiceDetails.transactionId !== 'Cash Payment') {
+      transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
+    }
   }
 
   // Check and add transactionIds from additionalInvoiceItem array
   if (this.addtionalInoiveItem && this.addtionalInoiveItem.length > 0) {
     this.addtionalInoiveItem.forEach(item => {
-      if (item.transactionId) {
+      if (item.transactionId && item.transactionId !== 'Cash Payment') {
         transactionIds.push({ transactionId: item.transactionId });
       }
     });
@@ -272,7 +286,9 @@ getMergedTransactionIds(): { transactionId: string }[] {
 
   console.log('Unique Transaction IDs:', uniqueTransactionIds);
   return uniqueTransactionIds;
-  }
+}
+
+
 
   getPatientDetails(id: number) {
     this.patientService.getPatientData(id).subscribe(res => {
@@ -305,6 +321,7 @@ getMergedTransactionIds(): { transactionId: string }[] {
     }
     )
   }
+  
   loadPatientAppointments() {
     this.appointmentList = [];
     const currentYear = new Date().getFullYear();
@@ -400,11 +417,24 @@ getMergedTransactionIds(): { transactionId: string }[] {
     else {
       this.paymentModeDetails.transactionId = null;
     }
-
-    this.paymentModeDetails.itemName = this.paymentMode;
+    
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = 0;
+    this.paymentModeDetails.itemId = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.id).join(',');
+    this.paymentModeDetails.itemName = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.itemName).join(',');
+    
+    if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.isConsultationPaid == false){
+      this.paymentModeDetails.itemId = this.paymentModeDetails.itemId + ',Consultation';
+      this.paymentModeDetails.itemName = this.paymentModeDetails.itemName + ',Consultation';
+
+
+    }
+    // console.log('this.addtionalInoiveItem.map(x => x.id) ', this.addtionalInoiveItem.map(x => x.id));
+    
+
+    console.log('this.paymentModeDetails ', this.paymentModeDetails);
+    
 
     this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
       this.totalInvoiceAmount = 0;
@@ -451,9 +481,20 @@ getMergedTransactionIds(): { transactionId: string }[] {
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = invoiceDetails.amount;
+    this.paymentModeDetails.itemId = 'Consultation';
+      this.paymentModeDetails.itemName = 'Consultation';
+
+    // if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.status == 'Unpaid'){
+    //   this.paymentModeDetails.itemId = 'Consultation';
+    //   this.paymentModeDetails.itemName = 'Consultation';
+
+
+    // }
 
     this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+    console.log('invoicePaymentDto:', this.invoicePaymentDto);
+    
 
     this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
       this.balanceAmount = 0;
@@ -549,6 +590,7 @@ getMergedTransactionIds(): { transactionId: string }[] {
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = data.finalAmount;
     this.paymentModeDetails.itemName = data.itemName;
+    this.paymentModeDetails.itemId = data.id.toString();
 
 
     this.invoiceService.getAddtionalSubInvoiceItemById(data.id).subscribe((result: any) => {
@@ -562,6 +604,9 @@ getMergedTransactionIds(): { transactionId: string }[] {
 
       this.subInvoicePaymentDto.additionalInvoiceItem = result;
       this.subInvoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+
+      console.log('this.subInvoicePaymentDto.', this.subInvoicePaymentDto);
+      
 
       this.invoiceService.updateSubInvoiceItem(data.id, this.subInvoicePaymentDto).subscribe(res => {
         this.toastr.success("Invoice Paid", 'Paid');

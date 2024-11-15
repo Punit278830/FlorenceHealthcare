@@ -113,7 +113,7 @@
                                     <tbody>
                                         <tr *ngIf="doctorDetails !== undefined">
                                             <td>1</td>
-                                            <td>Consultation</td>
+                                            <td>{{ tempinvoiceDetails.tempItemName }} </td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                             <td>{{appointmentDetails.fee}}</td>
                                             <td>{{ flag ? 100 : 0 }}</td>
@@ -121,13 +121,14 @@
                                             </td>
                                             
                                            <td><button
-                                                    [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
-                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' :
+                                                    [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
+                                                    class="custom-badge">{{tempinvoiceDetails.isConsultationPaid ? 'Paid' :
                                                     'Unpaid'}}</button>
                                             </td>
+                                            <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
+                                                    '--'  }}</td>
                                             
-                                            
-                                            <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
+                                            <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
                                                 tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
                                                 ( 'Cash Payment' )  }}
                                             </td>
@@ -135,7 +136,7 @@
                                             <ng-template #other_content>
                                                     <td style="text-align: center">{{invoiceDetails.transactionId ? invoiceDetails.transactionId :
                                                     '--'}}</td>
-                                            </ng-template>
+                                            </ng-template> -->
 
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
@@ -159,9 +160,8 @@
                                                         class="custom-badge">{{data.status}}</button>
                                                 </td>
                                                 <td style="text-align: center">
-                                                    {{ data.status === 'Paid' ? (data.transactionId || 'Cash Payment') : '--' }}
-                                                  </td>
-
+                                                    {{ data.status === 'Paid' ? (data.transactionId ? data.transactionId : 'Cash Payment') : '--' }}
+                                                  </td>                                                  
 
                                                 <td>
                                                     <button type="button" (click)="paidsubInvoiceItem(data)"
@@ -220,7 +220,7 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
-                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' || invoiceDetails.status == 'Partially Paid'}"
+                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid'}"
                     class="btn btn-primary submit-form me-2"
                     (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' :
                     'Paid'}}</a>
@@ -253,7 +253,7 @@
         'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
     <div [ngClass]="classes.textRight">
-        <strong>Payment Mode: 
+        <strong>Payment Mode:
           {{ getMergedTransactionIds().length > 0 ? 'Online' : 'Cash Payment' }}
         </strong>
       </div>

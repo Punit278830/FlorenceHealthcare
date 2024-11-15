@@ -131,9 +131,20 @@ namespace hospitalApiProject.Controllers
       // Get today's date
       var today = DateOnly.FromDateTime(DateTime.Now);
 
-      // Retrieve all invoices created today
+      // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
           .Where(invoice => invoice.CreatedDate == today)
+          .Join(
+              _context.PatientInfos,
+              invoice => invoice.PatientId,
+              patient => patient.PatientId,
+              (invoice, patient) => new
+              {
+                invoice.InvoiceId,
+                PatientName = patient.FirstName + " " + patient.LastName,
+                invoice.Amount,
+                invoice.Status
+              })
           .ToListAsync();
 
       // If no invoices are found, return a 404 (Not Found)
@@ -146,32 +157,52 @@ namespace hospitalApiProject.Controllers
       return Ok(invoicesToday);
     }
 
+
     [HttpGet("{id}")]
     public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
     {
       //var invoiceInfo = await _context.InvoiceInfos.FindAsync(id);
 
-      var invoiceInfo = await _context.InvoiceInfos
+      InvoiceInfoDetail invoiceInfo = await _context.InvoiceInfos
     .Where(i => i.InvoiceId == id)
-    .Select(i => new
+    .Select(i => new InvoiceInfoDetail
     {
-      i.InvoiceId,
-      i.PatientId,
-      i.AppointmentId,
-      i.CreatedDate,
-      i.Amount,
-      i.Status,
-      i.IsConsultationPaid,
+      InvoiceId = i.InvoiceId,
+      PatientId = i.PatientId,
+      AppointmentId = i.AppointmentId,
+      CreatedDate = i.CreatedDate,
+      Amount = i.Amount,
+      Status = i.Status,
+      IsConsultationPaid = i.IsConsultationPaid,
       TransactionId = (bool)i.IsConsultationPaid
             ? _context.PaymentModeInfo
-                .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation") // Assuming "Consultation" is the item name you're matching
+                .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
                 .OrderByDescending(p => p.PaymentDate)
                 .Select(p => p.TransactionId)
                 .FirstOrDefault()
-            : null // If not consultation paid, no transaction id fetched
+            : null
     })
     .FirstOrDefaultAsync();
 
+      if (invoiceInfo.IsConsultationPaid == true)
+      {
+        var tempRes = await this.GetPaymentModeInfoByInvoiceId(id);
+        if (tempRes.Count > 0)
+        {
+          if (tempRes[0].TransactionId != null)
+          {
+            invoiceInfo.TransactionId = tempRes[0].TransactionId;
+          }
+          else
+          {
+            invoiceInfo.TransactionId = "Cash";
+          }
+        }
+        else
+        {
+          invoiceInfo.TransactionId = "Cash";
+        }
+      }
 
       if (invoiceInfo == null)
       {
@@ -179,6 +210,22 @@ namespace hospitalApiProject.Controllers
       }
 
       return Ok(invoiceInfo);
+    }
+    private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? Id)
+    {
+      // Ensure models is not null and contains data
+      if (Id == 0)
+      {
+        return null; // Or handle as appropriate
+      }
+
+      // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
+      var results = await _context.PaymentModeInfo
+          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && e.itemId.Contains("Consultation"))
+          .ToListAsync();
+
+      return results;
+
     }
 
     [HttpGet("GetInvoiceinfoByPatientId")]

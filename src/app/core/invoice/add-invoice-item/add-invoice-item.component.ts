@@ -21,6 +21,7 @@ export class AddInvoiceItemComponent {
   public invoicedto!: IinvoiceItem;
   invoiceitems: any[] = [];
   itemId!: number;
+  public isEditMode!: boolean;
 
   constructor(private fb: FormBuilder,
     private InvoiceService:InvoiceService,
@@ -98,6 +99,7 @@ getInvoiceItemById(id: number) {
   
 
   onEditItem(id: number) {
+    this.isEditMode = true;
     console.log('Editing Item ID:', id);
     this.InvoiceService.itemId=id;
     // Fetch item details if ID is present
@@ -141,6 +143,7 @@ getInvoiceItemById(id: number) {
   //   }
    
     addInvoiceItem(invoiceItem: FormGroup) {
+      this.isEditMode = false;
       if (this.invoiceItem.valid) {
         console.log(invoiceItem.value);
         this.invoicedto = invoiceItem.value;

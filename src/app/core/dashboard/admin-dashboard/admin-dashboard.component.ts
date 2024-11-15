@@ -272,6 +272,12 @@ loadUpcomingAppointments(): void {
     this.upcomingAppointments = result.slice(0, 5);
   });
 }
+
+movetoInvoiceView(Id: number) {
+  this.invoiceService.invoiceId = Id;
+  this.route.navigate(['/accounts/invoice-view'])
+}
+
 movetoPatient(id: number) {
   this.patientService.patientId = id;
 
