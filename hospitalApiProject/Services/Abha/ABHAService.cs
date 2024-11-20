@@ -3,6 +3,7 @@ using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Text.Json;
 using Patient = hospitalApiProject.Models.Abha.M2.Patient;
@@ -826,7 +827,7 @@ namespace hospitalApiProject.Services.Abha
       return data; //return linkToken and use in LinkCareContextV3
     }
 
-    public async Task LinkCareContextV3()
+    public async Task AddCareContextV3()
     {
       // Create CareContext objects
       var careContext1 = new CareContext
@@ -876,6 +877,56 @@ namespace hospitalApiProject.Services.Abha
 
       var json = JsonSerializer.Serialize(root);
       await OnLinkCareContextV3("https://dev.abdm.gov.in/gateway/", "v0.5/links/link/add-contexts", json, ""); //todo get linkToken
+    }
+
+    public async Task LinkCareContextV3()
+    {
+      //todo
+      var request = new GenerateLinkToken {
+        AbhaAddress = "",
+        AbhaNumber = 12345,
+        Gender = "",
+        Name = "",
+        YearOfBirth = 2020
+      };
+
+      var linkToken = await GenerateLinkToken(request);
+
+      // Step 1: Perform a join between PatientVisit and CareContext on PatientVisit.Id and CareContext.PatientVisitId
+      var patients = await _context.PatientVisit
+          .Where(p => p.Id != null)  
+          .Join(_context.CareContext,
+                p => p.Id,  
+                cc => cc.PatientVisitId, 
+                (p, cc) => new { PatientVisit = p, CareContext = cc })
+          .GroupBy(x => x.PatientVisit.Id)  // Group by PatientVisit.Id to combine multiple care contexts for each patient
+          .Select(g => new Patient
+          {
+            referenceNumber = g.FirstOrDefault().PatientVisit.ReferenceNumber, 
+            display = g.FirstOrDefault().PatientVisit.Display, 
+            hiType = g.FirstOrDefault().PatientVisit.HiType, 
+            count = g.Count(), 
+            careContexts = g.Select(x => new CareContext
+            {
+              referenceNumber = x.CareContext.ReferenceNumber, 
+              display = x.CareContext.Display 
+            }).ToList() 
+          })
+          .ToListAsync();  
+
+      // Step 2: Create the root object containing all patients and their care contexts
+      var root = new
+      {
+        AbhaNumber = "91178386101731", // Use your logic to set this dynamically
+        AbhaAddress = "91178386101731@sbx", // Use your logic to set this dynamically
+        Patient = patients // List of patients with their associated care contexts
+      };
+
+      // Step 3: Serialize the object to JSON
+      var json = JsonSerializer.Serialize(root);
+
+      // Step 4: Send the JSON to the API
+      await OnLinkCareContextV3("https://dev.abdm.gov.in/hiecm", "api/v3/link/carecontext", json, linkToken); // todo: get linkToken
     }
 
     #endregion

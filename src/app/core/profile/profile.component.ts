@@ -21,7 +21,7 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
-
+import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
   selector: 'app-profile',
@@ -115,6 +115,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // public showAddQuestion=true;
   // public questionnaireId!:number;
   constructor(private appointmentService: AppointmentService,
+    private abhaService: AbhaService,
     private patientService: PatientService,
     private question: QuestionService,
     private departmentService: DepartmentService,
@@ -1054,8 +1055,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     console.log("consult dto", this._consultationDto);
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.loaderService.hideLoader();
-      this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
-      this.ApiCallsForPreview();
+      this.toaster.success("Consultation Info Successfully Updated", "Consultation update");
+      this.abhaService.confirmOtp().subscribe(
+        res => {
+          console.log(res);
+        }
+      );      this.ApiCallsForPreview();
       this.stepper.next();
     },
       error => {
