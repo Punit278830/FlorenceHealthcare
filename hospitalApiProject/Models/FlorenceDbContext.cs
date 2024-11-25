@@ -56,16 +56,22 @@ public partial class FlorenceDbContext : DbContext
   public virtual DbSet<VitalInfo> VitalInfos { get; set; }
   public virtual DbSet<AbhaPatientDetails> AbhaPatientDetails { get; set; }
 
-  public virtual DbSet<PatientVisit> PatientVisit { get; set; }
+  public virtual DbSet<PatientVisit> PatientVisits { get; set; }
 
-  public virtual DbSet<CareContext> CareContext { get; set; }
+  public virtual DbSet<CareContext> CareContexts { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
+  //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
   => optionsBuilder.UseSqlServer("Server=162.222.225.88;Database=florenceDb;User Id=mohit2024;Password=Spice@1234;TrustServerCertificate=True;");
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    modelBuilder.Entity<PatientVisit>()
+            .HasMany(pv => pv.CareContexts)
+            .WithOne(cc => cc.PatientVisit)
+            .HasForeignKey(cc => cc.PatientVisitId);
+
+    base.OnModelCreating(modelBuilder);
 
     modelBuilder.Entity<AdditionalInvoiceItem>(entity =>
     {
@@ -166,7 +172,7 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.AppointTime).HasColumnName("AppointmentTime");
       entity.Property(e => e.DoctorId).HasColumnName("doctorId");
       entity.Property(e => e.Fee).HasColumnName("fee");
-     
+
       entity.Property(e => e.Notes)
           .HasMaxLength(500)
           .IsUnicode(false)

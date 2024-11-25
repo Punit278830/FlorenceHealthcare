@@ -13,4 +13,7 @@ public partial class PatientVisit
   public string HiType { get; set; }
 
   public DateTime VisitDate { get; set; }
+
+  // Navigation property for related CareContexts
+  public ICollection<CareContext> CareContexts { get; set; }
 }

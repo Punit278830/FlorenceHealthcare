@@ -882,37 +882,69 @@ namespace hospitalApiProject.Services.Abha
     public async Task LinkCareContextV3()
     {
       //todo
-      var request = new GenerateLinkToken {
-        AbhaAddress = "",
-        AbhaNumber = 12345,
-        Gender = "",
-        Name = "",
-        YearOfBirth = 2020
+      var request = new GenerateLinkToken
+      {
+        AbhaAddress = "91178386101731@sbx",
+        AbhaNumber = 91330884683179,
+        Gender = "Female",
+        Name = "Manpreet Kaur",
+        YearOfBirth = 1989
       };
 
       var linkToken = await GenerateLinkToken(request);
 
+      // Create a new PatientVisit
+      var patientVisit = new Models.Response.PatientVisit
+      {
+        PatientId = 4739, // Assuming PatientId exists in PatientInfo
+        ReferenceNumber = "REF12345",
+        Display = "General Checkup",
+        HiType = "OPD",
+        VisitDate = DateTime.Now
+      };
+
+      var cc1 = new Models.Response.CareContext { ReferenceNumber = "CC123", Display = "Initial Consultation" };
+      var cc2 = new Models.Response.CareContext { ReferenceNumber = "CC124", Display = "Follow-up Visit" };
+
+      // Add CareContexts to the PatientVisit
+      patientVisit.CareContexts = new List<Models.Response.CareContext>
+    {
+        cc1,
+        cc2
+    };
+
+      _context.PatientVisits.Add(patientVisit);
+
       // Step 1: Perform a join between PatientVisit and CareContext on PatientVisit.Id and CareContext.PatientVisitId
-      var patients = await _context.PatientVisit
-          .Where(p => p.Id != null)  
-          .Join(_context.CareContext,
-                p => p.Id,  
-                cc => cc.PatientVisitId, 
-                (p, cc) => new { PatientVisit = p, CareContext = cc })
-          .GroupBy(x => x.PatientVisit.Id)  // Group by PatientVisit.Id to combine multiple care contexts for each patient
-          .Select(g => new Patient
-          {
-            referenceNumber = g.FirstOrDefault().PatientVisit.ReferenceNumber, 
-            display = g.FirstOrDefault().PatientVisit.Display, 
-            hiType = g.FirstOrDefault().PatientVisit.HiType, 
-            count = g.Count(), 
-            careContexts = g.Select(x => new CareContext
-            {
-              referenceNumber = x.CareContext.ReferenceNumber, 
-              display = x.CareContext.Display 
-            }).ToList() 
-          })
-          .ToListAsync();  
+      //var patients = await _context.PatientVisits
+      //    .Where(p => p.Id != null)  
+      //    .Join(_context.CareContexts,
+      //          p => p.Id,  
+      //          cc => cc.PatientVisitId, 
+      //          (p, cc) => new { PatientVisit = p, CareContext = cc })
+      //    .GroupBy(x => x.PatientVisit.Id)  // Group by PatientVisit.Id to combine multiple care contexts for each patient
+      //    .Select(g => new Patient
+      //    {
+      //      referenceNumber = g.FirstOrDefault().PatientVisit.ReferenceNumber, 
+      //      display = g.FirstOrDefault().PatientVisit.Display, 
+      //      hiType = g.FirstOrDefault().PatientVisit.HiType, 
+      //      count = g.Count(), 
+      //      careContexts = g.Select(x => new Models.Abha.M2.CareContext
+      //      {
+      //        referenceNumber = x.CareContext.ReferenceNumber, 
+      //        display = x.CareContext.Display 
+      //      }).ToList() 
+      //    })
+      //    .ToListAsync();
+
+      var patients = new
+      {
+        referenceNumber = patientVisit.ReferenceNumber,
+        display = patientVisit.Display,
+        hiType = patientVisit.HiType,
+        count = 1,
+        careContext = patientVisit.CareContexts
+      };
 
       // Step 2: Create the root object containing all patients and their care contexts
       var root = new

@@ -9,4 +9,7 @@ public partial class CareContext
   public string ReferenceNumber { get; set; }
 
   public string Display { get; set; }
+
+  // Navigation property for the related PatientVisit
+  public PatientVisit PatientVisit { get; set; }
 }
