@@ -1,0 +1,43 @@
+
+.signature-pad-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    justify-content: center;
+  }
+  
+  .heading {
+    font-size: 2rem;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .canvas-wrapper {
+    width: 800px;  // Set fixed width for the canvas
+    height: 400px; // Set the visible height for the scrollable area
+    overflow: auto;  // Enables scrolling when the content exceeds the visible area
+    border: 1px solid #ccc;  // Optional: Add a border for clarity
+  }
+  
+  canvas {
+    display: block;
+    background-color: #f9f9f9;
+    cursor: crosshair;
+    min-width: 800px;  // Set canvas width larger than the container
+    min-height: 400px; // Set canvas height larger than the container for scrolling
+  }
+  
+  .button-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  
+  button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    font-size: 16px;
+    cursor: pointer;
+  }

@@ -165,6 +165,13 @@ const routes: Routes = [
             (m) => m.EditProfileModule
           ),
       },
+      {
+        path: 'prescription',
+        loadChildren: () =>
+          import('../core/prescription/prescription-pad/prescription-pad.module').then(
+            (m) => m.PrescriptionPadModule
+          )
+      },
     ],
   },
 ];
