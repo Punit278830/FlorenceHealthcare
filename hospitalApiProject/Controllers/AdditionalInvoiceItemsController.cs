@@ -1,8 +1,12 @@
 //using Hl7.Fhir.Model;
+using Hl7.Fhir.Utility;
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace hospitalApiProject.Controllers
 {
@@ -38,20 +42,134 @@ namespace hospitalApiProject.Controllers
       return additionalInvoiceItem;
     }
 
+
     // GET: api/AdditionalInvoiceItems/invoiceId
     [HttpGet("invoiceId/{id}")]
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAllAdditionalInvoiceItem(int id)
     {
-      var additionalInvoiceItems = await _context.AdditionalInvoiceItems
-                                                  .Where(e => e.InvoiceId == id)
-                                                  .ToListAsync();
 
+
+      var singleTransactionId = await _context.PaymentModeInfo
+    .Where(p => p.InvoiceId == id)
+    .Select(p => p.TransactionId)
+    .Distinct()
+    .ToListAsync();
+
+      // Check if there's only one unique transaction ID
+      string transactionIdForInvoice = singleTransactionId.Count == 1 ? singleTransactionId.First() : null;
+
+      var additionalInvoiceItems = await _context.AdditionalInvoiceItems
+         .Where(e => e.InvoiceId == id)
+         .Join(
+             _context.InvoiceItemMasters,  // Joining InvoiceItemMaster to get ItemId
+             e => e.ItemName,             // Matching ItemName from AdditionalInvoiceItems
+             im => im.ItemName,          // Matching ItemName from InvoiceItemMaster
+             (e, im) => new              // Resulting projection
+             {
+               e.Id,
+               e.InvoiceId,
+               e.ItemName,
+               e.Description,
+               e.Discount,
+               e.Fee,
+               e.CreatedBy,
+               e.FinalAmount,
+               e.Status,
+               // Assign the single TransactionId if it exists; otherwise fetch based on conditions
+               TransactionId = transactionIdForInvoice ?? _context.PaymentModeInfo
+                     .Where(p => p.InvoiceId == e.InvoiceId && p.itemName == e.ItemName)
+                     .OrderByDescending(p => p.PaymentDate)
+                     .Select(p => p.TransactionId)
+                     .FirstOrDefault(),
+               // Fetch ItemId from the InvoiceItemMaster
+               ItemId = im.ItemId
+             })
+         .ToListAsync();
+
+
+      // Convert anonymous type list to List<AdditionalInvoiceItemDetail>
+      List<AdditionalInvoiceItemDetail> tempModel = additionalInvoiceItems
+          .Select(x => new AdditionalInvoiceItemDetail
+          {
+            Id = x.Id,
+            InvoiceId = x.InvoiceId,
+            ItemName = x.ItemName,
+            Description = x.Description,
+            Discount = x.Discount,
+            Fee = x.Fee,
+            CreatedBy = x.CreatedBy,
+            FinalAmount = x.FinalAmount,
+            Status = x.Status,
+            TransactionId = x.TransactionId,
+            ItemId = x.ItemId
+          })
+          .ToList(); 
       if (additionalInvoiceItems.Count == 0)
       {
         return NotFound();
       }
+      var tempRes = await this.GetPaymentModeInfoByInvoiceId(tempModel[0].InvoiceId);
+      // Split the string by commas and convert each item to an integer
+      var values = tempRes.Where(x => x.itemId.Contains(","))
+    .Select(x => new { x.itemId, x.TransactionId })
+    .ToList();
 
-      return Ok(additionalInvoiceItems);
+      if (values.Count > 0)
+      {
+
+        string[] data = null;
+        string tempTransactionId = "";
+        foreach (var value in values)
+        {
+          if (value.itemId.Contains(","))
+          {
+            // Split the string by commas and join them back to a single string if needed
+            data = value.itemId.Split(',');
+            tempTransactionId = value.TransactionId;
+          }
+        }
+        // Convert the string array to an integer array
+        int[] intData = data.Where(x => !x.Contains("Consultation")).Select(int.Parse).ToArray();
+
+        // Filter additionalInvoiceItems based on the Ids in the intData array
+        var res = tempModel
+    .Where(x => intData.Contains(x.Id))
+    .ToList();
+
+        // Update TransactionId in both res and additionalInvoiceItems
+        foreach (var item in res)
+        {
+          item.TransactionId = tempTransactionId; // Update the TransactionId in tempModel
+
+          // Find the matching item in additionalInvoiceItems and update its TransactionId
+          var matchedItem = tempModel.FirstOrDefault(x => x.Id == item.Id);
+          if (matchedItem != null)
+          {
+            matchedItem.TransactionId = tempTransactionId;
+          }
+        }
+
+      }
+
+
+      return Ok(tempModel);
+    }
+
+    private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? Id)
+    {
+      // Ensure models is not null and contains data
+      if (Id == 0)
+      {
+        return null; // Or handle as appropriate
+      }
+
+      // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
+      var results = await _context.PaymentModeInfo
+          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online")
+          .ToListAsync();
+
+      return results;
+
     }
 
 

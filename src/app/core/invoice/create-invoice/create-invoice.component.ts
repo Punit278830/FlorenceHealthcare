@@ -143,7 +143,9 @@ export class CreateInvoiceComponent {
       invoiceId: 0,
       paymentMode: '',
       transactionId: '',
-      amount: 0
+      amount: 0,
+      itemName:'',
+      itemId:''
     };
 
     this.newInvoiceDto = {

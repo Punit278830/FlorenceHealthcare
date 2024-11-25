@@ -33,6 +33,40 @@ namespace hospitalApiProject.Controllers
       return appointmentInfo;
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutInvoiceItemMaster(int id, InvoiceItemMaster invoiceItemMaster)
+    {
+      if (id != invoiceItemMaster.ItemId)
+      {
+        return BadRequest();
+      }
+
+      _context.Entry(invoiceItemMaster).State = EntityState.Modified;
+
+      try
+      {
+        await _context.SaveChangesAsync();
+      }
+      catch (DbUpdateConcurrencyException)
+      {
+        if (!InvoiceItemMasterExists(id))
+        {
+          return NotFound();
+        }
+        else
+        {
+          throw;
+        }
+      }
+
+      return NoContent();
+    }
+
+    private bool InvoiceItemMasterExists(int id)
+    {
+      return _context.InvoiceItemMasters.Any(e => e.ItemId == id);
+    }
+
     [HttpPost]
     public async Task<ActionResult<InvoiceItemMaster>> PostInvoiceItem(InvoiceItemMaster InvoiceItemInfo)
     {

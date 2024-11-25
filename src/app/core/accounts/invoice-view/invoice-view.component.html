@@ -65,6 +65,10 @@
                                 </div>
                                 <div [ngClass]="classes.singleLine">&nbsp;</div>
                                 <div class="col-sm-6 col-lg-12 m-b-20">
+                                    <!-- <button (click)="changeColor('both')" class="custom-badge"
+                                    [style.backgroundColor]="buttonColors.both">
+                                    Both
+                                </button> -->
                                     <button (click)="changeColor('Cash')" class="custom-badge"
                                         [style.backgroundColor]="buttonColors.Cash">
                                         Cash
@@ -85,7 +89,7 @@
                                         </div>
 
                                     </div>
-
+                                    
                                 </div>
                             </div>
                         </div>
@@ -101,6 +105,7 @@
                                             <th>Discount (%)</th>
                                             <th>Total</th>
                                             <th>Status</th>
+                                             <th>Transaction ID</th> 
                                             <th>Action</th>
                                             <th>Remove</th>
                                         </tr>
@@ -108,17 +113,31 @@
                                     <tbody>
                                         <tr *ngIf="doctorDetails !== undefined">
                                             <td>1</td>
-                                            <td>Consultation</td>
+                                            <td>{{ tempinvoiceDetails.tempItemName }} </td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                             <td>{{appointmentDetails.fee}}</td>
                                             <td>{{ flag ? 100 : 0 }}</td>
                                             <td>{{ appointmentDetails.fee - ((disc/100) * appointmentDetails.fee) }}
                                             </td>
+                                            
+                                           <td><button
+                                                    [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
+                                                    class="custom-badge">{{tempinvoiceDetails.isConsultationPaid ? 'Paid' :
+                                                    'Unpaid'}}</button>
+                                            </td>
+                                            <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
+                                                    '--'  }}</td>
+                                            
+                                            <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
+                                                tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
+                                                ( 'Cash Payment' )  }}
+                                            </td>
+                                                
+                                            <ng-template #other_content>
+                                                    <td style="text-align: center">{{invoiceDetails.transactionId ? invoiceDetails.transactionId :
+                                                    '--'}}</td>
+                                            </ng-template> -->
 
-                                            <td><button
-                                                    [ngClass]="{'status-green' : invoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
-                                                    class="custom-badge">{{invoiceDetails.isConsultationPaid ? 'Paid' :
-                                                    'Unpaid'}}</button></td>
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"
@@ -128,7 +147,7 @@
                                         </tr>
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
-
+                                          
                                                 <td>{{doctorDetails === undefined ? i+1 : i+2}}</td>
                                                 <td>{{data.itemName}}</td>
                                                 <td>{{data.description}}</td>
@@ -138,7 +157,12 @@
                                                 <!-- <td>{{data.finalAmount}}</td> -->
                                                 <td><button
                                                         [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
-                                                        class="custom-badge">{{data.status}}</button></td>
+                                                        class="custom-badge">{{data.status}}</button>
+                                                </td>
+                                                <td style="text-align: center">
+                                                    {{ data.status === 'Paid' ? (data.transactionId ? data.transactionId : 'Cash Payment') : '--' }}
+                                                  </td>                                                  
+
                                                 <td>
                                                     <button type="button" (click)="paidsubInvoiceItem(data)"
                                                         [disabled]="data.status === 'Paid'"
@@ -196,7 +220,7 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
-                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid' }"
+                <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid'}"
                     class="btn btn-primary submit-form me-2"
                     (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' :
                     'Paid'}}</a>
@@ -228,9 +252,19 @@
     <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM':
         'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
-    <div [ngClass]="classes.textRight"><strong>Payment Mode: {{paymentMode}}</strong></div>
-    <div [ngClass]="classes.textRight"><label *ngIf="paymentMode == 'Online'"><strong>Reference No.:
-                {{ReferenceTextBoxVal}}</strong></label></div>
+    <div [ngClass]="classes.textRight">
+        <strong>Payment Mode:
+          {{ getMergedTransactionIds().length > 0 ? 'Online' : 'Cash Payment' }}
+        </strong>
+      </div>
+      <div *ngIf="getMergedTransactionIds().length > 0" [ngClass]="classes.textRight">
+        <label>
+          <strong>TransactionId No:</strong>
+          <div *ngFor="let item of getMergedTransactionIds(); let last = last">
+            <span>{{ item.transactionId  }}</span><span *ngIf="!last">, </span>
+          </div>
+        </label>
+      </div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
@@ -244,10 +278,10 @@
 
         <div [ngClass]="[classes.gridBorder, classes.gridBorderDouble]"></div>
         <div style="display: flex;flex-direction: column;">
-            <div [ngClass]="classes.wrapper" *ngFor="let data of appointmentList; let i = index">
-                <div style="width:3mm;">{{ i + 1 }}</div>
+            <div [ngClass]="classes.wrapper" >
+                <div style="width:3mm;">{{ 1 }}</div>
                 <div style="width:20mm;">Consultation </div>
-                <!-- <div style="width: 1%;">1</div>-->
+                <!-- <div style="width: 1%;">1</div>  i + 1  *ngFor="let data of appointmentList; let i = index"-->
                 <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
                 <div style="width: 10mm;">{{ flag ? 100 : 0 }} </div>
                 <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
@@ -260,6 +294,9 @@
                 <div style="width: 10mm;">{{data.fee}}</div>
                 <div style="width: 10mm;">{{data.discount}} </div>
                 <div style="width: 10mm;">{{data.finalAmount}}</div>
+           
+
+                
             </div>
 
         </div>

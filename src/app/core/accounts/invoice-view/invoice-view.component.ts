@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
@@ -6,7 +6,7 @@ import { AppointmentService } from 'src/app/shared/Services/appointment/appointm
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { Iappointment, Iinvoice, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
+import { Iappointment, Iinvoice,IinvoiceTemp, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
@@ -89,16 +89,21 @@ const styles = {
   styleUrls: ['./invoice-view.component.scss'],
   providers: [DecimalPipe]  // Add DecimalPipe to providers
 })
+
+
 export class InvoiceViewComponent implements OnInit {
   @ViewChild('printview', { static: false }) printView!: ElementRef;
   @ViewChild('RefNoInput') RefNoInput!: ElementRef;
   public routes = routes;
   private sheets!: SheetsRegistry;
   public invoiceDetails!: Iinvoice;
+  public tempinvoiceDetails!: IinvoiceTemp;
   public paymentModeDetails!: IPaymentMode;
   public invoicePaymentDto!: IInvoicePaymentDto;
   public subInvoicePaymentDto!: ISubItemInvoicePaymentDto;
   private invoiceId!: number;
+  public transactionId?: string; 
+  uniqueTransactionIds: { transactionId: string }[] = []; 
   public patientDetails!: IpatientInfo;
   public appointmentDetails!: Iappointment;
   public doctorDetails!: IstaffInfo;
@@ -125,13 +130,15 @@ export class InvoiceViewComponent implements OnInit {
   public ReferenceTextBoxVal: string;
   buttonColors = {
     Cash: 'lightgray',
-    Online: 'lightgray'
+    Online: 'lightgray',
+    both:'lightgray'
   };
   isTextboxVisible = false;
   changeColor(button: string) {
     // Reset all buttons to default color
     this.buttonColors.Cash = 'lightgray';
     this.buttonColors.Online = 'lightgray';
+    this.buttonColors.both ='lightgray';
 
     // Change the color of the clicked button
     if (button === 'Cash') {
@@ -147,6 +154,13 @@ export class InvoiceViewComponent implements OnInit {
       this.paymentMode = 'Online';
       this.isReferenceLabelVisible = true;
     }
+    else if (button==='both')
+    {
+      this.buttonColors.both='blue';
+      this.isTextboxVisible=false;
+      this.paymentMode='both';
+      this.isReferenceLabelVisible =false;
+    }
   }
 
 
@@ -160,7 +174,7 @@ export class InvoiceViewComponent implements OnInit {
     private staffService: StaffService,
     private toastr: ToastrService,
     private decimalPipe: DecimalPipe,
-
+    
     private route: Router) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     console.log("invoiceId", this.invoiceService.invoiceId);
@@ -175,7 +189,9 @@ export class InvoiceViewComponent implements OnInit {
       invoiceId: 0,
       paymentMode: '',
       transactionId: '',
-      amount: 0
+      amount: 0,
+      itemName:'',
+      itemId:''
     };
 
     this.subInvoicePaymentDto = {
@@ -189,15 +205,27 @@ export class InvoiceViewComponent implements OnInit {
     };
   }
 
+  tempDoctorModels:any = {
+    name:'',
+    transactionId:0
+  };
+
   getInvoiceDetails() {
     this.invoiceId = this.invoiceService.invoiceId;
     if (this.invoiceId > 0) {
       this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
         this.isPaidButtonVisible = res.status != 'Paid'
         this.isAllowed = res.status == 'Paid';
-
+        
         this.invoiceDetails = res;
-        console.log("invoice details", res)
+        this.tempinvoiceDetails = {
+          ...res,            // Spread the properties of Iinvoice
+          tempItemName: 'Consultation'   // Add the missing tempItemName property
+        };
+        // this.tempinvoiceDetails = res;
+        // this.tempinvoiceDetails.tempItemName = 'Consultation';
+        console.log("invoice details", res);
+        console.log("tempinvoiceDetails ", this.tempinvoiceDetails);
         if (!res.isConsultationPaid && (res.status == 'Unpaid' || res.status == "Partially Paid")) {
           //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
@@ -205,6 +233,8 @@ export class InvoiceViewComponent implements OnInit {
 
         //this.totalInvoiceAmount += res.amount;
         this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
+        console.log('Total Amount:', this.totalInvoiceAmount);
+        
         this.getPatientDetails(res.patientId);
         this.getAddtionalItems(this.invoiceId);
 
@@ -216,6 +246,7 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   ngOnInit() {
+    
     this.getInvoiceDetails();
     const jss = create(preset());
     this.sheets = new SheetsRegistry();
@@ -223,9 +254,41 @@ export class InvoiceViewComponent implements OnInit {
     this.sheets.add(sheet);
     this.classes = sheet.attach().classes;
     this.width = '80mm';
+    
 
 
   }
+
+// Method to merge transaction IDs and remove duplicates in JSON format
+getMergedTransactionIds(): { transactionId: string }[] {
+  const transactionIds: { transactionId: string }[] = [];
+
+  // Check and add the transactionId from invoiceDetails if it exists
+  if (this.invoiceDetails && this.invoiceDetails.transactionId) {
+    // Ignore "Cash Payment"
+    if (this.invoiceDetails.transactionId !== 'Cash Payment') {
+      transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
+    }
+  }
+
+  // Check and add transactionIds from additionalInvoiceItem array
+  if (this.addtionalInoiveItem && this.addtionalInoiveItem.length > 0) {
+    this.addtionalInoiveItem.forEach(item => {
+      if (item.transactionId && item.transactionId !== 'Cash Payment') {
+        transactionIds.push({ transactionId: item.transactionId });
+      }
+    });
+  }
+
+  // Remove duplicates using Set (by converting objects to strings)
+  const uniqueTransactionIds = Array.from(new Set(transactionIds.map(a => JSON.stringify(a))))
+    .map(e => JSON.parse(e));
+
+  console.log('Unique Transaction IDs:', uniqueTransactionIds);
+  return uniqueTransactionIds;
+}
+
+
 
   getPatientDetails(id: number) {
     this.patientService.getPatientData(id).subscribe(res => {
@@ -258,12 +321,15 @@ export class InvoiceViewComponent implements OnInit {
     }
     )
   }
+  
   loadPatientAppointments() {
     this.appointmentList = [];
     const currentYear = new Date().getFullYear();
 
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
+      console.log('appointmentList ', this.appointmentList);
+      
       // Find the latest appointment and check if it is within the last 7 days
       this.checkLatestAppointmentWithin7Days();
     });
@@ -351,10 +417,24 @@ export class InvoiceViewComponent implements OnInit {
     else {
       this.paymentModeDetails.transactionId = null;
     }
-
+    
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = 0;
+    this.paymentModeDetails.itemId = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.id).join(',');
+    this.paymentModeDetails.itemName = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.itemName).join(',');
+    
+    if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.isConsultationPaid == false){
+      this.paymentModeDetails.itemId = this.paymentModeDetails.itemId + ',Consultation';
+      this.paymentModeDetails.itemName = this.paymentModeDetails.itemName + ',Consultation';
+
+
+    }
+    // console.log('this.addtionalInoiveItem.map(x => x.id) ', this.addtionalInoiveItem.map(x => x.id));
+    
+
+    console.log('this.paymentModeDetails ', this.paymentModeDetails);
+    
 
     this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
       this.totalInvoiceAmount = 0;
@@ -397,12 +477,24 @@ export class InvoiceViewComponent implements OnInit {
     this.invoiceDetails.isConsultationPaid = true;
     this.isAllowed = true;
 
+    this.paymentModeDetails.itemName = 'Consultation';
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = invoiceDetails.amount;
+    this.paymentModeDetails.itemId = 'Consultation';
+      this.paymentModeDetails.itemName = 'Consultation';
+
+    // if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.status == 'Unpaid'){
+    //   this.paymentModeDetails.itemId = 'Consultation';
+    //   this.paymentModeDetails.itemName = 'Consultation';
+
+
+    // }
 
     this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+    console.log('invoicePaymentDto:', this.invoicePaymentDto);
+    
 
     this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
       this.balanceAmount = 0;
@@ -414,6 +506,9 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   print() {
+
+    this.getMergedTransactionIds();
+   
     this.thermalvisible = true;
     var dateToday = new Date();
     this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
@@ -448,12 +543,17 @@ export class InvoiceViewComponent implements OnInit {
   getAddtionalItems(id: number) {
 
     this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res: any) => {
-
+      console.log('Temp: ',res);
+      
       this.addtionalInoiveItem = res;
       res.map((data: any) => {
         if (data.status == 'Unpaid') {
           this.isPaidButtonVisible = false;
           this.balanceAmount = this.balanceAmount + data.finalAmount;
+        }
+        else {
+          this.tempDoctorModels.transactionId = res[0].transactionId ? res[0].transactionId : 'Cash Payment';
+
         }
 
         this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
@@ -461,6 +561,7 @@ export class InvoiceViewComponent implements OnInit {
       console.log("addi", this.addtionalInoiveItem);
       console.log("appo", this.appointmentDetails);
       console.log("doc", this.doctorDetails);
+      
 
 
     })
@@ -488,6 +589,9 @@ export class InvoiceViewComponent implements OnInit {
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = data.finalAmount;
+    this.paymentModeDetails.itemName = data.itemName;
+    this.paymentModeDetails.itemId = data.id.toString();
+
 
     this.invoiceService.getAddtionalSubInvoiceItemById(data.id).subscribe((result: any) => {
       result.status = 'Paid';
@@ -500,6 +604,9 @@ export class InvoiceViewComponent implements OnInit {
 
       this.subInvoicePaymentDto.additionalInvoiceItem = result;
       this.subInvoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
+
+      console.log('this.subInvoicePaymentDto.', this.subInvoicePaymentDto);
+      
 
       this.invoiceService.updateSubInvoiceItem(data.id, this.subInvoicePaymentDto).subscribe(res => {
         this.toastr.success("Invoice Paid", 'Paid');

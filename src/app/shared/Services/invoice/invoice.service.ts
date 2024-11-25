@@ -14,6 +14,7 @@ export class InvoiceService {
   private readonly apiUrl = api_Url;
   public diagnosisId!: number;
   public invoiceId!: number;
+  public itemId!: number;
 
   constructor(private http: ApiHttpService,) {
     console.log();
@@ -39,6 +40,8 @@ export class InvoiceService {
 
     return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   }
+
+ 
 
   getPaymentDetails(fromDate: string, toDate: string): Observable<ITotalPaymentDetails> {
     let params = new HttpParams();
@@ -87,8 +90,16 @@ export class InvoiceService {
     return this.http.get(this.apiUrl + 'AdditionalInvoiceItems/' + id);
   }
 
+  getInvoicesForToday():Observable<any>{
+    return this.http.get(this.apiUrl+'InvoiceInfoes/GetInvoicesForToday');
+  }
+
   getAllInvoiceMaster(): Observable<any[]> {
     return this.http.get(this.apiUrl + 'InvoiceItemMasters');
+  }
+
+  getInvoiceMasterById(id:number):Observable<any>{
+    return this.http.get(this.apiUrl+'InvoiceItemMasters/'+ id);
   }
 
   addToaddtionalItemInvoice(data: IinvoiceItem): Observable<any> {
@@ -101,6 +112,14 @@ export class InvoiceService {
 
   deleteSubInvoiceItem(invoiceId: number, itemName: string): Observable<any> {
     return this.http.delete(this.apiUrl + 'AdditionalInvoiceItems/' + invoiceId + '/' + itemName);
+  }
+
+  deleteInvoiceItems(id:number):Observable<any>{
+    return this.http.delete(this.apiUrl+'InvoiceItemMasters/'+ id);
+  }
+ 
+  putInvoiceMastersItem(id:number, InvoiceItemMaster: IinvoiceItem) {
+    return this.http.put(this.apiUrl + 'InvoiceItemMaster/'+ id, InvoiceItemMaster);
   }
 
   getInvoiceItem() {
