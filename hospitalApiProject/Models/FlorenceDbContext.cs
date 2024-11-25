@@ -56,6 +56,8 @@ public partial class FlorenceDbContext : DbContext
   public virtual DbSet<VitalInfo> VitalInfos { get; set; }
   public virtual DbSet<AbhaPatientDetails> AbhaPatientDetails { get; set; }
 
+  public virtual DbSet<PaymentModeInfo> PaymentModeInfo { get; set; }
+
   public virtual DbSet<PatientVisit> PatientVisits { get; set; }
 
   public virtual DbSet<CareContext> CareContexts { get; set; }
