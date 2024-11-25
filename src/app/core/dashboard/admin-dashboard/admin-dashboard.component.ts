@@ -67,8 +67,8 @@ export class AdminDashboardComponent implements OnInit {
   public currentYear!: number;
   public recentYears: number[] = [];
   @ViewChild('chart') chart!: ChartComponent;
-  public chartOptionsOne: Partial<ChartOptions>;
-  public chartOptionsTwo: Partial<ChartOptions>;
+  public chartOptionsOne: Partial<ChartOptions> = {};
+  public chartOptionsTwo: Partial<ChartOptions> = {};
   public recentPatients: Array<any> = [];
   public upcomingAppointments: Array<any> = [];
   public CurrentTime=0;
@@ -79,7 +79,7 @@ export class AdminDashboardComponent implements OnInit {
   public earning=0;
   public totalAmount=0;
   public combinedData:any[]  = [];
-  public departments:any[]  = []
+  public invoices:any[] =[];
   public patientCountByGender: any[]=[];
 
   constructor(public data : DataService,
@@ -171,8 +171,37 @@ private departmentService:DepartmentService,private route : Router)
           },
         },
     };
+
+    //     this.recentPatients = this.data.getPatientsList().slice(0, 5);
+// this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
+    
+  }
+  public ngOnInit(){
+    this.getGreetingMsg();
+    const data=JSON.parse(localStorage.getItem('data')||'')
+  this.userName=data.fname +" "+data.lname;
+  this.appointmentCount();
+  this.consultationCount();
+  //this.totalEarning();
+  this.totalAmounts();
+  this.loadRecentPatients();
+      // this.loadUpcomingAppointments();
+      this.fetchCombineData()
+      this.currentYear = new Date().getFullYear(); // Get the current year
+      this.generateRecentYears();
+      this.getPatientCountByGender();
+      this.getPatientCountByDepartment();
+      
+  }
+  
+  
+  getPatientCountByDepartment():void {
+    this.patientService.getPatientCountByDepartment().subscribe((data: any) => {
+        console.log('Fetched data:', data);
+
     this.chartOptionsTwo = {
-      series: [44, 55, 41, 17],
+      series: data?.map((x:any) => x.patientCount),
+      labels: data?.map((x:any) => x.departmentName),
       chart: {
         type: 'donut',
         height: 200,
@@ -205,24 +234,7 @@ private departmentService:DepartmentService,private route : Router)
         }
     }],
     };
-//     this.recentPatients = this.data.getPatientsList().slice(0, 5);
-// this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
-    
-  }
-public ngOnInit(){
-  this.getGreetingMsg();
-  const data=JSON.parse(localStorage.getItem('data')||'')
-this.userName=data.fname +" "+data.lname;
-this.appointmentCount();
-this.consultationCount();
-//this.totalEarning();
-this.totalAmounts();
-this.loadRecentPatients();
-    // this.loadUpcomingAppointments();
-    this.fetchCombineData()
-    this.currentYear = new Date().getFullYear(); // Get the current year
-    this.generateRecentYears();
-    this.getPatientCountByGender();
+  });
 }
 
 getPatientCountByGender(): void {
@@ -260,6 +272,12 @@ loadUpcomingAppointments(): void {
     this.upcomingAppointments = result.slice(0, 5);
   });
 }
+
+movetoInvoiceView(Id: number) {
+  this.invoiceService.invoiceId = Id;
+  this.route.navigate(['/accounts/invoice-view'])
+}
+
 movetoPatient(id: number) {
   this.patientService.patientId = id;
 
@@ -276,12 +294,14 @@ fetchCombineData() {
   
 
  
-  const departmentData$ = this.departmentService.getDepartmentList();
+ 
   const staffData$ = this.staffService.getDoctorsList();
   const patientData$ = this.patientService.getPatientList();
-  forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
+  const invoiceData$ = this.invoiceService.getInvoicesForToday();
+  forkJoin([appointmentData$, staffData$, patientData$,invoiceData$ ]).subscribe(([appointments, staffs, patient,invoices]) => {
     // Combine data based on departmentId    
-    this.departments=departments.slice(0,5);
+    this.invoices=invoices.slice(-5);
+   
 
     if (appointments.message === "No records found") {
       this.upcomingAppointments=[];
@@ -290,14 +310,12 @@ fetchCombineData() {
       this.combinedData = appointments.map((appointment: any) => {
         const doctor = staffs.find((doctor: any) => doctor.staffId === appointment.doctorId)
         const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
-        const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
-
+        const invoice = invoices.find((invoice:any) => invoice.appointmentId === appointment.id)
 
         return {
           ...appointment,
           doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
           doctorLname: doctor ? doctor.lastName : '',
-          departmentName: department ? department.departmentName : 'Unknown Department',
           patientFname: patients ? patients.firstName : 'Unknon Patients',
           patientLname: patients ? patients.lastName : 'Unknon Patients',
           patientId: patients ? patients.patientId : 'Unknon Patients'

@@ -1017,6 +1017,18 @@ export class DataService {
           subMenus: [
           ],
         },
+        {
+          menuValue: 'Create Invoice',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.createInvoice,
+          icon:'fa-columns',
+          faIcon: true,
+          //img: 'assets/img/icons/edit.svg',
+          subMenus: [
+          ],
+        },
 
 
       ],

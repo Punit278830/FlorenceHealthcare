@@ -23,8 +23,31 @@ namespace hospitalApiProject.Controllers
             _context = context;
         }
 
+    [HttpGet("PatientCountByDepartment")]
+    public async Task<ActionResult<DepartmentInfo>> GetpatientCountByDepartment()
+    {
+      var today = DateTime.Today;
 
-        [HttpOptions]
+      var result = await _context.AppointmentInfos
+          .Where(a => a.Date.Date == today)
+          .GroupBy(a => a.Departmentid)
+          .Select(g => new
+          {
+            DepartmentName = _context.DepartmentInfos
+                  .Where(d => d.DepartmentId == g.Key)
+                  .Select(d => d.DepartmentName)
+                  .FirstOrDefault(),
+            PatientCount = g.Select(a => a.PatientId).Distinct().Count()
+          })
+          .ToListAsync();
+
+      return Ok(result);
+
+    }
+
+
+
+    [HttpOptions]
         public IActionResult Options()
         {
             return Ok();

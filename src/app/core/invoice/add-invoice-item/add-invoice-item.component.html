@@ -29,7 +29,7 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="itemName">Item name <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="itemName" type="text" placeholder="">
+                                        <input class="form-control" formControlName="itemName" type="text" placeholder="" [readonly]="isEditMode">
                                         <div *ngIf="invoiceItem.get('itemName')?.invalid && (invoiceItem.get('itemName')?.dirty || invoiceItem.get('itemName')?.touched)" class="text-danger">
                                             <div *ngIf="invoiceItem.get('itemName')?.errors?.['required']">Item name is required.</div>
                                         </div>
@@ -39,7 +39,7 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="description">Description <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="description" type="text" placeholder="">
+                                        <input class="form-control" formControlName="description" type="text" placeholder="" [readonly]="isEditMode">
                                         <div *ngIf="invoiceItem.get('description')?.invalid && (invoiceItem.get('description')?.dirty || invoiceItem.get('description')?.touched)" class="text-danger">
                                             <div *ngIf="invoiceItem.get('description')?.errors?.['required']">Description is required.</div>
                                         </div>
@@ -76,7 +76,60 @@
                         </form>
                         
                     </div>
+                    
+                    
                 </div>
+
+                <div class="table-responsive mt-4">
+                    <table matSort class="table border-0 custom-table comman-table datatable mb-0">
+                      <thead>
+                        <tr>
+                          <th mat-sort-header="itemId">Item ID</th>
+                          <th mat-sort-header="itemName">Item Name</th>
+                          <th mat-sort-header="description">Description</th>
+                          <th mat-sort-header="discount">Discount (%)</th>
+                          <th mat-sort-header="fee">Fee</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of invoiceitems; let i = index">
+                          <td>{{ item.itemId }}</td>
+                          <td>{{ item.itemName }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.discount }}</td>
+                          <td>{{ item.fee |  currency: 'INR'  }}</td>
+                          <td class="text-end">
+                            <div class="dropdown dropdown-action">
+                              <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
+                                aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                              <div class="dropdown-menu dropdown-menu-end">
+                                <a class="dropdown-item" href="javascript:void(0);" (click)="onEditItem(item.itemId)">
+                                    <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                                 </a>
+                                 
+                                <!-- *ngIf="loggedIn.userRole == 'admin' " -->
+                                <a class="dropdown-item" href="javascript:void(0);"
+                                (click)="deleteInvoiceItem(item.itemId)">
+                                <i class="fa fa-trash-alt m-r-5"></i> Delete
+                             </a>
+                             
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  
+                    <!-- No items found message -->
+                    <div *ngIf="invoiceitems.length === 0" class="dataTables_info text-center mt-3">
+                      No invoice items found
+                    </div>
+                  </div>
+                  
+                
+
+
             </div>
         </div>
     </div>
