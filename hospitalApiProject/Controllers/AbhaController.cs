@@ -402,7 +402,7 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
-      await _abhaM2Service.LinkCareContext(data);
+      await _abhaM2Service.LinkCareContextV3();
       if (_service.HasError)
       {
         return StatusCode((int)_service.StatusCode, _service.ErrorMessage);

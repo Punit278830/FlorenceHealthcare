@@ -884,11 +884,11 @@ namespace hospitalApiProject.Services.Abha
       //todo
       var request = new GenerateLinkToken
       {
-        AbhaAddress = "91178386101731@sbx",
-        AbhaNumber = 91330884683179,
-        Gender = "Female",
-        Name = "Manpreet Kaur",
-        YearOfBirth = 1989
+        abhaNumber = 91330884683179,
+        abhaAddress = "manpreet.53@sbx",
+        name = "Manpreet Kaur",
+        gender = "F",
+        yearOfBirth = 1989
       };
 
       var linkToken = await GenerateLinkToken(request);
@@ -950,7 +950,7 @@ namespace hospitalApiProject.Services.Abha
       var root = new
       {
         AbhaNumber = "91178386101731", // Use your logic to set this dynamically
-        AbhaAddress = "91178386101731@sbx", // Use your logic to set this dynamically
+        AbhaAddress = "manpreet.0503@sbx", // Use your logic to set this dynamically
         Patient = patients // List of patients with their associated care contexts
       };
 
