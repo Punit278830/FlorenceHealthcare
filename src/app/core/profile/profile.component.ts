@@ -21,6 +21,7 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
+//import { PrescriptionService } from '../../shared/Services/prescription/prescription.service';
 
 
 @Component({
@@ -110,6 +111,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentQuestionIndex: number = 1;
   public subQuestionCounter = 0;
   questionList!: Iquestion[];
+  prescriptionService: any;
+  prescriptionImage: string | null = null;
+  
 
 
   // public showAddQuestion=true;
@@ -130,6 +134,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
     private loaderService: LoadingService
+    
 
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
@@ -177,6 +182,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loadQuestions();
     this.fetchAllOptions();
 
+    this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
+      this.prescriptionImage = data;  // Assign the image data to the local variable
+      console.log('image',this.prescriptionImage);
+      
+    }); 
+
+
     // this.getUploadedFiles(this.latestId);
     //     this.preDiagnosis=[
     //   {
@@ -188,6 +200,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
+  
+  openInNewTab(path: string): void {
+    const url = this.route.serializeUrl(this.route.createUrlTree([path]));
+    window.open(url, '_blank'); // Open the generated URL in a new tab
+  }
+
+
   viewDocument(item: any) {
     this.currentFileName = item.fileName;
     this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(item.fileData);
