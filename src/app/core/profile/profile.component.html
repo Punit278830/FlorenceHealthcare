@@ -422,10 +422,7 @@
                                                                 style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                             <button type="button" class="uploadbtn"
                                                                 (click)="onFileUpload()">Upload file</button>
-                                                                <button type="button" class="uploadbtn" (click)="openInNewTab('/prescription')">
-                                                                    Write Prescription
-                                                                  </button>
-                                                                  
+
                                                         </div>
                                                     </div>
                                                     <div style="width: 47%;" *ngIf="presDocuments.length > 0"
@@ -521,6 +518,11 @@
 
                                                                 <div class="top-nav-search mob-view"
                                                                     style="margin-left: 0px;">
+                                                                    <label class="custom_check w-100">
+                                                                        <input type="checkbox" id="consent"
+                                                                            formControlName="consent">
+                                                                        <span class="checkmark"></span>Please check the checkbox to link carecontext
+                                                                    </label>
                                                                     <h3 style="font-weight: bold;">Add Medicine</h3>
                                                                     <form>
                                                                         <input type="text" class="form-control"
@@ -790,14 +792,14 @@
                                                                     seletedAppointmentDate | date:'dd-MM-yyyy' || null
                                                                     }}
                                                                 </h4>
-                                                                <!-- <div *ngIf="prescriptionImage; else noImage">
+                                                                <div *ngIf="prescriptionImage; else noImage">
                                                                     <h3>Your Prescription</h3>
                                                                     <img [src]="prescriptionImage" alt="Prescription Image" style="max-width: 100%; height: auto;" />
-                                                                  </div> -->
+                                                                  </div>
                                                                   
-                                                                  <!-- <ng-template #noImage>
+                                                                  <ng-template #noImage>
                                                                     <p>No prescription image available.</p>
-                                                                  </ng-template> -->
+                                                                  </ng-template>
                                                                   
                                                                 <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
                                                             </div>
@@ -964,9 +966,6 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <!-- Image Preview Section -->
-                                        
-
                                 </div>
                                 <div class="btnOuter1">
                                     <button class="uploadbtn" (click)="downloadPreviewAsPdf()">Download</button>
