@@ -1,9 +1,5 @@
-using Azure.Core;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
-using NuGet.Packaging.Signing;
-using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -399,8 +395,7 @@ namespace hospitalApiProject.Services
       _token = _tokenService.GetTokenFromCache();
       if (_token == null)
       {
-        _authService.GenerateAuthToken();
-        _token = _tokenService.GetTokenFromCache();
+        _token = _authService.GenerateAuthToken();
       }
     }
 
@@ -409,17 +404,6 @@ namespace hospitalApiProject.Services
       try
       {
         var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-
-        Console.WriteLine("Request Headers:");
-
-        //foreach (var header in client.DefaultRequestHeaders)
-        //{
-        //  Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
-        //}
-
-        // Log the request body 
-        Console.WriteLine($"Request Body: {content}");
-        // Send the POST request
         HttpResponseMessage response = await client.PostAsync(url, stringContent);
 
         // Read the response

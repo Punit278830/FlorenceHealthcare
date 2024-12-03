@@ -823,7 +823,7 @@ namespace hospitalApiProject.Services.Abha
     public async Task<string> GenerateLinkToken(GenerateLinkToken request)
     {
       var json = JsonSerializer.Serialize(request);
-      var data = await OnGenerateLinkToken("https://dev.abdm.gov.in/hiecm", "/api/v3/token/generate-token", json);
+      var data = await OnGenerateLinkToken("https://dev.abdm.gov.in/hiecm", "api/v3/token/generate-token", json);
       return data; //return linkToken and use in LinkCareContextV3
     }
 
@@ -885,7 +885,7 @@ namespace hospitalApiProject.Services.Abha
       var request = new GenerateLinkToken
       {
         abhaNumber = 91330884683179,
-        abhaAddress = "manpreet.53@sbx",
+        abhaAddress = "manpreet.0503@sbx",
         name = "Manpreet Kaur",
         gender = "F",
         yearOfBirth = 1989
