@@ -4,6 +4,14 @@
     <div class="canvas-wrapper">
       <canvas #canvas></canvas>
     </div>
+
+    <div class="color-buttons">
+      <button (click)="setPenColor('#000000')" style="background-color: black;"></button>
+      <button (click)="setPenColor('#FF0000')" style="background-color: red;"></button>
+      <button (click)="setPenColor('#00FF00')" style="background-color: green;"></button>
+      <button (click)="setPenColor('#0000FF')" style="background-color: blue;"></button>
+      <button (click)="setPenColor('#FFFF00')" style="background-color: yellow;"></button>
+    </div>
     
     <div class="button-container">
       <button (click)="clearPad()">Clear</button>

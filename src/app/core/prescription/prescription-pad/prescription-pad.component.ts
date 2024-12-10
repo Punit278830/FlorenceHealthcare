@@ -12,30 +12,59 @@ export class PrescriptionPadComponent implements AfterViewInit {
   @ViewChild('canvas') canvasEl!: ElementRef<HTMLCanvasElement>;
   prescriptionPad!: SignaturePad;
   isDrawing: boolean = false;
-  penSize: number = 2;
+  penSize: number = 1;
   maxPenSize: number = 5;
   minPenSize: number = 1;
   isEraserActive: boolean = false;
+  penColor: string = '#000000';  // Default pen color is black
 
   ngAfterViewInit() {
-    const canvas = this.canvasEl.nativeElement;
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = 450;
-    this.prescriptionPad = new SignaturePad(canvas, {
-      minWidth: this.penSize,
-      maxWidth: this.penSize,
-      penColor: 'black',
-    });
+    this.prescriptionPad = new SignaturePad(this.canvasEl.nativeElement);
+    this.prescriptionPad.penColor = this.penColor;  // Set initial pen color
+    this.canvasEl.nativeElement.style.cursor = 'crosshair';
+    this.canvasEl.nativeElement.addEventListener('mousedown', this.onBeginDrawing.bind(this));
+    this.canvasEl.nativeElement.addEventListener('mouseup', this.onEndDrawing.bind(this));
+    this.canvasEl.nativeElement.addEventListener('mousemove', this.onMouseMove.bind(this));
+
+  }
+
+ // Event handler for when drawing begins
+ onBeginDrawing(): void {
+  this.isDrawing = true;
+  this.canvasEl.nativeElement.style.cursor = 'url("/assets/img/pen-cursor.png"), auto'; // Custom pen cursor
+}
+
+// Event handler for when drawing ends
+onEndDrawing(): void {
+  this.isDrawing = false;
+  this.canvasEl.nativeElement.style.cursor = 'crosshair'; // Default crosshair cursor
+}
+
+// Optional: Change cursor when moving over the canvas (if you need this functionality)
+onMouseMove(event: MouseEvent): void {
+  if (this.isDrawing) {
+    // If user is drawing, change the cursor to a pen
+    this.canvasEl.nativeElement.style.cursor = 'url("/assets/img/pen-cursor.png"), auto';
+  } else {
+    // Default crosshair cursor
+    this.canvasEl.nativeElement.style.cursor = 'crosshair';
+  }
+}
+
+  // Update pen color
+  setPenColor(color: string): void {
+    this.penColor = color;
+    this.prescriptionPad.penColor = this.penColor;
   }
 
   toggleEraser() {
     this.isEraserActive = !this.isEraserActive;
     if (this.isEraserActive) {
-      this.prescriptionPad.penColor = 'white';
+      this.prescriptionPad.penColor = this.penColor;
       this.prescriptionPad.minWidth = 10;
       this.prescriptionPad.maxWidth = 10;
     } else {
-      this.prescriptionPad.penColor = 'black';
+      this.prescriptionPad.penColor = this.penColor;
       this.prescriptionPad.minWidth = this.penSize;
       this.prescriptionPad.maxWidth = this.penSize;
     }
