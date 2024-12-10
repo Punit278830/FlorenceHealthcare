@@ -484,6 +484,23 @@ namespace hospitalApiProject.Controllers
       return Ok();
     }
 
+    [HttpPost("AddAbhaPatient")]
+    public async Task<IActionResult> AddAbhaPatient([FromBody] PatientProfile request)
+    {
+      if (request == null)
+      {
+        return BadRequest("Invalid request body");
+      }
+
+      await _service.AddAbhaPatientProfile(request);
+      if (_service.HasError)
+      {
+        return StatusCode(500, _service.ErrorMessage);
+      }
+
+      return Ok();
+    }
+
     [HttpPost("ConsentOnNotify")]
     public async Task<IActionResult> ConsentsOnNotify([FromBody] ConsentOnNotify request)
     {
