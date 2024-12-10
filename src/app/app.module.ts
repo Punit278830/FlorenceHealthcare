@@ -9,6 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LoaderComponent } from './core/loader/loader.component';
+import { FormsModule } from '@angular/forms';  // Import FormsModule
 
 
 @NgModule({

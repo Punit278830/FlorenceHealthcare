@@ -17,15 +17,17 @@ export class PrescriptionPadComponent implements AfterViewInit {
   minPenSize: number = 1;
   isEraserActive: boolean = false;
   penColor: string = '#000000';  // Default pen color is black
+  public penWidth: number = 2;  // Default pen width (thickness)
 
   ngAfterViewInit() {
-    this.prescriptionPad = new SignaturePad(this.canvasEl.nativeElement);
-    this.prescriptionPad.penColor = this.penColor;  // Set initial pen color
-    this.canvasEl.nativeElement.style.cursor = 'crosshair';
-    this.canvasEl.nativeElement.addEventListener('mousedown', this.onBeginDrawing.bind(this));
-    this.canvasEl.nativeElement.addEventListener('mouseup', this.onEndDrawing.bind(this));
-    this.canvasEl.nativeElement.addEventListener('mousemove', this.onMouseMove.bind(this));
-
+     // Get the canvas element from the template
+     const canvas = this.canvasEl.nativeElement;
+     this.prescriptionPad = new SignaturePad(canvas);
+    this.prescriptionPad.penColor = this.penColor;
+    // Set initial pen color and stroke width
+    this.prescriptionPad.penColor = this.penColor;
+    this.prescriptionPad.minWidth = this.penWidth;
+    this.prescriptionPad.maxWidth = this.penWidth * 2;  // Max width can be twice the min width for smooth transitions
   }
 
  // Event handler for when drawing begins
@@ -52,22 +54,37 @@ onMouseMove(event: MouseEvent): void {
 }
 
   // Update pen color
-  setPenColor(color: string): void {
+  changePenColor(color: string): void {
     this.penColor = color;
-    this.prescriptionPad.penColor = this.penColor;
+    if (!this.isEraserActive) {
+      this.prescriptionPad.penColor = color;
+    }
+  }
+
+  // Change the pen thickness
+  changePenWidth(width: number): void {
+    this.penWidth = width;
+    if (!this.isEraserActive) {
+      this.prescriptionPad.minWidth = width;
+      this.prescriptionPad.maxWidth = width * 2;  // Max width is twice the min width for smooth transitions
+    }
   }
 
   toggleEraser() {
     this.isEraserActive = !this.isEraserActive;
     if (this.isEraserActive) {
-      this.prescriptionPad.penColor = this.penColor;
-      this.prescriptionPad.minWidth = 10;
-      this.prescriptionPad.maxWidth = 10;
+      // When the eraser is active, set a transparent color and increase the stroke width for the eraser
+      this.prescriptionPad.penColor = 'white';  // Set the pen color to transparent for erasing
+      this.prescriptionPad.minWidth = 10;  // Set eraser size
+      this.prescriptionPad.maxWidth = 20;  // Max eraser width
     } else {
+      // When the pen is active, reset the pen color and thickness
       this.prescriptionPad.penColor = this.penColor;
-      this.prescriptionPad.minWidth = this.penSize;
-      this.prescriptionPad.maxWidth = this.penSize;
+      this.prescriptionPad.minWidth = this.penWidth;
+      this.prescriptionPad.maxWidth = this.penWidth * 2;
     }
+
+    
   }
 
   adjustPenSize(input: HTMLInputElement) {
