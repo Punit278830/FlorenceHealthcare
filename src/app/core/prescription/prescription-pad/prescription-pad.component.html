@@ -5,18 +5,30 @@
       <canvas #canvas></canvas>
     </div>
 
-    <div class="color-buttons">
-      <button (click)="setPenColor('#000000')" style="background-color: black;"></button>
-      <button (click)="setPenColor('#FF0000')" style="background-color: red;"></button>
-      <button (click)="setPenColor('#00FF00')" style="background-color: green;"></button>
-      <button (click)="setPenColor('#0000FF')" style="background-color: blue;"></button>
-      <button (click)="setPenColor('#FFFF00')" style="background-color: yellow;"></button>
+    <div>
+      <label>Choose Pen Color:</label>
+    <button (click)="changePenColor('black')" style="background-color: black; color: white;">Black</button>
+    <button (click)="changePenColor('red')" style="background-color: red; color: white;">Red</button>
+    <button (click)="changePenColor('green')" style="background-color: green; color: white;">Green</button>
+    <button (click)="changePenColor('blue')" style="background-color: blue; color: white;">Blue</button>
+    <!-- You can also use an input color picker -->
+
     </div>
+<br>
+    <div>
+      <label>Pen Thickness:</label>
+      <input type="range" min="1" max="10" [(ngModel)]="penWidth" (input)="changePenWidth(penWidth)" />
+      <span>{{ penWidth }}</span>
+    </div>
+
+   
     
     <div class="button-container">
       <button (click)="clearPad()">Clear</button>
       <button (click)="printPad()">Print</button>
-      <button (click)="toggleEraser()">Toggle Eraser</button>
+      <button (click)="toggleEraser()" [style.background-color]="isEraserActive ? 'grey' : 'lightgray'">
+        {{ isEraserActive ? 'Switch to Pen' : 'Switch to Eraser' }}
+      </button>
     </div>
   </div>
   
