@@ -203,8 +203,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   
   openInNewTab(path: string): void {
     const url = this.route.serializeUrl(this.route.createUrlTree([path]));
-    window.open(url, '_blank'); // Open the generated URL in a new tab
+    //window.open(url, '_blank'); // Open the generated URL in a new tab
+    this.route.navigate([path]);
+
   }
+
 
 
   viewDocument(item: any) {
