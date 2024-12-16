@@ -1,57 +1,69 @@
-
 import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import SignaturePad from 'signature_pad';
 
 @Component({
   selector: 'app-prescription-pad',
- // standalone: true,
   templateUrl: './prescription-pad.component.html',
   styleUrls: ['./prescription-pad.component.scss'],
 })
 export class PrescriptionPadComponent implements AfterViewInit {
   @ViewChild('canvas') canvasEl!: ElementRef<HTMLCanvasElement>;
   prescriptionPad!: SignaturePad;
-  isDrawing: boolean = false;
-  penSize: number = 1;
-  maxPenSize: number = 5;
-  minPenSize: number = 1;
-  isEraserActive: boolean = false;
-  penColor: string = '#000000';  // Default pen color is black
-  public penWidth: number = 2;  // Default pen width (thickness)
+  isDrawing = false;
+  penColor = '#000000'; // Default pen color
+  penWidth = 2; // Default pen width
+  minPenSize = 1;
+  maxPenSize = 5;
+  isEraserActive = false;
+  debounceTimer: any;
 
   ngAfterViewInit() {
-     // Get the canvas element from the template
-     const canvas = this.canvasEl.nativeElement;
-     this.prescriptionPad = new SignaturePad(canvas);
-    this.prescriptionPad.penColor = this.penColor;
-    // Set initial pen color and stroke width
-    this.prescriptionPad.penColor = this.penColor;
-    this.prescriptionPad.minWidth = this.penWidth;
-    this.prescriptionPad.maxWidth = this.penWidth * 2;  // Max width can be twice the min width for smooth transitions
+    const canvas = this.canvasEl.nativeElement;
+    canvas.width = window.innerWidth * 0.9;
+    canvas.height = 450;
+
+    this.prescriptionPad = new SignaturePad(canvas, {
+      penColor: this.penColor,
+      minWidth: this.penWidth,
+      maxWidth: this.penWidth * 2,
+      velocityFilterWeight: 0.7,  // Adjust this value to smooth the drawing - 
+      //Higher values make the stroke smoother but less responsive, 
+      //and lower values make it more responsive but less smooth
+      throttle: 16, // Adjust for smoother performance
+    });
   }
 
- // Event handler for when drawing begins
- onBeginDrawing(): void {
-  this.isDrawing = true;
-  this.canvasEl.nativeElement.style.cursor = 'url("/assets/img/pen-cursor.png"), auto'; // Custom pen cursor
-}
-
-// Event handler for when drawing ends
-onEndDrawing(): void {
-  this.isDrawing = false;
-  this.canvasEl.nativeElement.style.cursor = 'crosshair'; // Default crosshair cursor
-}
-
-// Optional: Change cursor when moving over the canvas (if you need this functionality)
-onMouseMove(event: MouseEvent): void {
-  if (this.isDrawing) {
-    // If user is drawing, change the cursor to a pen
-    this.canvasEl.nativeElement.style.cursor = 'url("/assets/img/pen-cursor.png"), auto';
-  } else {
-    // Default crosshair cursor
-    this.canvasEl.nativeElement.style.cursor = 'crosshair';
+  // Handle the beginning of drawing
+  onBeginDrawing(): void {
+    this.isDrawing = true;
+    this.setCursor('pen');
   }
-}
+
+  // Handle the end of drawing
+  onEndDrawing(): void {
+    this.isDrawing = false;
+    this.setCursor('crosshair');
+  }
+
+  // Update cursor based on drawing state
+  onMouseMove(): void {
+    if (this.isDrawing) {
+      requestAnimationFrame(() => {
+        this.setCursor('pen');
+      });
+    } else {
+      requestAnimationFrame(() => {
+        this.setCursor('crosshair');
+      });
+    }
+  }
+
+  // Utility to set the cursor style
+  private setCursor(style: string): void {
+    this.canvasEl.nativeElement.style.cursor = style == 'pen' ?
+      'url("/assets/img/icons/edit.svg"), auto'
+      : 'crosshair';
+  }
 
   // Update pen color
   changePenColor(color: string): void {
@@ -66,45 +78,44 @@ onMouseMove(event: MouseEvent): void {
     this.penWidth = width;
     if (!this.isEraserActive) {
       this.prescriptionPad.minWidth = width;
-      this.prescriptionPad.maxWidth = width * 2;  // Max width is twice the min width for smooth transitions
+      this.prescriptionPad.maxWidth = width * 2; // Max width can be twice the min width
     }
   }
 
-  toggleEraser() {
+  // Toggle eraser mode
+  toggleEraser(): void {
     this.isEraserActive = !this.isEraserActive;
-    if (this.isEraserActive) {
-      // When the eraser is active, set a transparent color and increase the stroke width for the eraser
-      this.prescriptionPad.penColor = 'white';  // Set the pen color to transparent for erasing
-      this.prescriptionPad.minWidth = 10;  // Set eraser size
-      this.prescriptionPad.maxWidth = 20;  // Max eraser width
-    } else {
-      // When the pen is active, reset the pen color and thickness
-      this.prescriptionPad.penColor = this.penColor;
-      this.prescriptionPad.minWidth = this.penWidth;
-      this.prescriptionPad.maxWidth = this.penWidth * 2;
-    }
-
-    
+    this.prescriptionPad.penColor = this.isEraserActive ? 'white' : this.penColor;
+    this.prescriptionPad.minWidth = this.isEraserActive ? 10 : this.penWidth;
+    this.prescriptionPad.maxWidth = this.isEraserActive ? 20 : this.penWidth * 2;
   }
 
-  adjustPenSize(input: HTMLInputElement) {
+  // Adjust pen size
+  adjustPenSize(input: HTMLInputElement): void {
     const size = input.valueAsNumber;
-    if (size >= this.minPenSize && size <= this.maxPenSize) {
-      this.penSize = size;
-      if (!this.isEraserActive) {
-        this.prescriptionPad.minWidth = size;
-        this.prescriptionPad.maxWidth = size;
+
+    clearTimeout(this.debounceTimer); // Clear any previous debounce
+    this.debounceTimer = setTimeout(() => {
+      if (size >= this.minPenSize && size <= this.maxPenSize) {
+        this.penWidth = size;
+        if (!this.isEraserActive) {
+          this.prescriptionPad.minWidth = size;
+          this.prescriptionPad.maxWidth = size * 2; // Max width can be twice the min width
+        }
+      } else {
+        alert(`Pen size must be between ${this.minPenSize} and ${this.maxPenSize}`);
       }
-    } else {
-      alert(`Pen size must be between ${this.minPenSize} and ${this.maxPenSize}`);
-    }
+    }, 200); // Adjust debounce time as needed
   }
 
-  clearPad() {
+
+  // Clear the canvas
+  clearPad(): void {
     this.prescriptionPad.clear();
   }
 
-  printPad() {
+  // Print the canvas content
+  printPad(): void {
     if (this.prescriptionPad.isEmpty()) {
       alert('No content to print! Please draw something.');
       return;
