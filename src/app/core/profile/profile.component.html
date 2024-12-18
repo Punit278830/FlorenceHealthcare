@@ -15,7 +15,7 @@
                 <a [routerLink]="routes.editProfile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit
                     Profile</a>
             </div> -->
-        </div>      
+        </div>
         <div class="card-box profile-header">
             <div class="row">
                 <div class="col-md-12">
@@ -300,22 +300,21 @@
                                     <div class="card-body">
                                         <div class="box">
                                             <div *ngFor="let data of questionnaireDto"
-                                            class="col-12 col-md-12 col-xl-3 quesheading"
-                                            [ngClass]="{
+                                                class="col-12 col-md-12 col-xl-3 quesheading" [ngClass]="{
                                                'submitted': isSubmitted(data.questionnaireId),
                                                'completed': !isSubmitted(data.questionnaireId) && isCompleted(data),
                                                'untouched': !isSubmitted(data.questionnaireId) && isUntouched(data),
                                                'active': !isSubmitted(data.questionnaireId) && isActive(data),
                                                'inactive': !isSubmitted(data.questionnaireId) && !isActive(data)
                                             }">
-                                           <a href="javascript:void(0);"
-                                              (click)="mapQuestionAndOptions(data.questionnaireId)"
-                                              class="quesText">{{data.questionnaireName}}</a>
-                                       </div>
-                                       
+                                                <a href="javascript:void(0);"
+                                                    (click)="mapQuestionAndOptions(data.questionnaireId)"
+                                                    class="quesText">{{data.questionnaireName}}</a>
+                                            </div>
+
                                         </div>
-                                      </div>
-                                      
+                                    </div>
+
 
                                     <!-- <div class="card-body">
                                         <div class="box" >
@@ -355,27 +354,30 @@
                                                             <div class="col-12 col-md-6 col-xl-12">
                                                                 <div *ngIf="currentQuestionData.questionType === 2">
                                                                     <label for="questionText">
-                                                                        <h2 class="h2question">{{currentQuestionData.questionText}}</h2>
+                                                                        <h2 class="h2question">
+                                                                            {{currentQuestionData.questionText}}</h2>
                                                                     </label>
                                                                     <input type="text" class="form-control"
-                                                                           name="{{currentQuestionData.questionId}}"
-                                                                           [(ngModel)]="currentQuestionData.savedAnswerText">
+                                                                        name="{{currentQuestionData.questionId}}"
+                                                                        [(ngModel)]="currentQuestionData.savedAnswerText">
                                                                 </div>
                                                                 <div *ngIf="currentQuestionData.questionType === 1">
                                                                     <label for="questionText">
-                                                                        <h2 class="h2question">{{currentQuestionData.questionText}}</h2>
+                                                                        <h2 class="h2question">
+                                                                            {{currentQuestionData.questionText}}</h2>
                                                                     </label>
                                                                     <!-- <input type="text" class="form-control"
                                                                            name="{{currentQuestionData.questionId}}"
                                                                            [(ngModel)]="currentQuestionData.savedAnswerText"> -->
                                                                     <br>
-                                                                    <ng-container *ngFor="let data of currentQuestionData.options">
+                                                                    <ng-container
+                                                                        *ngFor="let data of currentQuestionData.options">
                                                                         <div class="optionsOuter">
                                                                             <span>{{data.optionText}}</span>
                                                                             <input type="radio" [value]="data.optionId"
-                                                                                   class="form-check-input"
-                                                                                   name="{{currentQuestionData.questionId}}"
-                                                                                   [(ngModel)]="currentQuestionData.savedSelectedOptionId">
+                                                                                class="form-check-input"
+                                                                                name="{{currentQuestionData.questionId}}"
+                                                                                [(ngModel)]="currentQuestionData.savedSelectedOptionId">
                                                                         </div>
                                                                     </ng-container>
                                                                 </div>
@@ -397,7 +399,7 @@
                                                         </div>
                                                     </form>
                                                 </div>
-                                                
+
 
                                             </div>
                                         </div>
@@ -407,7 +409,8 @@
                                         class="btn btn-primary submit-form me-2">Next</button></div>
 
                             </mat-step>
-                            <mat-step label="Prescription" *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
+                            <mat-step label="Prescription"
+                                *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
                                 <div class="row">
                                     <div class="card">
                                         <div class="card-body">
@@ -415,17 +418,19 @@
                                                 <div class="documentsOuter">
                                                     <div style="width:fit-content">
                                                         <label for="Avatar" class="local-top">Upload documents</label>
-                                                        <div 
+                                                        <div
                                                             style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                             <input type="file" id="file" (change)=onFileSelected($event)
                                                                 class="form-control"
                                                                 style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                             <button type="button" class="uploadbtn"
-                                                                (click)="onFileUpload()">Upload file</button>
-                                                                <button type="button" class="uploadbtn" (click)="openInNewTab('/prescription-pad')">
-                                                                    Write Prescription
-                                                                  </button>
-                                                                  
+                                                                (click)="openInNewTab('/prescription-pad', 'Draw')">
+                                                                Draw Image
+                                                            </button>
+                                                            <button type="button" class="uploadbtn"
+                                                                (click)="openInNewTab('/prescription-pad', 'Write')">
+                                                                Write Prescription
+                                                            </button>
                                                         </div>
                                                     </div>
                                                     <div style="width: 47%;" *ngIf="presDocuments.length > 0"
@@ -506,13 +511,15 @@
                                                                 </mat-select>
                                                             </div>
                                                         </div>
-                                                        
+
 
                                                         <div class="col-12 col-md-6 col-xl-4">
                                                             <div class="form-group local-forms">
                                                                 <label for="name">Followup After</label>
-                                                                <input class="form-control" (blur)="allowOnlyNumbers($event)" type="text"
-                                                                    formControlName="followupDate" [(ngModel)]="dtFollowUp">
+                                                                <input class="form-control"
+                                                                    (blur)="allowOnlyNumbers($event)" type="text"
+                                                                    formControlName="followupDate"
+                                                                    [(ngModel)]="dtFollowUp">
                                                             </div>
                                                         </div>
 
@@ -650,26 +657,36 @@
                                                                         </div>
 
                                                                     </div>
-                                                                    <div class="table-responsive" *ngIf="medicineDto.length>0">
-                                                                        <h3 style="font-weight: bold;">Prescribed Medicines</h3>
+                                                                    <div class="table-responsive"
+                                                                        *ngIf="medicineDto.length>0">
+                                                                        <h3 style="font-weight: bold;">Prescribed
+                                                                            Medicines</h3>
                                                                         <table
                                                                             class="table border-0 custom-table comman-table datatable mb-0">
                                                                             <thead>
                                                                                 <tr>
-                                                                                    <th mat-sort-header="name">Medicine Name</th>
-                                                                                    <th mat-sort-header="consultingDoctor">Type</th>
+                                                                                    <th mat-sort-header="name">Medicine
+                                                                                        Name</th>
+                                                                                    <th
+                                                                                        mat-sort-header="consultingDoctor">
+                                                                                        Type</th>
                                                                                     <th mat-sort-header="dose">Dose</th>
-                                                                                    <th mat-sort-header="consultingDoctor">Frequency
+                                                                                    <th
+                                                                                        mat-sort-header="consultingDoctor">
+                                                                                        Frequency
                                                                                     </th>
-                                                                                    <th mat-sort-header="timing">Timing</th>
-                                                                                    <th mat-sort-header="duration">Duration</th>
-                                                                                    <th mat-sort-header="instruction">Instruction</th>
+                                                                                    <th mat-sort-header="timing">Timing
+                                                                                    </th>
+                                                                                    <th mat-sort-header="duration">
+                                                                                        Duration</th>
+                                                                                    <th mat-sort-header="instruction">
+                                                                                        Instruction</th>
                                                                                     <th></th>
                                                                                 </tr>
                                                                             </thead>
                                                                             <tbody>
                                                                                 <tr *ngFor="let data of medicineDto">
-            
+
                                                                                     <td>{{data.medName}}</td>
                                                                                     <td>{{data.medType}}</td>
                                                                                     <td>{{data.dose}}</td>
@@ -677,7 +694,7 @@
                                                                                     <td>{{data.timing}}</td>
                                                                                     <td>{{data.duration}}</td>
                                                                                     <td>{{data.instruction}}</td>
-            
+
                                                                                 </tr>
                                                                             </tbody>
                                                                         </table>
@@ -689,7 +706,7 @@
                                                                         *ngIf="medicine.controls.length>0 && appointmentStatus">
                                                                         <div class="doctor-submit text-start">
 
-                                                                            <button type="submit" 
+                                                                            <button type="submit"
                                                                                 class="btn btn-primary submit-form me-2">Submit
                                                                                 Medicine</button>
 
@@ -712,7 +729,8 @@
 
                                                                 <button type="submit" *ngIf="!showNext"
                                                                     class="btn btn-primary submit-form me-2">Submit</button>
-                                                                <button (click)="updateConsultation()" type="button" *ngIf="showNext"
+                                                                <button (click)="updateConsultation()" type="button"
+                                                                    *ngIf="showNext"
                                                                     class="btn btn-primary me-2">Update</button>
 
                                                                 <button type="button" (click)="cancelConsultation()"
@@ -792,13 +810,15 @@
                                                                 </h4>
                                                                 <div *ngIf="prescriptionImage; else noImage">
                                                                     <h3>Your Prescription</h3>
-                                                                    <img [src]="prescriptionImage" alt="Prescription Image" style="max-width: 100%; height: auto;" />
-                                                                  </div>
-                                                                  
-                                                                  <ng-template #noImage>
+                                                                    <img [src]="prescriptionImage"
+                                                                        alt="Prescription Image"
+                                                                        style="max-width: 100%; height: auto;" />
+                                                                </div>
+
+                                                                <ng-template #noImage>
                                                                     <p>No prescription image available.</p>
-                                                                  </ng-template>
-                                                                  
+                                                                </ng-template>
+
                                                                 <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
                                                             </div>
                                                         </ng-container>
@@ -806,24 +826,28 @@
                                                     <hr>
 
                                                     <div class="row">
-                                                        <div class="col-12" class="questionsOuter" *ngIf="groupedQuestionData.length > 0">
-                                                          <div class="questionnaireGroup" *ngFor="let group of groupedQuestionData">
-                                                            <h3><strong>{{ group.questionnaireName }}</strong></h3>
-                                                            <ul class="quesansOuter">
-                                                              <ng-container *ngFor="let item of group.questions">
-                                                                <ng-container *ngIf="item.answerText">
-                                                                  <li>{{ item.questionText }} - <strong>{{ item.answerText }}</strong></li>
-                                                                </ng-container>
-                                                                <ng-container *ngIf="item.optionText">
-                                                                  <li>{{ item.questionText }} - <strong>{{ item.optionText }}</strong></li>
-                                                                </ng-container>
-                                                              </ng-container>
-                                                            </ul>
-                                                            <br/>
-                                                          </div>
+                                                        <div class="col-12" class="questionsOuter"
+                                                            *ngIf="groupedQuestionData.length > 0">
+                                                            <div class="questionnaireGroup"
+                                                                *ngFor="let group of groupedQuestionData">
+                                                                <h3><strong>{{ group.questionnaireName }}</strong></h3>
+                                                                <ul class="quesansOuter">
+                                                                    <ng-container *ngFor="let item of group.questions">
+                                                                        <ng-container *ngIf="item.answerText">
+                                                                            <li>{{ item.questionText }} - <strong>{{
+                                                                                    item.answerText }}</strong></li>
+                                                                        </ng-container>
+                                                                        <ng-container *ngIf="item.optionText">
+                                                                            <li>{{ item.questionText }} - <strong>{{
+                                                                                    item.optionText }}</strong></li>
+                                                                        </ng-container>
+                                                                    </ng-container>
+                                                                </ul>
+                                                                <br />
+                                                            </div>
                                                         </div>
-                                                      </div>
-                                                      
+                                                    </div>
+
                                                     <div></div>
                                                     <div class="row" *ngIf="vitalDto">
                                                         <!-- <div class="col-12" > -->
@@ -921,7 +945,8 @@
                                                             <div class="col-12" *ngIf="_consultationDto.followupDate">
                                                                 <div style="border: 2px solid black;">
                                                                     <h4><strong>Follow up
-                                                                            Date:</strong>{{_consultationDto.followupDate| date:'dd-MM-yyyy'}}
+                                                                            Date:</strong>{{_consultationDto.followupDate|
+                                                                        date:'dd-MM-yyyy'}}
                                                                     </h4>
                                                                 </div>
                                                             </div>
@@ -965,7 +990,7 @@
                                         </div>
                                     </div>
                                     <!-- Image Preview Section -->
-                                        
+
 
                                 </div>
                                 <div class="btnOuter1">

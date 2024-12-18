@@ -3,8 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { PrescriptionPadComponent } from './prescription-pad.component';
 
 const routes: Routes = [
-  { path: '', component: PrescriptionPadComponent,
- }
+  { path: '', component: PrescriptionPadComponent },
 ];
 
 @NgModule({
