@@ -1,4 +1,5 @@
-import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit, Input } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import SignaturePad from 'signature_pad';
 
 @Component({
@@ -9,6 +10,7 @@ import SignaturePad from 'signature_pad';
 export class PrescriptionPadComponent implements AfterViewInit {
   @ViewChild('canvas') canvasEl!: ElementRef<HTMLCanvasElement>;
   prescriptionPad!: SignaturePad;
+  title: string = '';
   isDrawing = false;
   penColor = '#000000'; // Default pen color
   penWidth = 2; // Default pen width
@@ -17,10 +19,19 @@ export class PrescriptionPadComponent implements AfterViewInit {
   isEraserActive = false;
   debounceTimer: any;
 
+  constructor(private route: ActivatedRoute) { }
+
+  ngOnInit(): void {
+    // Get the title parameter from the route
+    this.route.paramMap.subscribe(params => {
+      this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad'; 
+    });
+  }
+
   ngAfterViewInit() {
     const canvas = this.canvasEl.nativeElement;
-    canvas.width = window.innerWidth * 0.9;
-    canvas.height = 450;
+    canvas.width = 900;
+    canvas.height = 600;
 
     this.prescriptionPad = new SignaturePad(canvas, {
       penColor: this.penColor,
@@ -60,12 +71,12 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   // Utility to set the cursor style
   private setCursor(style: string): void {
-    this.canvasEl.nativeElement.style.cursor = style == 'pen' ?
-      'url("/assets/img/icons/edit.svg"), auto'
-      : 'crosshair';
+     this.canvasEl.nativeElement.style.cursor = style == 'pen' ?
+       'url("/assets/img/icons/edit.svg"), auto'
+       : 'crosshair';
   }
 
-  // Update pen color
+  // Update pen colors
   changePenColor(color: string): void {
     this.penColor = color;
     if (!this.isEraserActive) {

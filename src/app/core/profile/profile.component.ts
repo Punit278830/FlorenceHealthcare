@@ -201,11 +201,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
   
-  openInNewTab(path: string): void {
-    const url = this.route.serializeUrl(this.route.createUrlTree([path]));
+  openInNewTab(path: string, title: string): void {
+    const url = this.route.serializeUrl(this.route.createUrlTree([path, title]));
+    console.log(url);
     //window.open(url, '_blank'); // Open the generated URL in a new tab
-    this.route.navigate([path]);
-
+    this.route.navigate([url]);
   }
 
 

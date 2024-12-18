@@ -1,50 +1,72 @@
+.heading {
+  font-size: 2rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
 
-.signature-pad-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
-    justify-content: center;
-  }
-  
-  .heading {
-    font-size: 2rem;
-    margin-top: 20px;
-    margin-bottom: 20px;
-  }
-  
-  .canvas-wrapper {
-    width: 800px;  // Set fixed width for the canvas
-    height: 400px; // Set the visible height for the scrollable area
+.canvas-wrapper {
+    width: 100%;  // Set fixed width for the canvas
+    height: 90%; // Set the visible height for the scrollable area
     overflow: auto;  // Enables scrolling when the content exceeds the visible area
     border: 1px solid #ccc;  // Optional: Add a border for clarity
-  }
-  
-  canvas {
-    display: block;
-    background-color: #f9f9f9;
-    cursor: url('/assets/img/pen-cursor.png'), auto; /* Custom pen cursor */
-    min-width: 800px;  // Set canvas width larger than the container
-    min-height: 400px; // Set canvas height larger than the container for scrolling
-  }
+}
 
-  .color-buttons button {
-    width: 30px;
-    height: 30px;
-    margin: 5px;
-    border-radius: 50%;
-  }
-  
-  .button-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-  }
-  
-  button {
-    padding: 8px 12px;
-    margin: 0 5px;
-    font-size: 16px;
-    cursor: pointer;
-  }
+canvas {
+  display: block;
+  background-color: #f9f9f9;
+  cursor: url('/assets/img/icons/edit.svg'), auto; /* Custom pen cursor */
+  min-width: 100%; /* Set canvas width larger than the container */
+  min-height: 90%; /* Increase the canvas height */
+}
+
+.controls-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Add gap between sections (Pen Thickness, Pen Color, etc.) */
+}
+
+/* Pen Thickness Section */
+.pen-thickness-label {
+  font-size: 1.2rem;
+  margin-bottom: 10px; /* Add margin bottom to increase gap after Pen Thickness label */
+}
+
+/* Pen Color Section */
+.pen-color-section {
+  font-size: 1.2rem;
+  margin-top: 20px; /* Increase gap before "Choose Pen Color" label */
+}
+
+.color-buttons {
+  display: grid; /* Use grid layout */
+  grid-template-columns: repeat(2, 1fr); /* Create two columns of equal width */
+  gap: 10px; /* Space between buttons */
+  margin-top: 10px; /* Space between label and buttons */
+}
+
+.color-buttons button {
+  width: 100%; /* Make buttons fill the column */
+  padding: 15px; /* Add padding for larger buttons */
+  border: none; /* Remove border */
+  color: white;
+  font-size: 14px; /* Adjust font size */
+  cursor: pointer; /* Change cursor on hover */
+}
+
+.color-buttons button:hover {
+  opacity: 0.8; /* Slightly reduce opacity on hover */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-container button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  font-size: 16px;
+  cursor: pointer;
+}

@@ -166,7 +166,7 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'prescription-pad',
+        path: 'prescription-pad/:title',
         loadChildren: () =>
           import('../core/prescription/prescription.module').then(
             (m) => m.PrescriptionModule
