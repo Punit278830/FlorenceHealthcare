@@ -202,13 +202,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
   
   openInNewTab(path: string, title: string): void {
+    path = path + "/" + this.latestId + "/";
     const url = this.route.serializeUrl(this.route.createUrlTree([path, title]));
-    console.log(url);
-    //window.open(url, '_blank'); // Open the generated URL in a new tab
     this.route.navigate([url]);
   }
-
-
 
   viewDocument(item: any) {
     this.currentFileName = item.fileName;
@@ -961,7 +958,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
         console.log("item", item)
-        if (item.docName == "prescription") {
+        if (item.docName == "prescription" || item.docName == "pen-prescription") {
           this.presDocuments.push(item);
         }
         if (item.docName == "vital") {
@@ -1368,5 +1365,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.route.navigate([currentUrl]);
     })
 
+  }
+
+  getIcon(documentName: string): string {
+    const extension = documentName.split('.').pop()?.toLowerCase();
+
+    switch (extension) {
+      case 'pdf':
+        return 'picture_as_pdf'; // Material icon for PDFs
+      case 'doc':
+      case 'docx':
+        return 'description'; // Generic document icon
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+        return 'image'; // Icon for images
+      case 'txt':
+        return 'text_snippet'; // Icon for text files
+      default:
+        return 'insert_drive_file'; // Generic file icon
+    }
   }
 }

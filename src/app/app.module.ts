@@ -9,7 +9,7 @@ import { ToastrModule } from 'ngx-toastr';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LoaderComponent } from './core/loader/loader.component';
-import { FormsModule } from '@angular/forms';  // Import FormsModule
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -24,7 +24,8 @@ import { FormsModule } from '@angular/forms';  // Import FormsModule
     SharedModule,
     NgxExtendedPdfViewerModule,
     ToastrModule.forRoot(),
-    NgxSpinnerModule.forRoot()
+    NgxSpinnerModule.forRoot(),
+    MatIconModule
   ],
   providers: [],
   bootstrap: [AppComponent]

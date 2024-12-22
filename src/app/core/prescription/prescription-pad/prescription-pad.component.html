@@ -35,10 +35,11 @@
 
             <div class="button-container">
               <button (click)="clearPad()">Clear</button>
-              <button (click)="printPad()">Print</button>
               <button (click)="toggleEraser()" [style.background-color]="isEraserActive ? 'grey' : 'lightgray'">
                 {{ isEraserActive ? 'Switch to Pen' : 'Switch to Eraser' }}
               </button>
+              <button (click)="printPad()">Print</button>
+              <button (click)="saveCanvasToDatabase()">Save</button>
             </div>
           </div>
         </div>
