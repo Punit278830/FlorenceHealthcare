@@ -489,7 +489,17 @@
                                                                         close
                                                                       </mat-icon>
                                                                     </div>
-                                                                    <div class="doc-name">{{ file.fileName }}</div>
+                                                                    <div class="doc-name">
+                                                                        {{ file.fileName }}
+                                                                        <ng-container *ngIf="file.docName === 'pen-prescription'">
+                                                                            <span
+                                                                              class="edit-link"
+                                                                              (click)="openInNewTab('/prescription-pad', 'Write', file.fileId)"
+                                                                            >
+                                                                              Edit
+                                                                            </span>
+                                                                          </ng-container>
+                                                                      </div>
                                                                   </div>
                                                                 </ng-container>
                                                               </ng-container>

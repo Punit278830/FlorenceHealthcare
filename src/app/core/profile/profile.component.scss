@@ -274,4 +274,14 @@
     white-space: normal; /* Allows wrapping to multiple lines */
     text-align: center; /* Centers the text */
   }
+
+  .edit-link {
+    margin-left: 10px;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .edit-link:hover {
+    color: darkblue;
+  }
   

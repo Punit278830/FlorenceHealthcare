@@ -23,6 +23,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   maxPenSize = 5;
   isEraserActive = false;
   debounceTimer: any;
+  fileId?: number;
   private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
 
   constructor(private route: ActivatedRoute,
@@ -45,6 +46,20 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
       this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
       this.FileUploadDto.appointmentId = this.appointmentId;
+
+      this.route.queryParamMap.subscribe(queryParams => {
+        this.fileId = queryParams.has('fileId')
+          ? Number(queryParams.get('fileId'))
+          : undefined;
+  
+        if (this.fileId) {
+          this.fileUploadServie.getConsulationFileById(this.fileId).subscribe(res => {
+            this.loadImageData(res.fileData || '');
+          });
+        }
+      });
+      
+     
     });
   }
 
@@ -232,6 +247,35 @@ export class PrescriptionPadComponent implements AfterViewInit {
     }
   }
 
+  loadImageData(base64Image: string): void {
+    if (!base64Image.startsWith('data:image')) {
+      this.toastr.error('Invalid image data.', 'Error');
+      return;
+    }
+  
+    const image = new Image(); // Create an image object
+    image.src = base64Image;
+  
+    image.onload = () => {
+      const canvas = this.canvasEl.nativeElement;
+      const context = canvas.getContext('2d');
+  
+      if (context) {
+        // Resize canvas to match the image dimensions
+        canvas.width = image.width;
+        canvas.height = image.height;
+  
+        // Draw the image on the canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+      }
+    };
+  
+    image.onerror = () => {
+      this.toastr.error('Failed to load the image.', 'Error');
+    };
+  }
+  
 
   // Print the canvas content
   printPad(): void {

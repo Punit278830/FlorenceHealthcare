@@ -5,8 +5,8 @@
 }
 
 .canvas-wrapper {
-    width: 100%;  // Set fixed width for the canvas
-    height: 90%; // Set the visible height for the scrollable area
+    // width: 100%;  // Set fixed width for the canvas
+    // height: 90%; // Set the visible height for the scrollable area
     overflow: auto;  // Enables scrolling when the content exceeds the visible area
     border: 1px solid #ccc;  // Optional: Add a border for clarity
 }
@@ -15,8 +15,8 @@ canvas {
   display: block;
   background-color: #f9f9f9;
   cursor: url('/assets/img/icons/edit.svg'), auto; /* Custom pen cursor */
-  min-width: 100%; /* Set canvas width larger than the container */
-  min-height: 90%; /* Increase the canvas height */
+  // min-width: 100%; /* Set canvas width larger than the container */
+  // min-height: 90%; /* Increase the canvas height */
 }
 
 .controls-wrapper {

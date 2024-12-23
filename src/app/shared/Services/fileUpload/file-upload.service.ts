@@ -52,4 +52,8 @@ export class FileUploadService {
     return this._http.delete(this.apiUrl + 'ConsultationFiles/' + id)
   }
 
+  getConsulationFileById(fileId: number): Observable<IfileUpload> {
+    return this._http.get(this.apiUrl + "ConsultationFiles/file/" + fileId);
+  }
+
 }
