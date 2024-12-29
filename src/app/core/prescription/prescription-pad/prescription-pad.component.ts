@@ -51,15 +51,15 @@ export class PrescriptionPadComponent implements AfterViewInit {
         this.fileId = queryParams.has('fileId')
           ? Number(queryParams.get('fileId'))
           : undefined;
-  
+
         if (this.fileId) {
           this.fileUploadServie.getConsulationFileById(this.fileId).subscribe(res => {
             this.loadImageData(res.fileData || '');
           });
         }
       });
-      
-     
+
+
     });
   }
 
@@ -222,29 +222,55 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
       // Convert the temporary canvas content to a Base64 string
       const base64String = tempCanvas.toDataURL('image/png');
-
-      // Prepare the file upload DTO
-      this.FileUploadDto.fileName = `prescription-${Date.now()}.png`; // Unique file name
-      this.FileUploadDto.FileType = 'image/png';
       this.FileUploadDto.fileData = base64String;
 
-      // Call the upload service
-      this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
-        result => {
-          console.log(result);
-          this.loaderService.hideLoader();
-          this.toastr.success('Canvas image uploaded successfully', 'Success');
-        },
-        error => {
-          this.loaderService.hideLoader();
-          console.error('Error uploading canvas image:', error);
-          this.toastr.error('Image upload failed', 'Error');
-        }
-      );
+      // If the existing file is updated, call update method. else, call upload method
+      if (this.fileId != undefined && this.fileId > 0) {
+        this.FileUploadDto.fileId = this.fileId;
+        this.updateExistingImage();
+      } else {
+        // Prepare the file upload DTO
+        this.FileUploadDto.fileName = `prescription-${Date.now()}.png`; // Unique file name
+        this.FileUploadDto.FileType = 'image/png';
+
+        this.uploadNewImage();
+      }
+
     } else {
       this.loaderService.hideLoader();
       this.toastr.error('Failed to process the canvas.', 'Error');
     }
+  }
+
+  uploadNewImage() {
+    this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
+      result => {
+        console.log(result);
+        this.loaderService.hideLoader();
+        this.toastr.success('Canvas image uploaded successfully', 'Success');
+      },
+      error => {
+        this.loaderService.hideLoader();
+        console.error('Error uploading canvas image:', error);
+        this.toastr.error('Image upload failed', 'Error');
+      }
+    );
+  }
+
+  updateExistingImage() {
+    this.fileUploadServie.updateConsultationFile(this.fileId ?? 0, this.FileUploadDto).subscribe(
+      result => {
+        console.log(result);
+        this.loaderService.hideLoader();
+        this.toastr.success('Canvas image updated successfully', 'Success');
+      },
+      error => {
+        this.loaderService.hideLoader();
+        console.error('Error updating canvas image:', error);
+        this.toastr.error('Image update failed', 'Error');
+      }
+    );
+
   }
 
   loadImageData(base64Image: string): void {
@@ -252,30 +278,30 @@ export class PrescriptionPadComponent implements AfterViewInit {
       this.toastr.error('Invalid image data.', 'Error');
       return;
     }
-  
+
     const image = new Image(); // Create an image object
     image.src = base64Image;
-  
+
     image.onload = () => {
       const canvas = this.canvasEl.nativeElement;
       const context = canvas.getContext('2d');
-  
+
       if (context) {
         // Resize canvas to match the image dimensions
         canvas.width = image.width;
         canvas.height = image.height;
-  
+
         // Draw the image on the canvas
         context.clearRect(0, 0, canvas.width, canvas.height);
         context.drawImage(image, 0, 0);
       }
     };
-  
+
     image.onerror = () => {
       this.toastr.error('Failed to load the image.', 'Error');
     };
   }
-  
+
 
   // Print the canvas content
   printPad(): void {

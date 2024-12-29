@@ -39,7 +39,9 @@
                 {{ isEraserActive ? 'Switch to Pen' : 'Switch to Eraser' }}
               </button>
               <button (click)="printPad()">Print</button>
-              <button (click)="saveCanvasToDatabase()">Save</button>
+              <button (click)="saveCanvasToDatabase()">
+                {{ fileId == undefined || fileId <= 0 ? 'Save' : 'Update' }}
+              </button>
             </div>
           </div>
         </div>

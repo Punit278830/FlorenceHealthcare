@@ -69,7 +69,18 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
-      _context.Entry(consultationFile).State = EntityState.Modified;
+      var existingFile = await _context.ConsultationFiles.FindAsync(id);
+
+      if (existingFile == null)
+      {
+        return NotFound();
+      }
+
+      // Update only the FileData property
+      if (consultationFile.FileData != null)
+      {
+        existingFile.FileData = consultationFile.FileData;
+      }
 
       try
       {
@@ -89,6 +100,7 @@ namespace hospitalApiProject.Controllers
 
       return NoContent();
     }
+
 
     // POST: api/ConsultationFiles
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

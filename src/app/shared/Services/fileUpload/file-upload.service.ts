@@ -44,6 +44,10 @@ export class FileUploadService {
     return this._http.post(this.apiUrl + 'ConsultationFiles/', data)
   }
 
+  updateConsultationFile(id: number, data: IconsultationFiles): Observable<any> {
+    return this._http.put(this.apiUrl + 'ConsultationFiles/' + id, data)
+  }
+
   getConsultationFileByAppointment(appointmentid: number): Observable<IconsultationFiles[]> {
     return this._http.get(this.apiUrl + 'ConsultationFiles/' + appointmentid)
   }
