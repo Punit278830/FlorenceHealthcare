@@ -1,5 +1,5 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import SignaturePad from 'signature_pad';
 import { LoadingService } from '../../../shared/Services/loader/loader.service';
@@ -30,6 +30,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
     private toastr: ToastrService,
     private loaderService: LoadingService,
     private fileUploadServie: FileUploadService,
+    private router: Router
   ) {
 
   }
@@ -44,7 +45,8 @@ export class PrescriptionPadComponent implements AfterViewInit {
         return;
       }
 
-      this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
+      // this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
+      this.FileUploadDto.docName = 'pen-prescription';
       this.FileUploadDto.appointmentId = this.appointmentId;
 
       this.route.queryParamMap.subscribe(queryParams => {
@@ -65,20 +67,38 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   ngAfterViewInit() {
     const canvas = this.canvasEl.nativeElement;
-    canvas.width = 900;
-    canvas.height = 600;
-
+    const dpr = window.devicePixelRatio || 1;
+  
+    const parent = canvas.parentElement;
+    if (parent) {
+      // Calculate display and actual dimensions
+      const displayWidth = parent.clientWidth;
+      const displayHeight = parent.clientHeight;
+  
+      // Set CSS dimensions for display
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
+  
+      // Set actual canvas dimensions for drawing
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+  
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(dpr, dpr); // Scale canvas for high DPI
+      }
+    }
+  
+    // Initialize SignaturePad
     this.prescriptionPad = new SignaturePad(canvas, {
       penColor: this.penColor,
       minWidth: this.penWidth,
       maxWidth: this.penWidth * 2,
-      velocityFilterWeight: 0.7,  // Adjust this value to smooth the drawing - 
-      //Higher values make the stroke smoother but less responsive, 
-      //and lower values make it more responsive but less smooth
-      throttle: 16, // Adjust for smoother performance
+      velocityFilterWeight: 0.7,
+      throttle: 16, // Smoother drawing
     });
   }
-
+  
   // Handle the beginning of drawing
   onBeginDrawing(): void {
     this.isDrawing = true;
@@ -131,7 +151,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   // Toggle eraser mode
   toggleEraser(): void {
     this.isEraserActive = !this.isEraserActive;
-    this.prescriptionPad.penColor = this.isEraserActive ? 'white' : this.penColor;
+    this.prescriptionPad.penColor = this.isEraserActive ? '#f9f9f9' : this.penColor;
     this.prescriptionPad.minWidth = this.isEraserActive ? 10 : this.penWidth;
     this.prescriptionPad.maxWidth = this.isEraserActive ? 20 : this.penWidth * 2;
   }
@@ -154,10 +174,21 @@ export class PrescriptionPadComponent implements AfterViewInit {
     }, 200); // Adjust debounce time as needed
   }
 
-
-  // Clear the canvas
   clearPad(): void {
+    const canvas = this.canvasEl.nativeElement;
+  
+    // Clear the entire canvas area using actual dimensions
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width * 2, canvas.height * 2);
+    }
+  
+    // Clear SignaturePad's internal state
     this.prescriptionPad.clear();
+  
+    // Force SignaturePad to refresh its internal boundaries
+    this.prescriptionPad.off();
+    this.prescriptionPad.on();
   }
 
   saveAsImage(): void {
@@ -246,8 +277,17 @@ export class PrescriptionPadComponent implements AfterViewInit {
     this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
       result => {
         console.log(result);
+        const newFileId = result.fileId;
+
+        // Append the file ID to the URL as a query parameter
         this.loaderService.hideLoader();
         this.toastr.success('Canvas image uploaded successfully', 'Success');
+
+        if (newFileId) {
+          const queryParams = newFileId ? { newFileId } : {}; // Include fileId in queryParams if provided
+          const urlTree = this.router.createUrlTree(['/prescription-pad', this.appointmentId, this.title], { queryParams });
+          this.router.navigateByUrl(urlTree); // Navigate to the constructed URL
+        }
       },
       error => {
         this.loaderService.hideLoader();
@@ -256,6 +296,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
       }
     );
   }
+
 
   updateExistingImage() {
     this.fileUploadServie.updateConsultationFile(this.fileId ?? 0, this.FileUploadDto).subscribe(
