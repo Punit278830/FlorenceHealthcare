@@ -126,8 +126,28 @@ export class PrescriptionMasterComponent {
   }
 
   onDelete(id: number) {
-    this.isEditMode = false;
-    console.log('Delete Item ID:', id);
+    console.log('deleteId', id);
+    if (id) {
+      this.confirmDelete(id);
+    } else {
+      console.error('Invalid item ID');
+    }
+  }
+  
+
+  confirmDelete(id: number) {
+    this.consultTemplateService.deleteTemplate(id).subscribe({
+      next: (res) => {
+        if (res == null) {
+          this.toaster.success("Template is deleted!");
+          this.getAllTemplates(); 
+        }
+      },
+      error: (err) => {
+        console.error('Error deleting item:', err);
+        this.toaster.error('Failed to delete template');
+      }
+    });
   }
 
   getAllTemplates(): void {

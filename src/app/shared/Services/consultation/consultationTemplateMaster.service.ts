@@ -29,4 +29,8 @@ export class ConsultationTemplateMasterService {
     updateConsultationTemplate(id: number, consult: IConsultationTemplate): Observable<any> {
         return this.http.put(this.apiUrl + 'PrescriptionTemplateMaster/' + id, consult)
     }
+
+    deleteTemplate(id:number):Observable<any>{
+        return this.http.delete(this.apiUrl+'PrescriptionTemplateMaster/'+ id);
+      }
 }
