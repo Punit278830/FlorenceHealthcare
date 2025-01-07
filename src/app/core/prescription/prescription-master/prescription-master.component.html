@@ -23,7 +23,7 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="templateName">Prescription Template Name <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="templateName" type="text" placeholder="" [readonly]="isEditMode">
+                                        <input class="form-control" formControlName="templateName" type="text" placeholder="">
                                         <div *ngIf="consultForm.get('templateName')?.invalid || ((consultForm.get('templateName')?.dirty && consultForm.get('templateName')?.touched))" class="text-danger">
                                             <div *ngIf="consultForm.get('templateName')?.errors?.['required']">Template name is required.</div>
                                         </div>

@@ -35,6 +35,7 @@ export class PrescriptionMasterComponent {
 
   initlizeConsultForm() {
     this.consultForm = this.fb.group({
+      id: [''],
       templateName: ['', Validators.required],
       examinationNote: [''],
       advice: [''],
@@ -60,26 +61,37 @@ export class PrescriptionMasterComponent {
   }
 
   submitConsultation(form: FormGroup) {
+    if (!form.valid) {
+      this.toaster.error('Invalid form data');
+      return;
+    }
+  
     this.loaderService.showLoader();
-    this.isEditMode = false;
-
-    if (form.valid) {
-      this.prescriptionTemplateDto = form.value;
-      this.prescriptionTemplateDto.diagnosisId = this.selectedDiagnosisId;
-      this.consultTemplateService.addConsultationTemplate(this.prescriptionTemplateDto).subscribe(res => {
-        this.toaster.success("Consultation template data saved successfully!", "Consultation Template Data")
+  
+    const operation = this.isEditMode
+      ? this.consultTemplateService.updateConsultationTemplate(form.value.id, {
+          ...form.value,
+          diagnosisId: this.selectedDiagnosisId
+        })
+      : this.consultTemplateService.addConsultationTemplate({
+          ...form.value,
+          diagnosisId: this.selectedDiagnosisId
+        });
+  
+    operation.subscribe({
+      next: () => {
+        const message = this.isEditMode
+          ? "Consultation template data updated successfully!"
+          : "Consultation template data saved successfully!";
+        this.toaster.success(message, "Consultation Template Data");
         this.getAllTemplates();
         this.resetForm();
       },
-        err => {
-          this.toaster.error(err.error.message, 'Error');
-        })
-    } else {
-      this.toaster.error('Invalid form data');
-    }
-
-    this.loaderService.hideLoader();
-  }
+      error: (err) => this.toaster.error(err.error.message, 'Error'),
+      complete: () => this.loaderService.hideLoader()
+    });
+    this.loaderService.hideLoader()
+  }  
 
   addPreDefineDiagnosis(data: any) {
     this.consultForm.get('finalDiagnosis')?.patchValue(data.value.diagnosText);
@@ -88,16 +100,17 @@ export class PrescriptionMasterComponent {
 
   onEdit(id: number) {
     this.isEditMode = true;
-  
+
     // Find the selected template by ID
     const selectedTemplate = this.templates.find(template => template.id === id);
     if (!selectedTemplate) {
       this.toaster.error('Template not found', 'Error');
       return;
     }
-  
+
     // Patch the form values with the selected template
     this.consultForm.patchValue({
+      id: selectedTemplate.id,
       templateName: selectedTemplate.templateName,
       examinationNote: selectedTemplate.examinationNote,
       advice: selectedTemplate.advice,
@@ -105,12 +118,12 @@ export class PrescriptionMasterComponent {
       finalDiagnosis: selectedTemplate.finalDiagnosis,
       diagnosisData: this.getPreDiagnosisById(selectedTemplate.diagnosisId) // Map diagnosId to diagnosName
     });
-  
+
     // Save the selected diagnosisId for submission
     this.selectedDiagnosisId = selectedTemplate.diagnosisId || 0;
-  
+
     console.log('Editing Template:', selectedTemplate);
-  }  
+  }
 
   onDelete(id: number) {
     this.isEditMode = false;
@@ -125,6 +138,7 @@ export class PrescriptionMasterComponent {
   }
 
   resetForm() {
+    this.isEditMode = false;
     this.consultForm.reset();
     this.initlizeConsultForm(); // Reinitialize form with empty values
   }

@@ -46,6 +46,14 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
+      var existingTemplate = await _context.PrescriptionTemplateMaster
+          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName && pt.Id != id);
+
+      if (existingTemplate != null)
+      {
+        return Conflict(new { message = "A template with this name already exists." });
+      }
+
       _context.Entry(prescriptionTemplateMaster).State = EntityState.Modified;
 
       try
