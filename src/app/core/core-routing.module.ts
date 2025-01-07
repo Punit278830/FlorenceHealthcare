@@ -166,12 +166,19 @@ const routes: Routes = [
           ),
       },
       {
-        path: 'prescription-pad/:appointmentId/:title',
+        path: 'prescription',
         loadChildren: () =>
           import('../core/prescription/prescription.module').then(
             (m) => m.PrescriptionModule
           )
       },
+       {
+         path: 'prescription-pad/:appointmentId/:title',
+         loadChildren: () =>
+           import('../core/prescription/prescription.module').then(
+             (m) => m.PrescriptionModule
+           )
+       },
     ],
   },
 ];

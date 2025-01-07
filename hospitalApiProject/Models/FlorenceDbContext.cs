@@ -58,6 +58,7 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<PaymentModeInfo> PaymentModeInfo { get; set; }
 
+  public virtual DbSet<PrescriptionTemplateMaster> PrescriptionTemplateMaster { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -199,6 +200,31 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("finalDiagnosis");
       entity.Property(e => e.FollowupDate).HasColumnName("followupDate");
+    });
+
+    modelBuilder.Entity<PrescriptionTemplateMaster>(entity =>
+    {
+      entity.ToTable("PrescriptionTemplateMaster");
+
+      entity.Property(e => e.Id).HasColumnName("id");
+      entity.Property(e => e.TemplateName).HasColumnName("templateName");
+      entity.Property(e => e.Advice)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("advice");
+      entity.Property(e => e.DiffDiagnosis)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("diffDiagnosis");
+      entity.Property(e => e.ExaminationNote)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("examinationNote");
+      entity.Property(e => e.FinalDiagnosis)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("finalDiagnosis");
+      entity.Property(e => e.DiagnosisId).HasColumnName("diagnosisId");
     });
 
     modelBuilder.Entity<ConsultationFile>(entity =>

@@ -1,0 +1,140 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header  -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a>Presciption </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Add Prescription Data</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+
+                <div class="card">
+                    <div class="card-body">
+                        <form [formGroup]="consultForm" (ngSubmit)="submitConsultation(consultForm)">
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="templateName">Prescription Template Name <span class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="templateName" type="text" placeholder="" [readonly]="isEditMode">
+                                        <div *ngIf="consultForm.get('templateName')?.invalid || ((consultForm.get('templateName')?.dirty && consultForm.get('templateName')?.touched))" class="text-danger">
+                                            <div *ngIf="consultForm.get('templateName')?.errors?.['required']">Template name is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="examinationNote">Examination Note</label>
+                                        <textarea class="form-control" formControlName="examinationNote" rows="6"
+                                            cols="30"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="advice">Advice</label>
+                                        <textarea class="form-control" formControlName="advice" rows="6"
+                                            cols="30"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="diffDiagnosis">Differential diagnosis</label>
+                                        <textarea class="form-control" formControlName="diffDiagnosis" rows="6"
+                                            cols="30"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="finalDiagnosis">Final diagnosis</label>
+                                        <textarea class="form-control" formControlName="finalDiagnosis" rows="6"
+                                            cols="30"></textarea>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="diagnosisData">Pre Defined Diagnosis</label>
+                                        <mat-select class="form-control" formControlName="diagnosisData"
+                                            (selectionChange)="addPreDefineDiagnosis($event)">
+                                            <mat-option *ngFor="let data of preDiagnosis"
+                                                [value]="data">{{data.diagnosName}}</mat-option>
+                                        </mat-select>
+                                    </div>
+                                </div>
+
+                                <div class="col-12" style="margin-top:15px">
+                                    <div class="doctor-submit text-end">
+
+                                        <button type="submit"
+                                            class="btn btn-primary submit-form me-2">
+                                            {{isEditMode ? 'Update' : 'Submit'}}
+                                        </button>
+                                        <button type="button" (click)="cancelConsultation()"
+                                            class="btn btn-primary cancel-form">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="table-responsive mt-4">
+                    <table matSort class="table border-0 custom-table comman-table datatable mb-0">
+                        <thead>
+                            <tr>
+                                <th mat-sort-header="templateName">Template Name</th>
+                                <th mat-sort-header="examinationNote">Examination Note</th>
+                                <th mat-sort-header="advice">Advice</th>
+                                <th mat-sort-header="differentialDiagnosis">Differential diagnosis</th>
+                                <th mat-sort-header="finalDiagnosis">Final diagnosis</th>
+                                <th mat-sort-header="preDefinedDiagnosis">Pre Defined Diagnosis</th>
+                                <th mat-sort-header="actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let template of templates; let i = index">
+                                <td>{{ template.templateName }}</td>
+                                <td>{{ template.examinationNote }}</td>
+                                <td>{{ template.advice }}</td>
+                                <td>{{ template.diffDiagnosis }}</td>
+                                <td>{{ template.finalDiagnosis }}</td>
+                                <td>{{ getPreDiagnosisById(template.diagnosisId)?.diagnosName }}</td>
+
+                                <td class="text-end">
+                                  <div class="dropdown dropdown-action">
+                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
+                                      aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                                    <div class="dropdown-menu dropdown-menu-end">
+                                      <a class="dropdown-item" href="javascript:void(0);" (click)="onEdit(template.id)">
+                                          <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                                       </a>
+                                       
+                                      <!-- *ngIf="loggedIn.userRole == 'admin' " -->
+                                      <a class="dropdown-item" href="javascript:void(0);"
+                                      (click)="onDelete(template.id)">
+                                      <i class="fa fa-trash-alt m-r-5"></i> Delete
+                                   </a>
+                                   
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- No items found message -->
+                    <div class="dataTables_info text-center mt-3">
+                        No Data found
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

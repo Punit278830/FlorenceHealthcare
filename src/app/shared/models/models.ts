@@ -298,6 +298,16 @@ export interface Iconsultation {
   followupDate: Date
 }
 
+export interface IConsultationTemplate {
+  id: number,
+  templateName: string,
+  examinationNote?: string,
+  advice?: string,
+  diffDiagnosis?: string,
+  finalDiagnosis?: string,
+  diagnosisId?: number;
+}
+
 export interface IPredefineDiagnosis {
   diagnosId: number;
   diagnosName: string;
