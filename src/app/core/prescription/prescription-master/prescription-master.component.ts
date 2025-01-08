@@ -14,7 +14,7 @@ import { ConsultationTemplateMasterService } from '../../../shared/Services/cons
 export class PrescriptionMasterComponent {
   public consultForm!: FormGroup;
   public preDiagnosis: IPredefineDiagnosis[] = [];
-  public isEditMode!: boolean;
+  public isEditMode: boolean = false;
   public prescriptionTemplateDto!: IConsultationTemplate
   public selectedDiagnosisId!: number;
   public templates!: IConsultationTemplate[];
@@ -75,6 +75,7 @@ export class PrescriptionMasterComponent {
         })
       : this.consultTemplateService.addConsultationTemplate({
           ...form.value,
+          id: 0,
           diagnosisId: this.selectedDiagnosisId
         });
   
