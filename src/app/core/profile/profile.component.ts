@@ -21,6 +21,7 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
+import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
 //import { PrescriptionService } from '../../shared/Services/prescription/prescription.service';
 
 
@@ -113,8 +114,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   questionList!: Iquestion[];
   prescriptionService: any;
   prescriptionImage: string | null = null;
-  
-
+  public templates: any[] = [];
+  public selectedDiagnosis: number = 0;
 
   // public showAddQuestion=true;
   // public questionnaireId!:number;
@@ -133,8 +134,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
-    private loaderService: LoadingService
-    
+    private loaderService: LoadingService,
+    private consultTemplateService: ConsultationTemplateMasterService,
 
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
@@ -181,12 +182,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.loadQuestions();
     this.fetchAllOptions();
+    this.getAllTemplates();
 
     this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
       this.prescriptionImage = data;  // Assign the image data to the local variable
-      console.log('image',this.prescriptionImage);
-      
-    }); 
+      console.log('image', this.prescriptionImage);
+
+    });
 
 
     // this.getUploadedFiles(this.latestId);
@@ -200,7 +202,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
-  
+
   openInNewTab(path: string, title: string, fileId?: number): void {
     const queryParams = fileId ? { fileId } : {}; // Include fileId in queryParams if provided
     const urlTree = this.route.createUrlTree([path, this.latestId, title], { queryParams });
@@ -228,7 +230,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       alert('Cannot enter alphabet in followup after!');
     }
   }
-  
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -609,6 +611,43 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
+  getAllTemplates(): void {
+    this.consultTemplateService.getConsultationTemplates().subscribe((data: any) => {
+      this.templates = data;
+      console.log('templates:', data);
+    })
+  }
+
+  populateTemplateData(id: number) {
+    // Find the selected template by ID
+    const selectedTemplate = this.templates.find(template => template.id === id);
+    if (!selectedTemplate) {
+      this.toaster.error('Template not found', 'Error');
+      return;
+    }
+
+    // Patch the form values with the selected template
+    this.consultForm.patchValue({
+      templateName: selectedTemplate.templateName,
+      examinationNote: selectedTemplate.examinationNote,
+      advice: selectedTemplate.advice,
+      diffDiagnosis: selectedTemplate.diffDiagnosis,
+      finalDiagnosis: selectedTemplate.finalDiagnosis,
+      diagnosisId: selectedTemplate.diagnosisId // Map diagnosId to diagnosName
+    });
+
+    // Save the selected diagnosisId for submission
+    this.selectedDiagnosis = selectedTemplate.diagnosisId;
+  }
+
+  getPreDiagnosisById(diagnosisId?: number): IPredefineDiagnosis | undefined {
+    return this.preDiagnosis.find(diagnosis => diagnosis.diagnosId === diagnosisId);
+  }
+
+  onTemplateNameChange(event: any) {
+    this.populateTemplateData(event.value);
+  }
+
   loadQuestions(): void {
     this.question.getAllQuestions().subscribe(
       (res) => {
@@ -620,7 +659,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  
+
   fetchAllOptions() {
     this.question.getAllOptions().subscribe(res => {
       if (res) {
@@ -639,7 +678,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
       }
     }
-    
+
     console.log("current", this.currentQuestionData);
 
   }
@@ -936,7 +975,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       advice: [''],
       diffDiagnosis: [''],
       finalDiagnosis: [''],
-      followupDate: ['']
+      followupDate: [''],
+      diagnosisId: ['']
     })
   }
   cancelConsultation() {
@@ -964,7 +1004,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
-        if(item.docName == "previewFile") {
+        if (item.docName == "previewFile") {
           this.previewFile.push(item);
         }
       })
@@ -1084,13 +1124,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
       });
   }
 
-
-
-
-  addPreDefineDiagnosis(diagnosisValue: any) {
-    this.consultForm.get('finalDiagnosis')?.patchValue(diagnosisValue.value)
+  addPreDefineDiagnosis(diagnosis: any) {
+    const data = this.getPreDiagnosisById(diagnosis.value);
+    this.consultForm.get('finalDiagnosis')?.patchValue(data?.diagnosText)
   }
-
 
   addDays(date: Date, days: number): Date {
     const result = new Date(date);
