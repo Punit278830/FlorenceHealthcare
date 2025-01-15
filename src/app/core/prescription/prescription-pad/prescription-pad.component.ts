@@ -39,6 +39,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
     // Get the title parameter from the route
     this.route.paramMap.subscribe(params => {
       this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad';
+      
       this.appointmentId = Number(params.get('appointmentId')) || 0;
       if (this.appointmentId == 0) {
         this.toastr.error("Appointment id is missing in URL.", "Error");
@@ -60,8 +61,6 @@ export class PrescriptionPadComponent implements AfterViewInit {
           });
         }
       });
-
-
     });
   }
 

@@ -22,6 +22,7 @@ import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
 import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
+import { IConsultationTemplate } from '../../shared/models/models';
 //import { PrescriptionService } from '../../shared/Services/prescription/prescription.service';
 
 
@@ -116,6 +117,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   prescriptionImage: string | null = null;
   public templates: any[] = [];
   public selectedDiagnosis: number = 0;
+  isButtonEnabled: boolean = false;
+  newTemplate!: IConsultationTemplate;
 
   // public showAddQuestion=true;
   // public questionnaireId!:number;
@@ -183,6 +186,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loadQuestions();
     this.fetchAllOptions();
     this.getAllTemplates();
+
+    // Subscribe to form value changes
+    this.consultForm.valueChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
+
+    // Optionally subscribe to status changes to ensure fields are touched or dirty
+    this.consultForm.statusChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
 
     this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
       this.prescriptionImage = data;  // Assign the image data to the local variable
@@ -638,6 +651,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     // Save the selected diagnosisId for submission
     this.selectedDiagnosis = selectedTemplate.diagnosisId;
+
+    // Mark the form as touched after patching values, so the button can be enabled
+    this.consultForm.markAllAsTouched();
+  }
+
+  // Enable the button if any field is touched or changed
+  enableAddToTemplateButton(): void {
+    // Check if any form control is touched or dirty (changed)
+    this.isButtonEnabled = this.consultForm.dirty || this.consultForm.touched;
   }
 
   getPreDiagnosisById(diagnosisId?: number): IPredefineDiagnosis | undefined {
@@ -645,8 +667,42 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onTemplateNameChange(event: any) {
+    this.isButtonEnabled = false;
     this.populateTemplateData(event.value);
   }
+
+  SaveNewTemplate() {
+    if (this.consultForm.value.newTemplateName == '') {
+      this.toaster.error('Provide New Template Name');
+    }
+    else {
+      this.loaderService.showLoader();
+
+      this.newTemplate = {
+        id: 0,
+        templateName: this.consultForm.value.newTemplateName,
+        examinationNote: this.consultForm.value.examinationNote,
+        advice: this.consultForm.value.advice,
+        diffDiagnosis: this.consultForm.value.diffDiagnosis,
+        finalDiagnosis: this.consultForm.value.finalDiagnosis,
+        diagnosisId: this.consultForm.value.diagnosisId
+      };
+
+      this.consultTemplateService.addConsultationTemplate(this.newTemplate).subscribe(
+        (res) => {
+          this.toaster.success("Consultation template data saved successfully!", "Success");
+          this.consultForm.value.newTemplateName = '';
+          this.isButtonEnabled = false;
+        },
+        (err) => {
+          this.toaster.error(err.error.message, 'Error')
+        }
+      );
+
+      this.loaderService.hideLoader()
+    }
+  }
+
 
   loadQuestions(): void {
     this.question.getAllQuestions().subscribe(
@@ -934,6 +990,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     }
   }
+  
   submitPrescribeMedicine(prescribeMed: FormGroup) {
 
     this.loaderService.showLoader();
@@ -976,7 +1033,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       diffDiagnosis: [''],
       finalDiagnosis: [''],
       followupDate: [''],
-      diagnosisId: ['']
+      diagnosisId: [''],
+      newTemplateName: ['']
     })
   }
   cancelConsultation() {

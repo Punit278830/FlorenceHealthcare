@@ -443,7 +443,7 @@
                                 </mat-step>
                                 <mat-step label="Prescription"
                                     *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
-                                    
+
                                     <div class="row">
                                         <div class="card">
                                             <div class="card-body">
@@ -533,24 +533,37 @@
                                                         (ngSubmit)="submitConsultation(consultForm)">
                                                         <div class="row">
                                                             <div class="col-12 col-md-6 col-xl-4">
-                                                                <div class="card ">
-                                                                    <div class="card-body">
-                                                                        <div class="form-group local-forms">
-                                                                            <label for="templateName">Consultation
-                                                                                Template
-                                                                                <span
-                                                                                    class="login-danger">*</span></label>
-                                                                            <mat-select formControlName="templateName"
-                                                                                (selectionChange)="onTemplateNameChange($event)"
-                                                                                class="form-control select">
-                                                                                <mat-option
-                                                                                    *ngFor="let template of templates"
-                                                                                    [value]="template.id">
-                                                                                    {{template.templateName}}
-                                                                                </mat-option>
-                                                                            </mat-select>
-                                                                        </div>
-                                                                    </div>
+                                                                <div class="form-group local-forms">
+                                                                    <label for="templateName">Consultation Template
+                                                                        <span class="login-danger">*</span></label>
+                                                                    <mat-select formControlName="templateName"
+                                                                        (selectionChange)="onTemplateNameChange($event)"
+                                                                        class="form-control select">
+                                                                        <mat-option *ngFor="let template of templates"
+                                                                            [value]="template.id">
+                                                                            {{template.templateName}}
+                                                                        </mat-option>
+                                                                    </mat-select>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-12 col-md-6 col-xl-4"
+                                                                *ngIf="isButtonEnabled">
+                                                                <div class="form-group local-forms">
+                                                                    <label for="newTemplateName">New Template Name <span
+                                                                            class="login-danger">*</span></label>
+                                                                    <input class="form-control"
+                                                                        formControlName="newTemplateName" type="text"
+                                                                        placeholder="">
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6 col-xl-4"
+                                                                *ngIf="isButtonEnabled">
+                                                                <div class="form-group d-flex">
+                                                                    <button (click)="SaveNewTemplate()" type="button"
+                                                                        class="btn btn-primary me-2">
+                                                                        Save New Template
+                                                                    </button>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -589,14 +602,19 @@
                                                             </div>
                                                             <div class="col-12 col-md-6 col-xl-4">
                                                                 <div class="form-group local-forms">
-                                                                    <label for="diagnosisId">Pre Defined Diagnosis</label>
-                                                                    <mat-select class="form-control" formControlName="diagnosisId" [(ngModel)]="selectedDiagnosis" (selectionChange)="addPreDefineDiagnosis($event)">
-                                                                        <mat-option *ngFor="let data of preDiagnosis" [value]="data.diagnosId">
+                                                                    <label for="diagnosisId">Pre Defined
+                                                                        Diagnosis</label>
+                                                                    <mat-select class="form-control"
+                                                                        formControlName="diagnosisId"
+                                                                        [(ngModel)]="selectedDiagnosis"
+                                                                        (selectionChange)="addPreDefineDiagnosis($event)">
+                                                                        <mat-option *ngFor="let data of preDiagnosis"
+                                                                            [value]="data.diagnosId">
                                                                             {{ data.diagnosName }}
                                                                         </mat-option>
                                                                     </mat-select>
                                                                 </div>
-                                                            </div>                                                      
+                                                            </div>
 
 
                                                             <div class="col-12 col-md-6 col-xl-4">
