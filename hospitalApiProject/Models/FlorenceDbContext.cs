@@ -39,6 +39,10 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<MedicineMaster> MedicineMasters { get; set; }
 
+  public virtual DbSet<MedicinesGroup> MedicinesGroups { get; set; }
+
+  public virtual DbSet<MedicationGroup> MedicationGroups { get; set; }
+
   public virtual DbSet<Option> Options { get; set; }
 
   public virtual DbSet<PatientInfo> PatientInfos { get; set; }
@@ -58,6 +62,7 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<PaymentModeInfo> PaymentModeInfo { get; set; }
 
+  public virtual DbSet<PrescriptionTemplateMaster> PrescriptionTemplateMaster { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
@@ -199,6 +204,31 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("finalDiagnosis");
       entity.Property(e => e.FollowupDate).HasColumnName("followupDate");
+    });
+
+    modelBuilder.Entity<PrescriptionTemplateMaster>(entity =>
+    {
+      entity.ToTable("PrescriptionTemplateMaster");
+
+      entity.Property(e => e.Id).HasColumnName("id");
+      entity.Property(e => e.TemplateName).HasColumnName("templateName");
+      entity.Property(e => e.Advice)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("advice");
+      entity.Property(e => e.DiffDiagnosis)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("diffDiagnosis");
+      entity.Property(e => e.ExaminationNote)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("examinationNote");
+      entity.Property(e => e.FinalDiagnosis)
+          .HasMaxLength(255)
+          .IsUnicode(false)
+          .HasColumnName("finalDiagnosis");
+      entity.Property(e => e.DiagnosisId).HasColumnName("diagnosisId");
     });
 
     modelBuilder.Entity<ConsultationFile>(entity =>
@@ -409,6 +439,48 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(100)
           .IsUnicode(false);
       entity.Property(e => e.IsActive).HasColumnName("isActive");
+
+    });
+
+    modelBuilder.Entity<MedicinesGroup>(entity =>
+    {
+      entity.ToTable("MedicinesGroup");
+
+      entity.Property(e => e.Id).HasColumnName("Id");
+      entity.Property(e => e.Name).HasColumnName("Name");
+      entity.Property(e => e.Description)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+
+    });
+
+    modelBuilder.Entity<MedicationGroup>(entity =>
+    {
+      entity.ToTable("MedicationGroup");
+
+      entity.Property(e => e.Id).HasColumnName("Id");
+      entity.Property(e => e.GroupId).HasColumnName("GroupId");
+      entity.Property(e => e.Dose)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.Duration)
+          .HasMaxLength(30)
+          .IsUnicode(false);
+      entity.Property(e => e.Frequency)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.Instruction)
+          .HasMaxLength(200)
+          .IsUnicode(false);
+      entity.Property(e => e.MedName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.MedType)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.Timing)
+          .HasMaxLength(30)
+          .IsUnicode(false);
 
     });
 

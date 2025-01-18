@@ -1,6 +1,10 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ToastrService } from 'ngx-toastr';
 import SignaturePad from 'signature_pad';
+import { LoadingService } from '../../../shared/Services/loader/loader.service';
+import { IconsultationFiles } from '../../../shared/models/models';
+import { FileUploadService } from '../../../shared/Services/fileUpload/file-upload.service';
 
 @Component({
   selector: 'app-prescription-pad',
@@ -11,6 +15,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   @ViewChild('canvas') canvasEl!: ElementRef<HTMLCanvasElement>;
   prescriptionPad!: SignaturePad;
   title: string = '';
+  appointmentId: number = 0;
   isDrawing = false;
   penColor = '#000000'; // Default pen color
   penWidth = 2; // Default pen width
@@ -18,32 +23,81 @@ export class PrescriptionPadComponent implements AfterViewInit {
   maxPenSize = 5;
   isEraserActive = false;
   debounceTimer: any;
+  fileId?: number;
+  private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute,
+    private toastr: ToastrService,
+    private loaderService: LoadingService,
+    private fileUploadServie: FileUploadService,
+    private router: Router
+  ) {
+
+  }
 
   ngOnInit(): void {
     // Get the title parameter from the route
     this.route.paramMap.subscribe(params => {
-      this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad'; 
+      this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad';
+      
+      this.appointmentId = Number(params.get('appointmentId')) || 0;
+      if (this.appointmentId == 0) {
+        this.toastr.error("Appointment id is missing in URL.", "Error");
+        return;
+      }
+
+      // this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
+      this.FileUploadDto.docName = 'pen-prescription';
+      this.FileUploadDto.appointmentId = this.appointmentId;
+
+      this.route.queryParamMap.subscribe(queryParams => {
+        this.fileId = queryParams.has('fileId')
+          ? Number(queryParams.get('fileId'))
+          : undefined;
+
+        if (this.fileId) {
+          this.fileUploadServie.getConsulationFileById(this.fileId).subscribe(res => {
+            this.loadImageData(res.fileData || '');
+          });
+        }
+      });
     });
   }
 
   ngAfterViewInit() {
     const canvas = this.canvasEl.nativeElement;
-    canvas.width = 900;
-    canvas.height = 600;
-
+    const dpr = window.devicePixelRatio || 1;
+  
+    const parent = canvas.parentElement;
+    if (parent) {
+      // Calculate display and actual dimensions
+      const displayWidth = parent.clientWidth;
+      const displayHeight = parent.clientHeight;
+  
+      // Set CSS dimensions for display
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
+  
+      // Set actual canvas dimensions for drawing
+      canvas.width = displayWidth * dpr;
+      canvas.height = displayHeight * dpr;
+  
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.scale(dpr, dpr); // Scale canvas for high DPI
+      }
+    }
+  
+    // Initialize SignaturePad
     this.prescriptionPad = new SignaturePad(canvas, {
       penColor: this.penColor,
       minWidth: this.penWidth,
       maxWidth: this.penWidth * 2,
-      velocityFilterWeight: 0.7,  // Adjust this value to smooth the drawing - 
-      //Higher values make the stroke smoother but less responsive, 
-      //and lower values make it more responsive but less smooth
-      throttle: 16, // Adjust for smoother performance
+      velocityFilterWeight: 0.7,
+      throttle: 16, // Smoother drawing
     });
   }
-
+  
   // Handle the beginning of drawing
   onBeginDrawing(): void {
     this.isDrawing = true;
@@ -71,9 +125,9 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   // Utility to set the cursor style
   private setCursor(style: string): void {
-     this.canvasEl.nativeElement.style.cursor = style == 'pen' ?
-       'url("/assets/img/icons/edit.svg"), auto'
-       : 'crosshair';
+    this.canvasEl.nativeElement.style.cursor = style == 'pen' ?
+      'url("/assets/img/icons/edit.svg"), auto'
+      : 'crosshair';
   }
 
   // Update pen colors
@@ -96,7 +150,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   // Toggle eraser mode
   toggleEraser(): void {
     this.isEraserActive = !this.isEraserActive;
-    this.prescriptionPad.penColor = this.isEraserActive ? 'white' : this.penColor;
+    this.prescriptionPad.penColor = this.isEraserActive ? '#f9f9f9' : this.penColor;
     this.prescriptionPad.minWidth = this.isEraserActive ? 10 : this.penWidth;
     this.prescriptionPad.maxWidth = this.isEraserActive ? 20 : this.penWidth * 2;
   }
@@ -119,11 +173,175 @@ export class PrescriptionPadComponent implements AfterViewInit {
     }, 200); // Adjust debounce time as needed
   }
 
-
-  // Clear the canvas
   clearPad(): void {
+    const canvas = this.canvasEl.nativeElement;
+  
+    // Clear the entire canvas area using actual dimensions
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      ctx.clearRect(0, 0, canvas.width * 2, canvas.height * 2);
+    }
+  
+    // Clear SignaturePad's internal state
     this.prescriptionPad.clear();
+  
+    // Force SignaturePad to refresh its internal boundaries
+    this.prescriptionPad.off();
+    this.prescriptionPad.on();
   }
+
+  saveAsImage(): void {
+    if (this.prescriptionPad.isEmpty()) {
+      alert('No content to save! Please draw something.');
+      return;
+    }
+
+    const canvas = this.canvasEl.nativeElement;
+
+    // Create a temporary canvas to add a white background
+    const tempCanvas = document.createElement('canvas');
+    const tempContext = tempCanvas.getContext('2d');
+
+    if (tempContext) {
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+
+      // Fill with white background
+      tempContext.fillStyle = '#ffffff';
+      tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      // Draw the original canvas content on top
+      tempContext.drawImage(canvas, 0, 0);
+
+      // Generate the data URL from the temporary canvas
+      const dataUrl = tempCanvas.toDataURL('image/png');
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = dataUrl;
+      link.download = 'prescription-pad-image.png';
+      link.click();
+    }
+  }
+
+
+  saveCanvasToDatabase(): void {
+    if (this.prescriptionPad.isEmpty()) {
+      this.toastr.error("No content to save! Please draw something.", "Error");
+      return;
+    }
+
+    this.loaderService.showLoader();
+
+    const canvas = this.canvasEl.nativeElement;
+
+    // Create a temporary canvas to ensure the image has a white background
+    const tempCanvas = document.createElement('canvas');
+    const tempContext = tempCanvas.getContext('2d');
+
+    if (tempContext) {
+      tempCanvas.width = canvas.width;
+      tempCanvas.height = canvas.height;
+
+      // Fill with white background
+      tempContext.fillStyle = '#ffffff';
+      tempContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+      // Draw the original canvas content on top
+      tempContext.drawImage(canvas, 0, 0);
+
+      // Convert the temporary canvas content to a Base64 string
+      const base64String = tempCanvas.toDataURL('image/png');
+      this.FileUploadDto.fileData = base64String;
+
+      // If the existing file is updated, call update method. else, call upload method
+      if (this.fileId != undefined && this.fileId > 0) {
+        this.FileUploadDto.fileId = this.fileId;
+        this.updateExistingImage();
+      } else {
+        // Prepare the file upload DTO
+        this.FileUploadDto.fileName = `prescription-${Date.now()}.png`; // Unique file name
+        this.FileUploadDto.FileType = 'image/png';
+
+        this.uploadNewImage();
+      }
+
+    } else {
+      this.loaderService.hideLoader();
+      this.toastr.error('Failed to process the canvas.', 'Error');
+    }
+  }
+
+  uploadNewImage() {
+    this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
+      result => {
+        console.log(result);
+        const newFileId = result.fileId;
+
+        // Append the file ID to the URL as a query parameter
+        this.loaderService.hideLoader();
+        this.toastr.success('Canvas image uploaded successfully', 'Success');
+
+        if (newFileId) {
+          const queryParams = newFileId ? { newFileId } : {}; // Include fileId in queryParams if provided
+          const urlTree = this.router.createUrlTree(['/prescription-pad', this.appointmentId, this.title], { queryParams });
+          this.router.navigateByUrl(urlTree); // Navigate to the constructed URL
+        }
+      },
+      error => {
+        this.loaderService.hideLoader();
+        console.error('Error uploading canvas image:', error);
+        this.toastr.error('Image upload failed', 'Error');
+      }
+    );
+  }
+
+
+  updateExistingImage() {
+    this.fileUploadServie.updateConsultationFile(this.fileId ?? 0, this.FileUploadDto).subscribe(
+      result => {
+        console.log(result);
+        this.loaderService.hideLoader();
+        this.toastr.success('Canvas image updated successfully', 'Success');
+      },
+      error => {
+        this.loaderService.hideLoader();
+        console.error('Error updating canvas image:', error);
+        this.toastr.error('Image update failed', 'Error');
+      }
+    );
+
+  }
+
+  loadImageData(base64Image: string): void {
+    if (!base64Image.startsWith('data:image')) {
+      this.toastr.error('Invalid image data.', 'Error');
+      return;
+    }
+
+    const image = new Image(); // Create an image object
+    image.src = base64Image;
+
+    image.onload = () => {
+      const canvas = this.canvasEl.nativeElement;
+      const context = canvas.getContext('2d');
+
+      if (context) {
+        // Resize canvas to match the image dimensions
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        // Draw the image on the canvas
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.drawImage(image, 0, 0);
+      }
+    };
+
+    image.onerror = () => {
+      this.toastr.error('Failed to load the image.', 'Error');
+    };
+  }
+
 
   // Print the canvas content
   printPad(): void {

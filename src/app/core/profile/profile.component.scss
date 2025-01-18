@@ -1,47 +1,55 @@
-.personal-info{
+.personal-info {
     display: flex;
     flex-direction: column;
 }
-.btnOuter{
-    width:100%;
-    display:flex;
+
+.btnOuter {
+    width: 100%;
+    display: flex;
     justify-content: end;
 
 }
-.btnOuter1{
-    width:100%;
-    display:flex;
+
+.btnOuter1 {
+    width: 100%;
+    display: flex;
     justify-content: center;
     align-items: center;
     gap: 20px;
 
 }
+
 .completed {
-    background-color:lightgreen;
-}
-.untouched {
-    background-color:lightgray;
-}
-.active {
-background-color: white;
+    background-color: lightgreen;
 }
 
-.uploadbtn{
+.untouched {
+    background-color: lightgray;
+}
+
+.active {
+    background-color: white;
+}
+
+.uploadbtn {
     padding: 8px 16px;
     text-align: center;
     border: 1px solid black;
     border-radius: 8px;
 
 }
-.h4heading{
-    font-weight:700;
-    font-size:25px
+
+.h4heading {
+    font-weight: 700;
+    font-size: 25px
 }
-.h2question{
+
+.h2question {
     font-weight: 500;
     font-size: 23px;
 }
-.optionsOuter{
+
+.optionsOuter {
     display: flex;
     gap: 20px;
     justify-content: start;
@@ -49,38 +57,45 @@ background-color: white;
     align-items: center;
     margin-bottom: 10px;
 }
-.heading{
+
+.heading {
     font-size: 20px;
     font-weight: 700;
     margin: 5px 0px;
-    width:fit-content;
+    width: fit-content;
 
-    
+
 }
-.filesOuter{
-    display:flex;
-    gap:10px;
+
+.filesOuter {
+    display: flex;
+    gap: 10px;
     align-items: center;
 }
-.filesMainOuter{
-    margin:15px 0px;
+
+.filesMainOuter {
+    margin: 15px 0px;
     display: flex;
     flex-direction: column;
-    gap:10px
+    gap: 10px
 }
-.box{
-    display:flex;
+
+.box {
+    display: flex;
     gap: 10px;
-    margin-bottom:20px
+    margin-bottom: 20px
 }
+
 .imageOuter {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px; /* Adjust the gap between images */
+    gap: 10px;
+    /* Adjust the gap between images */
 }
 
 .imageContainer {
-    flex: 1 1 200px; /* Adjust the flex basis to control the size */
+    flex: 1 1 200px;
+    /* Adjust the flex basis to control the size */
     margin: 10px;
 }
 
@@ -89,61 +104,75 @@ background-color: white;
     height: auto;
     display: block;
 }
-.quesheading{
+
+.quesheading {
     border: 1px solid black;
     border-radius: 10px;
     padding: 6px 12px;
     width: fit-content;
     // background-color: lightgray;
 }
-.quesText{
+
+.quesText {
     color: black;
     font-weight: bold;
 }
+
 .align-right {
     margin-left: auto;
     margin-right: 0;
 }
+
 .profile-info-right {
     border-left: 2px dashed #ccc;
-  }
-.listOuter{
+}
+
+.listOuter {
     display: flex;
     flex-direction: column;
     gap: 25px;
 }
-.fileOuter{
-    display:flex;
-    gap:10px;
+
+.fileOuter {
+    display: flex;
+    gap: 10px;
     font-size: 15px;
     font-weight: 500;
-    align-items:center;
+    align-items: center;
 }
-.viewtbn{
-    padding:6px 10px;
+
+.viewtbn {
+    padding: 6px 10px;
     border: 1px solid grey;
     border-radius: 8px;
 }
-.medicineOuter{
+
+.medicineOuter {
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
-.boxlistOuter{
+
+.boxlistOuter {
     display: flex;
     gap: 10px;
 }
 
 .questionsOuter {
-    column-count: 2; /* Number of columns */
-    column-gap: 10px; /* Gap between columns */
+    column-count: 2;
+    /* Number of columns */
+    column-gap: 10px;
+    /* Gap between columns */
     width: 100%;
-    overflow: hidden; /* Ensures no overflow causes gaps */
+    overflow: hidden;
+    /* Ensures no overflow causes gaps */
 }
 
 .quesansOuter {
-    break-inside: avoid; /* Prevents breaking inside an element */
-    margin-bottom: 0; /* Removes bottom margin to reduce space between items */
+    break-inside: avoid;
+    /* Prevents breaking inside an element */
+    margin-bottom: 0;
+    /* Removes bottom margin to reduce space between items */
 }
 
 // .questionsOuter{
@@ -155,11 +184,12 @@ background-color: white;
 // .quesansOuter{
 //     width:60%
 // }
-.documentsOuter{
+.documentsOuter {
     margin: 7px 7px;
     display: flex;
     gap: 20px;
 }
+
 .submitted {
     background-color: lightgreen;
     color: white;
@@ -184,13 +214,74 @@ background-color: white;
     background-color: gray;
     color: white;
 }
-.upldbtn{
-    width:106%;
+
+.upldbtn {
+    width: 106%;
 
 }
 
-.uplddoc{
-    width:169%;
+.uplddoc {
+    width: 169%;
 }
 
+/* Parent container styling */
+.pres-documents-container {
+    display: flex;
+    flex-wrap: wrap; /* Allows wrapping to the next line if needed */
+    gap: 24px; /* Space between each document-row */
+    justify-content: flex-start; /* Aligns items in a row from the left */
+    align-items: flex-start; /* Aligns items to the top */
+    padding: 8px;
+  }
+  
+  /* Individual document styling */
+  .document-row {
+    display: flex;
+    flex-direction: column; /* Keeps icon and name in a vertical stack */
+    align-items: center; /* Centers content horizontally within the row */
+    width: 150px; /* Fixed width for each document item */
+    text-align: center;
+  }
 
+  .icon-container {
+    position: relative;
+    display: inline-block;
+    width: 100%; /* Matches the width of the document-row */
+  }
+  
+  .document-icon {
+    font-size: 48px; /* Icon size */
+    color: #616161; /* Icon color */
+  }
+  
+  .delete-icon {
+    font-size: 20px;
+    color: red;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    cursor: pointer;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Optional shadow for better visibility */
+    padding: 2px;
+  }
+
+  .doc-name {
+    margin-top: 8px;
+    font-size: 14px;
+    word-wrap: break-word; /* Break long words */
+    white-space: normal; /* Allows wrapping to multiple lines */
+    text-align: center; /* Centers the text */
+  }
+
+  .edit-link {
+    margin-left: 10px;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .edit-link:hover {
+    color: darkblue;
+  }
+  

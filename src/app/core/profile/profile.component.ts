@@ -21,6 +21,8 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
+import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
+import { IConsultationTemplate } from '../../shared/models/models';
 //import { PrescriptionService } from '../../shared/Services/prescription/prescription.service';
 
 
@@ -113,8 +115,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   questionList!: Iquestion[];
   prescriptionService: any;
   prescriptionImage: string | null = null;
-  
-
+  public templates: any[] = [];
+  public selectedDiagnosis: number = 0;
+  isButtonEnabled: boolean = false;
+  newTemplate!: IConsultationTemplate;
 
   // public showAddQuestion=true;
   // public questionnaireId!:number;
@@ -133,8 +137,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
-    private loaderService: LoadingService
-    
+    private loaderService: LoadingService,
+    private consultTemplateService: ConsultationTemplateMasterService,
 
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
@@ -181,12 +185,23 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     this.loadQuestions();
     this.fetchAllOptions();
+    this.getAllTemplates();
+
+    // Subscribe to form value changes
+    this.consultForm.valueChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
+
+    // Optionally subscribe to status changes to ensure fields are touched or dirty
+    this.consultForm.statusChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
 
     this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
       this.prescriptionImage = data;  // Assign the image data to the local variable
-      console.log('image',this.prescriptionImage);
-      
-    }); 
+      console.log('image', this.prescriptionImage);
+
+    });
 
 
     // this.getUploadedFiles(this.latestId);
@@ -200,15 +215,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // {
     //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
   }
-  
-  openInNewTab(path: string, title: string): void {
-    const url = this.route.serializeUrl(this.route.createUrlTree([path, title]));
-    console.log(url);
-    //window.open(url, '_blank'); // Open the generated URL in a new tab
-    this.route.navigate([url]);
+
+  openInNewTab(path: string, title: string, fileId?: number): void {
+    const queryParams = fileId ? { fileId } : {}; // Include fileId in queryParams if provided
+    const urlTree = this.route.createUrlTree([path, this.latestId, title], { queryParams });
+    this.route.navigateByUrl(urlTree); // Navigate to the constructed URL
   }
-
-
 
   viewDocument(item: any) {
     this.currentFileName = item.fileName;
@@ -231,7 +243,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       alert('Cannot enter alphabet in followup after!');
     }
   }
-  
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -612,6 +624,86 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
+  getAllTemplates(): void {
+    this.consultTemplateService.getConsultationTemplates().subscribe((data: any) => {
+      this.templates = data;
+      console.log('templates:', data);
+    })
+  }
+
+  populateTemplateData(id: number) {
+    // Find the selected template by ID
+    const selectedTemplate = this.templates.find(template => template.id === id);
+    if (!selectedTemplate) {
+      this.toaster.error('Template not found', 'Error');
+      return;
+    }
+
+    // Patch the form values with the selected template
+    this.consultForm.patchValue({
+      templateName: selectedTemplate.templateName,
+      examinationNote: selectedTemplate.examinationNote,
+      advice: selectedTemplate.advice,
+      diffDiagnosis: selectedTemplate.diffDiagnosis,
+      finalDiagnosis: selectedTemplate.finalDiagnosis,
+      diagnosisId: selectedTemplate.diagnosisId // Map diagnosId to diagnosName
+    });
+
+    // Save the selected diagnosisId for submission
+    this.selectedDiagnosis = selectedTemplate.diagnosisId;
+
+    // Mark the form as touched after patching values, so the button can be enabled
+    this.consultForm.markAllAsTouched();
+  }
+
+  // Enable the button if any field is touched or changed
+  enableAddToTemplateButton(): void {
+    // Check if any form control is touched or dirty (changed)
+    this.isButtonEnabled = this.consultForm.dirty || this.consultForm.touched;
+  }
+
+  getPreDiagnosisById(diagnosisId?: number): IPredefineDiagnosis | undefined {
+    return this.preDiagnosis.find(diagnosis => diagnosis.diagnosId === diagnosisId);
+  }
+
+  onTemplateNameChange(event: any) {
+    this.isButtonEnabled = false;
+    this.populateTemplateData(event.value);
+  }
+
+  SaveNewTemplate() {
+    if (this.consultForm.value.newTemplateName == '') {
+      this.toaster.error('Provide New Template Name');
+    }
+    else {
+      this.loaderService.showLoader();
+
+      this.newTemplate = {
+        id: 0,
+        templateName: this.consultForm.value.newTemplateName,
+        examinationNote: this.consultForm.value.examinationNote,
+        advice: this.consultForm.value.advice,
+        diffDiagnosis: this.consultForm.value.diffDiagnosis,
+        finalDiagnosis: this.consultForm.value.finalDiagnosis,
+        diagnosisId: this.consultForm.value.diagnosisId
+      };
+
+      this.consultTemplateService.addConsultationTemplate(this.newTemplate).subscribe(
+        (res) => {
+          this.toaster.success("Consultation template data saved successfully!", "Success");
+          this.consultForm.value.newTemplateName = '';
+          this.isButtonEnabled = false;
+        },
+        (err) => {
+          this.toaster.error(err.error.message, 'Error')
+        }
+      );
+
+      this.loaderService.hideLoader()
+    }
+  }
+
+
   loadQuestions(): void {
     this.question.getAllQuestions().subscribe(
       (res) => {
@@ -623,7 +715,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  
+
   fetchAllOptions() {
     this.question.getAllOptions().subscribe(res => {
       if (res) {
@@ -642,7 +734,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
       }
     }
-    
+
     console.log("current", this.currentQuestionData);
 
   }
@@ -898,6 +990,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     }
   }
+  
   submitPrescribeMedicine(prescribeMed: FormGroup) {
 
     this.loaderService.showLoader();
@@ -939,7 +1032,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       advice: [''],
       diffDiagnosis: [''],
       finalDiagnosis: [''],
-      followupDate: ['']
+      followupDate: [''],
+      diagnosisId: [''],
+      newTemplateName: ['']
     })
   }
   cancelConsultation() {
@@ -961,13 +1056,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
         console.log("item", item)
-        if (item.docName == "prescription") {
+        if (item.docName == "prescription" || item.docName == "pen-prescription") {
           this.presDocuments.push(item);
         }
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
-        if(item.docName == "previewFile") {
+        if (item.docName == "previewFile") {
           this.previewFile.push(item);
         }
       })
@@ -1087,13 +1182,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
       });
   }
 
-
-
-
-  addPreDefineDiagnosis(diagnosisValue: any) {
-    this.consultForm.get('finalDiagnosis')?.patchValue(diagnosisValue.value)
+  addPreDefineDiagnosis(diagnosis: any) {
+    const data = this.getPreDiagnosisById(diagnosis.value);
+    this.consultForm.get('finalDiagnosis')?.patchValue(data?.diagnosText)
   }
-
 
   addDays(date: Date, days: number): Date {
     const result = new Date(date);
@@ -1368,5 +1460,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.route.navigate([currentUrl]);
     })
 
+  }
+
+  getIcon(documentName: string): string {
+    const extension = documentName.split('.').pop()?.toLowerCase();
+
+    switch (extension) {
+      case 'pdf':
+        return 'picture_as_pdf'; // Material icon for PDFs
+      case 'doc':
+      case 'docx':
+        return 'description'; // Generic document icon
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+        return 'image'; // Icon for images
+      case 'txt':
+        return 'text_snippet'; // Icon for text files
+      default:
+        return 'insert_drive_file'; // Generic file icon
+    }
   }
 }
