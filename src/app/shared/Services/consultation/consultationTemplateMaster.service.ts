@@ -11,7 +11,7 @@ export class ConsultationTemplateMasterService {
     private readonly apiUrl = api_Url;
 
     constructor(private http: ApiHttpService) {
-        console.log();  
+        console.log();
     }
 
     addConsultationTemplate(data: IConsultationTemplate): Observable<any> {
@@ -30,7 +30,7 @@ export class ConsultationTemplateMasterService {
         return this.http.put(this.apiUrl + 'PrescriptionTemplateMaster/' + id, consult)
     }
 
-    deleteTemplate(id:number):Observable<any>{
-        return this.http.delete(this.apiUrl+'PrescriptionTemplateMaster/'+ id);
-      }
+    deleteTemplate(id: number): Observable<any> {
+        return this.http.delete(this.apiUrl + 'PrescriptionTemplateMaster/' + id);
+    }
 }

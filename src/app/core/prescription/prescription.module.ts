@@ -6,16 +6,20 @@ import { PrescriptionPadRoutingModule } from './prescription-pad/prescription-pa
 import { PrescriptionMasterComponent } from './prescription-master/prescription-master.component';
 import { PrescriptionMasterRoutingModule } from './prescription-master/prescription-master-routing.module';
 import { MatSelectModule } from '@angular/material/select';
+import { MedicinesMasterRoutingModule } from './medicines-master/medicines-master-routing.module';
+import { MedicinesMasterComponent } from './medicines-master/medicines-master.component';
 
 @NgModule({
   declarations: [
     PrescriptionPadComponent,
-    PrescriptionMasterComponent
+    PrescriptionMasterComponent,
+    MedicinesMasterComponent
   ],
   imports: [
     CommonModule,
     PrescriptionPadRoutingModule,
     PrescriptionMasterRoutingModule,
+    MedicinesMasterRoutingModule,
     FormsModule,
     ReactiveFormsModule,
     MatSelectModule

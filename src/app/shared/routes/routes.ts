@@ -218,6 +218,9 @@ export class routes {
   public static get prescriptionMaster(): string {
     return this.baseUrl + '/prescription/prescription-master';
   }
+  public static get medicinesMaster(): string {
+    return this.baseUrl + '/prescription/medicines-master';
+  }
   public static get createInvoice(): string {
     return this.baseUrl + '/invoice/create-invoice';
   }

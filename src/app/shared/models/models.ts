@@ -427,6 +427,24 @@ export interface IprescribeMedicine {
   instruction: string
 }
 
+export interface IMedicinesGroup {
+  id: number,
+  name: string,
+  description: string,
+}
+
+export interface IMedicationGroup {
+  id: number,
+  groupId: number,
+  medName: string,
+  medType: string,
+  dose: string,
+  frequency: string,
+  timing: string,
+  duration: string,
+  instruction: string
+}
+
 export interface Ivital {
   vitalId: number,
   appointmentId: number,

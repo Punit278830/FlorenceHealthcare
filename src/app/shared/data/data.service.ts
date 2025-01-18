@@ -508,6 +508,17 @@ export class DataService {
           ],
         },
         {
+          menuValue: 'Medicines Master',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.medicinesMaster,
+          img: 'assets/img/icons/plus.svg',
+          subMenus: [
+
+          ],
+        },
+        {
           menuValue: 'Add Invoice Item',
           hasSubRoute: false,
           showSubRoute: false,

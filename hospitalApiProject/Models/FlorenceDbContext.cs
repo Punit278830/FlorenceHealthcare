@@ -39,6 +39,10 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<MedicineMaster> MedicineMasters { get; set; }
 
+  public virtual DbSet<MedicinesGroup> MedicinesGroups { get; set; }
+
+  public virtual DbSet<MedicationGroup> MedicationGroups { get; set; }
+
   public virtual DbSet<Option> Options { get; set; }
 
   public virtual DbSet<PatientInfo> PatientInfos { get; set; }
@@ -435,6 +439,48 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(100)
           .IsUnicode(false);
       entity.Property(e => e.IsActive).HasColumnName("isActive");
+
+    });
+
+    modelBuilder.Entity<MedicinesGroup>(entity =>
+    {
+      entity.ToTable("MedicinesGroup");
+
+      entity.Property(e => e.Id).HasColumnName("Id");
+      entity.Property(e => e.Name).HasColumnName("Name");
+      entity.Property(e => e.Description)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+
+    });
+
+    modelBuilder.Entity<MedicationGroup>(entity =>
+    {
+      entity.ToTable("MedicationGroup");
+
+      entity.Property(e => e.Id).HasColumnName("Id");
+      entity.Property(e => e.GroupId).HasColumnName("GroupId");
+      entity.Property(e => e.Dose)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.Duration)
+          .HasMaxLength(30)
+          .IsUnicode(false);
+      entity.Property(e => e.Frequency)
+          .HasMaxLength(50)
+          .IsUnicode(false);
+      entity.Property(e => e.Instruction)
+          .HasMaxLength(200)
+          .IsUnicode(false);
+      entity.Property(e => e.MedName)
+          .HasMaxLength(100)
+          .IsUnicode(false);
+      entity.Property(e => e.MedType)
+          .HasMaxLength(20)
+          .IsUnicode(false);
+      entity.Property(e => e.Timing)
+          .HasMaxLength(30)
+          .IsUnicode(false);
 
     });
 
