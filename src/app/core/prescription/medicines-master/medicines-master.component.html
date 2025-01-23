@@ -151,7 +151,7 @@
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-end">
                                                     <a class="dropdown-item" href="javascript:void(0);"
-                                                        (click)="EditQuestionAddOptionWithMapping(data.id)">
+                                                        (click)="editMedication(data)">
                                                         <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
                                                     </a>
                                                     <a class="dropdown-item" href="javascript:void(0);"
@@ -178,14 +178,17 @@
                             <div class="col-12 col-md-6 col-xl-12">
                                 <div class="top-nav-search mob-view" style="margin-left: 0px;">
                                     <div class="form-heading">
-                                        <h4>Search and Add Medicine</h4>
+                                        <h4>{{isEditMedication ? 'Update Medication' : 'Search and Add Medication'}}</h4>
                                     </div>
 
-                                    <form>
-                                        <input type="text" class="form-control" #searchValue
-                                            (keyup)="searchMedicine(searchValue.value)" placeholder="search Medicine">
+                                    <ng-container *ngIf="!isEditMedication">
+                                        <form>
+                                            <input type="text" class="form-control" #searchValue
+                                                (keyup)="searchMedicine(searchValue.value)"
+                                                placeholder="search Medicine">
 
-                                    </form>
+                                        </form>
+                                    </ng-container>
                                 </div>
                                 <ng-container>
                                     <div *ngIf="SearchMedicineList.length>0" class="table-responsive">
@@ -230,7 +233,7 @@
                             </div>
                             <div class="col-12 col-md-6 col-xl-12">
                                 <form [formGroup]="prescribeMedForm"
-                                    (ngSubmit)="submitPrescribeMedicine(prescribeMedForm)">
+                                    (ngSubmit)="AddOrUpdateMedication(prescribeMedForm)">
                                     <div class="col-12 col-md-6 col-xl-12" formArrayName="medicine" style="margin:0px;">
                                         <div class="row" *ngFor="let control of medicine.controls; let i = index"
                                             formGroupName="{{i}}">
@@ -287,7 +290,7 @@
                                                         type="text">
                                                 </div>
                                             </div>
-                                            <div class="col-12 col-md-6 col-xl-1">
+                                            <div class="col-12 col-md-6 col-xl-1" *ngIf="!isEditMedication">
                                                 <button type="button" class="btn btn-danger"
                                                     (click)="removeDynamicControl(i)">
                                                     Remove
@@ -348,8 +351,7 @@
                                             <div class="doctor-submit text-start">
 
                                                 <button type="submit" class="btn btn-primary submit-form me-2">
-                                                    Submit
-                                                    Medicine
+                                                    {{isEditMedication ? 'Update' : 'Submit'}}
                                                 </button>
                                             </div>
                                         </div>
