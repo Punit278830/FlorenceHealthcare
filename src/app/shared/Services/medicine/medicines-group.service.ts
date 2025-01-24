@@ -42,7 +42,7 @@ export class MedicinesGroupService {
     return this.http.get(this.apiUrl + "MedicationGroup/" + id)
   }
 
-  getAllMedicationGroups(id: number): Observable<IMedicationGroup[]> {
+  getAllMedicationGroups(): Observable<IMedicationGroup[]> {
     return this.http.get(this.apiUrl + "MedicationGroup")
   }
 

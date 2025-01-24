@@ -26,6 +26,7 @@ export class MedicinesMasterComponent {
   public selectedRow: number | null = null;
   public selectedGroup!: IMedicinesGroup;
   public medicationGroup: IMedicationGroup[] = [];
+  public isEditMedication: boolean = false;
 
   frequencyData = ['1-0-0', '0-1-0', '0-0-1', '1-0-1', '1-1-1'];
   timingData = ['Before Meal', 'After Meal'];
@@ -143,6 +144,15 @@ export class MedicinesMasterComponent {
     return this.prescribeMedForm.get('medicine') as FormArray;
   }
 
+  AddOrUpdateMedication(prescribeMed: FormGroup) {
+    if (this.isEditMedication) {
+      this.updateMedication(prescribeMed);
+      return;
+    }
+
+    this.submitPrescribeMedicine(prescribeMed);
+  }
+
   submitPrescribeMedicine(prescribeMed: FormGroup) {
     if (this.selectedGroup == undefined) {
       this.toaster.error("Select a group first!", "Error")
@@ -166,6 +176,22 @@ export class MedicinesMasterComponent {
         this.getMedicationByGroup();
         this.loaderService.hideLoader();
       }
+    })
+
+    this.loaderService.hideLoader();
+  }
+
+  updateMedication(prescribeMed: FormGroup) {
+    this.loaderService.showLoader();
+    const prescribeMedicines = prescribeMed.getRawValue();
+
+    this.medicinesGroupService.updateMedicationGroup(prescribeMedicines.medicine[0].id, prescribeMedicines.medicine[0]).subscribe(res => {
+      this.toaster.success("Medication updated", "Success")
+      this.medicine.clear();
+      this.SearchMedicineList = [];
+      this.searchMedForm.reset();
+      this.isEditMedication = false;
+      this.getMedicationByGroup();
     })
 
     this.loaderService.hideLoader();
@@ -227,9 +253,40 @@ export class MedicinesMasterComponent {
     this.getMedicationByGroup();
   }
 
-  EditQuestionAddOptionWithMapping(id: number) { }
+  editMedication(data: any): void {
+    if (!this.selectedGroup) {
+      this.toaster.error("Select a group first!", "Error");
+      return;
+    }
 
-  deleteMedication(id: number) { 
+    this.loaderService.showLoader();
+
+    this.isEditMedication = true;
+    this.SearchMedicineList = [];
+    this.medicine.clear(); // Removes all controls from the FormArray
+
+    // Create a reusable function to build the form group
+    const createMedicationControl = (medication: any) =>
+      this.fb.group({
+        id: [{ value: medication.id || 0, disabled: true }],
+        groupId: [{ value: medication.groupId || 0, disabled: true }],
+        medName: [{ value: medication.medName || '', disabled: true }, [Validators.required]],
+        medType: [{ value: medication.medType || 'Tab', disabled: true }, [Validators.required]],
+        dose: [medication.dose || '', Validators.required],
+        frequency: [medication.frequency || '', Validators.required],
+        timing: [medication.timing || '', Validators.required],
+        duration: [medication.duration || '', Validators.required],
+        instruction: [medication.instruction || '', Validators.required],
+      });
+
+    // Add the new control to the medicines array
+    this.medicine.push(createMedicationControl(data));
+
+    this.loaderService.hideLoader();
+  }
+
+
+  deleteMedication(id: number) {
     this.medicinesGroupService.deleteMedicationGroup(id).subscribe({
       next: (res) => {
         if (res == null) {

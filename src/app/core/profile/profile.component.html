@@ -338,27 +338,6 @@
 
                                             </div>
                                         </div>
-
-
-                                        <!-- <div class="card-body">
-                    <div class="box" >
-                        <div *ngFor="let data of questionnaireDto" class="col-12 col-md-12  col-xl-3 quesheading"
-                            >
-                            <a href="javascript:void(0);"
-                                (click)="mapQuestionAndOptions(data.questionnaireId)" class="quesText">{{data.questionnaireName}}</a>
-                        </div>
-
-                    </div>
-                    <div *ngIf="this.selectedQueslist.length > 0" class="box">
-                        <div class="heading">Completed Questionnaires - </div>
-                        <div *ngFor="let data of selectedQueslist" class="col-12 col-md-12  col-xl-3 quesheading"
-                            >
-                            <a href="javascript:void(0);" class="quesText">{{data.questionnaireName}}</a>
-                        </div>
-
-                    </div>
-
-                </div> -->
                                     </div>
 
                                     <div class="row" *ngIf="combindQuestionOption.length>0">
@@ -506,18 +485,6 @@
 
 
                                                     </div>
-                                                    <!-- <div class="form-group local-top-form">
-                                 <label for="Avatar" class="local-top">Upload documents <span
-                                        class="login-danger">*</span></label>
-                                <div class="settings-btn upload-files-avator">
-                                    <input type="file" class="hide-input" id="file"
-                                        (change)=onFileSelected($event)>
-                                    <button for="file" type="submit" class="upload">Upload
-                                        File</button>
-
-                                </div>
-
-                            </div> -->
                                                 </div>
 
 
@@ -626,11 +593,49 @@
                                                                         [(ngModel)]="dtFollowUp">
                                                                 </div>
                                                             </div>
+                                                            <div class="medicineOuter">
+                                                                    <div class="card-body">
+                                                                        <div class="form-heading">
+                                                                            <h4>Add Medicine</h4>
+                                                                        </div>
+                                                                        <form>
+                                                                            <div class="row">
+                                                                                <div class="col-12 col-md-6 col-xl-5">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <input type="text"
+                                                                                            class="form-control"
+                                                                                            #searchValue
+                                                                                            (keyup)="searchMedicine(searchValue.value)"
+                                                                                            placeholder="search Medicine">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <h2 class="text-center">or</h2>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-5">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label for="medicationGroup">Select Medication</label>
+                                                                                        <mat-select formControlName="medicationGroup"
+                                                                                        (selectionChange)="onMediniesGroupChange($event)"
+                                                                                            class="form-control select">
+                                                                                            <mat-option *ngFor="let data of medicineGroups"
+                                                                                                [value]="data.id">
+                                                                                                {{data.name}}
+                                                                                            </mat-option>
+                                                                                        </mat-select>
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                            </div>
 
                                                             <div class="medicineOuter">
                                                                 <div class="boxlistOuter">
 
-                                                                    <div class="top-nav-search mob-view"
+                                                                    <!-- <div class="top-nav-search mob-view"
                                                                         style="margin-left: 0px;">
                                                                         <h3 style="font-weight: bold;">Add Medicine</h3>
                                                                         <form>
@@ -641,7 +646,7 @@
 
                                                                         </form>
 
-                                                                    </div>
+                                                                    </div> -->
                                                                     <!-- Medicine serch form end here -->
                                                                     <!-- Medicine serch option visible table code start from here -->
                                                                     <ng-container *ngIf="appointmentStatus">
@@ -652,16 +657,13 @@
                                                                                 <thead>
                                                                                     <tr>
                                                                                         <th mat-sort-header="name">
-                                                                                            Medicine
-                                                                                            Name
+                                                                                            Medicine Name
                                                                                         </th>
-                                                                                        <th
-                                                                                            mat-sort-header="consultingDoctor">
+                                                                                        <th mat-sort-header="consultingDoctor">
                                                                                             Type
                                                                                         </th>
                                                                                         <th mat-sort-header="treatment">
-                                                                                            Generic
-                                                                                            Name
+                                                                                            Generic Name
                                                                                         </th>
                                                                                         <th></th>
                                                                                     </tr>
@@ -774,26 +776,22 @@
                                                                         <div class="table-responsive"
                                                                             *ngIf="medicineDto.length>0">
                                                                             <h3 style="font-weight: bold;">
-                                                                                Prescribed
-                                                                                Medicines
+                                                                                Prescribed Medicines
                                                                             </h3>
                                                                             <table
                                                                                 class="table border-0 custom-table comman-table datatable mb-0">
                                                                                 <thead>
                                                                                     <tr>
                                                                                         <th mat-sort-header="name">
-                                                                                            Medicine
-                                                                                            Name
+                                                                                            Medicine Name
                                                                                         </th>
-                                                                                        <th
-                                                                                            mat-sort-header="consultingDoctor">
+                                                                                        <th mat-sort-header="consultingDoctor">
                                                                                             Type
                                                                                         </th>
                                                                                         <th mat-sort-header="dose">
                                                                                             Dose
                                                                                         </th>
-                                                                                        <th
-                                                                                            mat-sort-header="consultingDoctor">
+                                                                                        <th mat-sort-header="consultingDoctor">
                                                                                             Frequency
                                                                                         </th>
                                                                                         <th mat-sort-header="timing">
@@ -802,17 +800,14 @@
                                                                                         <th mat-sort-header="duration">
                                                                                             Duration
                                                                                         </th>
-                                                                                        <th
-                                                                                            mat-sort-header="instruction">
-                                                                                            Instruction
+                                                                                        <th mat-sort-header="instruction">
+                                                                                            Instructions
                                                                                         </th>
                                                                                         <th></th>
                                                                                     </tr>
                                                                                 </thead>
                                                                                 <tbody>
-                                                                                    <tr
-                                                                                        *ngFor="let data of medicineDto">
-
+                                                                                    <tr *ngFor="let data of medicineDto">
                                                                                         <td>{{data.medName}}</td>
                                                                                         <td>{{data.medType}}</td>
                                                                                         <td>{{data.dose}}</td>
@@ -820,32 +815,17 @@
                                                                                         <td>{{data.timing}}</td>
                                                                                         <td>{{data.duration}}</td>
                                                                                         <td>{{data.instruction}}</td>
-
                                                                                     </tr>
                                                                                 </tbody>
                                                                             </table>
                                                                         </div>
-
-
-
                                                                         <div class="col-12"
                                                                             *ngIf="medicine.controls.length>0 && appointmentStatus">
                                                                             <div class="doctor-submit text-start">
-
-                                                                                <button type="submit"
-                                                                                    class="btn btn-primary submit-form me-2">
-                                                                                    Submit
-                                                                                    Medicine
+                                                                                <button type="submit" class="btn btn-primary submit-form me-2">Submit Medicine
                                                                                 </button>
-
-
-                                                                                <!-- <button type="button"
-                                                        class="btn btn-primary cancel-form">Cancel</button> -->
                                                                             </div>
                                                                         </div>
-
-
-
                                                                     </div>
                                                                 </form>
                                                             </div>

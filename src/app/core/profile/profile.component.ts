@@ -22,8 +22,8 @@ import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
 import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
-import { IConsultationTemplate } from '../../shared/models/models';
-//import { PrescriptionService } from '../../shared/Services/prescription/prescription.service';
+import { IConsultationTemplate, IMedicationGroup, IMedicinesGroup } from '../../shared/models/models';
+import { MedicinesGroupService } from '../../shared/Services/medicine/medicines-group.service';
 
 
 @Component({
@@ -116,6 +116,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   prescriptionService: any;
   prescriptionImage: string | null = null;
   public templates: any[] = [];
+  public medicineGroups: IMedicinesGroup[] = [];
+  public selectedMedication: IMedicationGroup[] = [];
+
+
   public selectedDiagnosis: number = 0;
   isButtonEnabled: boolean = false;
   newTemplate!: IConsultationTemplate;
@@ -139,7 +143,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private sanitizer: DomSanitizer,
     private loaderService: LoadingService,
     private consultTemplateService: ConsultationTemplateMasterService,
-
+    private medicinesGroupService: MedicinesGroupService,
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
 
@@ -186,6 +190,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loadQuestions();
     this.fetchAllOptions();
     this.getAllTemplates();
+    this.getAllMedicationGroups();
 
     // Subscribe to form value changes
     this.consultForm.valueChanges.subscribe(() => {
@@ -627,8 +632,53 @@ export class ProfileComponent implements OnInit, OnDestroy {
   getAllTemplates(): void {
     this.consultTemplateService.getConsultationTemplates().subscribe((data: any) => {
       this.templates = data;
-      console.log('templates:', data);
     })
+  }
+
+  getAllMedicationGroups(): void {
+    this.medicinesGroupService.getAllMedicinesGroup().subscribe((data: any) => {
+      this.medicineGroups = data;
+    })
+  }
+
+  getMedicationByGroup(id: number) {
+    this.loaderService.showLoader();
+
+    this.medicinesGroupService.getMedicationByGroupId(id).subscribe((data: any) => {
+      this.selectedMedication = data;
+      this.SearchMedicineList = [];
+      this.medicine.clear();  // Clear any existing controls before adding new ones
+
+      // Create a reusable function to build the form group
+      const createMedicationControl = (medication: any) =>
+        this.fb.group({
+          id: [{ value: medication.id || 0, disabled: true }],
+          groupId: [{ value: medication.groupId || 0, disabled: true }],
+          medName: [{ value: medication.medName || '', disabled: true }, [Validators.required]],
+          medType: [{ value: medication.medType || 'Tab', disabled: true }, [Validators.required]],
+          dose: [medication.dose || '', Validators.required],
+          frequency: [medication.frequency || '', Validators.required],
+          timing: [medication.timing || '', Validators.required],
+          duration: [medication.duration || '', Validators.required],
+          instruction: [medication.instruction || '', Validators.required],
+        });
+
+      // Check if data contains a list of medications, and iterate over each medication
+      if (Array.isArray(data)) {
+        data.forEach((medication: any) => {
+          const medicationControl = createMedicationControl(medication);
+          this.medicine.push(medicationControl);  // Push each form group into the medicines array
+        });
+      } else {
+        // If the data is not an array, log an error or handle accordingly
+        console.error("Expected an array of medications, but received:", data);
+      }
+
+      this.loaderService.hideLoader();
+    }, error => {
+      this.loaderService.hideLoader();
+      console.error("Error fetching medications:", error);
+    });
   }
 
   populateTemplateData(id: number) {
@@ -669,6 +719,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   onTemplateNameChange(event: any) {
     this.isButtonEnabled = false;
     this.populateTemplateData(event.value);
+  }
+
+  onMediniesGroupChange(event: any) {
+    this.getMedicationByGroup(event.value);
   }
 
   SaveNewTemplate() {
@@ -990,7 +1044,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     }
   }
-  
+
   submitPrescribeMedicine(prescribeMed: FormGroup) {
 
     this.loaderService.showLoader();
@@ -1009,8 +1063,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.loaderService.hideLoader();
       }
     })
-    this.loaderService.hideLoader();
 
+    this.loaderService.hideLoader();
   }
 
 
