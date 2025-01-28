@@ -116,6 +116,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   prescriptionService: any;
   prescriptionImage: string | null = null;
   public templates: any[] = [];
+  public selectedTemplate!: any;
   public medicineGroups: IMedicinesGroup[] = [];
   public selectedMedication: IMedicationGroup[] = [];
 
@@ -123,7 +124,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public selectedDiagnosis: number = 0;
   isButtonEnabled: boolean = false;
   newTemplate!: IConsultationTemplate;
-
   // public showAddQuestion=true;
   // public questionnaireId!:number;
   constructor(private appointmentService: AppointmentService,
@@ -302,10 +302,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.FileUploadDto.fileData = base64String;
           this.FileUploadDto.docName = 'previewFile';
           this.FileUploadDto.appointmentId = this.latestId;
-
-          // Detailed logging for debugging
-          console.log('Generated PDF Base64 Length:', this.FileUploadDto.fileData.length);
-          console.log('Generated PDF Base64 String:', this.FileUploadDto.fileData);
 
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
@@ -683,24 +679,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   populateTemplateData(id: number) {
     // Find the selected template by ID
-    const selectedTemplate = this.templates.find(template => template.id === id);
-    if (!selectedTemplate) {
+    this.selectedTemplate = this.templates.find(template => template.id === id);
+    if (!this.selectedTemplate) {
       this.toaster.error('Template not found', 'Error');
       return;
     }
 
     // Patch the form values with the selected template
     this.consultForm.patchValue({
-      templateName: selectedTemplate.templateName,
-      examinationNote: selectedTemplate.examinationNote,
-      advice: selectedTemplate.advice,
-      diffDiagnosis: selectedTemplate.diffDiagnosis,
-      finalDiagnosis: selectedTemplate.finalDiagnosis,
-      diagnosisId: selectedTemplate.diagnosisId // Map diagnosId to diagnosName
+      templateName: this.selectedTemplate.templateName,
+      examinationNote: this.selectedTemplate.examinationNote,
+      advice: this.selectedTemplate.advice,
+      diffDiagnosis: this.selectedTemplate.diffDiagnosis,
+      finalDiagnosis: this.selectedTemplate.finalDiagnosis,
+      diagnosisId: this.selectedTemplate.diagnosisId // Map diagnosId to diagnosName
     });
 
     // Save the selected diagnosisId for submission
-    this.selectedDiagnosis = selectedTemplate.diagnosisId;
+    this.selectedDiagnosis = this.selectedTemplate.diagnosisId;
 
     // Mark the form as touched after patching values, so the button can be enabled
     this.consultForm.markAllAsTouched();
@@ -747,6 +743,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.toaster.success("Consultation template data saved successfully!", "Success");
           this.consultForm.value.newTemplateName = '';
           this.isButtonEnabled = false;
+          this.getAllTemplates();
         },
         (err) => {
           this.toaster.error(err.error.message, 'Error')
@@ -757,6 +754,39 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
+  UpdateExitingTemplate(){
+    if (!this.selectedTemplate) {
+      this.toaster.error('select the template to update', 'Error');
+      return;
+    }
+    else {
+      this.loaderService.showLoader();
+
+      const template = {
+        id: this.selectedTemplate.id,
+        templateName: this.selectedTemplate.templateName,
+        examinationNote: this.consultForm.value.examinationNote,
+        advice: this.consultForm.value.advice,
+        diffDiagnosis: this.consultForm.value.diffDiagnosis,
+        finalDiagnosis: this.consultForm.value.finalDiagnosis,
+        diagnosisId: this.consultForm.value.diagnosisId
+      };
+
+      this.consultTemplateService.updateConsultationTemplate(template.id, template).subscribe(
+        (res) => {
+          this.toaster.success("The existing consultation template is updated successfully!", "Success");
+          this.consultForm.value.newTemplateName = '';
+          this.isButtonEnabled = false;
+          this.getAllTemplates();
+        },
+        (err) => {
+          this.toaster.error(err.error.message, 'Error')
+        }
+      );
+
+      this.loaderService.hideLoader()
+    }
+  }
 
   loadQuestions(): void {
     this.question.getAllQuestions().subscribe(
@@ -1107,6 +1137,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   getUploadedFiles(id: number) {
     this.presDocuments = [];
     this.vitalDocuments = [];
+    this.previewFile = [];
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
         console.log("item", item)
@@ -1329,7 +1360,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
 
-  onFileUpload() {
+  onFileUpload(docName: string) {
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
 
@@ -1342,17 +1373,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.fileName = this.selectedFile?.name;
         this.FileUploadDto.FileType = this.selectedFile?.type;
         this.FileUploadDto.fileData = base64String;
-        this.FileUploadDto.docName = "prescription";
+        this.FileUploadDto.docName = docName;
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
         //const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]; 
         //if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type))
-        if (this.selectedFile?.type.startsWith('image/')) {
+        if ((docName == 'prescription' && this.selectedFile?.type.startsWith('image/')) 
+          || (docName == 'previewFile' && (this.selectedFile?.type.startsWith('application/pdf') || this.selectedFile?.type.startsWith('application/msword')))) {
           console.log("fileData", this.FileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
-              console.log(result);
               // Hide spinner if needed
               this.getUploadedFiles(this.latestId);
               this.selectedFile = null;

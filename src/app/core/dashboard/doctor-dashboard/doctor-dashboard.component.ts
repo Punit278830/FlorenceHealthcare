@@ -355,7 +355,8 @@ this.consultationCount();
   {
     this.medMasterDto=medData.value;
     this.medicineService.addMedicine(this.medMasterDto).subscribe(res=>{
-      this.toaster.success("Medicien added to Medicine Master","Add Medicine");
+      this.toaster.success("Medicine added to master","Add Medicine");
+      this.getMedicine();
       this.MedForm.reset();
     })
 

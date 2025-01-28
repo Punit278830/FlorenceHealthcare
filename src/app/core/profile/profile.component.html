@@ -422,6 +422,33 @@
                                 </mat-step>
                                 <mat-step label="Prescription"
                                     *ngIf="loggedInUserId.userRole==='admin' || loggedInUserId.userRole==='doctor'">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-12">
+                                                    <h2 class="heading">Upload/Write Prescription</h2>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-xl-6">
+                                                    <div style="display: flex;gap:20px;justify-content: start;align-items:center;">
+                                                        <input type="file" id="previewFile" (change)=onFileSelected($event)
+                                                            class="form-control"
+                                                            style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
+                                                        <button type="button" class="uploadbtn"
+                                                            (click)="onFileUpload('previewFile')">
+                                                            Upload file
+                                                        </button>
+                                                        <span>Or</span>
+                                                        <button type="button" class="uploadbtn"
+                                                            (click)="openInNewTab('/prescription-pad', 'Write')">
+                                                            Write Prescription
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 
                                     <div class="row">
                                         <div class="card">
@@ -430,8 +457,7 @@
                                                     <div class="documentsOuter">
                                                         <div style="width:fit-content">
                                                             <label for="Avatar" class="local-top">
-                                                                Upload
-                                                                documents
+                                                                Upload documents
                                                             </label>
                                                             <div
                                                                 style="display: flex;gap:20px;justify-content: start;align-items:center;">
@@ -439,16 +465,12 @@
                                                                     (change)=onFileSelected($event) class="form-control"
                                                                     style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                                 <button type="button" class="uploadbtn"
-                                                                    (click)="onFileUpload()">
+                                                                    (click)="onFileUpload('prescription')">
                                                                     Upload file
                                                                 </button>
                                                                 <button type="button" class="uploadbtn"
                                                                     (click)="openInNewTab('/prescription-pad', 'Draw')">
                                                                     Draw Image
-                                                                </button>
-                                                                <button type="button" class="uploadbtn"
-                                                                    (click)="openInNewTab('/prescription-pad', 'Write')">
-                                                                    Write Prescription
                                                                 </button>
                                                             </div>
                                                         </div>
@@ -524,12 +546,21 @@
                                                                         placeholder="">
                                                                 </div>
                                                             </div>
-                                                            <div class="col-12 col-md-6 col-xl-4"
+                                                            <div class="col-12 col-md-6 col-xl-2"
                                                                 *ngIf="isButtonEnabled">
                                                                 <div class="form-group d-flex">
                                                                     <button (click)="SaveNewTemplate()" type="button"
                                                                         class="btn btn-primary me-2">
                                                                         Save New Template
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-12 col-md-6 col-xl-2"
+                                                                *ngIf="isButtonEnabled && selectedTemplate != undefined">
+                                                                <div class="form-group d-flex">
+                                                                    <button (click)="UpdateExitingTemplate()"
+                                                                        type="button" class="btn btn-primary me-2">
+                                                                        Update Existing Template
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -593,265 +624,281 @@
                                                                         [(ngModel)]="dtFollowUp">
                                                                 </div>
                                                             </div>
-                                                            <div class="medicineOuter">
-                                                                    <div class="card-body">
-                                                                        <div class="form-heading">
-                                                                            <h4>Add Medicine</h4>
-                                                                        </div>
-                                                                        <form>
-                                                                            <div class="row">
-                                                                                <div class="col-12 col-md-6 col-xl-5">
-                                                                                    <div class="form-group local-forms">
-                                                                                        <input type="text"
-                                                                                            class="form-control"
-                                                                                            #searchValue
-                                                                                            (keyup)="searchMedicine(searchValue.value)"
-                                                                                            placeholder="search Medicine">
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-12 col-md-6 col-xl-2">
-                                                                                    <div class="form-group local-forms">
-                                                                                        <h2 class="text-center">or</h2>
-                                                                                    </div>
-                                                                                </div>
-                                                                                <div class="col-12 col-md-6 col-xl-5">
-                                                                                    <div class="form-group local-forms">
-                                                                                        <label for="medicationGroup">Select Medication</label>
-                                                                                        <mat-select formControlName="medicationGroup"
-                                                                                        (selectionChange)="onMediniesGroupChange($event)"
-                                                                                            class="form-control select">
-                                                                                            <mat-option *ngFor="let data of medicineGroups"
-                                                                                                [value]="data.id">
-                                                                                                {{data.name}}
-                                                                                            </mat-option>
-                                                                                        </mat-select>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                        </form>
+                                                            <div class="card-body">
+                                                                <div class="row">
+                                                                    <div class="col-12">
+                                                                        <h2 class="heading">Add Medicine</h2>
                                                                     </div>
-                                                            </div>
-
-                                                            <div class="medicineOuter">
-                                                                <div class="boxlistOuter">
-
-                                                                    <!-- <div class="top-nav-search mob-view"
-                                                                        style="margin-left: 0px;">
-                                                                        <h3 style="font-weight: bold;">Add Medicine</h3>
-                                                                        <form>
-                                                                            <input type="text" class="form-control"
-                                                                                #searchValue
-                                                                                (keyup)="searchMedicine(searchValue.value)"
-                                                                                placeholder="search Medicine">
-
-                                                                        </form>
-
-                                                                    </div> -->
-                                                                    <!-- Medicine serch form end here -->
-                                                                    <!-- Medicine serch option visible table code start from here -->
-                                                                    <ng-container *ngIf="appointmentStatus">
-                                                                        <div *ngIf="SearchMedicineList.length>0"
-                                                                            class="table-responsive">
-                                                                            <table
-                                                                                class="table border-0 custom-table comman-table datatable mb-0">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th mat-sort-header="name">
-                                                                                            Medicine Name
-                                                                                        </th>
-                                                                                        <th mat-sort-header="consultingDoctor">
-                                                                                            Type
-                                                                                        </th>
-                                                                                        <th mat-sort-header="treatment">
-                                                                                            Generic Name
-                                                                                        </th>
-                                                                                        <th></th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    <tr
-                                                                                        *ngFor="let data of SearchMedicineList; let i=index">
-
-                                                                                        <td class="profile-image">
-                                                                                            <a href="javascript:void(0);"
-                                                                                                (click)="selectMedicine(i)">
-                                                                                                {{data.medName}}
-                                                                                            </a>
-                                                                                        </td>
-                                                                                        <td>{{data.medType}}</td>
-                                                                                        <td>{{data.genericName}}</td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                    </ng-container>
-
                                                                 </div>
-
-                                                                <form [formGroup]="prescribeMedForm"
-                                                                    (ngSubmit)="submitPrescribeMedicine(prescribeMedForm)">
-                                                                    <div class="col-12 col-md-6 col-xl-12"
-                                                                        formArrayName="medicine" style="margin:0px;">
-                                                                        <div class="row"
-                                                                            *ngFor="let control of medicine.controls; let i = index"
-                                                                            formGroupName="{{i}}">
-                                                                            <div class="col-12 col-md-6 col-xl-2">
+                                                                <div class="medicineOuter">
+                                                                    <form>
+                                                                        <div class="row">
+                                                                            <div class="col-12 col-md-6 col-xl-5">
                                                                                 <div class="form-group local-forms">
-
-                                                                                    <input class="form-control"
-                                                                                        formControlName="medName"
-                                                                                        type="text">
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-12 col-md-6 col-xl-1">
-                                                                                <div class="form-group local-forms">
-
-                                                                                    <input class="form-control"
-                                                                                        formControlName="medType"
-                                                                                        type="text">
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-12 col-md-6 col-xl-1">
-                                                                                <div class="form-group local-forms">
-                                                                                    <label for="dose">Dose</label>
-                                                                                    <input class="form-control"
-                                                                                        formControlName="dose"
-                                                                                        type="text">
+                                                                                    <input type="text"
+                                                                                        class="form-control"
+                                                                                        #searchValue
+                                                                                        (keyup)="searchMedicine(searchValue.value)"
+                                                                                        placeholder="search Medicine">
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-12 col-md-6 col-xl-2">
                                                                                 <div class="form-group local-forms">
-                                                                                    <label for="dose">Frequency</label>
+                                                                                    <h2 class="text-center">or</h2>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-12 col-md-6 col-xl-5">
+                                                                                <div class="form-group local-forms">
+                                                                                    <label for="medicationGroup">Select
+                                                                                        Medication</label>
                                                                                     <mat-select
-                                                                                        formControlName="frequency"
+                                                                                        formControlName="medicationGroup"
+                                                                                        (selectionChange)="onMediniesGroupChange($event)"
                                                                                         class="form-control select">
                                                                                         <mat-option
-                                                                                            *ngFor="let data of frequencyData"
-                                                                                            [value]="data">
-                                                                                            {{data}}
+                                                                                            *ngFor="let data of medicineGroups"
+                                                                                            [value]="data.id">
+                                                                                            {{data.name}}
                                                                                         </mat-option>
                                                                                     </mat-select>
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="col-12 col-md-6 col-xl-2">
-                                                                                <div class="form-group local-forms">
-                                                                                    <label for="timing">Timing</label>
-                                                                                    <mat-select formControlName="timing"
-                                                                                        class="form-control select">
-                                                                                        <mat-option
-                                                                                            *ngFor="let data of timingData"
-                                                                                            [value]="data">{{data}}</mat-option>
-                                                                                    </mat-select>
-
-                                                                                </div>
-                                                                            </div>
-
-                                                                            <div class="col-12 col-md-6 col-xl-1">
-                                                                                <div class="form-group local-forms">
-                                                                                    <label
-                                                                                        for="duration">Duration</label>
-                                                                                    <input class="form-control"
-                                                                                        formControlName="duration"
-                                                                                        type="text" placeholder="days">
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-12 col-md-6 col-xl-2">
-                                                                                <div class="form-group local-forms">
-                                                                                    <label
-                                                                                        for="instruction">Instruction</label>
-                                                                                    <input class="form-control"
-                                                                                        formControlName="instruction"
-                                                                                        type="text">
-                                                                                </div>
-                                                                            </div>
-                                                                            <div class="col-12 col-md-6 col-xl-1">
-                                                                                <button type="button"
-                                                                                    class="btn btn-danger"
-                                                                                    (click)="removeDynamicControl(i)">
-                                                                                    Remove
-                                                                                </button>
-                                                                            </div>
-
                                                                         </div>
-                                                                        <div class="table-responsive"
-                                                                            *ngIf="medicineDto.length>0">
-                                                                            <h3 style="font-weight: bold;">
-                                                                                Prescribed Medicines
-                                                                            </h3>
-                                                                            <table
-                                                                                class="table border-0 custom-table comman-table datatable mb-0">
-                                                                                <thead>
-                                                                                    <tr>
-                                                                                        <th mat-sort-header="name">
-                                                                                            Medicine Name
-                                                                                        </th>
-                                                                                        <th mat-sort-header="consultingDoctor">
-                                                                                            Type
-                                                                                        </th>
-                                                                                        <th mat-sort-header="dose">
-                                                                                            Dose
-                                                                                        </th>
-                                                                                        <th mat-sort-header="consultingDoctor">
-                                                                                            Frequency
-                                                                                        </th>
-                                                                                        <th mat-sort-header="timing">
-                                                                                            Timing
-                                                                                        </th>
-                                                                                        <th mat-sort-header="duration">
-                                                                                            Duration
-                                                                                        </th>
-                                                                                        <th mat-sort-header="instruction">
-                                                                                            Instructions
-                                                                                        </th>
-                                                                                        <th></th>
-                                                                                    </tr>
-                                                                                </thead>
-                                                                                <tbody>
-                                                                                    <tr *ngFor="let data of medicineDto">
-                                                                                        <td>{{data.medName}}</td>
-                                                                                        <td>{{data.medType}}</td>
-                                                                                        <td>{{data.dose}}</td>
-                                                                                        <td>{{data.frequency}}</td>
-                                                                                        <td>{{data.timing}}</td>
-                                                                                        <td>{{data.duration}}</td>
-                                                                                        <td>{{data.instruction}}</td>
-                                                                                    </tr>
-                                                                                </tbody>
-                                                                            </table>
-                                                                        </div>
-                                                                        <div class="col-12"
-                                                                            *ngIf="medicine.controls.length>0 && appointmentStatus">
-                                                                            <div class="doctor-submit text-start">
-                                                                                <button type="submit" class="btn btn-primary submit-form me-2">Submit Medicine
-                                                                                </button>
+                                                                    </form>
+                                                                </div>
+
+                                                                <div class="medicineOuter">
+                                                                    <div class="boxlistOuter">
+                                                                        <ng-container *ngIf="appointmentStatus">
+                                                                            <div *ngIf="SearchMedicineList.length>0"
+                                                                                class="table-responsive">
+                                                                                <table
+                                                                                    class="table border-0 custom-table comman-table datatable mb-0">
+                                                                                    <thead>
+                                                                                        <tr>
+                                                                                            <th mat-sort-header="name">
+                                                                                                Medicine Name
+                                                                                            </th>
+                                                                                            <th
+                                                                                                mat-sort-header="consultingDoctor">
+                                                                                                Type
+                                                                                            </th>
+                                                                                            <th
+                                                                                                mat-sort-header="treatment">
+                                                                                                Generic Name
+                                                                                            </th>
+                                                                                            <th></th>
+                                                                                        </tr>
+                                                                                    </thead>
+                                                                                    <tbody>
+                                                                                        <tr
+                                                                                            *ngFor="let data of SearchMedicineList; let i=index">
+
+                                                                                            <td class="profile-image">
+                                                                                                <a href="javascript:void(0);"
+                                                                                                    (click)="selectMedicine(i)">
+                                                                                                    {{data.medName}}
+                                                                                                </a>
+                                                                                            </td>
+                                                                                            <td>{{data.medType}}</td>
+                                                                                            <td>{{data.genericName}}
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    </tbody>
+                                                                                </table>
                                                                             </div>
-                                                                        </div>
+                                                                        </ng-container>
+
                                                                     </div>
-                                                                </form>
-                                                            </div>
 
+                                                                    <form [formGroup]="prescribeMedForm"
+                                                                        (ngSubmit)="submitPrescribeMedicine(prescribeMedForm)">
+                                                                        <div class="col-12 col-md-6 col-xl-12"
+                                                                            formArrayName="medicine"
+                                                                            style="margin:0px;">
+                                                                            <div class="row"
+                                                                                *ngFor="let control of medicine.controls; let i = index"
+                                                                                formGroupName="{{i}}">
+                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                    <div class="form-group local-forms">
 
-                                                            <div class="col-12" style="margin-top:15px"
-                                                                *ngIf="appointmentStatus">
-                                                                <div class="doctor-submit text-end">
+                                                                                        <input class="form-control"
+                                                                                            formControlName="medName"
+                                                                                            type="text">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-1">
+                                                                                    <div class="form-group local-forms">
 
-                                                                    <button type="submit" *ngIf="!showNext"
-                                                                        class="btn btn-primary submit-form me-2">
-                                                                        Submit
-                                                                    </button>
-                                                                    <button (click)="updateConsultation()" type="button"
-                                                                        *ngIf="showNext" class="btn btn-primary me-2">
-                                                                        Update
-                                                                    </button>
+                                                                                        <input class="form-control"
+                                                                                            formControlName="medType"
+                                                                                            type="text">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-1">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label for="dose">Dose</label>
+                                                                                        <input class="form-control"
+                                                                                            formControlName="dose"
+                                                                                            type="text">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label
+                                                                                            for="dose">Frequency</label>
+                                                                                        <mat-select
+                                                                                            formControlName="frequency"
+                                                                                            class="form-control select">
+                                                                                            <mat-option
+                                                                                                *ngFor="let data of frequencyData"
+                                                                                                [value]="data">
+                                                                                                {{data}}
+                                                                                            </mat-option>
+                                                                                        </mat-select>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label
+                                                                                            for="timing">Timing</label>
+                                                                                        <mat-select
+                                                                                            formControlName="timing"
+                                                                                            class="form-control select">
+                                                                                            <mat-option
+                                                                                                *ngFor="let data of timingData"
+                                                                                                [value]="data">{{data}}</mat-option>
+                                                                                        </mat-select>
 
-                                                                    <button type="button" (click)="cancelConsultation()"
-                                                                        class="btn btn-primary cancel-form">
-                                                                        Cancel
-                                                                    </button>
+                                                                                    </div>
+                                                                                </div>
 
+                                                                                <div class="col-12 col-md-6 col-xl-1">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label
+                                                                                            for="duration">Duration</label>
+                                                                                        <input class="form-control"
+                                                                                            formControlName="duration"
+                                                                                            type="text"
+                                                                                            placeholder="days">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                    <div class="form-group local-forms">
+                                                                                        <label
+                                                                                            for="instruction">Instruction</label>
+                                                                                        <input class="form-control"
+                                                                                            formControlName="instruction"
+                                                                                            type="text">
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-1">
+                                                                                    <button type="button"
+                                                                                        class="btn btn-danger"
+                                                                                        (click)="removeDynamicControl(i)">
+                                                                                        Remove
+                                                                                    </button>
+                                                                                </div>
+
+                                                                            </div>
+                                                                            <div class="col-12"
+                                                                                *ngIf="medicine.controls.length>0 && appointmentStatus">
+                                                                                <div class="doctor-submit text-end">
+                                                                                    <button type="submit"
+                                                                                        class="btn btn-primary submit-form me-2">Submit
+                                                                                        Medicine
+                                                                                    </button>
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="table-responsive"
+                                                                                *ngIf="medicineDto.length>0">
+                                                                                <div class="card-body">
+                                                                                    <div class="form-heading">
+                                                                                        <h4>Prescribed Medicines</h4>
+                                                                                    </div>
+                                                                                    <table
+                                                                                        class="table border-0 custom-table comman-table datatable mb-0">
+                                                                                        <thead>
+                                                                                            <tr>
+                                                                                                <th
+                                                                                                    mat-sort-header="name">
+                                                                                                    Medicine Name
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="consultingDoctor">
+                                                                                                    Type
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="dose">
+                                                                                                    Dose
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="consultingDoctor">
+                                                                                                    Frequency
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="timing">
+                                                                                                    Timing
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="duration">
+                                                                                                    Duration
+                                                                                                </th>
+                                                                                                <th
+                                                                                                    mat-sort-header="instruction">
+                                                                                                    Instructions
+                                                                                                </th>
+                                                                                                <th></th>
+                                                                                            </tr>
+                                                                                        </thead>
+                                                                                        <tbody>
+                                                                                            <tr
+                                                                                                *ngFor="let data of medicineDto">
+                                                                                                <td>{{data.medName}}
+                                                                                                </td>
+                                                                                                <td>{{data.medType}}
+                                                                                                </td>
+                                                                                                <td>{{data.dose}}</td>
+                                                                                                <td>{{data.frequency}}
+                                                                                                </td>
+                                                                                                <td>{{data.timing}}</td>
+                                                                                                <td>{{data.duration}}
+                                                                                                </td>
+                                                                                                <td>{{data.instruction}}
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                        </tbody>
+                                                                                    </table>
+                                                                                </div>
+
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+
+                                                                <div class="col-12" style="margin-top:15px"
+                                                                    *ngIf="appointmentStatus">
+                                                                    <div class="doctor-submit text-end">
+
+                                                                        <button type="submit" *ngIf="!showNext"
+                                                                            class="btn btn-primary submit-form me-2">
+                                                                            Submit
+                                                                        </button>
+                                                                        <button (click)="updateConsultation()"
+                                                                            type="button" *ngIf="showNext"
+                                                                            class="btn btn-primary me-2">
+                                                                            Update
+                                                                        </button>
+
+                                                                        <button type="button"
+                                                                            (click)="cancelConsultation()"
+                                                                            class="btn btn-primary cancel-form">
+                                                                            Cancel
+                                                                        </button>
+
+                                                                    </div>
                                                                 </div>
                                                             </div>
-
 
                                                         </div>
 
