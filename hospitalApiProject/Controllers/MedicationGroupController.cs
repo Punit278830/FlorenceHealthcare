@@ -90,6 +90,40 @@ namespace hospitalApiProject.Controllers
       }
     }
 
+    [Route("replace")]
+    [HttpPost]
+    public async Task<ActionResult<MedicationGroup>> ReplaceMedicationGroups(List<MedicationGroup> medicationGroups)
+    {
+      try
+      {
+        if (medicationGroups == null || medicationGroups.Count == 0)
+        {
+          return BadRequest("Medication groups cannot be empty.");
+        }
+
+        // Get distinct GroupIds from the incoming list
+        var groupIds = medicationGroups.Select(m => m.GroupId).Distinct().ToList();
+
+        // Delete existing records matching these GroupIds
+        var existingGroups = _context.MedicationGroups
+            .Where(m => groupIds.Contains(m.GroupId));
+
+        _context.MedicationGroups.RemoveRange(existingGroups);
+
+        // Add new medication groups
+        _context.MedicationGroups.AddRange(medicationGroups);
+
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(PostMedicationGroups), medicationGroups);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal Server Error: {ex.Message}");
+      }
+    }
+
+
     // DELETE: api/PatientMedications/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMedicationGroup(int id)

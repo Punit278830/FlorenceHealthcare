@@ -54,4 +54,8 @@ export class MedicinesGroupService {
     return this.http.put(this.apiUrl + "MedicationGroup/" + id, data)
   }
 
+  replaceMedicationGroup(data: IMedicationGroup) {
+    return this.http.post(this.apiUrl + "MedicationGroup/replace", data)
+  }
+
 }

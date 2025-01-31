@@ -431,9 +431,10 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-12 col-md-6 col-xl-6">
-                                                    <div style="display: flex;gap:20px;justify-content: start;align-items:center;">
-                                                        <input type="file" id="previewFile" (change)=onFileSelected($event)
-                                                            class="form-control"
+                                                    <div
+                                                        style="display: flex;gap:20px;justify-content: start;align-items:center;">
+                                                        <input type="file" id="previewFile"
+                                                            (change)=onFileSelected($event) class="form-control"
                                                             style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
                                                         <button type="button" class="uploadbtn"
                                                             (click)="onFileUpload('previewFile')">
@@ -633,7 +634,7 @@
                                                                 <div class="medicineOuter">
                                                                     <form>
                                                                         <div class="row">
-                                                                            <div class="col-12 col-md-6 col-xl-5">
+                                                                            <div class="col-12 col-md-6 col-xl-4">
                                                                                 <div class="form-group local-forms">
                                                                                     <input type="text"
                                                                                         class="form-control"
@@ -642,15 +643,16 @@
                                                                                         placeholder="search Medicine">
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="col-12 col-md-6 col-xl-2">
+                                                                            <div class="col-12 col-md-6 col-xl-1">
                                                                                 <div class="form-group local-forms">
                                                                                     <h2 class="text-center">or</h2>
                                                                                 </div>
                                                                             </div>
-                                                                            <div class="col-12 col-md-6 col-xl-5">
+                                                                            <div class="col-12 col-md-6 col-xl-4">
                                                                                 <div class="form-group local-forms">
-                                                                                    <label for="medicationGroup">Select
-                                                                                        Medication</label>
+                                                                                    <label for="medicationGroup">
+                                                                                        Select Medication
+                                                                                    </label>
                                                                                     <mat-select
                                                                                         formControlName="medicationGroup"
                                                                                         (selectionChange)="onMediniesGroupChange($event)"
@@ -661,6 +663,44 @@
                                                                                             {{data.name}}
                                                                                         </mat-option>
                                                                                     </mat-select>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </form>
+                                                                    <form [formGroup]="medicinesGroupForm" *ngIf="isMedicinesFormDirty">
+                                                                        <div class="row form-container">
+                                                                            <div class="col-12 col-md-6 col-xl-4">
+                                                                                <div class="form-group local-forms">
+                                                                                    <label for="name">Medicines
+                                                                                        Group Name <span class="login-danger">*</span></label>
+                                                                                    <input class="form-control"
+                                                                                        formControlName="name"
+                                                                                        type="text" placeholder="">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-12 col-md-6 col-xl-4">
+                                                                                <div class="form-group local-forms">
+                                                                                    <label for="description">Group
+                                                                                        Description <span
+                                                                                            class="login-danger">*</span></label>
+                                                                                        <input class="form-control"
+                                                                                        formControlName="description"
+                                                                                        type="text" placeholder="">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="col-12 col-md-4 col-xl-4">
+                                                                                <div class="form-group d-flex">
+                                                                                    <button (click)="addNewMedication()"
+                                                                                        type="button"
+                                                                                        class="btn btn-primary me-2">
+                                                                                        Save As New
+                                                                                    </button>
+                                                                                    <button
+                                                                                        (click)="updateMedication()"
+                                                                                        type="button"
+                                                                                        class="btn btn-primary me-2">
+                                                                                        Update Existing
+                                                                                    </button>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -742,8 +782,8 @@
                                                                                             formControlName="dose"
                                                                                             type="text">
                                                                                     </div>
-                                                                                </div>
-                                                                                <div class="col-12 col-md-6 col-xl-2">
+                                                                                </div>`
+                                                                                <div class="col-12 col-md-6 col-xl-1">
                                                                                     <div class="form-group local-forms">
                                                                                         <label
                                                                                             for="dose">Frequency</label>
@@ -803,7 +843,7 @@
                                                                             </div>
                                                                             <div class="col-12"
                                                                                 *ngIf="medicine.controls.length>0 && appointmentStatus">
-                                                                                <div class="doctor-submit text-end">
+                                                                                <div class="doctor-submit text-start">
                                                                                     <button type="submit"
                                                                                         class="btn btn-primary submit-form me-2">Submit
                                                                                         Medicine
