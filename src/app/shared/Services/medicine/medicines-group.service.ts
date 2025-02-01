@@ -42,7 +42,7 @@ export class MedicinesGroupService {
     return this.http.get(this.apiUrl + "MedicationGroup/" + id)
   }
 
-  getAllMedicationGroups(id: number): Observable<IMedicationGroup[]> {
+  getAllMedicationGroups(): Observable<IMedicationGroup[]> {
     return this.http.get(this.apiUrl + "MedicationGroup")
   }
 
@@ -52,6 +52,10 @@ export class MedicinesGroupService {
 
   updateMedicationGroup(id: number, data: IMedicationGroup) {
     return this.http.put(this.apiUrl + "MedicationGroup/" + id, data)
+  }
+
+  replaceMedicationGroup(data: IMedicationGroup) {
+    return this.http.post(this.apiUrl + "MedicationGroup/replace", data)
   }
 
 }

@@ -19,7 +19,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PrescriptionTemplateMaster>>> GetAllPrescriptionTemplates()
     {
-      return await _context.PrescriptionTemplateMaster.ToListAsync();
+      return await _context.PrescriptionTemplateMaster.OrderBy(x => x.TemplateName).ToListAsync();
     }
 
     // GET: api/PrescriptionTemplateMaster/5

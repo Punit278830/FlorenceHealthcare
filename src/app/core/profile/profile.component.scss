@@ -284,4 +284,12 @@
   .edit-link:hover {
     color: darkblue;
   }
+
+  .form-container {
+    padding: 24px;  /* General padding */
+    padding-top: 40px;  /* Extra space at the top */
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
   
