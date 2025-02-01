@@ -4,7 +4,7 @@ import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/co
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { forkJoin, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { ConsultService } from 'src/app/shared/Services/consultation/consult.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
@@ -711,6 +711,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   onMediniesGroupChange(event: any) {
     this.selectedMedicineGroup = this.medicineGroups.find(group => group.id === event.value) || {} as IMedicinesGroup;
+    this.isMedicinesFormDirty = false;
     this.getMedicationByGroup(event.value);
   }
 
@@ -1048,7 +1049,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   removeDynamicControl(index: number) {
-    this.medicine.removeAt(index);  
+    this.medicine.removeAt(index);
     this.isMedicinesFormDirty = true;
   }
   get medicine() {
@@ -1089,60 +1090,84 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.loaderService.hideLoader();
   }
 
-  createMedicationGroup() {
+  createMedicationGroup(): Observable<number> {
     if (this.medicinesGroupForm.valid) {
-      this.medicinesGroupService.addMedicineGroup(this.medicinesGroupForm.value).subscribe(res => {
-        if (res) {
-          this.toaster.success("Medicines Group Created", "Success");
-          this.newGroupId = res.id;
-          this.getAllMedicationGroups();
-          this.medicinesGroupForm.reset();  // Reset the form properly
-        }
-      });
+      return this.medicinesGroupService.addMedicineGroup(this.medicinesGroupForm.value).pipe(
+        tap(res => {
+          if (res) {
+            this.toaster.success("Medicines Group Created", "Success");
+            this.getAllMedicationGroups();
+            this.medicinesGroupForm.reset();
+          }
+        }),
+        map(res => res.id) // Extract the newly created group ID
+      );
     } else {
       this.medicinesGroupForm.markAllAsTouched();
+      return throwError(() => new Error("Form is invalid")); // Return an error Observable if form is invalid
     }
   }
 
   addNewMedication() {
     this.loaderService.showLoader();
-  
-    // Add new group
-    this.createMedicationGroup();
-  
+
     const prescribeMedicines = this.prescribeMedForm.getRawValue();
-    prescribeMedicines.medicine.map((m: IMedicationGroup) => {
-      m.groupId = this.newGroupId;
-      m.id = 0;
-    });
-  
-    // Add medicines to the group
-    this.medicinesGroupService.submitMedicationGroup(prescribeMedicines.medicine).subscribe(res => {
-      if (res) {
-        this.toaster.success("Medication added to new group", "Success");
-        this.SearchMedicineList = [];
-        this.searchMedForm.reset();
-        this.getAllMedicationGroups();
-        this.isMedicinesFormDirty = false;
-      }
+
+    // ✅ Check if there is at least one medicine before proceeding
+    if (!prescribeMedicines.medicine || prescribeMedicines.medicine.length === 0) {
+      this.toaster.error("Please add at least one medicine before saving.", "Error");
       this.loaderService.hideLoader();
+      return;
+    }
+
+    this.createMedicationGroup().pipe(
+      switchMap(newGroupId => {
+        // Assign groupId to all medicines
+        prescribeMedicines.medicine.forEach((m: IMedicationGroup) => {
+          m.groupId = newGroupId;
+          m.id = 0;
+        });
+
+        // Submit the medicines to the new group
+        return this.medicinesGroupService.submitMedicationGroup(prescribeMedicines.medicine);
+      })
+    ).subscribe({
+      next: res => {
+        if (res) {
+          this.toaster.success("Medication added to new group", "Success");
+          this.SearchMedicineList = [];
+          this.searchMedForm.reset();
+          this.getAllMedicationGroups();
+          this.isMedicinesFormDirty = false;
+        }
+        this.loaderService.hideLoader();
+      },
+      error: err => {
+        console.error("Error in addNewMedication:", err);
+        this.loaderService.hideLoader();
+      }
     });
-  
-    this.loaderService.hideLoader();
   }
-  
+
 
   updateMedication() {
     this.loaderService.showLoader();
-  
+
     const prescribeMedicines = this.prescribeMedForm.getRawValue();
+
+    if (!prescribeMedicines.medicine || prescribeMedicines.medicine.length === 0) {
+      this.toaster.error("Please add at least one medicine before saving.", "Error");
+      this.loaderService.hideLoader();
+      return;
+    }
+
     this.medicinesGroupService.replaceMedicationGroup(prescribeMedicines.medicine).subscribe(res => {
       this.toaster.success("Medication updated", "Success");
       this.SearchMedicineList = [];
       this.searchMedForm.reset();
       this.isMedicinesFormDirty = false;
     });
-  
+
     this.loaderService.hideLoader();
   }
 
