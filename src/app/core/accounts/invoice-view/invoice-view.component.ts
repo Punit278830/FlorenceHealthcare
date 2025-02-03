@@ -6,7 +6,7 @@ import { AppointmentService } from 'src/app/shared/Services/appointment/appointm
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { Iappointment, Iinvoice,IinvoiceTemp, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
+import { Iappointment, Iinvoice, IinvoiceTemp, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
@@ -102,8 +102,8 @@ export class InvoiceViewComponent implements OnInit {
   public invoicePaymentDto!: IInvoicePaymentDto;
   public subInvoicePaymentDto!: ISubItemInvoicePaymentDto;
   private invoiceId!: number;
-  public transactionId?: string; 
-  uniqueTransactionIds: { transactionId: string }[] = []; 
+  public transactionId?: string;
+  uniqueTransactionIds: { transactionId: string }[] = [];
   public patientDetails!: IpatientInfo;
   public appointmentDetails!: Iappointment;
   public doctorDetails!: IstaffInfo;
@@ -131,14 +131,14 @@ export class InvoiceViewComponent implements OnInit {
   buttonColors = {
     Cash: 'lightgray',
     Online: 'lightgray',
-    both:'lightgray'
+    both: 'lightgray'
   };
   isTextboxVisible = false;
   changeColor(button: string) {
     // Reset all buttons to default color
     this.buttonColors.Cash = 'lightgray';
     this.buttonColors.Online = 'lightgray';
-    this.buttonColors.both ='lightgray';
+    this.buttonColors.both = 'lightgray';
 
     // Change the color of the clicked button
     if (button === 'Cash') {
@@ -154,12 +154,11 @@ export class InvoiceViewComponent implements OnInit {
       this.paymentMode = 'Online';
       this.isReferenceLabelVisible = true;
     }
-    else if (button==='both')
-    {
-      this.buttonColors.both='blue';
-      this.isTextboxVisible=false;
-      this.paymentMode='both';
-      this.isReferenceLabelVisible =false;
+    else if (button === 'both') {
+      this.buttonColors.both = 'blue';
+      this.isTextboxVisible = false;
+      this.paymentMode = 'both';
+      this.isReferenceLabelVisible = false;
     }
   }
 
@@ -174,10 +173,8 @@ export class InvoiceViewComponent implements OnInit {
     private staffService: StaffService,
     private toastr: ToastrService,
     private decimalPipe: DecimalPipe,
-    
     private route: Router) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
-    console.log("invoiceId", this.invoiceService.invoiceId);
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
     }
@@ -190,8 +187,8 @@ export class InvoiceViewComponent implements OnInit {
       paymentMode: '',
       transactionId: '',
       amount: 0,
-      itemName:'',
-      itemId:''
+      itemName: '',
+      itemId: ''
     };
 
     this.subInvoicePaymentDto = {
@@ -205,9 +202,9 @@ export class InvoiceViewComponent implements OnInit {
     };
   }
 
-  tempDoctorModels:any = {
-    name:'',
-    transactionId:0
+  tempDoctorModels: any = {
+    name: '',
+    transactionId: 0
   };
 
   getInvoiceDetails() {
@@ -216,25 +213,18 @@ export class InvoiceViewComponent implements OnInit {
       this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
         this.isPaidButtonVisible = res.status != 'Paid'
         this.isAllowed = res.status == 'Paid';
-        
+
         this.invoiceDetails = res;
         this.tempinvoiceDetails = {
           ...res,            // Spread the properties of Iinvoice
           tempItemName: 'Consultation'   // Add the missing tempItemName property
         };
-        // this.tempinvoiceDetails = res;
-        // this.tempinvoiceDetails.tempItemName = 'Consultation';
-        console.log("invoice details", res);
-        console.log("tempinvoiceDetails ", this.tempinvoiceDetails);
+
         if (!res.isConsultationPaid && (res.status == 'Unpaid' || res.status == "Partially Paid")) {
-          //this.isPaidButtonVisible=false;
           this.balanceAmount = this.balanceAmount + res.amount;
         }
 
-        //this.totalInvoiceAmount += res.amount;
         this.decimalPipe.transform(this.totalInvoiceAmount += res.amount, '1.2-2') || '';
-        console.log('Total Amount:', this.totalInvoiceAmount);
-        
         this.getPatientDetails(res.patientId);
         this.getAddtionalItems(this.invoiceId);
 
@@ -246,7 +236,6 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   ngOnInit() {
-    
     this.getInvoiceDetails();
     const jss = create(preset());
     this.sheets = new SheetsRegistry();
@@ -254,48 +243,42 @@ export class InvoiceViewComponent implements OnInit {
     this.sheets.add(sheet);
     this.classes = sheet.attach().classes;
     this.width = '80mm';
-    
-
-
   }
 
-// Method to merge transaction IDs and remove duplicates in JSON format
-getMergedTransactionIds(): { transactionId: string }[] {
-  const transactionIds: { transactionId: string }[] = [];
+  // Method to merge transaction IDs and remove duplicates in JSON format
+  getMergedTransactionIds(): { transactionId: string }[] {
+    const transactionIds: { transactionId: string }[] = [];
 
-  // Check and add the transactionId from invoiceDetails if it exists
-  if (this.invoiceDetails && this.invoiceDetails.transactionId) {
-    // Ignore "Cash Payment"
-    if (this.invoiceDetails.transactionId !== 'Cash Payment') {
-      transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
-    }
-  }
-
-  // Check and add transactionIds from additionalInvoiceItem array
-  if (this.addtionalInoiveItem && this.addtionalInoiveItem.length > 0) {
-    this.addtionalInoiveItem.forEach(item => {
-      if (item.transactionId && item.transactionId !== 'Cash Payment') {
-        transactionIds.push({ transactionId: item.transactionId });
+    // Check and add the transactionId from invoiceDetails if it exists
+    if (this.invoiceDetails && this.invoiceDetails.transactionId) {
+      // Ignore "Cash Payment"
+      if (this.invoiceDetails.transactionId !== 'Cash Payment') {
+        transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
       }
-    });
+    }
+
+    // Check and add transactionIds from additionalInvoiceItem array
+    if (this.addtionalInoiveItem && this.addtionalInoiveItem.length > 0) {
+      this.addtionalInoiveItem.forEach(item => {
+        if (item.transactionId && item.transactionId !== 'Cash Payment') {
+          transactionIds.push({ transactionId: item.transactionId });
+        }
+      });
+    }
+
+    // Remove duplicates using Set (by converting objects to strings)
+    const uniqueTransactionIds = Array.from(new Set(transactionIds.map(a => JSON.stringify(a))))
+      .map(e => JSON.parse(e));
+
+    return uniqueTransactionIds;
   }
-
-  // Remove duplicates using Set (by converting objects to strings)
-  const uniqueTransactionIds = Array.from(new Set(transactionIds.map(a => JSON.stringify(a))))
-    .map(e => JSON.parse(e));
-
-  console.log('Unique Transaction IDs:', uniqueTransactionIds);
-  return uniqueTransactionIds;
-}
-
-
 
   getPatientDetails(id: number) {
     this.patientService.getPatientData(id).subscribe(res => {
       this.patientDetails = res;
-
     })
   }
+
   handleClick(event: MouseEvent): void {
     if (!this.isAllowed) {
       // Prevent default behavior if not allowed
@@ -304,13 +287,10 @@ getMergedTransactionIds(): { transactionId: string }[] {
     }
   }
 
-
   getAppointDetails(id: number) {
     this.appointmentService.getAppointmentById(id).subscribe(res => {
       this.appointmentDetails = res;
-      console.log("appoint", this.appointmentDetails)
       this.getDoctorDetails();
-
     })
   }
 
@@ -321,15 +301,14 @@ getMergedTransactionIds(): { transactionId: string }[] {
     }
     )
   }
-  
+
   loadPatientAppointments() {
     this.appointmentList = [];
     const currentYear = new Date().getFullYear();
 
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
-      console.log('appointmentList ', this.appointmentList);
-      
+
       // Find the latest appointment and check if it is within the last 7 days
       this.checkLatestAppointmentWithin7Days();
     });
@@ -360,10 +339,6 @@ getMergedTransactionIds(): { transactionId: string }[] {
         const differenceInTime = selectedAppointmentDate.getTime() - previousAppointmentDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 3600 * 24);
 
-        console.log("Selected Appointment Date:", selectedAppointmentDate);
-        console.log("Previous Appointment Date:", previousAppointmentDate);
-        console.log("Difference in Days:", differenceInDays);
-
         // Check if the difference between the selected and previous appointment is within 7 days
         this.flag = differenceInDays <= 7 && differenceInDays >= 0;
 
@@ -393,11 +368,7 @@ getMergedTransactionIds(): { transactionId: string }[] {
         this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
         this.disc = 100;
       }
-
     }
-
-
-    console.log("Flag:", this.flag);
   }
 
   payAll(invoiceId: number) {
@@ -417,24 +388,19 @@ getMergedTransactionIds(): { transactionId: string }[] {
     else {
       this.paymentModeDetails.transactionId = null;
     }
-    
+
     this.paymentModeDetails.paymentMode = this.paymentMode;
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = 0;
     this.paymentModeDetails.itemId = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.id).join(',');
     this.paymentModeDetails.itemName = this.addtionalInoiveItem.filter(x => x.status == 'Unpaid').map(x => x.itemName).join(',');
-    
-    if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.isConsultationPaid == false){
+
+    if (this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.isConsultationPaid == false) {
       this.paymentModeDetails.itemId = this.paymentModeDetails.itemId + ',Consultation';
       this.paymentModeDetails.itemName = this.paymentModeDetails.itemName + ',Consultation';
 
 
     }
-    // console.log('this.addtionalInoiveItem.map(x => x.id) ', this.addtionalInoiveItem.map(x => x.id));
-    
-
-    console.log('this.paymentModeDetails ', this.paymentModeDetails);
-    
 
     this.invoiceService.payAll(invoiceId, this.paymentModeDetails).subscribe(res => {
       this.totalInvoiceAmount = 0;
@@ -442,7 +408,6 @@ getMergedTransactionIds(): { transactionId: string }[] {
       this.balanceAmount = 0;
       this.toastr.success("Invoice Paid Successfully", "Update Invoice");
     })
-
   }
 
   removeItem(itemName: string): void {
@@ -482,19 +447,10 @@ getMergedTransactionIds(): { transactionId: string }[] {
     this.paymentModeDetails.invoiceId = this.invoiceDetails.invoiceId;
     this.paymentModeDetails.amount = invoiceDetails.amount;
     this.paymentModeDetails.itemId = 'Consultation';
-      this.paymentModeDetails.itemName = 'Consultation';
-
-    // if(this.tempinvoiceDetails.tempItemName == 'Consultation' && this.tempinvoiceDetails.status == 'Unpaid'){
-    //   this.paymentModeDetails.itemId = 'Consultation';
-    //   this.paymentModeDetails.itemName = 'Consultation';
-
-
-    // }
+    this.paymentModeDetails.itemName = 'Consultation';
 
     this.invoicePaymentDto.invoiceInfo = this.invoiceDetails;
     this.invoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
-    console.log('invoicePaymentDto:', this.invoicePaymentDto);
-    
 
     this.invoiceService.updateInvoice(invoiceDetails.invoiceId, this.invoicePaymentDto).subscribe(res => {
       this.balanceAmount = 0;
@@ -506,15 +462,13 @@ getMergedTransactionIds(): { transactionId: string }[] {
   }
 
   print() {
-
     this.getMergedTransactionIds();
-   
     this.thermalvisible = true;
+
     var dateToday = new Date();
     this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
 
     if (this.isTextboxVisible == false) {
-
       this.ReferenceTextBoxVal = 'NA';
     }
     else {
@@ -522,29 +476,23 @@ getMergedTransactionIds(): { transactionId: string }[] {
       this.ReferenceTextBoxVal = inputValue;
     }
 
-
     setTimeout(() => {
       if (this.printView) {
         const tpm = new ThermalPrinterService('80mm');
         const styles = this.sheets.toString();
-        //console.log(this.printView.nativeElement.innerHTML);
-        //console.log(styles);
         tpm.setStyles(styles);
         tpm.addRawHtml(this.printView.nativeElement.innerHTML);
         tpm.print();
-
         this.thermalvisible = false;
       } else {
         console.error('printView is not defined');
       }
-    }, 0);
+    }, 100);
   }
 
   getAddtionalItems(id: number) {
 
     this.invoiceService.getAddtionalInvoiceItemById(id).subscribe((res: any) => {
-      console.log('Temp: ',res);
-      
       this.addtionalInoiveItem = res;
       res.map((data: any) => {
         if (data.status == 'Unpaid') {
@@ -558,12 +506,6 @@ getMergedTransactionIds(): { transactionId: string }[] {
 
         this.totalInvoiceAmount = this.totalInvoiceAmount + data.finalAmount;
       })
-      console.log("addi", this.addtionalInoiveItem);
-      console.log("appo", this.appointmentDetails);
-      console.log("doc", this.doctorDetails);
-      
-
-
     })
   }
 
@@ -604,9 +546,6 @@ getMergedTransactionIds(): { transactionId: string }[] {
 
       this.subInvoicePaymentDto.additionalInvoiceItem = result;
       this.subInvoicePaymentDto.paymentModeInfo = this.paymentModeDetails;
-
-      console.log('this.subInvoicePaymentDto.', this.subInvoicePaymentDto);
-      
 
       this.invoiceService.updateSubInvoiceItem(data.id, this.subInvoicePaymentDto).subscribe(res => {
         this.toastr.success("Invoice Paid", 'Paid');
@@ -694,7 +633,6 @@ class ThermalPrinterService {
     } else {
       console.error("Failed to open the print window. Please check your browser settings and try again.");
     }
-    // mywindow.close();
   }
 }
 

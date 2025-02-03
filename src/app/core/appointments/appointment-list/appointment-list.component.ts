@@ -384,7 +384,7 @@ export class AppointmentListComponent implements OnInit {
     }
 
     setTimeout(() => {
-      this.route.navigate([routes.profile]);
+      this.route.navigate([routes.profile], { queryParams: { patientId: patientId } });
       this.loadingService.hideLoader();
     }, 0);
 
