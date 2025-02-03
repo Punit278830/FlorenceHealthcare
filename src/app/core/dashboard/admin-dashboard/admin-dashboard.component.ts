@@ -280,9 +280,7 @@ movetoInvoiceView(Id: number) {
 
 movetoPatient(id: number) {
   this.patientService.patientId = id;
-
-  this.route.navigate([routes.profile]);
-
+  this.route.navigate([routes.profile], { queryParams: { patientId: id } });
 }
 
 fetchCombineData() {

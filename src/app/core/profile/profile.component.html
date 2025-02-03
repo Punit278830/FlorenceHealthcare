@@ -667,15 +667,24 @@
                                                                             </div>
                                                                         </div>
                                                                     </form>
-                                                                    <form [formGroup]="medicinesGroupForm" *ngIf="isMedicinesFormDirty">
+                                                                    <form [formGroup]="medicinesGroupForm"
+                                                                        *ngIf="isMedicinesFormDirty">
                                                                         <div class="row form-container">
                                                                             <div class="col-12 col-md-6 col-xl-4">
                                                                                 <div class="form-group local-forms">
                                                                                     <label for="name">Medicines
-                                                                                        Group Name <span class="login-danger">*</span></label>
+                                                                                        Group Name <span
+                                                                                            class="login-danger">*</span></label>
                                                                                     <input class="form-control"
                                                                                         formControlName="name"
                                                                                         type="text" placeholder="">
+                                                                                    <!-- <div *ngIf="medicinesGroupForm.get('name')?.invalid || ((medicinesGroupForm.get('name')?.dirty && medicinesGroupForm.get('name')?.touched))"
+                                                                                        class="text-danger">
+                                                                                        <div
+                                                                                            *ngIf="medicinesGroupForm.get('name')?.errors?.['required']">
+                                                                                            Group name is required.
+                                                                                        </div>
+                                                                                    </div> -->
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-12 col-md-6 col-xl-4">
@@ -683,9 +692,16 @@
                                                                                     <label for="description">Group
                                                                                         Description <span
                                                                                             class="login-danger">*</span></label>
-                                                                                        <input class="form-control"
+                                                                                    <input class="form-control"
                                                                                         formControlName="description"
                                                                                         type="text" placeholder="">
+                                                                                    <!-- <div *ngIf="medicinesGroupForm.get('description')?.invalid || ((medicinesGroupForm.get('description')?.dirty && medicinesGroupForm.get('description')?.touched))"
+                                                                                        class="text-danger">
+                                                                                        <div
+                                                                                            *ngIf="medicinesGroupForm.get('description')?.errors?.['required']">
+                                                                                            Group description is required.
+                                                                                        </div>
+                                                                                    </div> -->
                                                                                 </div>
                                                                             </div>
                                                                             <div class="col-12 col-md-4 col-xl-4">
@@ -695,8 +711,7 @@
                                                                                         class="btn btn-primary me-2">
                                                                                         Save As New
                                                                                     </button>
-                                                                                    <button
-                                                                                        (click)="updateMedication()"
+                                                                                    <button (click)="updateMedication()"
                                                                                         type="button"
                                                                                         class="btn btn-primary me-2">
                                                                                         Update Existing
@@ -1013,9 +1028,6 @@
                                                                     <h4>
                                                                         <strong>Gender: </strong>{{patientInfo.gender}}
                                                                     </h4>
-                                                                    <!-- <h4><strong>HUID/ID
-                                                proof:</strong>{{_appointmentDto ?
-                                            _appointmentDto.identiyNumber : 'N/A' }}</h4> -->
                                                                     <h4>
                                                                         <strong>Appointment Date:</strong>{{
                                                                         seletedAppointmentDate | date:'dd-MM-yyyy' ||

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
@@ -149,6 +149,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private loaderService: LoadingService,
     private consultTemplateService: ConsultationTemplateMasterService,
     private medicinesGroupService: MedicinesGroupService,
+    private router: Router,
+    private activeRoute: ActivatedRoute
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
 
@@ -162,7 +164,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.appointmentYears.push(year);
     }
     this.selectedYear = currentYear;
-    this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
+
+    // Retrieve patientId from the route parameter
+    this.activeRoute.queryParams.subscribe(params => {
+      const patientId = params['patientId'];
+
+      if (patientId) {
+        // If patientId is present in route params, set it
+        this.patientId = patientId;
+        //this.patientService.patientId = patientId; // Optionally store in service for later use
+      } else if (this.patientService.patientId) {
+        // If not in route params, check if it's available in patientService
+        this.patientId = this.patientService.patientId;
+      } else {
+        // If neither is available, navigate to the patient list
+        this.route.navigate([routes.patientsList]);
+      }
+    });
+
+    // this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
     this.initlizeProfileForm();
 
     //department id Required here
@@ -381,15 +401,28 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.getUploadedFiles(this.latestId);
     });
   }
-
+  
   loadPatientInfo() {
-    this.patientService.getPatientData(this.patientId).subscribe((data) => {
-      this.patientInfo = data;
-      this.patientInfo.IdentityName = data.identityName;
-      this.patientInfo.IdentityNumber = data.identityNumber;
-      this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
-    })
+    this.patientService.getPatientData(this.patientId).subscribe(
+      (data) => {
+        if (data) {
+          this.patientInfo = data;
+          this.patientInfo.IdentityName = data.identityName;
+          this.patientInfo.IdentityNumber = data.identityNumber;
+          this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
+        } else {
+          // If data is null or undefined, navigate to patient list
+          this.route.navigate([routes.patientsList]);
+        }
+      },
+      (error) => {
+        console.error("Error fetching patient data:", error);
+        // Navigate to patient list in case of an error
+        this.route.navigate([routes.patientsList]);
+      }
+    );
   }
+  
 
   callloadAppointment(event: any) {
     this.selectedYear = event.value;
@@ -1104,6 +1137,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       );
     } else {
       this.medicinesGroupForm.markAllAsTouched();
+      this.toaster.error("Provide Medicines Group name and description to save as new", "Error");
       return throwError(() => new Error("Form is invalid")); // Return an error Observable if form is invalid
     }
   }

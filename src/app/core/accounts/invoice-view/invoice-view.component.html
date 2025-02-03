@@ -270,7 +270,6 @@
         <div [ngClass]="classes.wrapper">
             <div style="width: 10mm;"><strong>SR.</strong></div>
             <div style="width: 10mm;"><strong>Item</strong></div>
-            <!--<div style="width: 3mm;margin-left: 5px"><strong>Qty</strong></div>-->
             <div style="width: 10mm;"><strong>Price</strong></div>
             <div style="width: 20mm;"><strong>Disc.(%)</strong></div>
             <div style="width: 10mm;"><strong>Amt</strong></div>
@@ -281,22 +280,17 @@
             <div [ngClass]="classes.wrapper" >
                 <div style="width:3mm;">{{ 1 }}</div>
                 <div style="width:20mm;">Consultation </div>
-                <!-- <div style="width: 1%;">1</div>  i + 1  *ngFor="let data of appointmentList; let i = index"-->
-                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+                <div style="width: 10mm;">{{appointmentDetails?.fee}}</div>
                 <div style="width: 10mm;">{{ flag ? 100 : 0 }} </div>
-                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+                <div style="width: 10mm;">{{appointmentDetails?.fee}}</div>
             </div>
 
             <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index">
                 <div style="width:3mm;">{{ i + 2 }}</div>
                 <div style="width:20mm;">{{data.itemName}}</div>
-                <!--<div style="width: 1%;">1</div>-->
                 <div style="width: 10mm;">{{data.fee}}</div>
                 <div style="width: 10mm;">{{data.discount}} </div>
-                <div style="width: 10mm;">{{data.finalAmount}}</div>
-           
-
-                
+                <div style="width: 10mm;">{{data.finalAmount}}</div>                
             </div>
 
         </div>
