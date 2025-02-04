@@ -111,8 +111,7 @@ export class InvoicesComponent implements OnInit {
     const patients$ = this.patientService.getPatientList();
   
     forkJoin([invoicesSummary$, patients$]).subscribe(([invoicesSummary, patients]) => {
-      console.log(invoicesSummary);
-  
+
       // Set total payment amounts based on paymentMode
       if (paymentMode === "All") {
         this.totalPaymentAmount = invoicesSummary.totalAmount; // Total amount for all payments
