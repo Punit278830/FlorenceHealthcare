@@ -5,6 +5,8 @@ import SignaturePad from 'signature_pad';
 import { LoadingService } from '../../../shared/Services/loader/loader.service';
 import { IconsultationFiles } from '../../../shared/models/models';
 import { FileUploadService } from '../../../shared/Services/fileUpload/file-upload.service';
+import { routes } from 'src/app/shared/routes/routes';
+import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 
 @Component({
   selector: 'app-prescription-pad',
@@ -30,7 +32,8 @@ export class PrescriptionPadComponent implements AfterViewInit {
     private toastr: ToastrService,
     private loaderService: LoadingService,
     private fileUploadServie: FileUploadService,
-    private router: Router
+    private router: Router,
+    private patientService: PatientService
   ) {
 
   }
@@ -39,7 +42,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
     // Get the title parameter from the route
     this.route.paramMap.subscribe(params => {
       this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad';
-      
+
       this.appointmentId = Number(params.get('appointmentId')) || 0;
       if (this.appointmentId == 0) {
         this.toastr.error("Appointment id is missing in URL.", "Error");
@@ -67,27 +70,27 @@ export class PrescriptionPadComponent implements AfterViewInit {
   ngAfterViewInit() {
     const canvas = this.canvasEl.nativeElement;
     const dpr = window.devicePixelRatio || 1;
-  
+
     const parent = canvas.parentElement;
     if (parent) {
       // Calculate display and actual dimensions
       const displayWidth = parent.clientWidth;
       const displayHeight = parent.clientHeight;
-  
+
       // Set CSS dimensions for display
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
-  
+
       // Set actual canvas dimensions for drawing
       canvas.width = displayWidth * dpr;
       canvas.height = displayHeight * dpr;
-  
+
       const ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.scale(dpr, dpr); // Scale canvas for high DPI
       }
     }
-  
+
     // Initialize SignaturePad
     this.prescriptionPad = new SignaturePad(canvas, {
       penColor: this.penColor,
@@ -97,7 +100,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
       throttle: 16, // Smoother drawing
     });
   }
-  
+
   // Handle the beginning of drawing
   onBeginDrawing(): void {
     this.isDrawing = true;
@@ -175,16 +178,16 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   clearPad(): void {
     const canvas = this.canvasEl.nativeElement;
-  
+
     // Clear the entire canvas area using actual dimensions
     const ctx = canvas.getContext('2d');
     if (ctx) {
       ctx.clearRect(0, 0, canvas.width * 2, canvas.height * 2);
     }
-  
+
     // Clear SignaturePad's internal state
     this.prescriptionPad.clear();
-  
+
     // Force SignaturePad to refresh its internal boundaries
     this.prescriptionPad.off();
     this.prescriptionPad.on();
@@ -265,8 +268,8 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
         this.uploadNewImage();
       }
-
-    } else {
+    }
+    else {
       this.loaderService.hideLoader();
       this.toastr.error('Failed to process the canvas.', 'Error');
     }
@@ -311,6 +314,11 @@ export class PrescriptionPadComponent implements AfterViewInit {
       }
     );
 
+  }
+
+  backToPrescription() {
+     //navigate to prescription
+     this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
   }
 
   loadImageData(base64Image: string): void {

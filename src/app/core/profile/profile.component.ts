@@ -172,7 +172,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       if (patientId) {
         // If patientId is present in route params, set it
         this.patientId = patientId;
-        //this.patientService.patientId = patientId; // Optionally store in service for later use
+        this.patientService.patientId = patientId; // Optionally store in service for later use
       } else if (this.patientService.patientId) {
         // If not in route params, check if it's available in patientService
         this.patientId = this.patientService.patientId;
@@ -507,19 +507,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
       appointmentId: this.latestId
     }
-    console.log("answer object ", answerObject)
+
     this.answerDto.push(answerObject);
-
-    console.log(answer.value)
     this.nextQuestion();
-
   }
 
   nextQuestion() {
     var subQuestionIndex = -1;
 
     // If there's a next question id, it means we need to navigate to a sub-question
-    if (this.nextQuestionId != 0) {
+    if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId
+      && this.currentQuestionData.questionType != 2
+    ) {
       this.subQuestionCounter += 1;
 
       if (this.currentQuestionData && this.currentQuestionData.options) {
@@ -628,15 +627,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         }
       })
-      console.log("issubmitted", this.isSubmitted(questId))
 
       this.loadSavedAnswers(this.latestId);
-
-      // if (this.isSubmitted(questId)) {
-      //   this.loadSavedAnswers(this.latestId);
-      // } else {
-      //   this.dispalyPatientQuiz();
-      // }
     })
 
   }
@@ -874,7 +866,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       console.log("answer dto in add", this.answerDto)
       this.submittedQues.push(this.selectedques);
       this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
-        console.log(res);
         this.ApiCallsForPreview();
         this.toaster.success("Questionniare submitted successfully", "Questionniare")
       })
@@ -950,18 +941,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   saveVItals(vital: FormGroup) {
     this.loaderService.showLoader();
     this.vitalDto = vital.value;
-    console.log("entered", this.vitalDto)
-
 
     if (this.copyId != -1 && this.latestId != -1) {
-      console.log("1", this.latestId)
       this.vitalDto.appointmentId = this.latestId;
     }
     else {
-      console.log("2", this.appointmentService.appointmentId)
       this.vitalDto.appointmentId = this.latestId;
     }
-    console.log("vitaldto", this.vitalDto);
     this.question.postVitalInformation(this.vitalDto).subscribe(res => {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
@@ -979,7 +965,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.question.getVitalInfoByAppointmentId(appointmentId).subscribe(res => {
       res ? this.vitalSubmitted = true : this.vitalSubmitted = false;
       this.vitalDto = res;
-      console.log("res", res)
       this.patchVitalFormValueForEdit();
     })
   }
@@ -991,14 +976,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Ensure appointmentId is set correctly based on copyId and latestId
     this.vitalDto.appointmentId = (this.copyId != -1 && this.latestId != -1) ? this.latestId : this.latestId;
     this.vitalDto.vitalId = vitalId;
-    console.log("vitalDto", this.vitalDto);
 
     // Show loader while updating
     this.loaderService.showLoader();
 
     this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(
       (res) => {
-        console.log("res", res);
         this.toaster.success("Vital Info Successfully Updated", "Vital update");
 
         // Call getQuestionnaireByDepartmentId and proceed to next step after completion
@@ -1025,7 +1008,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
         (res) => {
           this.questionnaireDto = res;
           this.loadSavedAnswers(this.latestId);
-          console.log("questionnaire", res);
           resolve();
         },
         (error) => {

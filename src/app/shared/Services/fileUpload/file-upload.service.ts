@@ -40,7 +40,6 @@ export class FileUploadService {
   // file upload code for Consulation 
 
   uploadConsultationFile(data: IconsultationFiles): Observable<any> {
-    console.log("data in service ", data);
     return this._http.post(this.apiUrl + 'ConsultationFiles/', data)
   }
 

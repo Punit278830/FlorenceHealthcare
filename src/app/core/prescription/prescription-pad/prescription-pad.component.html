@@ -40,7 +40,12 @@
               </button>
               <button (click)="printPad()">Print</button>
               <button (click)="saveCanvasToDatabase()">
-                {{ fileId == undefined || fileId <= 0 ? 'Save' : 'Update' }}
+                {{ fileId == undefined || fileId <= 0 ? 'Save' : 'Update' }} </button>
+            </div>
+
+            <div class="d-flex justify-content-center mt-5">
+              <button type="button" (click)="backToPrescription()" class="btn btn-primary submit-form me-2">
+                Back to Prescription
               </button>
             </div>
           </div>
