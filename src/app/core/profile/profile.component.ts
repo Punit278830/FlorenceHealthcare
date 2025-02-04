@@ -172,7 +172,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       if (patientId) {
         // If patientId is present in route params, set it
         this.patientId = patientId;
-        //this.patientService.patientId = patientId; // Optionally store in service for later use
+        this.patientService.patientId = patientId; // Optionally store in service for later use
       } else if (this.patientService.patientId) {
         // If not in route params, check if it's available in patientService
         this.patientId = this.patientService.patientId;
