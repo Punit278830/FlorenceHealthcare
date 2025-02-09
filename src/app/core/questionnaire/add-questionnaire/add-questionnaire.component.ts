@@ -496,7 +496,12 @@ export class AddQuestionnaireComponent {
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
-    } else {
+    } 
+    else if(this.nextQuestionId == this.currentQuestionData.questionId){
+      subQuestionIndex = -1;
+      this.questionCounter = this.questionLenth;
+    }
+    else {
       // Navigate to the next main question
       this.questionCounter++;
       if (this.questionCounter < this.questionLenth) {
