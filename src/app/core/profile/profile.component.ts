@@ -401,7 +401,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.getUploadedFiles(this.latestId);
     });
   }
-  
+
   loadPatientInfo() {
     this.patientService.getPatientData(this.patientId).subscribe(
       (data) => {
@@ -422,7 +422,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
     );
   }
-  
+
 
   callloadAppointment(event: any) {
     this.selectedYear = event.value;
@@ -534,6 +534,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
+    }
+    else if (this.nextQuestionId == this.currentQuestionData.questionId) {
+      subQuestionIndex = -1;
+      this.questionCounter = this.questionLenth;
     } else {
       // Navigate to the next main question
       this.questionCounter++;
