@@ -395,14 +395,14 @@ namespace hospitalApiProject.Controllers
 
     [HttpPost]
     [Route("LinkCareContext")]
-    public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
+    public async Task<IActionResult> LinkCareContext([FromBody] LinkCareContextRequest data)
     {
       if (data == null)
       {
         return BadRequest();
       }
 
-      await _abhaM2Service.LinkCareContextV3();
+      await _abhaM2Service.LinkCareContextV3(data);
       if (_service.HasError)
       {
         return StatusCode((int)_service.StatusCode, _service.ErrorMessage);

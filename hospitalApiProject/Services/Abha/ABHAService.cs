@@ -918,7 +918,7 @@ namespace hospitalApiProject.Services.Abha
       await OnLinkCareContextV3("https://dev.abdm.gov.in/gateway/", "v0.5/links/link/add-contexts", json, ""); //todo get linkToken
     }
 
-    public async Task LinkCareContextV3(int abhaNum, string abhaAddress, string VisitDetails, int appointmentId)
+    public async Task LinkCareContextV3(LinkCareContextRequest data)
     {
       //todo: get Link Token
       var request = new GenerateLinkToken
@@ -937,7 +937,7 @@ namespace hospitalApiProject.Services.Abha
       var patientVisit = new Models.Response.PatientVisit
       {
         PatientId = 4739, // Assuming PatientId exists in PatientInfo
-        ReferenceNumber = "REF" + appointmentId,
+        ReferenceNumber = "REF" + data.AppointmentId,
         Display = "General Checkup",
         HiType = "OPD",
         VisitDate = DateTime.Now

@@ -7,7 +7,7 @@ namespace hospitalApiProject.Services.Abha
 {
   public interface IAbhaM2Service : ISimpleServiceBase
   {
-    Task LinkCareContextV3();
+    Task LinkCareContextV3(LinkCareContextRequest data);
 
     Task NotifyContext(CareContextModel data);
 
