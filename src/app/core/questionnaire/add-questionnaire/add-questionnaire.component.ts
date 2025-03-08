@@ -479,7 +479,8 @@ export class AddQuestionnaireComponent {
     var subQuestionIndex = -1;
 
     // If there's a next question id, it means we need to navigate to a sub-question
-    if (this.nextQuestionId != 0) {
+    if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId
+      && this.currentQuestionData.questionType != 2) {
       this.subQuestionCounter += 1;
 
       if (this.currentQuestionData && this.currentQuestionData.options) {
@@ -495,7 +496,12 @@ export class AddQuestionnaireComponent {
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
-    } else {
+    } 
+    else if(this.nextQuestionId == this.currentQuestionData.questionId){
+      subQuestionIndex = -1;
+      this.questionCounter = this.questionLenth;
+    }
+    else {
       // Navigate to the next main question
       this.questionCounter++;
       if (this.questionCounter < this.questionLenth) {

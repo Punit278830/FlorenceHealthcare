@@ -1,0 +1,368 @@
+<div class="page-wrapper">
+    <div class="content">
+
+        <!-- Page Header  -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a>Presciption </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Group Medicines</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="form-heading">
+                            <h4>Add Medicine Group</h4>
+                        </div>
+                        <form [formGroup]="medicinesGroupForm" (ngSubmit)="createGroup(medicinesGroupForm)">
+                            <div class="row">
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="name">Medicines Group Name <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="name" type="text" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="description">Group Description <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" formControlName="description" type="text"
+                                            placeholder="">
+                                    </div>
+                                </div>
+                                <div class="col-12 col-md-4 col-xl-4">
+                                    <button type="submit" class="btn btn-primary submit-form me-2">Create Group</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row d-flex">
+            <div class="col-12 col-md-12 col-xl-4 d-flex flex-column">
+                <div class="card flex-grow-1">
+                    <div class="card-body d-flex flex-column">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-4 form-heading">
+                                <h4>Avaliable Groups</h4>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive flex-grow-1" style="overflow-x:clip;">
+                            <table class="table border-0 custom-table comman-table datatable mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Group Name</th>
+                                        <th>Group Description</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+
+                                    <ng-container *ngFor="let group of groups; let i = index">
+                                        <tr [class.selectedGroup]="i === selectedRow" (click)="selectRow(i)">
+                                            <td (click)="OnGroupChange(group); $event.stopPropagation()">
+                                                <a href="javascript:void(0);">
+                                                    {{ group.name }}
+                                                </a>
+                                            </td>
+                                            <td (click)="OnGroupChange(group); $event.stopPropagation()">
+                                                <a href="javascript:void(0);">
+                                                    {{ group.description }}
+                                                </a>
+                                            </td>
+                                            <td class="text-end" (click)="$event.stopPropagation()">
+                                                <div class="dropdown dropdown-action">
+                                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle"
+                                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                        <a class="dropdown-item" href="javascript:void(0);"
+                                                            (click)="onEdit(group.id)">
+                                                            <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                                                        </a>
+                                                        <a class="dropdown-item" href="javascript:void(0);"
+                                                            (click)="onDelete(group.id)">
+                                                            <i class="fa fa-trash-alt m-r-5"></i> Delete
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+
+                                </tbody>
+                            </table>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-12 col-xl-8 d-flex flex-column">
+                <div class="card flex-grow-1">
+                    <div class="card-body d-flex flex-column">
+                        <div class="col-12 form-heading" *ngIf="selectedGroup != undefined">
+                            <h4>List of medicines in the selected Group: {{selectedGroup.name}}</h4>
+                        </div>
+                        <div class="col-12 form-heading" *ngIf="selectedGroup == undefined">
+                            <h4>List of medicines</h4>
+                        </div>
+                        <div class="table-responsive flex-grow-1">
+                            <table class="table border-0 custom-table comman-table datatable mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Medicine Name</th>
+                                        <th>Medicine Type</th>
+                                        <th>Dose</th>
+                                        <th>Frequency</th>
+                                        <th>Timing</th>
+                                        <th>Duration</th>
+                                        <th>Instructions</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngIf="medicationGroup.length === 0">
+                                        <td colspan="8" class="text-center">No Data Found</td>
+                                    </tr>
+                                    <tr *ngFor="let data of medicationGroup">
+                                        <td> {{data.medName}} </td>
+                                        <td> {{data.medType}} </td>
+                                        <td> {{data.dose}} </td>
+                                        <td> {{data.frequency}} </td>
+                                        <td> {{data.timing}} </td>
+                                        <td> {{data.duration}} </td>
+                                        <td> {{data.instruction}} </td>
+                                        <td class="text-end">
+                                            <div class="dropdown dropdown-action">
+                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle"
+                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="fa fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">
+                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="editMedication(data)">
+                                                        <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                                                    </a>
+                                                    <a class="dropdown-item" href="javascript:void(0);"
+                                                        (click)="deleteMedication(data.id)">
+                                                        <i class="fa fa-trash-alt m-r-5"></i> Delete
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 col-md-6 col-xl-12">
+                                <div class="top-nav-search mob-view" style="margin-left: 0px;">
+                                    <div class="form-heading">
+                                        <h4>{{isEditMedication ? 'Update Medication' : 'Search and Add Medication'}}</h4>
+                                    </div>
+
+                                    <ng-container *ngIf="!isEditMedication">
+                                        <form>
+                                            <input type="text" class="form-control" #searchValue
+                                                (keyup)="searchMedicine(searchValue.value)"
+                                                placeholder="search Medicine">
+
+                                        </form>
+                                    </ng-container>
+                                </div>
+                                <ng-container>
+                                    <div *ngIf="SearchMedicineList.length>0" class="table-responsive">
+                                        <table class="table border-0 custom-table comman-table datatable mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th mat-sort-header="name">
+                                                        Medicine
+                                                        Name
+                                                    </th>
+                                                    <th mat-sort-header="consultingDoctor">
+                                                        Type
+                                                    </th>
+                                                    <th mat-sort-header="treatment">
+                                                        Generic
+                                                        Name
+                                                    </th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr *ngFor="let data of SearchMedicineList; let i=index">
+
+                                                    <td class="profile-image">
+                                                        <a href="javascript:void(0);" (click)="selectMedicine(i)">
+                                                            {{data.medName}}
+                                                        </a>
+                                                    </td>
+                                                    <td>{{data.medType}}</td>
+                                                    <td>{{data.genericName}}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </ng-container>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 col-xl-12">
+                                &nbsp;
+                            </div>
+                            <div class="col-12 col-md-6 col-xl-12">
+                                <form [formGroup]="prescribeMedForm"
+                                    (ngSubmit)="AddOrUpdateMedication(prescribeMedForm)">
+                                    <div class="col-12 col-md-6 col-xl-12" formArrayName="medicine" style="margin:0px;">
+                                        <div class="row" *ngFor="let control of medicine.controls; let i = index"
+                                            formGroupName="{{i}}">
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+
+                                                    <input class="form-control" formControlName="medName" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+
+                                                    <input class="form-control" formControlName="medType" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+                                                    <label for="dose">Dose</label>
+                                                    <input class="form-control" formControlName="dose" type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="dose">Frequency</label>
+                                                    <mat-select formControlName="frequency" class="form-control select">
+                                                        <mat-option *ngFor="let data of frequencyData" [value]="data">
+                                                            {{data}}
+                                                        </mat-option>
+                                                    </mat-select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="timing">Timing</label>
+                                                    <mat-select formControlName="timing" class="form-control select">
+                                                        <mat-option *ngFor="let data of timingData"
+                                                            [value]="data">{{data}}</mat-option>
+                                                    </mat-select>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 col-md-6 col-xl-1">
+                                                <div class="form-group local-forms">
+                                                    <label for="duration">Duration</label>
+                                                    <input class="form-control" formControlName="duration" type="text"
+                                                        placeholder="days">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-2">
+                                                <div class="form-group local-forms">
+                                                    <label for="instruction">Instruction</label>
+                                                    <input class="form-control" formControlName="instruction"
+                                                        type="text">
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-1" *ngIf="!isEditMedication">
+                                                <button type="button" class="btn btn-danger"
+                                                    (click)="removeDynamicControl(i)">
+                                                    Remove
+                                                </button>
+                                            </div>
+
+                                        </div>
+                                        <div class="table-responsive" *ngIf="medicineDto.length>0">
+                                            <h3 style="font-weight: bold;">
+                                                Prescribed
+                                                Medicines
+                                            </h3>
+                                            <table class="table border-0 custom-table comman-table datatable mb-0">
+                                                <thead>
+                                                    <tr>
+                                                        <th mat-sort-header="name">
+                                                            Medicine
+                                                            Name
+                                                        </th>
+                                                        <th mat-sort-header="consultingDoctor">
+                                                            Type
+                                                        </th>
+                                                        <th mat-sort-header="dose">
+                                                            Dose
+                                                        </th>
+                                                        <th mat-sort-header="consultingDoctor">
+                                                            Frequency
+                                                        </th>
+                                                        <th mat-sort-header="timing">
+                                                            Timing
+                                                        </th>
+                                                        <th mat-sort-header="duration">
+                                                            Duration
+                                                        </th>
+                                                        <th mat-sort-header="instruction">
+                                                            Instruction
+                                                        </th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr *ngFor="let data of medicineDto">
+
+                                                        <td>{{data.medName}}</td>
+                                                        <td>{{data.medType}}</td>
+                                                        <td>{{data.dose}}</td>
+                                                        <td>{{data.frequency}}</td>
+                                                        <td>{{data.timing}}</td>
+                                                        <td>{{data.duration}}</td>
+                                                        <td>{{data.instruction}}</td>
+
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <div class="col-12" *ngIf="medicine.controls.length>0">
+                                            <div class="doctor-submit text-start">
+
+                                                <button type="submit" class="btn btn-primary submit-form me-2">
+                                                    {{isEditMedication ? 'Update' : 'Submit'}}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

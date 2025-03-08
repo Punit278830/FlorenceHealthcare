@@ -9,9 +9,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { MatStepperModule } from '@angular/material/stepper';
-
-
-
+import { MatIconModule } from '@angular/material/icon';
 
 @NgModule({
   declarations: [
@@ -25,7 +23,8 @@ import { MatStepperModule } from '@angular/material/stepper';
     MatStepperModule,
     NgxExtendedPdfViewerModule,
     FormsModule,
-    NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' })
+    NgxSpinnerModule.forRoot({ type: 'ball-scale-multiple' }),
+    MatIconModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
 })

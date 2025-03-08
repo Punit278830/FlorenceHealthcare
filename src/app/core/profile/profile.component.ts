@@ -2,9 +2,9 @@ import { DatePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, NgForm, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { forkJoin, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { ConsultService } from 'src/app/shared/Services/consultation/consult.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
@@ -21,6 +21,9 @@ import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { MatStepper } from '@angular/material/stepper';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { LoadingService } from '../../shared/Services/loader/loader.service';
+import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
+import { IConsultationTemplate, IMedicationGroup, IMedicinesGroup } from '../../shared/models/models';
+import { MedicinesGroupService } from '../../shared/Services/medicine/medicines-group.service';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
@@ -110,10 +113,24 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentQuestionIndex: number = 1;
   public subQuestionCounter = 0;
   questionList!: Iquestion[];
+  prescriptionService: any;
+  prescriptionImage: string | null = null;
+  public templates: any[] = [];
+  public selectedTemplate!: any;
+  public medicineGroups: IMedicinesGroup[] = [];
+  public selectedMedicineGroup!: IMedicinesGroup;
+  public selectedMedication: IMedicationGroup[] = [];
 
+  public selectedDiagnosis: number = 0;
+  isButtonEnabled: boolean = false;
+  newTemplate!: IConsultationTemplate;
+  isMedicinesFormDirty = false;
+  public medicinesGroupForm!: FormGroup;
+  newGroupId: number = 0;
 
-  // public showAddQuestion=true;
-  // public questionnaireId!:number;
+  frequencyData = ['1-0-0', '0-1-0', '0-0-1', '1-0-1', '1-1-1'];
+  timingData = ['Before Meal', 'After Meal'];
+
   constructor(private appointmentService: AppointmentService,
     private abhaService: AbhaService,
     private patientService: PatientService,
@@ -130,8 +147,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private doctorService: StaffService,
     private sanitizer: DomSanitizer,
-    private loaderService: LoadingService
-
+    private loaderService: LoadingService,
+    private consultTemplateService: ConsultationTemplateMasterService,
+    private medicinesGroupService: MedicinesGroupService,
+    private router: Router,
+    private activeRoute: ActivatedRoute
   ) {
     //this.appointmentStatus = this.appointmentService.appoinmentStatus;
 
@@ -145,8 +165,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.appointmentYears.push(year);
     }
     this.selectedYear = currentYear;
-    console.log("current date", currentYear)
-    this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
+
+    // Retrieve patientId from the route parameter
+    this.activeRoute.queryParams.subscribe(params => {
+      const patientId = params['patientId'];
+
+      if (patientId) {
+        // If patientId is present in route params, set it
+        this.patientId = patientId;
+        this.patientService.patientId = patientId; // Optionally store in service for later use
+      } else if (this.patientService.patientId) {
+        // If not in route params, check if it's available in patientService
+        this.patientId = this.patientService.patientId;
+      } else {
+        // If neither is available, navigate to the patient list
+        this.route.navigate([routes.patientsList]);
+      }
+    });
+
+    // this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
     this.initlizeProfileForm();
 
     //department id Required here
@@ -164,31 +201,46 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
-    // this.getVitalByAppointment(this.appointmentService.appointmentId);
     this.initilizemedicineForm();
     this.initlizeSearchMedicine();
     this.initlizeConsultForm();
-    // this.ApiCallsForPreview();
-    // this.getPrescribeMedicine();
-    // this.getDoctorDetails();
     this.getCurrentAppointmentDetils();
-    // this.getConsultationFiles();
     this.getPreDiagnosisTemplate();
 
     this.loadQuestions();
     this.fetchAllOptions();
+    this.getAllTemplates();
+    this.getAllMedicationGroups();
+    this.initalizeMedicinesGroupForm();
 
-    // this.getUploadedFiles(this.latestId);
-    //     this.preDiagnosis=[
-    //   {
-    //   diagnosId:1,diagnosName:"diagnosOne",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1},
-    // {
-    //   diagnosId:2,diagnosName:"diagnosTwo",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1},
-    // {
-    //   diagnosId:3,diagnosName:"diagnosThree",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1},
-    // {
-    //   diagnosId:4,diagnosName:"diagnosFour",diagnosText:'fsdjkfsdfjkfeffffksdklf   sdjkcnwecnkwecmwe cfkwe  wefwjhwbcw',diagnosStatus:1}]
+    // Subscribe to form value changes
+    this.consultForm.valueChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
+
+    // Optionally subscribe to status changes to ensure fields are touched or dirty
+    this.consultForm.statusChanges.subscribe(() => {
+      this.enableAddToTemplateButton();
+    });
+
+    this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
+      this.prescriptionImage = data;  // Assign the image data to the local variable
+    });
   }
+
+  initalizeMedicinesGroupForm() {
+    this.medicinesGroupForm = this.fb.group({
+      name: ['', Validators.required],
+      description: ['', Validators.required]
+    })
+  }
+
+  openInNewTab(path: string, title: string, fileId?: number): void {
+    const queryParams = fileId ? { fileId } : {}; // Include fileId in queryParams if provided
+    const urlTree = this.route.createUrlTree([path, this.latestId, title], { queryParams });
+    this.route.navigateByUrl(urlTree); // Navigate to the constructed URL
+  }
+
   viewDocument(item: any) {
     this.currentFileName = item.fileName;
     this.documentUrl = this.sanitizer.bypassSecurityTrustResourceUrl(item.fileData);
@@ -210,7 +262,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
       alert('Cannot enter alphabet in followup after!');
     }
   }
-  
+
   downloadPreviewAsPdf() {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
@@ -265,13 +317,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.FileUploadDto.docName = 'previewFile';
           this.FileUploadDto.appointmentId = this.latestId;
 
-          // Detailed logging for debugging
-          console.log('Generated PDF Base64 Length:', this.FileUploadDto.fileData.length);
-          console.log('Generated PDF Base64 String:', this.FileUploadDto.fileData);
-
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
-              console.log(result);
               this.getUploadedFiles(this.latestId);
               this.loaderService.hideLoader();
               this.toastr.success('File uploaded Successfully', 'Success');
@@ -292,11 +339,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.loaderService.hideLoader();
       this.toastr.error('No content to convert', 'Error');
     }
-
   }
 
   loadSavedAnswers(appointmentId: number) {
-
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
       this.questionData = res;
       console.log("question answer res", res)
@@ -325,9 +370,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   copyClick(id: number, depId: number) {
-
     this.copyId = id;
-    // this.fileUpladServie.editPresc = true;
     this.showNext = true;
     this.getVitalByAppointment(this.copyId);
     this.getQuestionnaireByDepartmentId(depId)
@@ -341,18 +384,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   loadPatientAppointments() {
     this.appointmentList = [];
-    // this.selectedYear=event.value;
     this.selectedYear = this.profileForm.get('appointYear')?.value
     this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe(res => {
       // Assuming the date field is named 'date' and is in a format that can be compared directly (e.g., ISO string).
 
-      console.log("app", res)
       this.appointmentList = res.sort((a, b) => {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
-      console.log(" in app list ", this.appointmentList);
       this.latestId = this.appointmentList[0]?.id;
-      console.log("selectedId", this.latestId);
       this.departmentId = this.appointmentList[0]?.departmentid;
       this.getVitalByAppointment(this.latestId);
       this.getQuestionnaireByDepartmentId(this.departmentId);
@@ -365,14 +404,26 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   loadPatientInfo() {
-    this.patientService.getPatientData(this.patientId).subscribe((data) => {
-      this.patientInfo = data;
-      this.patientInfo.IdentityName = data.identityName;
-      this.patientInfo.IdentityNumber = data.identityNumber;
-      this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
-      console.log("patient Info  hh", this.patientInfo);
-    })
+    this.patientService.getPatientData(this.patientId).subscribe(
+      (data) => {
+        if (data) {
+          this.patientInfo = data;
+          this.patientInfo.IdentityName = data.identityName;
+          this.patientInfo.IdentityNumber = data.identityNumber;
+          this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
+        } else {
+          // If data is null or undefined, navigate to patient list
+          this.route.navigate([routes.patientsList]);
+        }
+      },
+      (error) => {
+        console.error("Error fetching patient data:", error);
+        // Navigate to patient list in case of an error
+        this.route.navigate([routes.patientsList]);
+      }
+    );
   }
+
 
   callloadAppointment(event: any) {
     this.selectedYear = event.value;
@@ -457,19 +508,18 @@ export class ProfileComponent implements OnInit, OnDestroy {
       selectedOptionId: typeof answer.value[answerKey] !== 'string' ? answer.value[answerKey] : null,
       appointmentId: this.latestId
     }
-    console.log("answer object ", answerObject)
+
     this.answerDto.push(answerObject);
-
-    console.log(answer.value)
     this.nextQuestion();
-
   }
 
   nextQuestion() {
     var subQuestionIndex = -1;
 
     // If there's a next question id, it means we need to navigate to a sub-question
-    if (this.nextQuestionId != 0) {
+    if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId
+      && this.currentQuestionData.questionType != 2
+    ) {
       this.subQuestionCounter += 1;
 
       if (this.currentQuestionData && this.currentQuestionData.options) {
@@ -485,6 +535,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.getNextMappedQuestion();
         this.nextQuestionId = 0;
       }
+    }
+    else if (this.nextQuestionId == this.currentQuestionData.questionId) {
+      subQuestionIndex = -1;
+      this.questionCounter = this.questionLenth;
     } else {
       // Navigate to the next main question
       this.questionCounter++;
@@ -578,17 +632,184 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
         }
       })
-      console.log("issubmitted", this.isSubmitted(questId))
 
       this.loadSavedAnswers(this.latestId);
-
-      // if (this.isSubmitted(questId)) {
-      //   this.loadSavedAnswers(this.latestId);
-      // } else {
-      //   this.dispalyPatientQuiz();
-      // }
     })
 
+  }
+
+  getAllTemplates(): void {
+    this.consultTemplateService.getConsultationTemplates().subscribe((data: any) => {
+      this.templates = data;
+    })
+  }
+
+  getAllMedicationGroups(): void {
+    this.medicinesGroupService.getAllMedicinesGroup().subscribe((data: any) => {
+      this.medicineGroups = data;
+    })
+  }
+
+  getMedicationByGroup(id: number) {
+    this.loaderService.showLoader();
+
+    this.medicinesGroupService.getMedicationByGroupId(id).subscribe((data: any) => {
+      this.selectedMedication = data;
+      this.SearchMedicineList = [];
+      this.medicine.clear(); // Clear existing controls before adding new ones
+
+      const createMedicationControl = (medication: any) =>
+        this.fb.group({
+          id: [{ value: medication.id || 0, disabled: true }],
+          groupId: [{ value: medication.groupId || 0, disabled: true }],
+          medName: [{ value: medication.medName || '', disabled: true }, [Validators.required]],
+          medType: [{ value: medication.medType || 'Tab', disabled: true }, [Validators.required]],
+          dose: [medication.dose || '', Validators.required],
+          frequency: [medication.frequency || '', Validators.required],
+          timing: [medication.timing || '', Validators.required],
+          duration: [medication.duration || '', Validators.required],
+          instruction: [medication.instruction || '', Validators.required],
+        });
+
+      if (Array.isArray(data)) {
+        data.forEach((medication: any) => {
+          const medicationControl = createMedicationControl(medication);
+          this.medicine.push(medicationControl);
+        });
+      } else {
+        console.error("Expected an array of medications, but received:", data);
+      }
+
+      this.subscribeToFormChanges(); // Call after populating the form
+
+      this.loaderService.hideLoader();
+    }, error => {
+      this.loaderService.hideLoader();
+      console.error("Error fetching medications:", error);
+    });
+  }
+
+
+  // Subscribe to valueChanges
+  subscribeToFormChanges() {
+    this.medicine.controls.forEach((control) => {
+      control.valueChanges.subscribe(() => {
+        this.isMedicinesFormDirty = true;
+      });
+    });
+  }
+
+  populateTemplateData(id: number) {
+    // Find the selected template by ID
+    this.selectedTemplate = this.templates.find(template => template.id === id);
+    if (!this.selectedTemplate) {
+      this.toaster.error('Template not found', 'Error');
+      return;
+    }
+
+    // Patch the form values with the selected template
+    this.consultForm.patchValue({
+      templateName: this.selectedTemplate.templateName,
+      examinationNote: this.selectedTemplate.examinationNote,
+      advice: this.selectedTemplate.advice,
+      diffDiagnosis: this.selectedTemplate.diffDiagnosis,
+      finalDiagnosis: this.selectedTemplate.finalDiagnosis,
+      diagnosisId: this.selectedTemplate.diagnosisId // Map diagnosId to diagnosName
+    });
+
+    // Save the selected diagnosisId for submission
+    this.selectedDiagnosis = this.selectedTemplate.diagnosisId;
+
+    // Mark the form as touched after patching values, so the button can be enabled
+    this.consultForm.markAllAsTouched();
+  }
+
+  // Enable the button if any field is touched or changed
+  enableAddToTemplateButton(): void {
+    // Check if any form control is touched or dirty (changed)
+    this.isButtonEnabled = this.consultForm.dirty || this.consultForm.touched;
+  }
+
+  getPreDiagnosisById(diagnosisId?: number): IPredefineDiagnosis | undefined {
+    return this.preDiagnosis.find(diagnosis => diagnosis.diagnosId === diagnosisId);
+  }
+
+  onTemplateNameChange(event: any) {
+    this.isButtonEnabled = false;
+    this.populateTemplateData(event.value);
+  }
+
+  onMediniesGroupChange(event: any) {
+    this.selectedMedicineGroup = this.medicineGroups.find(group => group.id === event.value) || {} as IMedicinesGroup;
+    this.isMedicinesFormDirty = false;
+    this.getMedicationByGroup(event.value);
+  }
+
+  SaveNewTemplate() {
+    if (this.consultForm.value.newTemplateName == '') {
+      this.toaster.error('Provide New Template Name');
+    }
+    else {
+      this.loaderService.showLoader();
+
+      this.newTemplate = {
+        id: 0,
+        templateName: this.consultForm.value.newTemplateName,
+        examinationNote: this.consultForm.value.examinationNote,
+        advice: this.consultForm.value.advice,
+        diffDiagnosis: this.consultForm.value.diffDiagnosis,
+        finalDiagnosis: this.consultForm.value.finalDiagnosis,
+        diagnosisId: this.consultForm.value.diagnosisId
+      };
+
+      this.consultTemplateService.addConsultationTemplate(this.newTemplate).subscribe(
+        (res) => {
+          this.toaster.success("Consultation template data saved successfully!", "Success");
+          this.consultForm.value.newTemplateName = '';
+          this.isButtonEnabled = false;
+          this.getAllTemplates();
+        },
+        (err) => {
+          this.toaster.error(err.error.message, 'Error')
+        }
+      );
+
+      this.loaderService.hideLoader()
+    }
+  }
+
+  UpdateExitingTemplate() {
+    if (!this.selectedTemplate) {
+      this.toaster.error('select the template to update', 'Error');
+      return;
+    }
+    else {
+      this.loaderService.showLoader();
+
+      const template = {
+        id: this.selectedTemplate.id,
+        templateName: this.selectedTemplate.templateName,
+        examinationNote: this.consultForm.value.examinationNote,
+        advice: this.consultForm.value.advice,
+        diffDiagnosis: this.consultForm.value.diffDiagnosis,
+        finalDiagnosis: this.consultForm.value.finalDiagnosis,
+        diagnosisId: this.consultForm.value.diagnosisId
+      };
+
+      this.consultTemplateService.updateConsultationTemplate(template.id, template).subscribe(
+        (res) => {
+          this.toaster.success("The existing consultation template is updated successfully!", "Success");
+          this.consultForm.value.newTemplateName = '';
+          this.isButtonEnabled = false;
+          this.getAllTemplates();
+        },
+        (err) => {
+          this.toaster.error(err.error.message, 'Error')
+        }
+      );
+
+      this.loaderService.hideLoader()
+    }
   }
 
   loadQuestions(): void {
@@ -602,7 +823,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
-  
+
   fetchAllOptions() {
     this.question.getAllOptions().subscribe(res => {
       if (res) {
@@ -621,7 +842,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.currentQuestionData.savedSelectedOptionId = this.currentQuestionData.savedSelectedOptionId;
       }
     }
-    
+
     console.log("current", this.currentQuestionData);
 
   }
@@ -650,7 +871,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       console.log("answer dto in add", this.answerDto)
       this.submittedQues.push(this.selectedques);
       this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
-        console.log(res);
         this.ApiCallsForPreview();
         this.toaster.success("Questionniare submitted successfully", "Questionniare")
       })
@@ -726,18 +946,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   saveVItals(vital: FormGroup) {
     this.loaderService.showLoader();
     this.vitalDto = vital.value;
-    console.log("entered", this.vitalDto)
-
 
     if (this.copyId != -1 && this.latestId != -1) {
-      console.log("1", this.latestId)
       this.vitalDto.appointmentId = this.latestId;
     }
     else {
-      console.log("2", this.appointmentService.appointmentId)
       this.vitalDto.appointmentId = this.latestId;
     }
-    console.log("vitaldto", this.vitalDto);
     this.question.postVitalInformation(this.vitalDto).subscribe(res => {
       this.vitalSubmitted = true;
       this.displayVitalCard = false;
@@ -755,7 +970,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.question.getVitalInfoByAppointmentId(appointmentId).subscribe(res => {
       res ? this.vitalSubmitted = true : this.vitalSubmitted = false;
       this.vitalDto = res;
-      console.log("res", res)
       this.patchVitalFormValueForEdit();
     })
   }
@@ -767,14 +981,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Ensure appointmentId is set correctly based on copyId and latestId
     this.vitalDto.appointmentId = (this.copyId != -1 && this.latestId != -1) ? this.latestId : this.latestId;
     this.vitalDto.vitalId = vitalId;
-    console.log("vitalDto", this.vitalDto);
 
     // Show loader while updating
     this.loaderService.showLoader();
 
     this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(
       (res) => {
-        console.log("res", res);
         this.toaster.success("Vital Info Successfully Updated", "Vital update");
 
         // Call getQuestionnaireByDepartmentId and proceed to next step after completion
@@ -801,7 +1013,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
         (res) => {
           this.questionnaireDto = res;
           this.loadSavedAnswers(this.latestId);
-          console.log("questionnaire", res);
           resolve();
         },
         (error) => {
@@ -858,7 +1069,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   removeDynamicControl(index: number) {
-    this.medicine.removeAt(index);  // Remove the dynamic control at the specified index
+    this.medicine.removeAt(index);
+    this.isMedicinesFormDirty = true;
   }
   get medicine() {
     return this.prescribeMedForm.get('medicine') as FormArray;
@@ -870,15 +1082,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     if (medname.length > 3) {
 
       this.medicineService.SearchMatchMedicine(medname).subscribe((res) => {
-        console.log(res);
         this.SearchMedicineList = res;
-
       })
 
     }
   }
-  submitPrescribeMedicine(prescribeMed: FormGroup) {
 
+  submitPrescribeMedicine(prescribeMed: FormGroup) {
     this.loaderService.showLoader();
     const prescribeMedicines = prescribeMed.getRawValue();
     prescribeMedicines.medicine.map((m: IprescribeMedicine) => {
@@ -892,24 +1102,102 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.medicine.clear();
         this.searchMedForm.reset();
         this.getPrescribeMedicine();
+        this.isMedicinesFormDirty = false;
         this.loaderService.hideLoader();
       }
     })
-    this.loaderService.hideLoader();
 
+    this.loaderService.hideLoader();
+  }
+
+  createMedicationGroup(): Observable<number> {
+    if (this.medicinesGroupForm.valid) {
+      return this.medicinesGroupService.addMedicineGroup(this.medicinesGroupForm.value).pipe(
+        tap(res => {
+          if (res) {
+            this.toaster.success("Medicines Group Created", "Success");
+            this.getAllMedicationGroups();
+            this.medicinesGroupForm.reset();
+          }
+        }),
+        map(res => res.id) // Extract the newly created group ID
+      );
+    } else {
+      this.medicinesGroupForm.markAllAsTouched();
+      this.toaster.error("Provide Medicines Group name and description to save as new", "Error");
+      return throwError(() => new Error("Form is invalid")); // Return an error Observable if form is invalid
+    }
+  }
+
+  addNewMedication() {
+    this.loaderService.showLoader();
+
+    const prescribeMedicines = this.prescribeMedForm.getRawValue();
+
+    // ✅ Check if there is at least one medicine before proceeding
+    if (!prescribeMedicines.medicine || prescribeMedicines.medicine.length === 0) {
+      this.toaster.error("Please add at least one medicine before saving.", "Error");
+      this.loaderService.hideLoader();
+      return;
+    }
+
+    this.createMedicationGroup().pipe(
+      switchMap(newGroupId => {
+        // Assign groupId to all medicines
+        prescribeMedicines.medicine.forEach((m: IMedicationGroup) => {
+          m.groupId = newGroupId;
+          m.id = 0;
+        });
+
+        // Submit the medicines to the new group
+        return this.medicinesGroupService.submitMedicationGroup(prescribeMedicines.medicine);
+      })
+    ).subscribe({
+      next: res => {
+        if (res) {
+          this.toaster.success("Medication added to new group", "Success");
+          this.SearchMedicineList = [];
+          this.searchMedForm.reset();
+          this.getAllMedicationGroups();
+          this.isMedicinesFormDirty = false;
+        }
+        this.loaderService.hideLoader();
+      },
+      error: err => {
+        console.error("Error in addNewMedication:", err);
+        this.loaderService.hideLoader();
+      }
+    });
   }
 
 
-  frequencyData = ['1-0-0', '0-1-0', '0-0-1', '1-0-1', '1-1-1'];
-  timingData = ['Before Meal', 'After Meal'];
+  updateMedication() {
+    this.loaderService.showLoader();
+
+    const prescribeMedicines = this.prescribeMedForm.getRawValue();
+
+    if (!prescribeMedicines.medicine || prescribeMedicines.medicine.length === 0) {
+      this.toaster.error("Please add at least one medicine before saving.", "Error");
+      this.loaderService.hideLoader();
+      return;
+    }
+
+    this.medicinesGroupService.replaceMedicationGroup(prescribeMedicines.medicine).subscribe(res => {
+      this.toaster.success("Medication updated", "Success");
+      this.SearchMedicineList = [];
+      this.searchMedForm.reset();
+      this.isMedicinesFormDirty = false;
+    });
+
+    this.loaderService.hideLoader();
+  }
 
   selectMedicine(id: number) {
     const selectMedicine = this.SearchMedicineList[id];
     this.addDynamicControl(selectMedicine);
     this.SearchMedicineList = [];
     this.searchMedForm.reset();
-
-
+    this.subscribeToFormChanges(); // Call after populating the form
   }
 
   initlizeConsultForm() {
@@ -918,16 +1206,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
       advice: [''],
       diffDiagnosis: [''],
       finalDiagnosis: [''],
-      followupDate: ['']
+      followupDate: [''],
+      diagnosisId: [''],
+      newTemplateName: ['']
     })
   }
   cancelConsultation() {
     this.consultForm.reset()
   }
   getConsultationOnAppointmentId(id: number) {
-    console.log("id in C ", id)
     this.consultService.getConsultData(id).subscribe(res => {
-      console.log("consult data", res)
       res ? this.showNext = true : this.showNext = false;
       this.consultForm.patchValue(res[res.length - 1]);
       this._consultationDto = res[res.length - 1];
@@ -937,23 +1225,20 @@ export class ProfileComponent implements OnInit, OnDestroy {
   getUploadedFiles(id: number) {
     this.presDocuments = [];
     this.vitalDocuments = [];
+    this.previewFile = [];
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
-        console.log("item", item)
-        if (item.docName == "prescription") {
+        if (item.docName == "prescription" || item.docName == "pen-prescription") {
           this.presDocuments.push(item);
         }
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
         }
-        if(item.docName == "previewFile") {
+        if (item.docName == "previewFile") {
           this.previewFile.push(item);
         }
       })
-
-
     })
-    console.log("pres vit", this.presDocuments, this.vitalDocuments);
   }
 
   submitConsultation(consultData: FormGroup) {
@@ -969,17 +1254,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
 
       this._consultationDto = consultData.value;
-      console.log("id0", this.latestId)
       if (this.copyId != -1 && this.latestId != -1) {
         this._consultationDto.appointmentId = this.latestId;
-        console.log("1", this.copyId);
       }
       else {
-        console.log("2");
         this._consultationDto.appointmentId = this.latestId;
       }
-      //this._consultationDto.followupDate=this.followupDate;
-      console.log("consult dto", this._consultationDto)
       this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
         this.toaster.success("Consultation Data Saved", "Consultation Data")
         this.toggalUi = false;
@@ -1007,17 +1287,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
 
       this._consultationDto = consultData.value;
-      console.log("id0", this.latestId)
       if (this.copyId != -1 && this.latestId != -1) {
         this._consultationDto.appointmentId = this.latestId;
-        console.log("1", this.copyId);
       }
       else {
-        console.log("2");
         this._consultationDto.appointmentId = this.latestId;
       }
-      //this._consultationDto.followupDate=this.followupDate;
-      console.log("consult dto", this._consultationDto)
       this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
         this.toaster.success("Consultation Data Saved", "Consultation Data")
         this.toggalUi = false;
@@ -1052,7 +1327,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this._consultationDto.appointmentId = this.latestId;
     }
     this._consultationDto.id = consultId;
-    console.log("consult dto", this._consultationDto);
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.loaderService.hideLoader();
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update");
@@ -1070,13 +1344,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
       });
   }
 
-
-
-
-  addPreDefineDiagnosis(diagnosisValue: any) {
-    this.consultForm.get('finalDiagnosis')?.patchValue(diagnosisValue.value)
+  addPreDefineDiagnosis(diagnosis: any) {
+    const data = this.getPreDiagnosisById(diagnosis.value);
+    this.consultForm.get('finalDiagnosis')?.patchValue(data?.diagnosText)
   }
-
 
   addDays(date: Date, days: number): Date {
     const result = new Date(date);
@@ -1084,27 +1355,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
     return result;
   }
 
-  // upadateFoloupDate(days:any)
-  // {
-  //   const currentDate = new Date();
-  //   const formatDate=(this.addDays(currentDate, parseInt(days)))
-  //   const x=this.datePipe.transform(formatDate,'yyyy-MM-dd')
-  //   if(x)
-  //   {
-  //      this.followupDate =new Date(x);
-  //   }
-  //    this.consultForm.get('followupDate')?.patchValue(this.followupDate);
-  // }
-
-
-
   ApiCallsForPreview() {
     this.appointmentId = this.appointmentService.appointmentId
     this.question.getQuestionwithAnswerByAppointmentId(this.latestId).subscribe(res => {
       this.questionData = res;
       this.groupQuestionsByQuestionnaire();
-      console.log("ques", res);
-
       // Push unique submitted questionnaireIds to submittedQues
       const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
 
@@ -1117,7 +1372,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     })
     this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
       this.medicineDto = res;
-      console.log("ques 1", res)
     })
 
   }
@@ -1146,14 +1400,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
   //consutation fine upload code
   onFileSelected(event: any) {
     this.selectedFile = event.target.files[0];
-    // this.onFileUpload();
-
   }
   onVfileSelected(event: any) {
     this.VselectedFile = event.target.files[0];
-    console.log("vvv", this.VselectedFile)
-    // this.onFileUpload();
-
   }
 
   deleteFile(id: number) {
@@ -1161,12 +1410,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
       //this.spinner.hide();
       this.getUploadedFiles(this.latestId)
       this.toastr.success('File deleted Successfully', 'Success');
-
     });
-
   }
 
-  onFileUpload() {
+  onFileUpload(docName: string) {
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
 
@@ -1179,17 +1426,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.FileUploadDto.fileName = this.selectedFile?.name;
         this.FileUploadDto.FileType = this.selectedFile?.type;
         this.FileUploadDto.fileData = base64String;
-        this.FileUploadDto.docName = "prescription";
+        this.FileUploadDto.docName = docName;
         this.FileUploadDto.appointmentId = this.latestId;
 
         // Check for supported file types (for example, PDFs, Word documents, etc.)
         //const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]; 
         //if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type))
-        if (this.selectedFile?.type.startsWith('image/')) {
-          console.log("fileData", this.FileUploadDto);
+        if ((docName == 'prescription' && this.selectedFile?.type.startsWith('image/'))
+          || (docName == 'previewFile' && (this.selectedFile?.type.startsWith('application/pdf') || this.selectedFile?.type.startsWith('application/msword')))) {
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
-              console.log(result);
               // Hide spinner if needed
               this.getUploadedFiles(this.latestId);
               this.selectedFile = null;
@@ -1219,19 +1465,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.loaderService.showLoader();
       const reader1 = new FileReader();
       reader1.onload = () => {
-        console.log("Vfile", this.VFileUploadDto);
         this.base64String = reader1.result as string;
         this.VFileUploadDto.fileName = this.VselectedFile?.name;
         this.VFileUploadDto.FileType = this.VselectedFile?.type;
         this.VFileUploadDto.fileData = this.base64String;
         this.VFileUploadDto.docName = "vital";
         this.VFileUploadDto.appointmentId = this.latestId;
-        console.log("Vfile", this.VFileUploadDto);
         const supportedFileTypes: string[] = ["application/pdf", "application/msword", "image/jpeg", "image/jpeg", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
         if (this.VselectedFile?.type != null && supportedFileTypes.includes(this.VselectedFile.type)) {
-          console.log("fileData", this.VFileUploadDto);
           this.fileUpladServie.uploadConsultationFile(this.VFileUploadDto).subscribe(result => {
-            console.log(result);
             this.getUploadedFiles(this.latestId);
             this.VselectedFile = null;
             this.loaderService.hideLoader();
@@ -1252,23 +1494,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
   editDetails(id: number, dateHere: Date) {
-    console.log("enter")
     this.latestId = id;
     this.seletedAppointmentDate = dateHere;
-    // this.fileUpladServie.appointmentId = id;
-    // this.fileUpladServie.editPresc = true;
     this.getUploadedFiles(id);
     this.getVitalByAppointment(this.latestId);
-    // this.vitalSubmitted=true;
-    // const questionaryTab = document.getElementById('questab');
-    // if (questionaryTab) {
-    //   questionaryTab.click();
-    // }
     this.stepper.next();
-
   }
   movetopres() {
-    console.log(" copy latest ", this.copyId, this.latestId)
     if (this.copyId != -1) {
       this.getConsultationOnAppointmentId(this.copyId)
       this.getUploadedFiles(this.copyId);
@@ -1351,5 +1583,25 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.route.navigate([currentUrl]);
     })
 
+  }
+
+  getIcon(documentName: string): string {
+    const extension = documentName.split('.').pop()?.toLowerCase();
+
+    switch (extension) {
+      case 'pdf':
+        return 'picture_as_pdf'; // Material icon for PDFs
+      case 'doc':
+      case 'docx':
+        return 'description'; // Generic document icon
+      case 'png':
+      case 'jpg':
+      case 'jpeg':
+        return 'image'; // Icon for images
+      case 'txt':
+        return 'text_snippet'; // Icon for text files
+      default:
+        return 'insert_drive_file'; // Generic file icon
+    }
   }
 }

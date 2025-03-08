@@ -1,0 +1,56 @@
+<div class="page-wrapper">
+  <div class="content">
+    <h2 class="heading">{{ title }}</h2>
+
+    <div class="row d-flex">
+      <div class="col-12 col-md-12 col-xl-8 d-flex flex-column">
+        <div class="card flex-grow-1">
+          <div class="card-body d-flex flex-column canvas-wrapper">
+            <canvas #canvas></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-12 col-xl-4 d-flex flex-column">
+        <div class="card flex-grow-1">
+          <div class="card-body d-flex flex-column controls-wrapper">
+            <!-- Pen Thickness Section -->
+            <div class="pen-thickness-label">
+              Pen Thickness: {{ penWidth }}
+            </div>
+            <div>
+              <input type="range" min="1" max="10" [(ngModel)]="penWidth" (input)="changePenWidth(penWidth)" />
+            </div>
+
+            <!-- Choose Pen Color Section -->
+            <div class="pen-color-section">
+              Choose Pen Color:
+              <!-- Color Buttons Container -->
+              <div class="color-buttons">
+                <button (click)="changePenColor('black')" style="background-color: black; color: white;">Black</button>
+                <button (click)="changePenColor('red')" style="background-color: red; color: white;">Red</button>
+                <button (click)="changePenColor('green')" style="background-color: green; color: white;">Green</button>
+                <button (click)="changePenColor('blue')" style="background-color: blue; color: white;">Blue</button>
+              </div>
+            </div>
+
+            <div class="button-container">
+              <button (click)="clearPad()">Clear</button>
+              <button (click)="toggleEraser()" [style.background-color]="isEraserActive ? 'grey' : 'lightgray'">
+                {{ isEraserActive ? 'Switch to Pen' : 'Switch to Eraser' }}
+              </button>
+              <button (click)="printPad()">Print</button>
+              <button (click)="saveCanvasToDatabase()">
+                {{ fileId == undefined || fileId <= 0 ? 'Save' : 'Update' }} </button>
+            </div>
+
+            <div class="d-flex justify-content-center mt-5">
+              <button type="button" (click)="backToPrescription()" class="btn btn-primary submit-form me-2">
+                Back to Prescription
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

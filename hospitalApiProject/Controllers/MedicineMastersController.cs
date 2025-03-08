@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,7 +24,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MedicineMaster>>> GetMedicineMasters()
         {
-            return await _context.MedicineMasters.ToListAsync();
+            return await _context.MedicineMasters.OrderByDescending(x => x.MedId).ToListAsync();
         }
 
         // GET: api/MedicineMasters/5

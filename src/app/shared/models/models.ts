@@ -298,6 +298,16 @@ export interface Iconsultation {
   followupDate: Date
 }
 
+export interface IConsultationTemplate {
+  id: number,
+  templateName: string,
+  examinationNote?: string,
+  advice?: string,
+  diffDiagnosis?: string,
+  finalDiagnosis?: string,
+  diagnosisId?: number;
+}
+
 export interface IPredefineDiagnosis {
   diagnosId: number;
   diagnosName: string;
@@ -408,6 +418,24 @@ export interface ImedicineMaster {
 export interface IprescribeMedicine {
   medicationId: number,
   appointmentId: number,
+  medName: string,
+  medType: string,
+  dose: string,
+  frequency: string,
+  timing: string,
+  duration: string,
+  instruction: string
+}
+
+export interface IMedicinesGroup {
+  id: number,
+  name: string,
+  description: string,
+}
+
+export interface IMedicationGroup {
+  id: number,
+  groupId: number,
   medName: string,
   medType: string,
   dose: string,

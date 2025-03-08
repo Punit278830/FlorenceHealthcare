@@ -370,9 +370,7 @@ export class PatientsListComponent implements OnInit {
 
   movetoProfile(id: number) {
     this.patientService.patientId = id;
-
-    this.route.navigate([routes.profile]);
-
+    this.route.navigate([routes.profile], { queryParams: { patientId: id } });
   }
 
   movetoBookappointment(id: number) {

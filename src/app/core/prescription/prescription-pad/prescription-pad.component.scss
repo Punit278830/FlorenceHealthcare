@@ -1,0 +1,92 @@
+.heading {
+  font-size: 2rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.canvas-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 80vh; /* Dynamically fill 80% of the viewport height */
+  overflow: hidden;
+  border: 1px solid #ccc; /* Optional */
+}
+
+canvas {
+  background-color: #f9f9f9;
+  display: block;
+  width: 100%; /* Match the parent container width */
+  height: 100%; /* Match the parent container height */
+}
+
+.controls-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px; /* Add gap between sections (Pen Thickness, Pen Color, etc.) */
+}
+
+/* Pen Thickness Section */
+.pen-thickness-label {
+  font-size: 1.2rem;
+  margin-bottom: 10px; /* Add margin bottom to increase gap after Pen Thickness label */
+}
+
+/* Pen Color Section */
+.pen-color-section {
+  font-size: 1.2rem;
+  margin-top: 20px; /* Increase gap before "Choose Pen Color" label */
+}
+
+.color-buttons {
+  display: grid; /* Use grid layout */
+  grid-template-columns: repeat(2, 1fr); /* Create two columns of equal width */
+  gap: 10px; /* Space between buttons */
+  margin-top: 10px; /* Space between label and buttons */
+}
+
+.color-buttons button {
+  width: 100%; /* Make buttons fill the column */
+  padding: 15px; /* Add padding for larger buttons */
+  border: none; /* Remove border */
+  color: white;
+  font-size: 14px; /* Adjust font size */
+  cursor: pointer; /* Change cursor on hover */
+}
+
+.color-buttons button:hover {
+  opacity: 0.8; /* Slightly reduce opacity on hover */
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.button-container button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+/* New Enhancements */
+@media (max-width: 768px) {
+  .canvas-wrapper {
+    height: 60vh; /* Adjust for smaller screens */
+  }
+
+  canvas {
+    min-width: 100%; /* Ensure canvas fits within the smaller container */
+    min-height: 60vh; /* Adjust height for smaller viewports */
+  }
+
+  .controls-wrapper {
+    flex-direction: row; /* Adjust controls layout for horizontal alignment */
+    flex-wrap: wrap; /* Wrap controls to fit smaller screens */
+    gap: 10px; /* Reduce gap for compact layout */
+  }
+}
