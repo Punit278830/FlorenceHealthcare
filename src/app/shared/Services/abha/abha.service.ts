@@ -256,7 +256,7 @@ export class AbhaService {
     );
   }
 
-  addPatient(patientData: IAbhaPatientInfo): Observable<any> {
+  addPatient(patientData: IAbhaPatientInfo): Observable<any> { //todo : use AddAbhaPatient method in place of this api to add patient to syatem
     return this.http.post(this.apiUrl + "PatientInfoes", patientData).pipe(
       catchError(this.handleError)
     );

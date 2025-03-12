@@ -2,10 +2,10 @@ namespace hospitalApiProject.Models.Abha.M2
 {
   public class GenerateLinkToken
   {
-    public long AbhaNumber { get; set; }
-    public string AbhaAddress { get; set; }
-    public string Name { get; set; }
-    public string Gender { get; set; }
-    public int YearOfBirth { get; set; }
+    public long abhaNumber { get; set; }
+    public string abhaAddress { get; set; }
+    public string name { get; set; }
+    public string gender { get; set; }
+    public int yearOfBirth { get; set; }
   }
 }
