@@ -253,9 +253,10 @@
                                     </div>
 
                                     <div class="col-12 col-md-6 col-xl-6" formArrayName="optionControls"
-                                        *ngIf="objectiveType">
+                                        >
+                                        <ng-container *ngIf="objectiveType">
 
-                                        <div class="row" *ngFor="let control of optionControls.controls; let i = index"
+                                            <div class="row" *ngFor="let control of optionControls.controls; let i = index"
                                             formGroupName="{{i}}">
                                             <div class="col-12 col-md-6 col-xl-8">
                                                 <div class="form-group local-forms">
@@ -284,10 +285,29 @@
 
 
                                         </div>
+                                        
+                                        </ng-container>
+                                        <ng-container *ngIf="!objectiveType">
+                                            <div class="row" *ngFor="let control of optionControls.controls; let i = index"
+                                            formGroupName="{{i}}">
+                                            <div class="col-12 col-md-6 col-xl-6">
+                                                <div class="form-group local-forms">
+                                                    <label for="mapQuestionId{{ i }}">Map Question Id<span
+                                                            class="login-danger">*</span></label>
+                                                    <input class="form-control" id="mapQuestionId{{ i }}"
+                                                        formControlName="mapQuestionId" type="text">
+
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                        </ng-container>
                                         <ng-container *ngIf="editQuestion">
                                             <button type="button" class="btn btn-primary submit-form me-2"
                                                 (click)="addDynamicControl()">Add Option</button>
                                         </ng-container>
+
+                                    
                                     </div>
 
                                     <div class="col-12 col-md-6 col-xl-10">
@@ -330,7 +350,7 @@
                                             Question
                                         </h4>
                                     </div>
-                                    <div class="col-4 text-right" *ngIf="currentQuestionData?.options?.length > 0">
+                                    <div class="col-4 text-right" *ngIf="currentQuestionData?.options?.length > 0  && optionsNotAvailable">
                                         <div class="form-group local-forms">
                                             <label for="existingOptions">Options</label>
                                             <mat-select [(ngModel)]="selectedOption"

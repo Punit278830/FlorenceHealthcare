@@ -334,6 +334,12 @@ export class PatientsListComponent implements OnInit {
 
   }
 
+  onBookAppointment(id: number) {
+    this.patientService.patientId = id;
+    console.log("stafflist", this.patientList)
+
+  }
+
   calculateDateDifference(dob: Date) {
     const start = new Date(dob);
     const end = new Date();

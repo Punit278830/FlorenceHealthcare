@@ -56,6 +56,8 @@ export class AddQuestionnaireComponent {
   public finishQuestionniary = false;
   private questionCounter = 0;
   public subQuestionCounter = 0;
+  public optionsNotAvailable=true;
+  public textMappingCounter=0;
 
   selectedRow: number | null = null;
   selectedOption!: number;
@@ -218,6 +220,7 @@ export class AddQuestionnaireComponent {
     this.questionForm = this.fb.group({
       questionText: ['', Validators.required],
       questionType: ['', Validators.required],
+      questionMapping: [''],
       optionControls: this.fb.array([
 
       ])
@@ -227,17 +230,23 @@ export class AddQuestionnaireComponent {
 
   addDynamicControl() {
     this.showQuestionList = true;
+    if(this.objectiveType==false && this.textMappingCounter==0||this.objectiveType==true)
+    {
+      this.textMappingCounter++;
     this.optionControls.push(
       this.fb.group({
         option: ['', Validators.required],
         mapQuestionId: ['', Validators.required]
       })
     )
+    }
+    
 
   }
 
   removeDynamicControl(index: number) {
     this.optionControls.removeAt(index);  // Remove the dynamic control at the specified index
+    this.textMappingCounter=0;
   }
 
   get optionControls() {
@@ -351,7 +360,17 @@ export class AddQuestionnaireComponent {
 
   showOption(event: any) {
 
-    event == 1 ? this.objectiveType = true : this.objectiveType = false;
+    if(event == 1)
+    {
+      this.objectiveType = true
+    }  
+    else
+    {
+      this.objectiveType = false;
+     // this.textMappingCounter++;
+
+    } 
+
   }
 
 
@@ -369,7 +388,7 @@ export class AddQuestionnaireComponent {
     const answerKey = Object.keys(answer.value)[0];
     if (this.currentQuestionData.options.length > 0) {
       this.currentQuestionData.options.map((res: Ioptions) => {
-        if (res.optionId == answer.value[answerKey]) {
+        if (res.optionId == answer.value[answerKey] || this.currentQuestionData.options.length==1) {
           res.mapQuestionId ? this.nextQuestionId = res.mapQuestionId : this.nextQuestionId = 0;
         }
       })
@@ -389,6 +408,7 @@ export class AddQuestionnaireComponent {
   }
 
   EditQuestionAddOptionWithMapping(questId: number) {
+    this.textMappingCounter=0;
     this.questionId = questId
     this.editQuestion = true;
 
@@ -396,6 +416,7 @@ export class AddQuestionnaireComponent {
       console.log(res)
       this.questionForm.get('questionText')?.patchValue(res.questionText);
       this.questionForm.get('questionType')?.patchValue(res.questionType);
+      this.questionForm.get("questionMapping")?.patchValue(270);
       this.showOption(res.questionType);
     })
   }
@@ -426,7 +447,7 @@ export class AddQuestionnaireComponent {
     //this._questionDto.questionnaireId=this.questionForm.get('questionnaireId')?.value;
     this._questionDto.questionId = this.questionId;
     this._questionDto.questionnaireId = this.questionnaireId;
-    if (this.questionForm.value.questionType == 1) {
+    if (this.questionForm.value.questionType == 1 || this.questionForm.value.questionType == 2) {
       if (this.questionForm.value.optionControls.length > 0) {
         temp = this.questionForm.value.optionControls;
       }
@@ -461,6 +482,7 @@ export class AddQuestionnaireComponent {
 
       this.toaster.success("Question Updated Successfully", "Update Question")
       this.showaddQuestion(this.questionnaireId)
+      //this.textMappingCounter=0;
 
     })
     // }
@@ -472,6 +494,8 @@ export class AddQuestionnaireComponent {
     this.subQuestionCounter = this.questionLenth > 0 ? 1 : 0;
 
     this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
+    this.currentQuestionData.options.map((e:any)=>e.optionText==""?this.optionsNotAvailable=false:this.optionsNotAvailable=true)
+    
     this.currentQuestionIndex = this.questionCounter + 1; // Ensure this is set initially
   }
 
@@ -480,8 +504,9 @@ export class AddQuestionnaireComponent {
 
     // If there's a next question id, it means we need to navigate to a sub-question
     if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId
-      && this.currentQuestionData.questionType != 2) {
-      this.subQuestionCounter += 1;
+      ) {
+      this.subQuestionCounter ++;
+      //this.subQuestionCounter=this.currentQuestionData.mapQuestionId
 
       if (this.currentQuestionData && this.currentQuestionData.options) {
         // Find the index of the sub-question in the current question's options
@@ -499,11 +524,14 @@ export class AddQuestionnaireComponent {
     } 
     else if(this.nextQuestionId == this.currentQuestionData.questionId){
       subQuestionIndex = -1;
+      
       this.questionCounter = this.questionLenth;
     }
     else {
       // Navigate to the next main question
-      this.questionCounter++;
+      //this.questionCounter++;
+      this.questionCounter=this.currentQuestionData.mapQuestionId
+
       if (this.questionCounter < this.questionLenth) {
         this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
 

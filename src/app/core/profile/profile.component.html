@@ -2,7 +2,6 @@
     <div class="content">
 
         <div class="row">
-
             <div class="col-sm-7 col-6">
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item"><a [routerLink]="routes.adminDashboard">Dashboard </a></li>
@@ -739,6 +738,10 @@
                                                                                                 Type
                                                                                             </th>
                                                                                             <th
+                                                                                                mat-sort-header="unit">
+                                                                                                Unit
+                                                                                            </th>
+                                                                                            <th
                                                                                                 mat-sort-header="treatment">
                                                                                                 Generic Name
                                                                                             </th>
@@ -756,6 +759,7 @@
                                                                                                 </a>
                                                                                             </td>
                                                                                             <td>{{data.medType}}</td>
+                                                                                            <td>{{data.unit}}</td>
                                                                                             <td>{{data.genericName}}
                                                                                             </td>
                                                                                         </tr>
@@ -788,8 +792,9 @@
                                                                                         <input class="form-control"
                                                                                             formControlName="medType"
                                                                                             type="text">
-                                                                                    </div>
+                                                                                 </div>
                                                                                 </div>
+                                                                                 
                                                                                 <div class="col-12 col-md-6 col-xl-1">
                                                                                     <div class="form-group local-forms">
                                                                                         <label for="dose">Dose</label>
@@ -797,7 +802,16 @@
                                                                                             formControlName="dose"
                                                                                             type="text">
                                                                                     </div>
-                                                                                </div>`
+                                                                                </div>
+                                                                                <div class="col-12 col-md-6 col-xl-1">
+                                                                                    <div class="form-group local-forms">
+   
+                                                                                       <input class="form-control"
+                                                                                           formControlName="unit"
+                                                                                           type="text">
+                                                                                
+                                                                               </div>
+                                                                                   </div>
                                                                                 <div class="col-12 col-md-6 col-xl-1">
                                                                                     <div class="form-group local-forms">
                                                                                         <label
@@ -888,6 +902,10 @@
                                                                                                     Dose
                                                                                                 </th>
                                                                                                 <th
+                                                                                                    mat-sort-header="dose">
+                                                                                                    unit
+                                                                                                </th>
+                                                                                                <th
                                                                                                     mat-sort-header="consultingDoctor">
                                                                                                     Frequency
                                                                                                 </th>
@@ -913,11 +931,12 @@
                                                                                                 </td>
                                                                                                 <td>{{data.medType}}
                                                                                                 </td>
+                                                                                                
                                                                                                 <td>{{data.dose}}</td>
-                                                                                                <td>{{data.frequency}}
-                                                                                                </td>
+                                                                                                <td>{{data.unit}}</td>
+                                                                                                <td>{{data.frequency}}</td>
                                                                                                 <td>{{data.timing}}</td>
-                                                                                                <td>{{data.duration}}
+                                                                                                <td>{{data.duration}}-days
                                                                                                 </td>
                                                                                                 <td>{{data.instruction}}
                                                                                                 </td>
@@ -979,79 +998,8 @@
                                         <div class="col-md-12">
                                             <div class="card-box">
 
-                                                <div class="col-12 border border-dark border-4">
-                                                    <div class="row">
-                                                        <div class="col-12 col-md-6 col-xl-10">
-
-                                                            <h2 class="text-center">Florence HealthCare</h2>
-                                                            <h4 class="text-center">
-                                                                Florence Healthcare, Kheri Road,
-                                                                Kheri,
-                                                                Lakhimpur
-                                                                Kheri - 262701 (Near By Don Bosco School)
-                                                            </h4>
-                                                        </div>
-                                                        <div class="col-12 col-md-6 col-xl-2">
-
-                                                            <img src=".././assets/img/logo.png" alt="logo">
-                                                        </div>
-                                                        <hr>
-                                                        <div class="row">
-                                                            <ng-container *ngIf="_doctorDto">
-                                                                <div class="col-12 col-md-6 col-xl-6">
-                                                                    <h4>
-                                                                        <strong>Doctor Name:</strong>
-                                                                        {{_doctorDto.firstName}} {{_doctorDto.lastName}}
-                                                                    </h4>
-                                                                    <h4>
-                                                                        <strong>Degree:</strong>
-                                                                        {{_doctorDto.education}}
-                                                                    </h4>
-                                                                    <h4>
-                                                                        <strong>Designation:</strong>{{_doctorDto.designation}}
-                                                                    </h4>
-                                                                    <h4><strong>Email:</strong>{{_doctorDto.email}}</h4>
-                                                                </div>
-                                                            </ng-container>
-                                                            <ng-container *ngIf="patientInfo">
-                                                                <div class="col-12 col-md-6 col-xl-4">
-
-
-                                                                    <h4>
-                                                                        <strong>
-                                                                            Patient
-                                                                            Name:
-                                                                        </strong>{{patientInfo.firstName}}
-                                                                        {{patientInfo.lastName}}
-                                                                    </h4>
-                                                                    <h4><strong>Age:</strong> {{patientAge}}</h4>
-                                                                    <h4>
-                                                                        <strong>Gender: </strong>{{patientInfo.gender}}
-                                                                    </h4>
-                                                                    <h4>
-                                                                        <strong>Appointment Date:</strong>{{
-                                                                        seletedAppointmentDate | date:'dd-MM-yyyy' ||
-                                                                        null
-                                                                        }}
-                                                                    </h4>
-                                                                    <div *ngIf="prescriptionImage; else noImage">
-                                                                        <h3>Your Prescription</h3>
-                                                                        <img [src]="prescriptionImage"
-                                                                            alt="Prescription Image"
-                                                                            style="max-width: 100%; height: auto;" />
-                                                                    </div>
-
-                                                                    <ng-template #noImage>
-                                                                        <p>No prescription image available.</p>
-                                                                    </ng-template>
-
-                                                                    <!-- <h4><strong>Valid till:</strong>2nd Mar 2024</h4> -->
-                                                                </div>
-                                                            </ng-container>
-                                                        </div>
-                                                        <hr>
-
-                                                        <div class="row">
+                                                <div class="col-12">
+                                                   <div class="row">
                                                             <div class="col-12" class="questionsOuter"
                                                                 *ngIf="groupedQuestionData.length > 0">
                                                                 <div class="questionnaireGroup"
@@ -1085,12 +1033,11 @@
                                                             </div>
                                                         </div>
 
-                                                        <div></div>
-                                                        <div class="row" *ngIf="vitalDto">
-                                                            <!-- <div class="col-12" > -->
-                                                            <div class="col-12 col-md-6 col-xl-2">
-                                                            </div>
-                                                            <h4><strong>Examination:</strong></h4>
+                                                        <div>
+                                                            
+                                                        </div>
+                                                        <!-- <div class="row" *ngIf="vitalDto">
+                                                          <h4><strong>Examination:</strong></h4>
                                                             <div class="col-12 col-md-6 col-xl-6 ml-3">
                                                                 <ul class="list-unstyled invoice-clinic mt-2 ">
                                                                     <li><strong>BP:{{vitalDto.bp}} /mmHg</strong></li>
@@ -1100,13 +1047,9 @@
                                                                     <li>
                                                                         <strong>Height:{{vitalDto.height}} CM</strong>
                                                                     </li>
-                                                                </ul>
-                                                                <!-- <h4><strong></strong>BP:{{vitalDto.bp}} /mmHg</strong></h4>
-                                        <h3><strong>Weight:{{vitalDto.weight}} Kg</strong></h3>
-                                        <h5>Height:<strong>{{vitalDto.height}} CM</strong></h5> -->
-
-
+                                                                </ul>                                                            
                                                             </div>
+
                                                             <div class="col-12 col-md-6 col-xl-6">
 
                                                                 <ul class="list-unstyled invoice-clinic mt-2 ">
@@ -1126,39 +1069,10 @@
                                                                         </strong>
                                                                     </li>
                                                                 </ul>
-
-                                                                <!-- <h5>Pulse:<strong>{{vitalDto.pulse}} /min</strong></h5>
-                                        <h5>Tempurature:<strong>{{vitalDto.tempurature}}F</strong>
-                                        </h5>
-
-                                        <h5>OxigenLevel:<strong>{{vitalDto.oxigenLevel}} %</strong>
-                                        </h5> -->
-
-
+                                                              
                                                             </div>
-                                                            <!-- </div> -->*
-                                                        </div>
-                                                        <div class="imageOuter" *ngIf="presDocuments.length > 0">
-                                                            <h4><strong>Uploaded images:</strong></h4>
-                                                            <ng-container *ngFor="let item of presDocuments">
-                                                                <div *ngIf="item.docName != 'pen-prescription'"
-                                                                    class="imageContainer">
-                                                                    <img style="width: 50%;" [src]="item.fileData"
-                                                                        alt="Pres Document" />
-                                                                </div>
-                                                            </ng-container>
-
-                                                        </div>
-                                                        <div class="imageOuter" *ngIf="presDocuments.length > 0">
-                                                            <h4><strong>Prescription:</strong></h4>
-                                                            <ng-container *ngFor="let item of presDocuments">
-                                                                <div *ngIf="item.docName == 'pen-prescription'"
-                                                                    class="row">
-                                                                    <img style="width: 90%;" [src]="item.fileData" />
-                                                                </div>
-                                                            </ng-container>
-
-                                                        </div>
+                                                            </div> -->
+                                                        
                                                         <div>
                                                         </div>
                                                         <div class="row">
@@ -1171,69 +1085,14 @@
                                                                 </div>
                                                             </ng-container>
 
-                                                            <ng-container *ngIf="_consultationDto">
-                                                                <div class="col-12"
-                                                                    *ngIf="_consultationDto.examinationNote">
-                                                                    <div style="border: 2px solid black;">
-                                                                        <h4>
-                                                                            <strong>Note:</strong>{{_consultationDto.examinationNote}}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="col-12" *ngIf="_consultationDto.advice">
-                                                                    <div style="border: 2px solid black;">
-                                                                        <h4>
-                                                                            <strong>Advice:</strong>{{_consultationDto.advice}}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="col-12"
-                                                                    *ngIf="_consultationDto.diffDiagnosis">
-                                                                    <div style="border: 2px solid black;">
-                                                                        <h4>
-                                                                            <strong>
-                                                                                Differential
-                                                                                diagnosis:
-                                                                            </strong>{{_consultationDto.diffDiagnosis}}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="col-12"
-                                                                    *ngIf="_consultationDto.finalDiagnois">
-                                                                    <div style="border: 2px solid black;">
-                                                                        <h4>
-                                                                            <strong>
-                                                                                Final
-                                                                                Diagnosis:
-                                                                            </strong>{{_consultationDto.finalDiagnois}}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                                <div class="col-12"
-                                                                    *ngIf="_consultationDto.followupDate">
-                                                                    <div style="border: 2px solid black;">
-                                                                        <h4>
-                                                                            <strong>
-                                                                                Follow up
-                                                                                Date:
-                                                                            </strong>{{_consultationDto.followupDate|
-                                                                            date:'dd-MM-yyyy'}}
-                                                                        </h4>
-                                                                    </div>
-                                                                </div>
-                                                            </ng-container>
-
                                                             <!-- display prescription Medicine code start from here -->
-                                                            <div class="table-responsive" *ngIf="medicineDto.length>0">
+                                                            <!-- <div class="table-responsive" *ngIf="medicineDto.length>0">
                                                                 <table
                                                                     class="table border-0 custom-table comman-table datatable mb-0">
                                                                     <thead>
                                                                         <tr>
                                                                             <th mat-sort-header="name">
-                                                                                Medicine Name
+                                                                                scaccacaMedicine Name
                                                                             </th>
                                                                             <th mat-sort-header="consultingDoctor">
                                                                                 Type
@@ -1257,7 +1116,8 @@
 
                                                                             <td>{{data.medName}}</td>
                                                                             <td>{{data.medType}}</td>
-                                                                            <td>{{data.dose}}</td>
+                                                                             <td>{{data.dose}}</td>
+                                                                             <td>{{data.unit}}</td>
                                                                             <td>{{data.frequency}}</td>
                                                                             <td>{{data.timing}}</td>
                                                                             <td>{{data.duration}}</td>
@@ -1266,14 +1126,399 @@
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
-                                                            </div>
+                                                            </div> -->
+                                                            <mat-card class="prescription-card" *ngIf="_doctorDto">
+                                                                <table>
+                                                                    <tr>
+                                                                        <td> <mat-card-header>
+                                                                            <div style="height: 100px;"></div>
+                                                                          <mat-card-title class="header-title">Dr. {{_doctorDto.firstName}} {{_doctorDto.lastName}}</mat-card-title>
+                                                                          <p class="header-subtitle">{{_doctorDto.education}}</p>
+                                                                          <p class="header-subtitle">Reg Num UP MCI-63800</p>
+                                                                          <!-- <p class="header-subtitle">{{_doctorDto.designation}}</p> -->
+                                                                          <p class="header-subtitle">Department of ENT, Head & Neck Surgery</p>
+                                                                          <p class="header-subtitle">Florence Healthcare, Lakhimpur Kheri UP</p>
+                                                                         
+                                                                        </mat-card-header>
+                                                                    </td>
+                                                                    <td>
+                                                                        <div style="height: 100px;"></div>
+                                                                        <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; margin-left: 800px;">
+                                                                    </td>
+                                                                    </tr>
+                                                                </table>
+                                                               
+                                                                
+                                                                <mat-card-content>
+                                                                  <p class="section-title">Patient details</p>
+                                                                  <table class="patient-table" *ngIf="patientInfo">
+                                                                    <tr>
+                                                                        <td><strong>Name:</strong></td>
+                                                                        <td><span>{{patientInfo.firstName}} {{patientInfo.lastName}}</span></td>
+                                                                        <td><strong>Patient ID:</strong></td>
+                                                                        <td>P-{{patientInfo.patientId}}</td>
+                                                                        <td rowspan="6" style="    text-align: left;">
+                                                                            <img  src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; border: 1px solid #ccc;" />
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Age:</strong></td>
+                                                                        <td>{{patientAge}}</td>
+                                                                        <td><strong>ABHA ID:</strong></td>
+                                                                        <td>9878-0987-5677-8765</td>                                                                        
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Gender:</strong></td>
+                                                                        <td>{{patientInfo.gender}}</td>
+                                                                        <td><strong>Appointment:</strong></td>
+                                                                        <td>05-08-2024</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Address:</strong></td>
+                                                                        <td>{{patientInfo?.address}}</td>
+                                                                        <td><strong>Validity:</strong></td>
+                                                                        <td>11-08-2024, 05:00 pm</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Phone</strong></td>
+                                                                        <td>{{patientInfo?patientInfo.mobile:''}}</td>
+                                                                       
+                                                                    </tr>
+                                                                  </table>
+                                                                  <div class="containersection ">
+                                                                    <div class="sectionOne">
+                                                                        <ng-container >
+                                                                       
+                                                                             <!-- <table class="patient-table" *ngIf="vitalDto"> -->
+                                                                                <table class="patient-table" >
+                                                                                <tr><td><h3><strong>Examination</strong></h3></td></tr>
+                                                                               <tr>
+                                                                                   <td><strong>BP:</strong>{{vitalDto?.bp?vitalDto.bp + '/mmHg': ''}}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                   <td><strong>Pulse:</strong>{{vitalDto?.pulse?vitalDto.pulse + 'bpm': ''}}</td>
+                                                                                   </tr>
+                                                                                   <tr> <td><strong>Tempurature:</strong>{{vitalDto?.tempurature? vitalDto.tempurature +'f': ''}}  </td>
+                                                                                   </tr>
+                                                                                   <tr>
+                                                                                    <td><strong>Oxygen:</strong>{{vitalDto?.oxigenLevel ? vitalDto.oxigenLevel + ' gml' : ''}}</td>
+                                                                                   
+                                                                                </tr>
+                                                                                   <tr>
+                                                                                    <td><strong>Height:</strong>{{vitalDto?.height?vitalDto.height+ 'cm': ''}} </td>
+                                                                                 </tr>
+                                                                                 
+                                                                                   <tr>
+                                                                                    <td><strong>Weight:</strong>{{vitalDto?.weight?vitalDto.weight + 'kg':''}}</td>
+                                                                               </tr>
+                                                                               <tr><td><h3><strong>Patient History:</strong></h3></td></tr>
+                                                                               <tr>
+                                                                                   <tr>
+                                                                                   <td><strong>Diabetes:</strong>Yes</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td><strong>Thyroid Disease:</strong>No</td>
+                                                                                  
+                                                                                  </tr>                                                                                                                                                      
+                                                                              
+                                                                              
+                                                                                  <tr> <td><strong>Hypertension:</strong>No</td>
+                                                                                   </tr>
+                                                                                  <tr>
+                                                                                   <td><strong>Alcohol:</strong>No</td>
+                                                                                                                                                         
+                                                                               </tr>
+                                                                               <tr><td><strong>Smoking:</strong>Yes</td>
+                                                                               </tr>
+                                                                               
+                                                                                  
+                                                                                   <tr>
+                                                                                   <td><strong>Tobacco:</strong>No</td>
+                                                                                   
+                                                                               </tr>
+                                                                                                                                                             
+                                                                             </table>
+                                                                            </ng-container>
+                                                                               
+                                                                          
+                                                                    </div>
+                                                                    <div class="sectionTwo">
+                                                                        
+                                                                        <ng-container *ngIf="hasPenPrescription; else noRelevantDocuments">
+                                                                            <ng-container *ngFor="let item of presDocuments">
+                                                                                <div *ngIf="item.docName === 'pen-prescription'" class="row">
+                                                                                    <img style="width: 100%; height: 1400px;" [src]="item.fileData" />
+                                                                                </div>
+                                                                            </ng-container>
+                                                                        </ng-container>
+                                                                        
+                                                                        <!-- Case  No documents or no 'pen-prescription' -->
+                                                                        <ng-template #noRelevantDocuments>
+                                                                            <ng-container *ngIf="_consultationDto">
+                                                                              
+                                                                                <h4 *ngIf="_consultationDto.examinationNote">
+                                                                                    <strong>Examination Note:</strong> {{ _consultationDto.examinationNote }}
+                                                                                </h4>
+                                                                           
+                                                                        
+                                                                                <h4 *ngIf="_consultationDto.advice">
+                                                                                    <strong>Advice:</strong> {{ _consultationDto.advice }}
+                                                                                </h4>
+                                                                        
+                                                                                <h4 *ngIf="_consultationDto.diffDiagnosis">
+                                                                                    <strong>Differential Diagnosis:</strong> {{ _consultationDto.diffDiagnosis }}
+                                                                                </h4>
+                                                                        
+                                                                                <h4 *ngIf="_consultationDto.finalDiagnois">
+                                                                                    <strong>Final Diagnosis:</strong> {{ _consultationDto.finalDiagnois }}
+                                                                                </h4>
+                                                                        
+                                                                                <h4 *ngIf="_consultationDto.followupDate">
+                                                                                    <strong>Follow-up Date:</strong> {{ _consultationDto.followupDate | date:'dd-MM-yyyy' }}
+                                                                                </h4>
+                                                                            </ng-container>
+                                                                            <ng-container *ngIf="vitalDto">
+                                                                                <h3 class="section-title">Presenting complaints:</h3>
+                                                                               <p><strong>Main Affected Region:</strong> EAR</p>
+                                                                                <p><strong>Ear Pain:</strong> YES (Duration: 1 week)</p>
+                                                                                <p><strong>Ear Discharge:</strong> NO</p>
+                                                                                <p><strong>Hearing Loss:</strong> NO</p>
+                                                                             </ng-container>
+                                                                        </ng-template>
+                                                                        
+                                                                            
+                                                                    </div>
+                                                                 
+                                                                       
+                                                                   
+                                                                    
+                                                                </div>
+                                                                <!-- <ng-container *ngIf="vitalDto">
+                                                                    <p class="section-title">Examination</p>
+                                                                      <table class="patient-table">
+                                                                        <tr>
+                                                                            <td><strong>BP:</strong></td>
+                                                                            <td><span>{{vitalDto.bp}} /mmHg</span></td>
+                                                                            <td><strong></strong>Weight:</td>
+                                                                            <td><span>{{vitalDto.weight}} kg</span></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><strong>Height</strong></td>
+                                                                            <td><span>{{vitalDto.height}} cm</span></td>
+                                                                            <td><strong>Pulse</strong></td>
+                                                                            <td><span>{{vitalDto.pulse}} bpm</span></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <td><strong>Temprature</strong></td>
+                                                                            <td><span>{{vitalDto.tempurature}} C</span></td>
+                                                                            <td><strong>Oxygen</strong></td>
+                                                                            <td><span>{{vitalDto.oxigenLevel}} mg/L</span></td>
+                                                                        </tr>
+                                                                      </table>
+                                                                </ng-container>      -->
+                                                                     
+                                                               <!-- Patient history dispaly section start -->
+                                                                  <!-- <ng-container *ngIf="vitalDto">
+                                                                  <h3 class="section-title">Presenting complaints:</h3>
+                                                                  <div class="grid-container">
+                                                                   <div class="column left-column">
+                                                                   <p><strong>Main Affected Region:</strong> EAR</p>
+                                                                  <p><strong>Ear Pain:</strong> YES (Duration: 1 week)</p>
+                                                                  <p><strong>Ear Discharge:</strong> NO</p>
+                                                                  <p><strong>Hearing Loss:</strong> NO</p>
+                                                                </div>
+                                                                </div>
+                                                            </ng-container> -->
+                                                                 <!-- <div class="row" *ngIf="vitalDto">
+                                                                 <p class="section-title">History & Examination</p>
+                                                                  <table class="patient-table" *ngIf="vitalDto">
+                                                                    <tr>
+                                                                        <td><strong>BP:</strong></td>
+                                                                        <td>{{vitalDto.bp}} /mmHg</td>
+                                                                        <td><strong>Pulse:</strong></td>
+                                                                        <td>{{vitalDto?.pulse}} bpm</td>
+                                                                        <td><strong>Diabetes:</strong></td>
+                                                                        <td>Yes</td>
+                                                                        <td><strong>Smoking:</strong></td>
+                                                                        <td>Yes</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Weight:</strong></td>
+                                                                        <td>{{vitalDto.weight}} kg</td>
+                                                                        <td><strong>Tempurature:</strong></td>
+                                                                        <td>{{vitalDto.tempurature}} c</td>
+                                                                        <td><strong>Hypertension:</strong></td>
+                                                                        <td>No</td>
+                                                                        <td><strong>Alcohol:</strong></td>
+                                                                        <td>No</td>                                                                        
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td><strong>Height:</strong></td>
+                                                                        <td>{{vitalDto.height}} cm</td>
+                                                                        <td><strong>Oxygen:</strong></td>
+                                                                        <td>{{vitalDto.oxigenLevel}} cm</td>
+                                                                        <td><strong>Thyroid Disease:</strong></td>
+                                                                        <td>No</td>
+                                                                        <td><strong>Tobacco:</strong></td>
+                                                                        <td>No</td>
+                                                                    </tr>
+                                                                    
+                                                                  </table>
+                                                              
+                                                                </div> -->
+                                                                <!-- <ng-container *ngIf="_consultationDto">
+                                                                    <div class="col-12"
+                                                                        *ngIf="_consultationDto.examinationNote">
+                                                                        <div>
+                                                                            <h4>
+                                                                                <strong>Examination Note:</strong>{{_consultationDto.examinationNote}}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+    
+                                                                    <div class="col-12" *ngIf="_consultationDto.advice">
+                                                                        <div >
+                                                                            <h4>
+                                                                                <strong>Advice:</strong>{{_consultationDto.advice}}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+    
+                                                                    <div class="col-12"
+                                                                        *ngIf="_consultationDto.diffDiagnosis">
+                                                                        <div >
+                                                                            <h4>
+                                                                                <strong>
+                                                                                    Differential
+                                                                                    diagnosis:
+                                                                                </strong>{{_consultationDto.diffDiagnosis}}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+    
+                                                                    <div class="col-12"
+                                                                        *ngIf="_consultationDto.finalDiagnois">
+                                                                        <div >
+                                                                            <h4>
+                                                                                <strong>
+                                                                                    Final
+                                                                                    Diagnosis:
+                                                                                </strong>{{_consultationDto.finalDiagnois}}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-12"
+                                                                        *ngIf="_consultationDto.followupDate">
+                                                                        <div>
+                                                                            <h4>
+                                                                                <strong>
+                                                                                    Follow up
+                                                                                    Date:
+                                                                                </strong>{{_consultationDto.followupDate|
+                                                                                date:'dd-MM-yyyy'}}
+                                                                            </h4>
+                                                                        </div>
+                                                                    </div>
+                                                                </ng-container>      -->
+                                                                <div class="table-responsive" *ngIf="medicineDto.length>0">
+                                                                    <table
+                                                                        class="table border-0 custom-table comman-table datatable mb-0">
+                                                                        <thead>
+                                                                            <tr>
+                                                                                <th mat-sort-header="name">
+                                                                                    Medicine Name
+                                                                                </th>
+                                                                                <th mat-sort-header="consultingDoctor">
+                                                                                    Type
+                                                                                </th>
+                                                                                <th mat-sort-header="name">Dose</th>
+                                                                                <th mat-sort-header="consultingDoctor">
+                                                                                    Frequency
+                                                                                </th>
+                                                                                <th mat-sort-header="treatment">Timing</th>
+                                                                                <th mat-sort-header="treatment">
+                                                                                    Duration
+                                                                                </th>
+                                                                                <th mat-sort-header="treatment">
+                                                                                    Instruction
+                                                                                </th>
+                                                                                <th></th>
+                                                                            </tr>
+                                                                        </thead>
+                                                                        <tbody>
+                                                                            <tr *ngFor="let data of medicineDto">
+    
+                                                                                <td>{{data.medName}}</td>
+                                                                                <td>{{data.medType}}</td>
+                                                                                 <td>{{data.dose}}</td>
+                                                                                 <td>{{data.unit}}</td>
+                                                                                <td>{{data.frequency}}</td>
+                                                                                <td>{{data.timing}}</td>
+                                                                                <td>{{data.duration}}</td>
+                                                                                <td>{{data.instruction}}</td>
+    
+                                                                            </tr>
+                                                                        </tbody>
+                                                                    </table>
+                                                                </div>  
+                                                                  <!-- </ng-container>  -->
+                                                                <!-- Patient history dispaly section End -->
+                                                                </mat-card-content>
+                                                        <div>
+                                                            <!--Dispaly Prescription papr section start-->
+                                                            <!-- <div  *ngIf="presDocuments.length > 0">
+                                                                <ng-container *ngFor="let item of presDocuments">
+                                                                    <div *ngIf="item.docName == 'pen-prescription'"
+                                                                        class="row">
+                                                                        <img style="width: 100%; height: 1400px;" [src]="item.fileData" />
+                                                                    </div>
+                                                                </ng-container>
+    
+                                                            </div>  -->
+                                                            <!--Dispaly Prescription papr section End-->
+                                                        
+                                                           <!--Dispaly drawing image dispaly sction start-->
+                                                                <div class="container" *ngIf="presDocuments.length > 0">
+                                                                    <ng-container *ngFor="let item of presDocuments">
+                                                                        <div class="image-box" *ngIf="item.docName != 'pen-prescription'">
+                                                                            <div class="imageContainer">
+                                                                                <img [src]="item.fileData" alt="Pres Document" />
+                                                                            </div>
+                                                                        </div>
+                                                                    </ng-container>
+                                                                    <!-- <div class="image-box" *ngIf="presDocuments.length > 0"><ng-container *ngFor="let item of presDocuments">
+                                                                        <div *ngIf="item.docName != 'pen-prescription'"
+                                                                            class="imageContainer">
+                                                                            <img  [src]="item.fileData"
+                                                                                alt="Pres Document" />
+                                                                        </div>
+                                                                        
+                                                                    </ng-container></div>
+                                                                    <div class="image-box" *ngIf="presDocuments.length > 0"><ng-container *ngFor="let item of presDocuments">
+                                                                        <div *ngIf="item.docName != 'pen-prescription'"
+                                                                            class="imageContainer">
+                                                                            <img [src]="item.fileData"
+                                                                                alt="Pres Document" />
+                                                                        </div>
+                                                                        
+                                                                    </ng-container></div> -->
+                                                                  </div>
+                                                             <!--Dispaly drawing image dispaly sction End-->
+
+                                                        </div>
+                                                                       
+                                                                                                 
+                                                                  <mat-divider></mat-divider>
+                                                                 
+                                                              </mat-card>
+                                                              
+                                                              
                                                         </div>
                                                     </div>
-                                                </div>
+                                               
                                             </div>
                                         </div>
                                         <!-- Image Preview Section -->
-
 
                                     </div>
                                     <div class="btnOuter1">

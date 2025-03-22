@@ -131,7 +131,11 @@
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
                           aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                          
                         <div class="dropdown-menu dropdown-menu-end">
+                          <a class="dropdown-item" [routerLink]="routes.addAppointment"
+                          (click)="onBookAppointment(data.patientId)"><i class=" fa-solid fa-pen-to-square m-r-5"></i>
+                            Book appointment</a>
                           <a class="dropdown-item" [routerLink]="routes.editPatient"
                             (click)="onEditPatient(data.patientId)"><i class=" fa-solid fa-pen-to-square m-r-5"></i>
                             Edit</a>

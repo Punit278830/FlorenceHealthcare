@@ -42,21 +42,28 @@ export class PrescriptionPadComponent implements AfterViewInit {
     // Get the title parameter from the route
     this.route.paramMap.subscribe(params => {
       this.title = params.get('title') == 'Draw' ? 'Drawing Pad' : 'Prescription Pad';
-
-      this.appointmentId = Number(params.get('appointmentId')) || 0;
+        this.appointmentId = Number(params.get('appointmentId')) || 0;
       if (this.appointmentId == 0) {
         this.toastr.error("Appointment id is missing in URL.", "Error");
         return;
       }
-
+      
       // this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
-      this.FileUploadDto.docName = 'pen-prescription';
+      if(this.title== 'Prescription Pad')
+      {
+        this.FileUploadDto.docName = 'pen-prescription';
+      }
+      else
+      {
+        this.FileUploadDto.docName='drawing'
+      }
+       
       this.FileUploadDto.appointmentId = this.appointmentId;
 
       this.route.queryParamMap.subscribe(queryParams => {
         this.fileId = queryParams.has('fileId')
           ? Number(queryParams.get('fileId'))
-          : undefined;
+          : undefined; 
 
         if (this.fileId) {
           this.fileUploadServie.getConsulationFileById(this.fileId).subscribe(res => {
@@ -262,8 +269,18 @@ export class PrescriptionPadComponent implements AfterViewInit {
         this.FileUploadDto.fileId = this.fileId;
         this.updateExistingImage();
       } else {
-        // Prepare the file upload DTO
-        this.FileUploadDto.fileName = `prescription-${Date.now()}.png`; // Unique file name
+          // Prepare the file upload DTO
+        if(this.title== 'Prescription Pad')
+        {
+          this.FileUploadDto.fileName = `prescription-${Date.now()}.png`;
+          this.FileUploadDto.docName = 'pen-prescription';
+        }
+        else
+        {
+          this.FileUploadDto.fileName = `drawing-${Date.now()}.png`;
+          this.FileUploadDto.docName = 'drawing';
+        }
+        //this.FileUploadDto.fileName = `prescription-${Date.now()}.png`; // Unique file name
         this.FileUploadDto.FileType = 'image/png';
 
         this.uploadNewImage();
@@ -276,13 +293,15 @@ export class PrescriptionPadComponent implements AfterViewInit {
   }
 
   uploadNewImage() {
+     console.log("foleDto" + this.FileUploadDto)
     this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
       result => {
-        console.log(result);
+        console.log("data" +result);
         const newFileId = result.fileId;
 
         // Append the file ID to the URL as a query parameter
         this.loaderService.hideLoader();
+        this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
         this.toastr.success('Canvas image uploaded successfully', 'Success');
 
         if (newFileId) {
@@ -303,8 +322,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   updateExistingImage() {
     this.fileUploadServie.updateConsultationFile(this.fileId ?? 0, this.FileUploadDto).subscribe(
       result => {
-        console.log(result);
-        this.loaderService.hideLoader();
+       this.loaderService.hideLoader();
         this.toastr.success('Canvas image updated successfully', 'Success');
       },
       error => {
@@ -354,7 +372,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   // Print the canvas content
   printPad(): void {
     if (this.prescriptionPad.isEmpty()) {
-      alert('No content to print! Please draw something.');
+      
       return;
     }
 

@@ -234,10 +234,11 @@ export class AddAppointmentComponent implements OnInit {
     this.fileFormInitlize();
     this.flag = false;
     this.patientAppointmentData = [];
-    // if(this.patierntService.patientId)
-    // {
-    //   this.postDatatoAppointment(this.patierntService.patientId);
-    // }
+    if(this.patierntService.patientId)
+    {
+      this.postDatatoAppointment(this.patierntService.patientId);
+      this.patientService.patientId =0;
+    }
     //this.updateFormattedDateTime();
     //this.downloadPatientFile();
 

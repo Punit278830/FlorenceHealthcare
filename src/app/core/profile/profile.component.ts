@@ -120,6 +120,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public medicineGroups: IMedicinesGroup[] = [];
   public selectedMedicineGroup!: IMedicinesGroup;
   public selectedMedication: IMedicationGroup[] = [];
+  public hasPenPrescription: boolean = false;
 
   public selectedDiagnosis: number = 0;
   isButtonEnabled: boolean = false;
@@ -205,6 +206,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.initlizeConsultForm();
     this.getCurrentAppointmentDetils();
     this.getPreDiagnosisTemplate();
+    this.checkPenPrescription();
 
     this.loadQuestions();
     this.fetchAllOptions();
@@ -227,6 +229,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
   }
 
+  checkPenPrescription() {
+    this.hasPenPrescription = this.presDocuments.some(item => item.docName === 'pen-prescription');
+}
+
   initalizeMedicinesGroupForm() {
     this.medicinesGroupForm = this.fb.group({
       name: ['', Validators.required],
@@ -238,6 +244,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const queryParams = fileId ? { fileId } : {}; // Include fileId in queryParams if provided
     const urlTree = this.route.createUrlTree([path, this.latestId, title], { queryParams });
     this.route.navigateByUrl(urlTree); // Navigate to the constructed URL
+    
   }
 
   viewDocument(item: any) {
@@ -663,6 +670,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
           groupId: [{ value: medication.groupId || 0, disabled: true }],
           medName: [{ value: medication.medName || '', disabled: true }, [Validators.required]],
           medType: [{ value: medication.medType || 'Tab', disabled: true }, [Validators.required]],
+          unit:[{ value: medication.unit || 'mg', disabled: true }, [Validators.required]],
           dose: [medication.dose || '', Validators.required],
           frequency: [medication.frequency || '', Validators.required],
           timing: [medication.timing || '', Validators.required],
@@ -1052,6 +1060,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     const newControl = this.fb.group({
       medName: [{ value: 'Dolo 650', disabled: true }, [Validators.required]],
       medType: [{ value: 'Tab', disabled: true }, [Validators.required]],
+      unit: [{ value: 'mg', disabled: true }, [Validators.required]],
       dose: ['', Validators.required],
       frequency: ['', Validators.required],
       timing: ['', Validators.required],
@@ -1062,6 +1071,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     newControl.patchValue({
       medName: selectMedicine.medName,
       medType: selectMedicine.medType,
+      unit:selectMedicine.unit,
     });
 
     this.medicine.push(newControl);
@@ -1192,6 +1202,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   selectMedicine(id: number) {
+    
     const selectMedicine = this.SearchMedicineList[id];
     this.addDynamicControl(selectMedicine);
     this.SearchMedicineList = [];
@@ -1227,8 +1238,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.previewFile = [];
     this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
       res.forEach(item => {
-        if (item.docName == "prescription" || item.docName == "pen-prescription") {
+        if (item.docName == "prescription" || item.docName == "pen-prescription" || item.docName=='drawing') {
           this.presDocuments.push(item);
+          this.checkPenPrescription();
+          console.log(this.presDocuments)
         }
         if (item.docName == "vital") {
           this.vitalDocuments.push(item);
@@ -1237,7 +1250,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.previewFile.push(item);
         }
       })
-    })
+    },
+    error => {
+      console.error('Error adding consultation data:', error);
+      this.hasPenPrescription=false;
+      // Handle the error as needed
+    },)
   }
 
   submitConsultation(consultData: FormGroup) {
@@ -1261,6 +1279,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       }
       this.consultService.addConsultationData(this._consultationDto).subscribe(res => {
         this.toaster.success("Consultation Data Saved", "Consultation Data")
+        //to set pad-prescription false
+        this.hasPenPrescription=false;
         this.toggalUi = false;
         this.ApiCallsForPreview();
         this.stepper.next();
@@ -1366,6 +1386,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     })
     this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
+      console.log("medicine", res)
       this.medicineDto = res;
     })
 

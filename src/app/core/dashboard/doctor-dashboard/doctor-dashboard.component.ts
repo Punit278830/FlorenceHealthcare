@@ -84,6 +84,7 @@ export class DoctorDashboardComponent implements OnInit {
   public diagnosForm!:FormGroup;
   private _diafnosDto!:IPredefineDiagnosis;
   public isMedicineFormVisible=false;
+  public isDiafnosFormVisible=false;
   public isDiagnosisFormVisble=false;
   public MedicineList:ImedicineMaster[]=[];
   public diagnosisTemplateList:IPredefineDiagnosis[]=[];
@@ -408,14 +409,16 @@ public getGreetingMsg()
   showMedicineForm()
   {
     this.getMedicine();
-    this.isMedicineFormVisible=!this.isMedicineFormVisible
+   this.isMedicineFormVisible=false;
+   this.isDiafnosFormVisible=true;
   }
 
 
   showAddDiagnosis()
   {
     this.getDiagnosisTemplate();
-   this.isMedicineFormVisible=!this.isMedicineFormVisible
+   this.isDiafnosFormVisible=false;
+   this.isMedicineFormVisible=true;
   }
 
   cancel()

@@ -120,7 +120,7 @@ export class AddPatientComponent implements OnInit {
           if (!res.message) {
             this.toastr.success("Patient added successfully", "Add Patient");
             this.resetAddPatientForm();
-            this.route.navigate([routes.patientsList]);
+            this.route.navigate([routes.addAppointment]);
           } else {
             this.toastr.error(res.message, "Error");
           }

@@ -419,6 +419,7 @@ export interface IprescribeMedicine {
   medicationId: number,
   appointmentId: number,
   medName: string,
+  unit:string,
   medType: string,
   dose: string,
   frequency: string,

@@ -29,7 +29,7 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="itemName">Item name <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="itemName" type="text" placeholder="" [readonly]="isEditMode">
+                                        <input class="form-control" formControlName="itemName" type="text" placeholder="" >
                                         <div *ngIf="invoiceItem.get('itemName')?.invalid && (invoiceItem.get('itemName')?.dirty || invoiceItem.get('itemName')?.touched)" class="text-danger">
                                             <div *ngIf="invoiceItem.get('itemName')?.errors?.['required']">Item name is required.</div>
                                         </div>
@@ -39,7 +39,7 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="description">Description <span class="login-danger">*</span></label>
-                                        <input class="form-control" formControlName="description" type="text" placeholder="" [readonly]="isEditMode">
+                                        <input class="form-control" formControlName="description" type="text" placeholder="">
                                         <div *ngIf="invoiceItem.get('description')?.invalid && (invoiceItem.get('description')?.dirty || invoiceItem.get('description')?.touched)" class="text-danger">
                                             <div *ngIf="invoiceItem.get('description')?.errors?.['required']">Description is required.</div>
                                         </div>
