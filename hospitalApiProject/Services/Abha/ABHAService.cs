@@ -1,9 +1,10 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
+using hospitalApiProject.Models.Abha.response;
 using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
-using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Patient = hospitalApiProject.Models.Abha.M2.Patient;
 
@@ -359,42 +360,57 @@ namespace hospitalApiProject.Services.Abha
           LastName = nameParts[1]
         };
 
-        var errorMessage = await AddNewPatient(abhaPatient);
+        var data = await AddNewPatient(abhaPatient);
 
-        if (errorMessage != null)
+        if (!data.IsSuccess)
         {
-          abhaPatient.Status = errorMessage == "Identity Number already exists." ? "Existing Patient" : "Not Registered"; //todo : check for already existing
+          abhaPatient.Status = data.ErrorMessage == "Identity Number already exists." ? "Existing Patient" : "Not Registered"; //todo : check for already existing
         }
         else
         {
+          abhaPatient.PatientId = data.PatientId;
           abhaPatient.Status = "Registered";
         }
       }
       catch (Exception ex)
       {
         this.ErrorMessage = "Error occurred while registering the new ABHA patient.";
+        return;
       }
 
       // Add the new PatientInfo to AbhaPatientDetails table
       try
       {
-        _context.AbhaPatientDetails.Add(abhaPatient);
-        await _context.SaveChangesAsync();
+        // create a linking token - valid for 6 months
+        var request = new GenerateLinkToken
+        {
+          abhaNumber = Convert.ToInt64(patientProfile.abhaNumber),
+          abhaAddress = patientProfile.abhaAddress,
+          name = patientProfile.name,
+          gender = patientProfile.gender,
+          yearOfBirth = Convert.ToInt32(patientProfile.yearOfBirth)
+        };
+
+        string token = await GenerateLinkToken(request);
+        abhaPatient.LinkingToken = token;
+
+        await SaveLinkToken(abhaPatient, token);
       }
       catch (Exception ex)
       {
-        this.ErrorMessage = "Error occurred while adding the ABHA patient profile received from QR Code Scan.";
+        this.ErrorMessage = "Error occurred while adding the ABHA patient profile";
       }
     }
 
-    private async Task<string?> AddNewPatient(AbhaPatientDetails patientProfile)
+    private async Task<AddPatientResponse> AddNewPatient(AbhaPatientDetails patientProfile)
     {
+      var toReturn = new AddPatientResponse();
       var patientInfo = new PatientInfo
       {
         FirstName = patientProfile.FirstName,
         LastName = patientProfile.LastName,
         IdentityName = "ABHA ID", // todo: add abha address in the identity type options?
-        IdentityNumber = patientProfile.AbhaAddress,
+        IdentityNumber = patientProfile.AbhaNumber + "/" + patientProfile.AbhaAddress,
         Address = patientProfile.Address,
         Dob = patientProfile.Dob,
         Mobile = patientProfile.Mobile,
@@ -407,10 +423,12 @@ namespace hospitalApiProject.Services.Abha
 
       if (_patientInfoService.HasError)
       {
-        return _patientInfoService.ErrorMessage;
+        toReturn.ErrorMessage = _patientInfoService.ErrorMessage;
       }
 
-      return null;
+      toReturn.PatientId = patientInfo.PatientId;
+
+      return toReturn;
     }
 
     public async Task<string> CareContext(PatientShareRequest request)
@@ -822,11 +840,33 @@ namespace hospitalApiProject.Services.Abha
     public async Task<string> GenerateLinkToken(GenerateLinkToken request)
     {
       var json = JsonSerializer.Serialize(request);
-      var data = await OnGenerateLinkToken("https://dev.abdm.gov.in/hiecm", "/api/v3/token/generate-token", json);
-      return data; //return linkToken and use in LinkCareContextV3
+      var data = await OnGenerateLinkToken("https://dev.abdm.gov.in/hiecm", "api/v3/token/generate-token", json);
+      return data;
     }
 
-    public async Task LinkCareContextV3()
+    public async Task SaveLinkToken(AbhaPatientDetails abhaPatient, string token)
+    {
+      //Todo : Ensure that the system creates a unique patient Id for AbhaNumber and AbhaAddress combination
+      var patientInfo = await _context.AbhaPatientDetails.FirstOrDefaultAsync(i => i.PatientId == abhaPatient.PatientId && i.AbhaNumber == abhaPatient.AbhaNumber
+      && i.AbhaAddress == abhaPatient.AbhaAddress);
+
+      //only update Link Token
+      if (patientInfo != null)
+      {
+        abhaPatient.LinkingToken = token;
+
+        _context.AbhaPatientDetails.Update(abhaPatient);
+        await _context.SaveChangesAsync();
+        return;
+      }
+
+      //Add Patient with link token
+      _context.AbhaPatientDetails.Add(abhaPatient);
+      await _context.SaveChangesAsync();
+      return;
+    }
+
+    public async Task AddCareContextV3()
     {
       // Create CareContext objects
       var careContext1 = new CareContext
@@ -876,6 +916,89 @@ namespace hospitalApiProject.Services.Abha
 
       var json = JsonSerializer.Serialize(root);
       await OnLinkCareContextV3("https://dev.abdm.gov.in/gateway/", "v0.5/links/link/add-contexts", json, ""); //todo get linkToken
+    }
+
+    public async Task LinkCareContextV3(LinkCareContextRequest data)
+    {
+      //todo: get Link Token
+      var request = new GenerateLinkToken
+      {
+        abhaNumber = 91330884683179,
+        abhaAddress = "manpreet.0503@sbx",
+        name = "Manpreet Kaur",
+        gender = "F",
+        yearOfBirth = 1989
+      };
+
+      var linkToken = await GenerateLinkToken(request);
+
+
+      // Create a new PatientVisit
+      var patientVisit = new Models.Response.PatientVisit
+      {
+        PatientId = 4739, // Assuming PatientId exists in PatientInfo
+        ReferenceNumber = "REF" + data.AppointmentId,
+        Display = "General Checkup",
+        HiType = "OPD",
+        VisitDate = DateTime.Now
+      };
+
+      var cc1 = new Models.Response.CareContext { ReferenceNumber = "CC123", Display = "Consultation" };
+      var cc2 = new Models.Response.CareContext { ReferenceNumber = "CC124", Display = "Follow-up Visit" };
+
+      // Add CareContexts to the PatientVisit
+      patientVisit.CareContexts = new List<Models.Response.CareContext>
+    {
+        cc1,
+        cc2
+    };
+
+      _context.PatientVisits.Add(patientVisit);
+
+      // Step 1: Perform a join between PatientVisit and CareContext on PatientVisit.Id and CareContext.PatientVisitId
+      //var patients = await _context.PatientVisits
+      //    .Where(p => p.Id != null)  
+      //    .Join(_context.CareContexts,
+      //          p => p.Id,  
+      //          cc => cc.PatientVisitId, 
+      //          (p, cc) => new { PatientVisit = p, CareContext = cc })
+      //    .GroupBy(x => x.PatientVisit.Id)  // Group by PatientVisit.Id to combine multiple care contexts for each patient
+      //    .Select(g => new Patient
+      //    {
+      //      referenceNumber = g.FirstOrDefault().PatientVisit.ReferenceNumber, 
+      //      display = g.FirstOrDefault().PatientVisit.Display, 
+      //      hiType = g.FirstOrDefault().PatientVisit.HiType, 
+      //      count = g.Count(), 
+      //      careContexts = g.Select(x => new Models.Abha.M2.CareContext
+      //      {
+      //        referenceNumber = x.CareContext.ReferenceNumber, 
+      //        display = x.CareContext.Display 
+      //      }).ToList() 
+      //    })
+      //    .ToListAsync();
+
+      var patients = new
+      {
+        referenceNumber = patientVisit.ReferenceNumber,
+        display = patientVisit.Display,
+        hiType = patientVisit.HiType,
+        count = 1,
+        careContext = patientVisit.CareContexts
+      };
+
+      // Step 2: Create the root object containing all patients and their care contexts
+      var root = new
+      {
+        AbhaNumber = "91178386101731", // Use your logic to set this dynamically
+        AbhaAddress = "manpreet.0503@sbx", // Use your logic to set this dynamically
+        Patient = patients // List of patients with their associated care contexts
+      };
+
+      // Step 3: Serialize the object to JSON
+      var json = JsonSerializer.Serialize(root);
+
+      // Step 4: Send the JSON to the API
+      await OnLinkCareContextV3("https://dev.abdm.gov.in/hiecm", "api/v3/link/carecontext", json, linkToken); // todo: get linkToken
     }
 
     #endregion

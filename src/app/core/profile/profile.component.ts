@@ -24,7 +24,7 @@ import { LoadingService } from '../../shared/Services/loader/loader.service';
 import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
 import { IConsultationTemplate, IMedicationGroup, IMedicinesGroup } from '../../shared/models/models';
 import { MedicinesGroupService } from '../../shared/Services/medicine/medicines-group.service';
-
+// import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
   selector: 'app-profile',
@@ -133,6 +133,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   timingData = ['Before Meal', 'After Meal'];
 
   constructor(private appointmentService: AppointmentService,
+    // private abhaService: AbhaService,
     private patientService: PatientService,
     private question: QuestionService,
     private departmentService: DepartmentService,
@@ -1348,7 +1349,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this._consultationDto.id = consultId;
     this.consultService.updateConsultData(consultId, this._consultationDto).subscribe(res => {
       this.loaderService.hideLoader();
-      this.toaster.success("Consultation Info Successfully Updated", "Consultation update")
+      this.toaster.success("Consultation Info Successfully Updated", "Consultation update");
+      // this.abhaService.confirmOtp().subscribe(
+      //   res => {
+      //     console.log(res);
+      //   }
+      // );      
       this.ApiCallsForPreview();
       this.stepper.next();
     },
@@ -1358,6 +1364,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.toastr.error('Consultation update failed!', 'Error');
       });
   }
+
 
   addPreDefineDiagnosis(diagnosis: any) {
     const data = this.getPreDiagnosisById(diagnosis.value);

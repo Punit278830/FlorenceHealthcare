@@ -395,14 +395,14 @@ namespace hospitalApiProject.Controllers
 
     [HttpPost]
     [Route("LinkCareContext")]
-    public async Task<IActionResult> LinkCareContext([FromBody] CareContextModel data)
+    public async Task<IActionResult> LinkCareContext([FromBody] LinkCareContextRequest data)
     {
       if (data == null)
       {
         return BadRequest();
       }
 
-      await _abhaM2Service.LinkCareContext(data);
+      await _abhaM2Service.LinkCareContextV3(data);
       if (_service.HasError)
       {
         return StatusCode((int)_service.StatusCode, _service.ErrorMessage);
@@ -476,6 +476,23 @@ namespace hospitalApiProject.Controllers
       }
 
       await _service.AddAbhaPatientProfile(request.patient);
+      if (_service.HasError)
+      {
+        return StatusCode(500, _service.ErrorMessage);
+      }
+
+      return Ok();
+    }
+
+    [HttpPost("AddAbhaPatient")]
+    public async Task<IActionResult> AddAbhaPatient([FromBody] PatientProfile request)
+    {
+      if (request == null)
+      {
+        return BadRequest("Invalid request body");
+      }
+
+      await _service.AddAbhaPatientProfile(request);
       if (_service.HasError)
       {
         return StatusCode(500, _service.ErrorMessage);

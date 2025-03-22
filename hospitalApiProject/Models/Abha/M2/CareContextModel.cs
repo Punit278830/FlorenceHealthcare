@@ -7,6 +7,17 @@ namespace hospitalApiProject.Models.Abha.M2
     public string authCode { get; set; }
   }
 
+  public class LinkCareContextRequest
+  {
+    public string AbhaNumber { get; set; }
+
+    public string AbhaAddress { get; set; }
+
+    public string VisitDetails { get; set; }
+
+    public int AppointmentId { get; set; }
+  }
+
   public class CareContextModel
   {
     //public string AbhaNumber { get; set; }
