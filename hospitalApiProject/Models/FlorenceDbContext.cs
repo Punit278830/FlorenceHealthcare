@@ -599,6 +599,12 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.Weight)
           .HasMaxLength(50)
           .IsUnicode(false);
+      entity.Property(e => e.Diabetes).HasColumnName("Diabetes");
+      entity.Property(e => e.Thyroid).HasColumnName("Thyroid");
+      entity.Property(e => e.Hypertension).HasColumnName("Hypertension");
+      entity.Property(e => e.Alcohol).HasColumnName("Alcohol");
+      entity.Property(e => e.Smoking).HasColumnName("Smoking");
+      entity.Property(e => e.Tobacco).HasColumnName("Tobacco");
     });
 
     OnModelCreatingPartial(modelBuilder);
