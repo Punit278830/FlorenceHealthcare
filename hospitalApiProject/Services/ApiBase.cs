@@ -1,8 +1,5 @@
-using Azure.Core;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
-using NuGet.Packaging.Signing;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
 
@@ -191,21 +188,9 @@ namespace hospitalApiProject.Services
     public async Task<string> OnShareProfileAsync(string baseUrl, string api, string content, string timestamp)
     {
       URL = string.Format("{0}/{1}", baseUrl, api);
-      var client = ClientForScan(timestamp);
+      var client = ClientForScan(timestamp);   
 
-      var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
-
-      Console.WriteLine("Request Headers:");
-
-      foreach (var header in client.DefaultRequestHeaders)
-      {
-        Console.WriteLine($"{header.Key}: {string.Join(", ", header.Value)}");
-      }
-
-      // Log the request body 
-      Console.WriteLine($"Request Body: {content}");
-
-      var response = await SendPostRequestAsync(URL, client, stringContent);
+      var response = await SendPostRequestAsync(URL, client, content);
 
       return response;
     }
@@ -329,7 +314,7 @@ namespace hospitalApiProject.Services
       client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
       client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
       client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
-      //client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
+      client.DefaultRequestHeaders.Add("X-HIP-ID", "HIP_Florence");
 
       client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
       return client;
@@ -340,7 +325,8 @@ namespace hospitalApiProject.Services
       URL = string.Format("{0}/{1}", baseUrl, api);
       var client = GetV3Client();
 
-      return await getResponse(content, client);
+      //return await getResponse(content, client);
+      return await SendPostRequestAsync(URL, client, content);
     }
 
     public async Task<string> OnLinkCareContextV3(string baseUrl, string api, string content, string linkToken)
@@ -409,17 +395,16 @@ namespace hospitalApiProject.Services
       _token = _tokenService.GetTokenFromCache();
       if (_token == null)
       {
-        _authService.GenerateAuthToken();
-        _token = _tokenService.GetTokenFromCache();
+        _token = _authService.GenerateAuthToken();
       }
     }
 
-    public async Task<string> SendPostRequestAsync(string url, HttpClient client, HttpContent content)
+    public async Task<string> SendPostRequestAsync(string url, HttpClient client, string content)
     {
       try
       {
-        // Send the POST request
-        HttpResponseMessage response = await client.PostAsync(url, content);
+        var stringContent = new StringContent(content, Encoding.UTF8, "application/json");
+        HttpResponseMessage response = await client.PostAsync(url, stringContent);
 
         // Read the response
         return await HandleResponseAsync(response);

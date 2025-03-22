@@ -4,6 +4,8 @@ namespace hospitalApiProject.Models.Abha
   { 
     public int Id { get; set; }
 
+    public int PatientId { get; set; }
+
     public string AbhaNumber { get; set; }
 
     public string AbhaAddress { get; set; }
@@ -27,6 +29,10 @@ namespace hospitalApiProject.Models.Abha
     public DateOnly? RegistrationDate { get; set; }
 
     public string? Status { get; set; }
+
+    public string? LinkingToken { get; set; }
+
+    public DateOnly? TokenDate { get; set; }
   }
 
 }
