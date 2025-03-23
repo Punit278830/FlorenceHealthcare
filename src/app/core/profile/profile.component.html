@@ -622,7 +622,7 @@
                                                         <div class="row">
                                                             <div class="col-12 col-md-6 col-xl-4">
                                                                 <div class="form-group local-forms">
-                                                                    <label for="name">Examination Note</label>
+                                                                    <label class="section-title" for="name">Examination Note</label>
                                                                     <textarea class="form-control"
                                                                         formControlName="examinationNote" rows="6"
                                                                         cols="30"></textarea>
@@ -1311,33 +1311,33 @@
                                                                         <ng-template #noRelevantDocuments>
                                                                             <ng-container *ngIf="_consultationDto">
                                                                               
-                                                                                <h4 *ngIf="_consultationDto.examinationNote">
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.examinationNote">
                                                                                     <strong>Examination Note:</strong> {{ _consultationDto.examinationNote }}
                                                                                 </h4>
                                                                            
                                                                         
-                                                                                <h4 *ngIf="_consultationDto.advice">
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.advice">
                                                                                     <strong>Advice:</strong> {{ _consultationDto.advice }}
                                                                                 </h4>
                                                                         
-                                                                                <h4 *ngIf="_consultationDto.diffDiagnosis">
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.diffDiagnosis">
                                                                                     <strong>Differential Diagnosis:</strong> {{ _consultationDto.diffDiagnosis }}
                                                                                 </h4>
                                                                         
-                                                                                <h4 *ngIf="_consultationDto.finalDiagnois">
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.finalDiagnois">
                                                                                     <strong>Final Diagnosis:</strong> {{ _consultationDto.finalDiagnois }}
                                                                                 </h4>
                                                                         
-                                                                                <h4 *ngIf="_consultationDto.followupDate">
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.followupDate">
                                                                                     <strong>Follow-up Date:</strong> {{ _consultationDto.followupDate | date:'dd-MM-yyyy' }}
                                                                                 </h4>
                                                                             </ng-container>
-                                                                            <ng-container *ngIf="vitalDto">
-                                                                                <h3 class="section-title">Presenting complaints:</h3>
-                                                                               <p><strong>Main Affected Region:</strong> EAR</p>
-                                                                                <p><strong>Ear Pain:</strong> YES (Duration: 1 week)</p>
-                                                                                <p><strong>Ear Discharge:</strong> NO</p>
-                                                                                <p><strong>Hearing Loss:</strong> NO</p>
+                                                                            <ng-container class="section-title" *ngIf="vitalDto">
+                                                                                <h4 class="prescription-h4"><strong> Presenting complaints:</strong></h4>
+                                                                               <h4 class="prescription-h4"><strong>Main Affected Region:</strong> EAR</h4>
+                                                                               <h4 class="prescription-h4"><strong>Ear Pain:</strong> YES (Duration: 1 week)</h4>
+                                                                                <h4 class="prescription-h4"><strong>Ear Discharge:</strong> NO</h4>
+                                                                                    <h4 class="prescription-h4"><strong>Hearing Loss:</strong> NO</h4>
                                                                              </ng-container>
                                                                         </ng-template>
                                                                         
@@ -1475,16 +1475,16 @@
                                                                         </div>
                                                                     </div>
                                                                 </ng-container>      -->
-                                                                <div class="table-responsive" *ngIf="medicineDto.length>0">
-                                                                    <table
+                                                                <div *ngIf="medicineDto.length>0">
+                                                                    <table style="font-size: 22px;"
                                                                         class="table border-0 custom-table comman-table datatable mb-0">
                                                                         <thead>
                                                                             <tr>
-                                                                                <th mat-sort-header="name">
-                                                                                    Medicine Name
-                                                                                </th>
                                                                                 <th mat-sort-header="consultingDoctor">
                                                                                     Type
+                                                                                </th>
+                                                                                <th mat-sort-header="name">
+                                                                                    Medicine Name
                                                                                 </th>
                                                                                 <th mat-sort-header="name">Dose</th>
                                                                                 <th mat-sort-header="consultingDoctor">
@@ -1500,16 +1500,15 @@
                                                                                 <th></th>
                                                                             </tr>
                                                                         </thead>
-                                                                        <tbody>
+                                                                        <tbody class="tableSection">
                                                                             <tr *ngFor="let data of medicineDto">
     
-                                                                                <td>{{data.medName}}</td>
                                                                                 <td>{{data.medType}}</td>
-                                                                                 <td>{{data.dose}}</td>
-                                                                                 <td>{{data.unit}}</td>
+                                                                                <td>{{data.medName}}</td>
+                                                                                <td>{{data.dose}}</td>
                                                                                 <td>{{data.frequency}}</td>
                                                                                 <td>{{data.timing}}</td>
-                                                                                <td>{{data.duration}}</td>
+                                                                                <td>{{data.duration}}-days</td>
                                                                                 <td>{{data.instruction}}</td>
     
                                                                             </tr>
