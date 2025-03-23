@@ -265,6 +265,60 @@
                                                         formControlName="oxigenLevel" placeholder="mg/L">
                                                 </div>
                                             </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Diabetes</label>
+                                                    <select class="form-control" formControlName="diabetes">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Thyroid</label>
+                                                    <select class="form-control" formControlName="thyroid">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Hypertension</label>
+                                                    <select class="form-control" formControlName="hypertension">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Alcohol</label>
+                                                    <select class="form-control" formControlName="alcohol">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Smoking</label>
+                                                    <select class="form-control" formControlName="smoking">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-md-6 col-xl-4">
+                                                <div class="form-group local-forms">
+                                                    <label for="oxigenLevel">Tobacco</label>
+                                                    <select class="form-control" formControlName="tobacco">
+                                                        <option [ngValue]="true">Yes</option>
+                                                        <option [ngValue]="false">No</option>
+                                                    </select>
+                                                </div>
+                                            </div>
 
                                             <div class="documentsOuter">
                                                 <div>
@@ -623,13 +677,6 @@
                                                                         formControlName="followupDate"
                                                                         [(ngModel)]="dtFollowUp">
                                                                 </div>
-                                                                <!-- <div>
-                                                                    <label class="custom_check w-100">
-                                                                        <input type="checkbox" id="consent"
-                                                                            formControlName="consent">
-                                                                        <span class="checkmark"></span>Please check the checkbox to link carecontext
-                                                                    </label>
-                                                                </div> -->
                                                             </div>
                                                             <div class="card-body">
                                                                 <div class="row">
@@ -1150,7 +1197,7 @@
                                                                     </td>
                                                                     <td>
                                                                         <div style="height: 100px;"></div>
-                                                                        <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; margin-left: 800px;">
+                                                                        <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; margin-left: 750px;">
                                                                     </td>
                                                                     </tr>
                                                                 </table>
@@ -1165,7 +1212,7 @@
                                                                         <td><strong>Patient ID:</strong></td>
                                                                         <td>P-{{patientInfo.patientId}}</td>
                                                                         <td rowspan="6" style="    text-align: left;">
-                                                                            <img  src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; border: 1px solid #ccc;" />
+                                                                            <img  src="assets/img/patient_image.png" style="width: 150px; height: 150px; border: 1px solid #ccc;" />
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
@@ -1216,31 +1263,32 @@
                                                                                  </tr>
                                                                                  
                                                                                    <tr>
-                                                                                    <td><strong>Weight:</strong>{{vitalDto?.weight?vitalDto.weight + 'kg':''}}</td>
+                                                                                    <td><strong>Weight:</strong>{{vitalDto?.weight? vitalDto.weight + 'kg':''}}</td>
                                                                                </tr>
                                                                                <tr><td><h3><strong>Patient History:</strong></h3></td></tr>
                                                                                <tr>
                                                                                    <tr>
-                                                                                   <td><strong>Diabetes:</strong>Yes</td>
+                                                                                   <td><strong>Diabetes:</strong>{{vitalDto?.diabetes? vitalDto.diabetes : ''}}</td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <td><strong>Thyroid Disease:</strong>No</td>
+                                                                                    <td><strong>Thyroid Disease:</strong>{{ vitalDto?.thyroid ? vitalDto?.thyroid : '' }}
+                                                                                    </td>
                                                                                   
                                                                                   </tr>                                                                                                                                                      
                                                                               
                                                                               
-                                                                                  <tr> <td><strong>Hypertension:</strong>No</td>
+                                                                                  <tr> <td><strong>Hypertension:</strong>{{vitalDto?.hypertension? vitalDto?.hypertension : ''}}</td>
                                                                                    </tr>
                                                                                   <tr>
-                                                                                   <td><strong>Alcohol:</strong>No</td>
+                                                                                   <td><strong>Alcohol:</strong>{{vitalDto?.alcohol? vitalDto?.alcohol : ''}}</td>
                                                                                                                                                          
                                                                                </tr>
-                                                                               <tr><td><strong>Smoking:</strong>Yes</td>
+                                                                               <tr><td><strong>Smoking:</strong>{{vitalDto?.smoking? vitalDto?.smoking : ''}}</td>
                                                                                </tr>
                                                                                
                                                                                   
                                                                                    <tr>
-                                                                                   <td><strong>Tobacco:</strong>No</td>
+                                                                                   <td><strong>Tobacco:</strong>{{vitalDto?.tobacco?vitalDto?.tobacco : ''}}</td>
                                                                                    
                                                                                </tr>
                                                                                                                                                              

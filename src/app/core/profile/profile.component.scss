@@ -293,7 +293,7 @@
     background-color: #f8f9fa;
   }
 
-  .prescription-card { padding: 20px; margin: 10px; }
+  .prescription-card { padding: 22px; margin: 10px; }
   .header-title {
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 20px;
@@ -301,9 +301,9 @@
     color: #005493;
     
   }
-                                        .header-subtitle { font-size: 14px; margin-top: 6px; font-weight: bold; color: #001E32; line-height: .5; }
+                                        .header-subtitle { font-size: 16px; margin-top: 6px; font-weight: bold; color: #001E32; line-height: .5; }
                                         .header-info { font-size: 15px; color: #333; line-height: 1;line-height: .5; }
-                                        .section-title { font-size: 16px; font-weight: bold; margin-top: 18px;line-height: 18px; }
+                                        .section-title { font-size: 18px; font-weight: bold; margin-top: 18px;line-height: 18px; }
                                         .spaced-grid mat-grid-tile {  padding: 5px; }
                                         .grid-container { display: flex; gap: 10px; justify-content: space-between; }
                                         .column { width: 48%; }
@@ -343,6 +343,7 @@
                                             width: 100%;
                                             border-collapse: collapse;
                                             margin-top: 5px;
+                                            font-size: 16px;
                                         }
                                         
                                         .patient-table td {
@@ -370,6 +371,7 @@
                                            
                                             //display: flex;
                                             margin-top: 100px;
+                                            font-size: 16px;
                                            
                                             justify-content: center;
                                         }

@@ -454,7 +454,13 @@ export interface Ivital {
   height: string,
   pulse: string,
   tempurature: string,
-  oxigenLevel: string
+  oxigenLevel: string,
+  diabetes: boolean,
+  thyroid: boolean,
+  hypertension: boolean,
+  alcohol: boolean,
+  smoking: boolean,
+  tobacco: boolean
 
 }
 

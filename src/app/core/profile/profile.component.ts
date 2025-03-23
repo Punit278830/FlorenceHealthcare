@@ -937,14 +937,20 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   initlizeVitalForm() {
     this.vitalForm = this.fb.group({
-
       bp: [''],
       height: [''],
       weight: [''],
       pulse: [''],
       tempurature: [''],
       oxigenLevel: [''],
-    })
+      diabetes: [null],
+      thyroid: [null],
+      hypertension: [null],
+      alcohol: [null],
+      smoking: [null],
+      tobacco: [null]
+    });
+    
 
   }
   cancelVitals() {
@@ -1040,6 +1046,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.vitalForm.get('tempurature')?.patchValue(this.vitalDto.tempurature)
     this.vitalForm.get('weight')?.patchValue(this.vitalDto.weight)
     this.vitalForm.get('pulse')?.patchValue(this.vitalDto.pulse)
+    this.vitalForm.get('diabetes')?.patchValue(this.vitalDto.diabetes)
+    this.vitalForm.get('thyroid')?.patchValue(this.vitalDto.thyroid)
+    this.vitalForm.get('hypertension')?.patchValue(this.vitalDto.hypertension)
+    this.vitalForm.get('alcohol')?.patchValue(this.vitalDto.alcohol)
+    this.vitalForm.get('smoking')?.patchValue(this.vitalDto.smoking)
+    this.vitalForm.get('tobacco')?.patchValue(this.vitalDto.tobacco)
+
   }
 
 
