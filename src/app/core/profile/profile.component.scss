@@ -293,29 +293,38 @@
     background-color: #f8f9fa;
   }
 
-  .prescription-card { padding: 22px; margin: 10px; }
+  .prescription-card { padding: 32px; margin: 10px; }
   .header-title {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-size: 28px;
+    font-family: "Arial, sans-serif";
+    font-size: 38px;
     font-weight: bold;
     color: #005493;
     
   }
-                                        .header-subtitle { font-size: 22px; margin-top: 6px; font-weight: bold; color: #001E32; line-height: .5; }
+  .custom-header{
+    box-sizing: content-box !important;
+  }
+                                        .header-subtitle { font-size: 26px; margin-top: 6px; font-weight: bold; color: #001E32;}
                                         .header-info { font-size: 15px; color: #333; line-height: 1;line-height: .5; }
-                                        .section-title { font-size: 22px; font-weight: bold; margin-top: 18px;line-height: 18px; }
+                                        .section-title { font-size: 34px; margin-top: 18px;line-height: 18px; font-weight: bold; color: #004d93; }
                                         .spaced-grid mat-grid-tile {  padding: 5px; }
                                         .grid-container { display: flex; gap: 10px; justify-content: space-between; }
                                         .column { width: 48%; }
                                         .footer { font-size: 12px; margin-top: 8px; }
                                         .not-legal { font-style: italic; color: red; }
                                         .heading-one {
-                                            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                            font-family: "Arial, sans-serif";
                                             font-size: 18px;
                                             font-weight: bold;
                                             color: #001E32;
                                             
                                           }
+                                          .tdclass{
+                                            color: #004d93 !important;
+                                          }
+                                          strong {
+                                            color: #004d93 !important;
+                                        }
 
                                         .empty-box {
                                             width: 100px;
@@ -347,9 +356,9 @@
                                         }
                                         
                                         .patient-table td {
-                                            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                            font-family: "Arial, sans-serif";
                                             padding: 1px;
-                                            font-size: 22px;
+                                            font-size: 28px;
                                         }
                                         
                                         .patient-table td strong {
@@ -363,16 +372,16 @@
                                             width: 25%; /* 1/4 of the second section */
                                             
                                             display: flex;
-                                            font-size: 26px;
+                                            font-size: 28px;
+                                            margin-top: 25px;
                                            
                                             justify-content: center;
                                         }
                                         .sectionTwo {
                                             width: 75%; /* 3 times the width of section1 */
-                                           
                                             //display: flex;
-                                            margin-top: 100px;
-                                            font-size: 26px;
+                                            margin-top: 50px;
+                                            font-size: 28px;
                                            
                                             justify-content: center;
                                         }
@@ -397,7 +406,7 @@
                                             object-fit: contain; /* You can use 'cover' if you want to crop but fill completely */
                                         }
                                         .prescription-h4{
-                                            font-size: 22px;
+                                            font-size: 26px;
     font-weight: 400;
     line-height: 24px;
     font-family: Roboto, sans-serif;
@@ -405,13 +414,13 @@
     margin: 0 0 16px;
                                         }
                                         .tableSection{
-                                            font-size: 22px !important;
-                                            font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+                                            font-size: 26px !important;
+                                            font-family: "Arial, sans-serif";
                                             
                                         
                                         }
                                         thead, tbody, tfoot, tr, td, th {
-                                            font-size: 22px !important;
+                                            font-size: 26px !important;
                                         }
                                         
   

@@ -87,6 +87,7 @@ export class EditStaffComponent implements OnInit {
       this.staffReg.get('departmentId')?.patchValue(this._staffDto.departmentId)
       //this.staffReg.patchValue({activeStatus:this._staffDto.activeStatus})
       this.staffReg.get('activeStatus')?.patchValue(this._staffDto.activeStatus)
+      this.staffReg.get('regestrationNumber')?.patchValue(this._staffDto?.regestrationNumber)
       console.log("staffDto",this._staffDto)
       
       
@@ -189,6 +190,7 @@ export class EditStaffComponent implements OnInit {
       doj: ['', Validators.required],
       identityNumber: ['', Validators.required],
       identityName: ['', Validators.required],
+      regestrationNumber: [''],
 
     });
   }

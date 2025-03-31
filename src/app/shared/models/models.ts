@@ -174,6 +174,7 @@ export interface IstaffInfo {
   education: string;
   IdentityName: string;
   IdentityNumber: string;
+  regestrationNumber?:string;
 }
 
 export interface IpatientInfo {

@@ -307,6 +307,16 @@
                                                                 </mat-select>
                                                             </div>
                                                         </div> -->
+                                                        <div class="col-12 col-md-6 col-xl-4" *ngIf="staffReg.get('designation')?.value === 'Doctor'">
+                                                            <div class="form-group local-forms">
+                                                                <label for="lastname">Regestration Number</label>
+                                                                <input class="form-control" formControlName="regestrationNumber" type="text"
+                                                                    placeholder="Enter Regestration Number">
+                                                                <div *ngIf="staffReg.get('regestrationNumber')?.invalid && (staffReg.get('regestrationNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
+                                                                    class="text-danger">
+                                                                </div>
+                                                            </div>
+                                                        </div>                      
                                 <div class="col-12 col-sm-12">
                                     <div class="form-group local-forms">
                                         <label for="address">Address <span class="login-danger">*</span></label>

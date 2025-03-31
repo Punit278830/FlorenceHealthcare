@@ -542,6 +542,10 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(20)
           .IsUnicode(false)
           .HasColumnName("password");
+      entity.Property(e => e.RegestrationNumber)
+          .HasMaxLength(100)
+          .IsUnicode(false)
+          .HasColumnName("regestrationNumber");
       entity.Property(e => e.IdentityName)
           .HasMaxLength(100)
           .IsUnicode(false);

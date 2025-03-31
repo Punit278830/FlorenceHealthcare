@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace hospitalApiProject.Models;
 
@@ -37,4 +38,6 @@ public partial class StaffInfo
     public string Education { get; set; } = null!;
 
     public DateOnly Doj { get; set; }
+
+   public string? RegestrationNumber { get; set; }
 }

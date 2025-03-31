@@ -1,7 +1,6 @@
 <div class="page-wrapper">
     <div class="content">
-
-        <div class="row">
+         <div class="row">
             <div class="col-sm-7 col-6">
                 <ul class="breadcrumb">
                     <li class="breadcrumb-item"><a [routerLink]="routes.adminDashboard">Dashboard </a></li>
@@ -144,8 +143,6 @@
                                                                         <a href="javascript:void(0);"
                                                                             (click)="updateAppointmentId(data.id)">{{data.id}}</a>
                                                                     </td>
-                                                                    <!-- <td><button class=" custom-badge status-gray" type="button"
-                                                    (click)="showAppointmentData(data.id)">View</button></td> -->
                                                                     <td>
                                                                         <button class=" custom-badge status-gray"
                                                                             type="button" (click)="goToStep(5)">
@@ -171,7 +168,6 @@
                                                                 <ng-container *ngIf="downLoadList.length>0">
                                                                     <tr *ngFor="let data of downLoadList">
                                                                         <td>{{data.fileName}}</td>
-                                                                        <!-- <td colspan="2"><a [href]="data.downloadLink">download</a></td> -->
                                                                         <td colspan="2">
                                                                             <a href="javascript:void(0);"
                                                                                 (click)="loadPdf(data.downloadLink)">
@@ -424,9 +420,6 @@
                                                                                 {{currentQuestionData.questionText}}
                                                                             </h2>
                                                                         </label>
-                                                                        <!-- <input type="text" class="form-control"
-                                                   name="{{currentQuestionData.questionId}}"
-                                                   [(ngModel)]="currentQuestionData.savedAnswerText"> -->
                                                                         <br>
                                                                         <ng-container
                                                                             *ngFor="let data of currentQuestionData.options">
@@ -622,7 +615,7 @@
                                                         <div class="row">
                                                             <div class="col-12 col-md-6 col-xl-4">
                                                                 <div class="form-group local-forms">
-                                                                    <label class="section-title" for="name">Examination Note</label>
+                                                                    <label for="name">Examination Note</label>
                                                                     <textarea class="form-control"
                                                                         formControlName="examinationNote" rows="6"
                                                                         cols="30"></textarea>
@@ -748,14 +741,7 @@
                                                                                     <input class="form-control"
                                                                                         formControlName="description"
                                                                                         type="text" placeholder="">
-                                                                                    <!-- <div *ngIf="medicinesGroupForm.get('description')?.invalid || ((medicinesGroupForm.get('description')?.dirty && medicinesGroupForm.get('description')?.touched))"
-                                                                                        class="text-danger">
-                                                                                        <div
-                                                                                            *ngIf="medicinesGroupForm.get('description')?.errors?.['required']">
-                                                                                            Group description is required.
-                                                                                        </div>
-                                                                                    </div> -->
-                                                                                </div>
+                                                                                    </div>
                                                                             </div>
                                                                             <div class="col-12 col-md-4 col-xl-4">
                                                                                 <div class="form-group d-flex">
@@ -1033,9 +1019,6 @@
                                                     </form>
 
                                                 </div>
-                                                <!-- <button *ngIf="showNext" type="button" (click)="movetoprev()"
-                            class="btn btn-primary submit-form me-2">Next
-                        </button> -->
                                                 <!-- Consultation form code end here-->
 
 
@@ -1046,6 +1029,8 @@
                                     </div>
 
                                 </mat-step>
+                                                            
+                                
                                 <mat-step label="Preview">
 
                                     <div class="row" id="convertToPdf">
@@ -1090,42 +1075,7 @@
                                                         <div>
                                                             
                                                         </div>
-                                                        <!-- <div class="row" *ngIf="vitalDto">
-                                                          <h4><strong>Examination:</strong></h4>
-                                                            <div class="col-12 col-md-6 col-xl-6 ml-3">
-                                                                <ul class="list-unstyled invoice-clinic mt-2 ">
-                                                                    <li><strong>BP:{{vitalDto.bp}} /mmHg</strong></li>
-                                                                    <li>
-                                                                        <strong>Weight:{{vitalDto.weight}} Kg</strong>
-                                                                    </li>
-                                                                    <li>
-                                                                        <strong>Height:{{vitalDto.height}} CM</strong>
-                                                                    </li>
-                                                                </ul>                                                            
-                                                            </div>
-
-                                                            <div class="col-12 col-md-6 col-xl-6">
-
-                                                                <ul class="list-unstyled invoice-clinic mt-2 ">
-                                                                    <li>
-                                                                        <strong>Pulse:{{vitalDto.pulse}} / bpm</strong>
-                                                                    </li>
-                                                                    <li>
-                                                                        <strong>
-                                                                            Tempurature:{{vitalDto.tempurature}}
-                                                                            C
-                                                                        </strong>
-                                                                    </li>
-                                                                    <li>
-                                                                        <strong>
-                                                                            Oxigen Level:{{vitalDto.oxigenLevel}}
-                                                                            mg/L
-                                                                        </strong>
-                                                                    </li>
-                                                                </ul>
-                                                              
-                                                            </div>
-                                                            </div> -->
+                                                        
                                                         
                                                         <div>
                                                         </div>
@@ -1133,73 +1083,30 @@
                                                             <ng-container *ngIf="displayImage.length>0">
                                                                 <div class="col-12 col-sm-6"
                                                                     *ngFor="let image of displayImage">
-                                                                    <!-- <h3>{{getFileNameWithoutExtension(image.fileName)}}</h3> -->
                                                                     <img [src]="image.fileData" height="150" width="150"
                                                                         alt="" style="border: 2px solid #000" />
                                                                 </div>
                                                             </ng-container>
 
                                                             <!-- display prescription Medicine code start from here -->
-                                                            <!-- <div class="table-responsive" *ngIf="medicineDto.length>0">
-                                                                <table
-                                                                    class="table border-0 custom-table comman-table datatable mb-0">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th mat-sort-header="name">
-                                                                                scaccacaMedicine Name
-                                                                            </th>
-                                                                            <th mat-sort-header="consultingDoctor">
-                                                                                Type
-                                                                            </th>
-                                                                            <th mat-sort-header="name">Dose</th>
-                                                                            <th mat-sort-header="consultingDoctor">
-                                                                                Frequency
-                                                                            </th>
-                                                                            <th mat-sort-header="treatment">Timing</th>
-                                                                            <th mat-sort-header="treatment">
-                                                                                Duration
-                                                                            </th>
-                                                                            <th mat-sort-header="treatment">
-                                                                                Instruction
-                                                                            </th>
-                                                                            <th></th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <tr *ngFor="let data of medicineDto">
-
-                                                                            <td>{{data.medName}}</td>
-                                                                            <td>{{data.medType}}</td>
-                                                                             <td>{{data.dose}}</td>
-                                                                             <td>{{data.unit}}</td>
-                                                                            <td>{{data.frequency}}</td>
-                                                                            <td>{{data.timing}}</td>
-                                                                            <td>{{data.duration}}</td>
-                                                                            <td>{{data.instruction}}</td>
-
-                                                                        </tr>
-                                                                    </tbody>
-                                                                </table>
-                                                            </div> -->
                                                             <mat-card class="prescription-card" *ngIf="_doctorDto">
-                                                                <table>
+                                                                <table style="width: 100%;">
                                                                     <tr>
-                                                                        <td> <mat-card-header>
+                                                                        <td style="width: 80%;"> <mat-card-header class="custom-header">
                                                                             <div style="height: 100px;"></div>
                                                                           <mat-card-title class="header-title">Dr. {{_doctorDto.firstName}} {{_doctorDto.lastName}}</mat-card-title>
                                                                           <p class="header-subtitle">{{_doctorDto.education}}</p>
-                                                                          <p class="header-subtitle">Reg Num UP MCI-63800</p>
-                                                                          <!-- <p class="header-subtitle">{{_doctorDto.designation}}</p> -->
-                                                                          <p class="header-subtitle">Department of ENT, Head & Neck Surgery</p>
-                                                                          <p class="header-subtitle">Florence Healthcare, Lakhimpur Kheri UP</p>
+                                                                          <p class="header-subtitle">{{_doctorDto.regestrationNumber}}</p>
+                                                                          <p class="header-subtitle">{{_depDto?.departmentName}}</p>
+                                                                          <p class="header-subtitle">{{_doctorDto.address}}</p>
                                                                          
                                                                         </mat-card-header>
                                                                     </td>
-                                                                    <td>
-                                                                        <div style="height: 100px;"></div>
-                                                                        <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px; margin-left: 750px;">
-                                                                    </td>
-                                                                    </tr>
+                                                                   
+                                                                        <td style="width: 19%; text-align: left;">
+                                                                            <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px;" />
+                                                                        </td>
+                                                                        </tr>
                                                                 </table>
                                                                
                                                                 
@@ -1243,9 +1150,8 @@
                                                                     <div class="sectionOne">
                                                                         <ng-container >
                                                                        
-                                                                             <!-- <table class="patient-table" *ngIf="vitalDto"> -->
-                                                                                <table class="patient-table" >
-                                                                                <tr><td><h3><strong>Examination</strong></h3></td></tr>
+                                                                             <table class="patient-table" >
+                                                                                <tr><td><strong>Vitals</strong></td></tr>
                                                                                <tr>
                                                                                    <td><strong>BP:</strong>{{vitalDto?.bp?vitalDto.bp + '/mmHg': ''}}</td>
                                                                                 </tr>
@@ -1265,30 +1171,30 @@
                                                                                    <tr>
                                                                                     <td><strong>Weight:</strong>{{vitalDto?.weight? vitalDto.weight + 'kg':''}}</td>
                                                                                </tr>
-                                                                               <tr><td><h3><strong>Patient History:</strong></h3></td></tr>
+                                                                               <tr><td><strong>Patient History</strong></td></tr>
                                                                                <tr>
                                                                                    <tr>
-                                                                                   <td><strong>Diabetes:</strong>{{vitalDto?.diabetes? vitalDto.diabetes : ''}}</td>
+                                                                                   <td><strong>Diabetes:</strong>{{ vitalDto?.diabetes === true ? 'Yes' : vitalDto?.diabetes === false ? 'No' : '' }}</td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <td><strong>Thyroid Disease:</strong>{{ vitalDto?.thyroid ? vitalDto?.thyroid : '' }}
+                                                                                    <td><strong>Thyroid Disease:</strong>{{ vitalDto?.thyroid===true?'Yes' : vitalDto?.thyroid===false? 'No' : '' }}
                                                                                     </td>
                                                                                   
                                                                                   </tr>                                                                                                                                                      
                                                                               
                                                                               
-                                                                                  <tr> <td><strong>Hypertension:</strong>{{vitalDto?.hypertension? vitalDto?.hypertension : ''}}</td>
+                                                                                  <tr> <td><strong>Hypertension:</strong>{{vitalDto?.hypertension===true?'Yes' : vitalDto?.hypertension===false? 'No' : '' }}</td>
                                                                                    </tr>
                                                                                   <tr>
-                                                                                   <td><strong>Alcohol:</strong>{{vitalDto?.alcohol? vitalDto?.alcohol : ''}}</td>
+                                                                                   <td><strong>Alcohol:</strong>{{vitalDto?.alcohol===true?'Yes' : vitalDto?.alcohol===false? 'No' : '' }}</td>
                                                                                                                                                          
                                                                                </tr>
-                                                                               <tr><td><strong>Smoking:</strong>{{vitalDto?.smoking? vitalDto?.smoking : ''}}</td>
+                                                                               <tr><td><strong>Smoking:</strong>{{vitalDto?.smoking===true?'Yes' : vitalDto?.smoking ===false? 'No' : '' }}</td>
                                                                                </tr>
                                                                                
                                                                                   
                                                                                    <tr>
-                                                                                   <td><strong>Tobacco:</strong>{{vitalDto?.tobacco?vitalDto?.tobacco : ''}}</td>
+                                                                                   <td><strong>Tobacco:</strong>{{vitalDto?.tobacco ===true?'Yes' : vitalDto?.tobacco ===false? 'No' : '' }}</td>
                                                                                    
                                                                                </tr>
                                                                                                                                                              
@@ -1348,154 +1254,28 @@
                                                                    
                                                                     
                                                                 </div>
-                                                                <!-- <ng-container *ngIf="vitalDto">
-                                                                    <p class="section-title">Examination</p>
-                                                                      <table class="patient-table">
-                                                                        <tr>
-                                                                            <td><strong>BP:</strong></td>
-                                                                            <td><span>{{vitalDto.bp}} /mmHg</span></td>
-                                                                            <td><strong></strong>Weight:</td>
-                                                                            <td><span>{{vitalDto.weight}} kg</span></td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td><strong>Height</strong></td>
-                                                                            <td><span>{{vitalDto.height}} cm</span></td>
-                                                                            <td><strong>Pulse</strong></td>
-                                                                            <td><span>{{vitalDto.pulse}} bpm</span></td>
-                                                                        </tr>
-                                                                        <tr>
-                                                                            <td><strong>Temprature</strong></td>
-                                                                            <td><span>{{vitalDto.tempurature}} C</span></td>
-                                                                            <td><strong>Oxygen</strong></td>
-                                                                            <td><span>{{vitalDto.oxigenLevel}} mg/L</span></td>
-                                                                        </tr>
-                                                                      </table>
-                                                                </ng-container>      -->
-                                                                     
-                                                               <!-- Patient history dispaly section start -->
-                                                                  <!-- <ng-container *ngIf="vitalDto">
-                                                                  <h3 class="section-title">Presenting complaints:</h3>
-                                                                  <div class="grid-container">
-                                                                   <div class="column left-column">
-                                                                   <p><strong>Main Affected Region:</strong> EAR</p>
-                                                                  <p><strong>Ear Pain:</strong> YES (Duration: 1 week)</p>
-                                                                  <p><strong>Ear Discharge:</strong> NO</p>
-                                                                  <p><strong>Hearing Loss:</strong> NO</p>
-                                                                </div>
-                                                                </div>
-                                                            </ng-container> -->
-                                                                 <!-- <div class="row" *ngIf="vitalDto">
-                                                                 <p class="section-title">History & Examination</p>
-                                                                  <table class="patient-table" *ngIf="vitalDto">
-                                                                    <tr>
-                                                                        <td><strong>BP:</strong></td>
-                                                                        <td>{{vitalDto.bp}} /mmHg</td>
-                                                                        <td><strong>Pulse:</strong></td>
-                                                                        <td>{{vitalDto?.pulse}} bpm</td>
-                                                                        <td><strong>Diabetes:</strong></td>
-                                                                        <td>Yes</td>
-                                                                        <td><strong>Smoking:</strong></td>
-                                                                        <td>Yes</td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Weight:</strong></td>
-                                                                        <td>{{vitalDto.weight}} kg</td>
-                                                                        <td><strong>Tempurature:</strong></td>
-                                                                        <td>{{vitalDto.tempurature}} c</td>
-                                                                        <td><strong>Hypertension:</strong></td>
-                                                                        <td>No</td>
-                                                                        <td><strong>Alcohol:</strong></td>
-                                                                        <td>No</td>                                                                        
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <td><strong>Height:</strong></td>
-                                                                        <td>{{vitalDto.height}} cm</td>
-                                                                        <td><strong>Oxygen:</strong></td>
-                                                                        <td>{{vitalDto.oxigenLevel}} cm</td>
-                                                                        <td><strong>Thyroid Disease:</strong></td>
-                                                                        <td>No</td>
-                                                                        <td><strong>Tobacco:</strong></td>
-                                                                        <td>No</td>
-                                                                    </tr>
-                                                                    
-                                                                  </table>
-                                                              
-                                                                </div> -->
-                                                                <!-- <ng-container *ngIf="_consultationDto">
-                                                                    <div class="col-12"
-                                                                        *ngIf="_consultationDto.examinationNote">
-                                                                        <div>
-                                                                            <h4>
-                                                                                <strong>Examination Note:</strong>{{_consultationDto.examinationNote}}
-                                                                            </h4>
-                                                                        </div>
-                                                                    </div>
-    
-                                                                    <div class="col-12" *ngIf="_consultationDto.advice">
-                                                                        <div >
-                                                                            <h4>
-                                                                                <strong>Advice:</strong>{{_consultationDto.advice}}
-                                                                            </h4>
-                                                                        </div>
-                                                                    </div>
-    
-                                                                    <div class="col-12"
-                                                                        *ngIf="_consultationDto.diffDiagnosis">
-                                                                        <div >
-                                                                            <h4>
-                                                                                <strong>
-                                                                                    Differential
-                                                                                    diagnosis:
-                                                                                </strong>{{_consultationDto.diffDiagnosis}}
-                                                                            </h4>
-                                                                        </div>
-                                                                    </div>
-    
-                                                                    <div class="col-12"
-                                                                        *ngIf="_consultationDto.finalDiagnois">
-                                                                        <div >
-                                                                            <h4>
-                                                                                <strong>
-                                                                                    Final
-                                                                                    Diagnosis:
-                                                                                </strong>{{_consultationDto.finalDiagnois}}
-                                                                            </h4>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div class="col-12"
-                                                                        *ngIf="_consultationDto.followupDate">
-                                                                        <div>
-                                                                            <h4>
-                                                                                <strong>
-                                                                                    Follow up
-                                                                                    Date:
-                                                                                </strong>{{_consultationDto.followupDate|
-                                                                                date:'dd-MM-yyyy'}}
-                                                                            </h4>
-                                                                        </div>
-                                                                    </div>
-                                                                </ng-container>      -->
+                                                                
                                                                 <div *ngIf="medicineDto.length>0">
                                                                     <table style="font-size: 22px;"
                                                                         class="table border-0 custom-table comman-table datatable mb-0">
                                                                         <thead>
                                                                             <tr>
                                                                                 <th mat-sort-header="consultingDoctor">
-                                                                                    Type
+                                                                                   <strong>Type</strong>
                                                                                 </th>
                                                                                 <th mat-sort-header="name">
-                                                                                    Medicine Name
+                                                                                    <strong> Name</strong>
                                                                                 </th>
-                                                                                <th mat-sort-header="name">Dose</th>
+                                                                                <th mat-sort-header="name"><strong>Dose</strong></th>
                                                                                 <th mat-sort-header="consultingDoctor">
-                                                                                    Frequency
+                                                                                    <strong>Frequency</strong>
                                                                                 </th>
-                                                                                <th mat-sort-header="treatment">Timing</th>
+                                                                                <th mat-sort-header="treatment"><strong>Timing</strong></th>
                                                                                 <th mat-sort-header="treatment">
-                                                                                    Duration
+                                                                                    <strong>Duration</strong>
                                                                                 </th>
                                                                                 <th mat-sort-header="treatment">
-                                                                                    Instruction
+                                                                                   <strong>Instruction</strong>
                                                                                 </th>
                                                                                 <th></th>
                                                                             </tr>
@@ -1515,23 +1295,11 @@
                                                                         </tbody>
                                                                     </table>
                                                                 </div>  
-                                                                  <!-- </ng-container>  -->
+                                                                  
                                                                 <!-- Patient history dispaly section End -->
                                                                 </mat-card-content>
                                                         <div>
-                                                            <!--Dispaly Prescription papr section start-->
-                                                            <!-- <div  *ngIf="presDocuments.length > 0">
-                                                                <ng-container *ngFor="let item of presDocuments">
-                                                                    <div *ngIf="item.docName == 'pen-prescription'"
-                                                                        class="row">
-                                                                        <img style="width: 100%; height: 1400px;" [src]="item.fileData" />
-                                                                    </div>
-                                                                </ng-container>
-    
-                                                            </div>  -->
-                                                            <!--Dispaly Prescription papr section End-->
-                                                        
-                                                           <!--Dispaly drawing image dispaly sction start-->
+                                                             <!--Dispaly drawing image dispaly sction start-->
                                                                 <div class="container" *ngIf="presDocuments.length > 0">
                                                                     <ng-container *ngFor="let item of presDocuments">
                                                                         <div class="image-box" *ngIf="item.docName != 'pen-prescription'">
@@ -1540,22 +1308,7 @@
                                                                             </div>
                                                                         </div>
                                                                     </ng-container>
-                                                                    <!-- <div class="image-box" *ngIf="presDocuments.length > 0"><ng-container *ngFor="let item of presDocuments">
-                                                                        <div *ngIf="item.docName != 'pen-prescription'"
-                                                                            class="imageContainer">
-                                                                            <img  [src]="item.fileData"
-                                                                                alt="Pres Document" />
-                                                                        </div>
-                                                                        
-                                                                    </ng-container></div>
-                                                                    <div class="image-box" *ngIf="presDocuments.length > 0"><ng-container *ngFor="let item of presDocuments">
-                                                                        <div *ngIf="item.docName != 'pen-prescription'"
-                                                                            class="imageContainer">
-                                                                            <img [src]="item.fileData"
-                                                                                alt="Pres Document" />
-                                                                        </div>
-                                                                        
-                                                                    </ng-container></div> -->
+                                                                    
                                                                   </div>
                                                              <!--Dispaly drawing image dispaly sction End-->
 

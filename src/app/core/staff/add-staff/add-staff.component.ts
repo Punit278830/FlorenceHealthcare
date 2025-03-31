@@ -150,6 +150,7 @@ export class AddStaffComponent {
       dob: ['', Validators.required],
       doj: ['', Validators.required],
       IdentityNumber: ['', Validators.required],
+      regestrationNumber:[''],
       IdentityName: ['', Validators.required],
 
 
@@ -191,7 +192,6 @@ export class AddStaffComponent {
 
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
-
       this.staffService.CreateStaff(staffData).subscribe((res:any) => {
         console.log(res);
         if (!res.message) {

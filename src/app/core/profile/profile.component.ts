@@ -12,7 +12,7 @@ import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-uploa
 import { MedicineService } from 'src/app/shared/Services/medicine/medicine.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { QuestionService } from 'src/app/shared/Services/question/question.service';
-import { IPredefineDiagnosis, Iquestion, IQuestionnaires, Ianswers, Iappointment, Iconsultation, IconsultationFiles, IdownloadFile, IfileUpload, Ilogin, ImedicineMaster, Ioptions, IpatientInfo, IprescribeMedicine, IstaffInfo, Ivital } from 'src/app/shared/models/models';
+import { IPredefineDiagnosis, Iquestion, IQuestionnaires, Ianswers, Iappointment, Iconsultation, IconsultationFiles, IdownloadFile, IfileUpload, Ilogin, ImedicineMaster, Ioptions, IpatientInfo, IprescribeMedicine, IstaffInfo, Ivital, Idepartment } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import jsPDF, * as jspdf from 'jspdf';
 import html2canvas from 'html2canvas';
@@ -121,6 +121,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public selectedMedicineGroup!: IMedicinesGroup;
   public selectedMedication: IMedicationGroup[] = [];
   public hasPenPrescription: boolean = false;
+  public _depDto!: Idepartment;
 
   public selectedDiagnosis: number = 0;
   isButtonEnabled: boolean = false;
@@ -1562,7 +1563,15 @@ export class ProfileComponent implements OnInit, OnDestroy {
   getDoctorDetails() {
     this.doctorService.getStaffByID(this.doctorId).subscribe(res => {
       this._doctorDto = res;
+      this.getDepartmentNameById();
     })
+  }
+  getDepartmentNameById()
+  {
+    this.departmentService.getDepartmentByID(this._doctorDto.departmentId).subscribe(res=>{
+      this._depDto=res;
+    })
+
   }
   getCurrentAppointmentDetils() {
     this.appointmentService.getAppointmentById(this.latestId).subscribe(res => {
