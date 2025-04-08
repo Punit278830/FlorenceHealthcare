@@ -24,6 +24,7 @@ import { LoadingService } from '../../shared/Services/loader/loader.service';
 import { ConsultationTemplateMasterService } from '../../shared/Services/consultation/consultationTemplateMaster.service';
 import { IConsultationTemplate, IMedicationGroup, IMedicinesGroup } from '../../shared/models/models';
 import { MedicinesGroupService } from '../../shared/Services/medicine/medicines-group.service';
+import { dE } from '@fullcalendar/core/internal-common';
 // import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
@@ -53,6 +54,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public latestId: number = -1;
   public departmentId: number = -1;
   public selectedQueslist: any[] = [];
+  public appointmentDate:any;
   public selectedques!: number
   //*********8 Questionnaire related Variables decletation start */
   public questionnaireDto: IQuestionnaires[] = [];
@@ -391,6 +393,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
 
   loadPatientAppointments() {
+    debugger
     this.appointmentList = [];
     this.selectedYear = this.profileForm.get('appointYear')?.value
     this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe(res => {
@@ -400,6 +403,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
         return new Date(b.date).getTime() - new Date(a.date).getTime();
       });
       this.latestId = this.appointmentList[0]?.id;
+      this.appointmentDate=this.appointmentList[0]?.date;
       this.departmentId = this.appointmentList[0]?.departmentid;
       this.getVitalByAppointment(this.latestId);
       this.getQuestionnaireByDepartmentId(this.departmentId);
@@ -1574,8 +1578,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   }
   getCurrentAppointmentDetils() {
+    debugger;
     this.appointmentService.getAppointmentById(this.latestId).subscribe(res => {
       this._appointmentDto = res;
+      console.log("Appointment" ,res);
     })
   }
   getConsultationFiles() {

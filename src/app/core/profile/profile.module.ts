@@ -10,10 +10,12 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatIconModule } from '@angular/material/icon';
+import {CheckValidityPipe} from '../../shared/pipes/check-validity.pipe';
 
 @NgModule({
   declarations: [
-    ProfileComponent
+    ProfileComponent,
+    CheckValidityPipe
   ],
   imports: [
     CommonModule,

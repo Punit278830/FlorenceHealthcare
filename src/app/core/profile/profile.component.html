@@ -123,12 +123,12 @@
                                             </div>
                                             <div class="col-12">
                                                 <div class="form-check check-tables2">
-                                                    <table class="table">
+                                                    <table class="table ">
                                                         <thead>
                                                             <tr>
-                                                                <th scope="col">Appointment Date</th>
-                                                                <th scope="col">Appointment Number</th>
-                                                                <th scope="col">Action</th>
+                                                                <th class="meicalHistoryTableth" scope="col">Appointment Date</th>
+                                                                <th class="meicalHistoryTableth" scope="col">Appointment Number</th>
+                                                                <th class="meicalHistoryTableth" scope="col">Action</th>
                                                                 <th></th>
 
                                                                 <!-- Add more headers based on your patient details -->
@@ -137,9 +137,9 @@
                                                         <tbody>
                                                             <ng-container *ngIf="appointmentList.length>0">
                                                                 <tr *ngFor="let data of appointmentList,let i = index">
-                                                                    <td>{{data.date | date:'dd-MMM-yyyy' | uppercase}}
+                                                                    <td class="meicalHistoryTabletd">{{data.date | date:'dd-MMM-yyyy' | uppercase}}
                                                                     </td>
-                                                                    <td>
+                                                                    <td class="meicalHistoryTabletd">
                                                                         <a href="javascript:void(0);"
                                                                             (click)="updateAppointmentId(data.id)">{{data.id}}</a>
                                                                     </td>
@@ -247,7 +247,7 @@
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4">
                                                 <div class="form-group local-forms">
-                                                    <label for="tempurature">Temprature</label>
+                                                    <label for="tempurature">Temperature</label>
                                                     <input type="text" class="form-control"
                                                         formControlName="tempurature" placeholder="C">
 
@@ -1095,7 +1095,8 @@
                                                                         <td style="width: 80%;"> <mat-card-header class="custom-header">
                                                                             <div style="height: 100px;"></div>
                                                                           <mat-card-title class="header-title">Dr. {{_doctorDto.firstName}} {{_doctorDto.lastName}}</mat-card-title>
-                                                                          <p class="header-subtitle">{{_doctorDto.education}}</p>
+                                                                          <p class="header-subtitle"><span class="subheader-title-linehight" *ngFor="let part of _doctorDto.education.split('--')">
+                                                                            {{ part }}<br> </span></p>
                                                                           <p class="header-subtitle">{{_doctorDto.regestrationNumber}}</p>
                                                                           <p class="header-subtitle">{{_depDto?.departmentName}}</p>
                                                                           <p class="header-subtitle">{{_doctorDto.address}}</p>
@@ -1103,7 +1104,7 @@
                                                                         </mat-card-header>
                                                                     </td>
                                                                    
-                                                                        <td style="width: 19%; text-align: left;">
+                                                                        <td style="width: 19%; text-align: left; align-content: end;">
                                                                             <img src="assets/img/QRCode.JPG" style="width: 150px; height: 150px;" />
                                                                         </td>
                                                                         </tr>
@@ -1119,26 +1120,26 @@
                                                                         <td><strong>Patient ID:</strong></td>
                                                                         <td>P-{{patientInfo.patientId}}</td>
                                                                         <td rowspan="6" style="    text-align: left;">
-                                                                            <img  src="assets/img/patient_image.png" style="width: 150px; height: 150px; border: 1px solid #ccc;" />
+                                                                            <img  src="assets/img/patient_image.png" style="width: 150px; height: 150px; border: 1px solid #ccc; visibility: hidden;" />
                                                                         </td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Age:</strong></td>
                                                                         <td>{{patientAge}}</td>
-                                                                        <td><strong>ABHA ID:</strong></td>
-                                                                        <td>9878-0987-5677-8765</td>                                                                        
+                                                                        <td><strong>{{patientInfo.IdentityName}}</strong></td>
+                                                                        <td>{{patientInfo.IdentityNumber}}</td>                                                                        
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Gender:</strong></td>
                                                                         <td>{{patientInfo.gender}}</td>
                                                                         <td><strong>Appointment:</strong></td>
-                                                                        <td>05-08-2024</td>
+                                                                        <td>{{appointmentDate  | date: 'dd MMM y'}}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Address:</strong></td>
                                                                         <td>{{patientInfo?.address}}</td>
                                                                         <td><strong>Validity:</strong></td>
-                                                                        <td>11-08-2024, 05:00 pm</td>
+                                                                        <td>{{appointmentDate | checkValidity | date: 'dd MMM y'}}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Phone</strong></td>
@@ -1158,10 +1159,10 @@
                                                                                 <tr>
                                                                                    <td><strong>Pulse:</strong>{{vitalDto?.pulse?vitalDto.pulse + 'bpm': ''}}</td>
                                                                                    </tr>
-                                                                                   <tr> <td><strong>Tempurature:</strong>{{vitalDto?.tempurature? vitalDto.tempurature +'f': ''}}  </td>
+                                                                                   <tr> <td><strong>Temperature:</strong>{{vitalDto?.tempurature? vitalDto.tempurature +'°F': ''}}  </td>
                                                                                    </tr>
                                                                                    <tr>
-                                                                                    <td><strong>Oxygen:</strong>{{vitalDto?.oxigenLevel ? vitalDto.oxigenLevel + ' gml' : ''}}</td>
+                                                                                    <td><strong>Oxygen:</strong>{{vitalDto?.oxigenLevel ? vitalDto.oxigenLevel + '% gml' : ''}}</td>
                                                                                    
                                                                                 </tr>
                                                                                    <tr>
@@ -1238,13 +1239,13 @@
                                                                                     <strong>Follow-up Date:</strong> {{ _consultationDto.followupDate | date:'dd-MM-yyyy' }}
                                                                                 </h4>
                                                                             </ng-container>
-                                                                            <ng-container class="section-title" *ngIf="vitalDto">
+                                                                            <!-- <ng-container class="section-title" *ngIf="vitalDto">
                                                                                 <h4 class="prescription-h4"><strong> Presenting complaints:</strong></h4>
                                                                                <h4 class="prescription-h4"><strong>Main Affected Region:</strong> EAR</h4>
                                                                                <h4 class="prescription-h4"><strong>Ear Pain:</strong> YES (Duration: 1 week)</h4>
                                                                                 <h4 class="prescription-h4"><strong>Ear Discharge:</strong> NO</h4>
                                                                                     <h4 class="prescription-h4"><strong>Hearing Loss:</strong> NO</h4>
-                                                                             </ng-container>
+                                                                             </ng-container> -->
                                                                         </ng-template>
                                                                         
                                                                             

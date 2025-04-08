@@ -220,6 +220,11 @@
         </div>
         <div class="col-12">
             <div class="doctor-submit float-end">
+                
+                <ng-container *ngIf="invoiceDetails.status == 'Paid'">
+                    <a href="javascript:;" class="btn btn-primary submit-form me-2"
+                       (click)="backToAppointmentList()">Finish</a>
+                </ng-container>
                 <a href="javascript:;" [ngClass]="{ 'disabled': invoiceDetails.status == 'Paid'}"
                     class="btn btn-primary submit-form me-2"
                     (click)="payAll(invoiceDetails.invoiceId)">{{invoiceDetails.status != 'Paid' ? 'Pay All' :

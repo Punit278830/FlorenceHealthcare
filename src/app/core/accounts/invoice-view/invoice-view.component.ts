@@ -370,13 +370,17 @@ export class InvoiceViewComponent implements OnInit {
       }
     }
   }
+  backToAppointmentList()
+    {
+      this.route.navigate(['/appointments/appointment-list']);
+    }
 
   payAll(invoiceId: number) {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
     }
-
+    
     if (this.paymentMode == 'Online') {
       if (this.RefNoInput.nativeElement.value == '') {
         alert('Please enter online payment reference number!');
