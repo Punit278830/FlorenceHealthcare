@@ -270,4 +270,8 @@ private loaderService : LoadingService) {
       this.pageSelection.push({ skip: skip, limit: limit });
     }
   }
+  moveToProfile(idhere: number) {
+    this.staffService.staffId = idhere;
+    this.route.navigate([routes.staffProfile])
+  }
 }

@@ -49,6 +49,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public pdfUrl = '';
   public patientAge!: number
   public showNext: boolean = false;
+  public displayAge!:string;
   @ViewChild('stepper') stepper!: MatStepper;
   public copyId: number = -1;
   public latestId: number = -1;
@@ -124,6 +125,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   public selectedMedication: IMedicationGroup[] = [];
   public hasPenPrescription: boolean = false;
   public _depDto!: Idepartment;
+  public step=0;
 
   public selectedDiagnosis: number = 0;
   isButtonEnabled: boolean = false;
@@ -173,12 +175,16 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Retrieve patientId from the route parameter
     this.activeRoute.queryParams.subscribe(params => {
       const patientId = params['patientId'];
+      this.step=params['step'];
 
       if (patientId) {
         // If patientId is present in route params, set it
         this.patientId = patientId;
-        this.patientService.patientId = patientId; // Optionally store in service for later use
-      } else if (this.patientService.patientId) {
+        this.patientService.patientId = patientId;
+
+        // Optionally store in service for later use
+      } 
+      else if (this.patientService.patientId) {
         // If not in route params, check if it's available in patientService
         this.patientId = this.patientService.patientId;
       } else {
@@ -201,7 +207,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -217,7 +222,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getAllTemplates();
     this.getAllMedicationGroups();
     this.initalizeMedicinesGroupForm();
-
     // Subscribe to form value changes
     this.consultForm.valueChanges.subscribe(() => {
       this.enableAddToTemplateButton();
@@ -231,6 +235,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
       this.prescriptionImage = data;  // Assign the image data to the local variable
     });
+  }
+
+  ngAfterViewInit() {
+    this.stepper.selectedIndex=this.step;
   }
 
   checkPenPrescription() {
@@ -273,7 +281,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
 
-  downloadPreviewAsPdf() {
+  downloadPreviewAsPdf(type:string) {
     this.loaderService.showLoader();
     const data = document.getElementById('convertToPdf');
     if (data) {
@@ -287,7 +295,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const position = 0;
 
         pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+        if(type=='print'){
+          window.open(pdf.output('bloburl'), '_blank');
+        }
+        else{
+              
         pdf.save(`${this.patientInfo.patientId}-${this.patientInfo.firstName}${this.patientInfo.lastName}.pdf`);
+        }
       })
     }
 
@@ -350,6 +364,39 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.toastr.error('No content to convert', 'Error');
     }
   }
+//print functionality
+printContent(): void {
+  const content = document.getElementById('convertToPdf');
+  if (content) {
+    const printWindow = window.open('', '', 'height=800,width=800');
+    
+    // Copy the styles from the current document to the print window
+    const styles = Array.from(document.styleSheets)
+      .map((styleSheet: CSSStyleSheet) => {
+        try {
+          return Array.from(styleSheet.cssRules).map((rule: CSSRule) => rule.cssText).join(' ');
+        } catch (e) {
+          // If there is a cross-origin issue, skip the style
+          return '';
+        }
+      })
+      .join(' ');
+
+    printWindow?.document.write('<html><head><title>Prescription</title>');
+    printWindow?.document.write(`<style>${styles}</style>`);
+    printWindow?.document.write('</head><body>');
+    
+    // Write the exact content of the div to the print window without changing the structure
+    printWindow?.document.write(content.innerHTML); 
+    
+    printWindow?.document.write('</body></html>');
+    printWindow?.document.close(); // Close the document to complete writing
+    printWindow?.print(); // Trigger the print dialog
+  } else {
+    this.toastr.error('No content to print', 'Error');
+  }
+}
+
 
   loadSavedAnswers(appointmentId: number) {
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
@@ -393,7 +440,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
 
   loadPatientAppointments() {
-    debugger
     this.appointmentList = [];
     this.selectedYear = this.profileForm.get('appointYear')?.value
     this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe(res => {
@@ -418,11 +464,12 @@ export class ProfileComponent implements OnInit, OnDestroy {
   loadPatientInfo() {
     this.patientService.getPatientData(this.patientId).subscribe(
       (data) => {
-        if (data) {
+        if (data) {          
           this.patientInfo = data;
           this.patientInfo.IdentityName = data.identityName;
           this.patientInfo.IdentityNumber = data.identityNumber;
-          this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
+          this.patientAge =this.convertAgeinMOnthandYear(data.dob);
+          //this.patientAge = this.appointmentService.calculateDateDifference(data.dob);
         } else {
           // If data is null or undefined, navigate to patient list
           this.route.navigate([routes.patientsList]);
@@ -436,8 +483,36 @@ export class ProfileComponent implements OnInit, OnDestroy {
     );
   }
 
+  convertAgeinMOnthandYear(patientDob:any)
+  {
+    const dob = new Date(patientDob);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+    const months = this.getMonthDifference(dob, today);
+       if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) { age--; }
+    if (age < 12 && months < 12) {
+      // let monthDiffs = "0." + months;
+      // age = parseFloat(monthDiffs);
+      age=months;
+      
+      this.displayAge='Month'
+      return age;
+    }
+    else
+    {
 
-  callloadAppointment(event: any) {
+    this.displayAge='Year'
+    return age;
+    }
+  }
+  getMonthDifference(startDate: Date, endDate: Date): number {
+    const yearDiff = endDate.getFullYear() - startDate.getFullYear();
+    const monthDiff = endDate.getMonth() - startDate.getMonth();
+    return yearDiff * 12 + monthDiff;
+  }
+
+    callloadAppointment(event: any) {
     this.selectedYear = event.value;
     this.loadPatientAppointments();
   }
@@ -1252,6 +1327,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   getUploadedFiles(id: number) {
+    debugger
     this.presDocuments = [];
     this.vitalDocuments = [];
     this.previewFile = [];
@@ -1439,11 +1515,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
   }
   //consutation fine upload code
-  onFileSelected(event: any) {
+  onFileSelected(event: any,docName: string) {
     this.selectedFile = event.target.files[0];
+    this.onFileUpload(docName);
+
+
   }
-  onVfileSelected(event: any) {
-    this.VselectedFile = event.target.files[0];
+  onVfileSelected(event: any) {   
+    this.VselectedFile = event.target.files[0];    
   }
 
   deleteFile(id: number) {
@@ -1455,6 +1534,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   onFileUpload(docName: string) {
+    debugger
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
 
@@ -1473,8 +1553,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
         // Check for supported file types (for example, PDFs, Word documents, etc.)
         //const supportedFileTypes: string[] = ["application/pdf", "application/msword", "application/jpeg", "application/png", "application/txt", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"]; 
         //if (this.selectedFile?.type != null && supportedFileTypes.includes(this.selectedFile.type))
-        if ((docName == 'prescription' && this.selectedFile?.type.startsWith('image/'))
-          || (docName == 'previewFile' && (this.selectedFile?.type.startsWith('application/pdf') || this.selectedFile?.type.startsWith('application/msword')))) {
+        if ((docName == 'prescription' && this.selectedFile?.type.startsWith('image/'))       
+          || (docName == 'previewFile' && (this.selectedFile?.type.startsWith('application/pdf') || this.selectedFile?.type.startsWith('application/msword'))|| this.selectedFile?.type.startsWith('image/'))) {
           this.fileUpladServie.uploadConsultationFile(this.FileUploadDto).subscribe(
             result => {
               // Hide spinner if needed

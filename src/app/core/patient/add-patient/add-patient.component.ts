@@ -31,6 +31,8 @@ export class AddPatientComponent implements OnInit {
   public btnLable = 'Capture Image';
   public RegrestationDate = '';
   public maxDate;
+  public months!:number;
+  displayAge: string = '';
 
   constructor(private fb: FormBuilder,
     private patientService: PatientService,
@@ -96,8 +98,10 @@ export class AddPatientComponent implements OnInit {
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
       age: ['',],
-      IdentiyNumber: ['', Validators.required],
-      IdentiyName: ['', Validators.required],
+      // IdentiyNumber: ['', Validators.required],
+      // IdentiyName: ['', Validators.required],
+      IdentiyNumber: [''],
+      IdentiyName: [''],
     })
   }
 
@@ -112,6 +116,8 @@ export class AddPatientComponent implements OnInit {
       this._patientDto = patientData.value;
       this._patientDto.IdentityName = patientData.value.IdentiyName;
       this._patientDto.IdentityNumber = patientData.value.IdentiyNumber;
+      //assigning age in month to store in background
+      this._patientDto.ageinYear=this.months;
       this._patientDto.patientImage = this.previewImage;
 
       this.patientService.CreatePatient(this._patientDto).subscribe(
@@ -153,15 +159,25 @@ export class AddPatientComponent implements OnInit {
     let age = today.getFullYear() - dob.getFullYear();
     const monthDiff = today.getMonth() - dob.getMonth();
     const months = this.getMonthDifference(dob, today);
+    this.months=months
+
 
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) { age--; }
     if (age < 12 && months < 12) {
-      let monthDiffs = "0." + months;
-      age = parseFloat(monthDiffs);
+      // let monthDiffs = "0." + months;
+      // age = parseFloat(monthDiffs);
+      age=months;
+      this.patientReg.get('age')?.setValue(age);
+      this.displayAge='Month'
+    }
+    else
+    {
+this.patientReg.get('age')?.setValue(age);
+    this.displayAge='Year'
     }
 
     // Set age value in the form
-    this.patientReg.get('age')?.setValue(age);
+    
     this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
   }
 
@@ -212,6 +228,7 @@ export class AddPatientComponent implements OnInit {
 
 
   changedob(year: any) {
+    debugger
     const currentYear = new Date().getFullYear();
     const y = currentYear - year;
 

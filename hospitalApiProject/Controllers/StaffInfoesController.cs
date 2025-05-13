@@ -26,7 +26,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetDoctorsInfo()
     {
 
-      var result = await _context.StaffInfos.Where(e => e.Designation.ToLower() == "doctor").ToListAsync();
+      var result = await _context.StaffInfos
+        .Where(e => e.Designation.ToLower() == "doctor")
+        .OrderBy(e => e.FirstName)
+        .ToListAsync();
       return Ok(result);
     }
 
@@ -43,7 +46,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetStaffInfos()
     {
-      return await _context.StaffInfos.OrderByDescending(p => p.StaffId).ToListAsync();
+      return await _context.StaffInfos.OrderBy(p => p.FirstName).ToListAsync();
     }
 
     // GET: api/StaffInfoes/5
@@ -119,7 +122,6 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<StaffInfo>> PostStaffInfo(StaffInfo staffInfo)
     {
-
       var existingStaff = await _context.StaffInfos.FirstOrDefaultAsync(p => p.IdentityNumber == staffInfo.IdentityNumber);
 
       if (existingStaff != null)

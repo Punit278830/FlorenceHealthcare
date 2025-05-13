@@ -7,6 +7,9 @@ import { ToastrService } from 'ngx-toastr';
 import { ConsultationTemplateMasterService } from '../../../shared/Services/consultation/consultationTemplateMaster.service';
 import { MedicineService } from 'src/app/shared/Services/medicine/medicine.service';
 import { MedicinesGroupService } from '../../../shared/Services/medicine/medicines-group.service';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+
 
 @Component({
   selector: 'app-medicines-master',
@@ -26,6 +29,7 @@ export class MedicinesMasterComponent {
   public selectedRow: number | null = null;
   public selectedGroup!: IMedicinesGroup;
   public medicationGroup: IMedicationGroup[] = [];
+  public allMedicine: ImedicineMaster[]=[];
   public isEditMedication: boolean = false;
 
   frequencyData = ['1-0-0', '0-1-0', '0-0-1', '1-0-1', '1-1-1'];
@@ -299,4 +303,30 @@ export class MedicinesMasterComponent {
       }
     });
   }
+  getAllMedicine()
+  {
+    this.medicinesGroupService.getAllMedicine().subscribe((data: any[]) => {
+      this.allMedicine = data;
+      this.exportAllMedicine();
+    })
+    }
+    exportAllMedicine()
+    {          
+      
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.allMedicine);
+        const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
+        
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      
+        // Call saveAsExcel
+        this.saveAsExcelFile(excelBuffer, 'PatientList');
+        this.allMedicine.length=0;
+      }
+      
+      private saveAsExcelFile(buffer: any, fileName: string): void {
+        const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+        FileSaver.saveAs(data, `${fileName}_export_${new Date().getTime()}.xlsx`);
+      }
+      
+    
 }

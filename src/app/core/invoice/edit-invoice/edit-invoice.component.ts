@@ -5,6 +5,7 @@ import { ToastrService } from 'ngx-toastr';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { IinvoiceItem, Ilogin, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { InvoiceItemService } from 'src/app/shared/Services/invoiceItem/invoiceItemService';
 interface data {
   value: string;
 }
@@ -22,14 +23,17 @@ export class EditInvoiceComponent implements OnInit {
   public allnvoiceItems: any[] = [];
   public total = 0;
   private IinvoiceDto!: IinvoiceItem;
+  public invoiceItemDto!: IinvoiceItem;
   private loggedInUser!: Ilogin;
   public flag: boolean = false;
   alreadyAddedItems: Set<string> = new Set();
   public selectedItem: any;
+  public searchDataValue!:number;
 
   constructor(private fb: FormBuilder,
     private invoiceService: InvoiceService,
     private toastr: ToastrService,
+    private itemService:InvoiceItemService,
     private route: Router) {
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
     if (!this.invoiceService.invoiceId) {
@@ -74,6 +78,21 @@ export class EditInvoiceComponent implements OnInit {
     })
   }
 
+  searchItem(item:any)
+  {
+    let itemId=parseInt(item);
+    if (!isNaN(itemId))
+    {
+      this.itemService.getItemById(itemId).subscribe(data=>{
+        this.invoiceItemDto=data;
+        console.log("invoice item.......",data)
+      })
+
+    }
+
+    
+  }
+
 
 
   InitlizeInvoiceItemForm() {
@@ -93,8 +112,9 @@ export class EditInvoiceComponent implements OnInit {
   }
 
 
-  addItemToInvoice(event: any) {
-    const id = event.value;
+  addItemToInvoice(id:number) {
+    debugger
+    //const id = event.value;
     const data = this.allnvoiceItems.find(e => e.itemId == id)
     this.addItemFormGroup.get('itemName')?.patchValue(data.itemName);
     this.addItemFormGroup.get('description')?.patchValue(data.description);

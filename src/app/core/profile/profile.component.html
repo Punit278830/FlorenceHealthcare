@@ -30,7 +30,9 @@
                                     <div class="profile-info-left" *ngIf="patientInfo">
                                         <h3 class="user-name m-t-0 mb-0">{{patientInfo.firstName}}
                                             {{patientInfo.lastName}}</h3>
-                                        <small class="text-muted">Patient</small>
+                                            <a class="dropdown-item" [routerLink]="routes.editPatient"
+                                            ><i class=" fa-solid fa-pen-to-square m-r-5"></i>
+                                            Edit</a>
                                         <div class="staff-id">Patient ID : P-{{patientInfo.patientId}}</div>
                                         <!-- DO NOT DELETE -->
                                         <!-- <div class="staff-msg"><a [routerLink]="routes.chat"
@@ -249,7 +251,7 @@
                                                 <div class="form-group local-forms">
                                                     <label for="tempurature">Temperature</label>
                                                     <input type="text" class="form-control"
-                                                        formControlName="tempurature" placeholder="C">
+                                                        formControlName="tempurature" placeholder="°F">
 
 
                                                 </div>
@@ -258,7 +260,7 @@
                                                 <div class="form-group local-forms">
                                                     <label for="oxigenLevel">Oxygen Level</label>
                                                     <input type="text" class="form-control"
-                                                        formControlName="oxigenLevel" placeholder="mg/L">
+                                                        formControlName="oxigenLevel" placeholder="%">
                                                 </div>
                                             </div>
                                             <div class="col-12 col-md-6 col-xl-4">
@@ -480,13 +482,13 @@
                                                     <div
                                                         style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                         <input type="file" id="previewFile"
-                                                            (change)=onFileSelected($event) class="form-control"
+                                                            (change)="onFileSelected($event,'previewFile')" class="form-control"
                                                             style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
-                                                        <button type="button" class="uploadbtn"
+                                                        <!-- <button type="button" class="uploadbtn"
                                                             (click)="onFileUpload('previewFile')">
                                                             Upload file
                                                         </button>
-                                                        <span>Or</span>
+                                                        <span>Or</span> -->
                                                         <button type="button" class="uploadbtn"
                                                             (click)="openInNewTab('/prescription-pad', 'Write')">
                                                             Write Prescription
@@ -509,12 +511,12 @@
                                                             <div
                                                                 style="display: flex;gap:20px;justify-content: start;align-items:center;">
                                                                 <input type="file" id="file"
-                                                                    (change)=onFileSelected($event) class="form-control"
+                                                                    (change)="onFileSelected($event,'prescription')" class="form-control"
                                                                     style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
-                                                                <button type="button" class="uploadbtn"
+                                                                <!-- <button type="button" class="uploadbtn"
                                                                     (click)="onFileUpload('prescription')">
                                                                     Upload file
-                                                                </button>
+                                                                </button> -->
                                                                 <button type="button" class="uploadbtn"
                                                                     (click)="openInNewTab('/prescription-pad', 'Draw')">
                                                                     Draw Image
@@ -527,10 +529,11 @@
                                                                 <ng-container *ngIf="file.fileName && file.docName">
                                                                     <div class="document-row">
                                                                         <div class="icon-container">
-                                                                            <mat-icon class="document-icon"
-                                                                                [ngClass]="getIcon(file.fileName)">
-                                                                                {{ getIcon(file.fileName) }}
-                                                                            </mat-icon>
+                                                                            <!-- <mat-icon class="document-icon"
+                                                                                [ngClass]="getIcon(file.fileName)"> -->
+                                                                                <!-- {{ getIcon(file.fileName) }} -->
+                                                                                <div><img [src]="file.fileData" height="100" width="100"></div>
+                                                                            <!-- </mat-icon> -->
                                                                             <mat-icon class="delete-icon"
                                                                                 (click)="deleteFile(file.fileId)"
                                                                                 aria-label="Delete Document">
@@ -1125,9 +1128,10 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Age:</strong></td>
-                                                                        <td>{{patientAge}}</td>
-                                                                        <td><strong>{{patientInfo.IdentityName}}</strong></td>
-                                                                        <td>{{patientInfo.IdentityNumber}}</td>                                                                        
+                                                                        <td>{{patientAge}} {{displayAge}}</td>
+                                                                        <td><strong>{{patientInfo.IdentityName?patientInfo.IdentityName:'Identity Name'}}</strong>
+                                                                        </td>
+                                                                        <td>{{patientInfo.IdentityNumber?patientInfo.IdentityNumber:'N/A'}}</td>                                                                        
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Gender:</strong></td>
@@ -1143,16 +1147,20 @@
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Phone</strong></td>
-                                                                        <td>{{patientInfo?patientInfo.mobile:''}}</td>
+                                                                        <td>{{patientInfo?patientInfo.mobile:''}}</td>                                                                       
+                                                                        <td><strong>Follow-up Date</strong></td>
+                                                                        <td *ngIf="_consultationDto?.followupDate">{{ _consultationDto.followupDate | date:'dd-MM-yyyy' }}</td>
+                                                                           
                                                                        
-                                                                    </tr>
+                                                                       
+                                                                    </tr>                                                                                                           
                                                                   </table>
                                                                   <div class="containersection ">
                                                                     <div class="sectionOne">
                                                                         <ng-container >
                                                                        
                                                                              <table class="patient-table" >
-                                                                                <tr><td><strong>Vitals</strong></td></tr>
+                                                                                <tr><td><p class="section-title">Vitals</p></td></tr>
                                                                                <tr>
                                                                                    <td><strong>BP:</strong>{{vitalDto?.bp?vitalDto.bp + '/mmHg': ''}}</td>
                                                                                 </tr>
@@ -1162,7 +1170,7 @@
                                                                                    <tr> <td><strong>Temperature:</strong>{{vitalDto?.tempurature? vitalDto.tempurature +'°F': ''}}  </td>
                                                                                    </tr>
                                                                                    <tr>
-                                                                                    <td><strong>Oxygen:</strong>{{vitalDto?.oxigenLevel ? vitalDto.oxigenLevel + '% gml' : ''}}</td>
+                                                                                    <td><strong>Oxygen:</strong>{{vitalDto?.oxigenLevel ? vitalDto.oxigenLevel + '%' : ''}}</td>
                                                                                    
                                                                                 </tr>
                                                                                    <tr>
@@ -1172,7 +1180,7 @@
                                                                                    <tr>
                                                                                     <td><strong>Weight:</strong>{{vitalDto?.weight? vitalDto.weight + 'kg':''}}</td>
                                                                                </tr>
-                                                                               <tr><td><strong>Patient History</strong></td></tr>
+                                                                               <tr><td><p class="section-title">Patient History</p></td></tr>
                                                                                <tr>
                                                                                    <tr>
                                                                                    <td><strong>Diabetes:</strong>{{ vitalDto?.diabetes === true ? 'Yes' : vitalDto?.diabetes === false ? 'No' : '' }}</td>
@@ -1209,7 +1217,7 @@
                                                                         <ng-container *ngIf="hasPenPrescription; else noRelevantDocuments">
                                                                             <ng-container *ngFor="let item of presDocuments">
                                                                                 <div *ngIf="item.docName === 'pen-prescription'" class="row">
-                                                                                    <img style="width: 100%; height: 1400px;" [src]="item.fileData" />
+                                                                                    <img style="width: 100%; height: 750px;" [src]="item.fileData"  />
                                                                                 </div>
                                                                             </ng-container>
                                                                         </ng-container>
@@ -1221,23 +1229,17 @@
                                                                                 <h4 class="prescription-h4" *ngIf="_consultationDto.examinationNote">
                                                                                     <strong>Examination Note:</strong> {{ _consultationDto.examinationNote }}
                                                                                 </h4>
-                                                                           
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.diffDiagnosis">
+                                                                                    <strong>Differential Diagnosis:</strong> {{ _consultationDto.diffDiagnosis }}
+                                                                                </h4>  
+                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.finalDiagnosis">
+                                                                                    <strong>Final Diagnosis:</strong> {{ _consultationDto.finalDiagnosis }}
+                                                                                </h4>                                                                  
                                                                         
                                                                                 <h4 class="prescription-h4" *ngIf="_consultationDto.advice">
                                                                                     <strong>Advice:</strong> {{ _consultationDto.advice }}
-                                                                                </h4>
-                                                                        
-                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.diffDiagnosis">
-                                                                                    <strong>Differential Diagnosis:</strong> {{ _consultationDto.diffDiagnosis }}
-                                                                                </h4>
-                                                                        
-                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.finalDiagnois">
-                                                                                    <strong>Final Diagnosis:</strong> {{ _consultationDto.finalDiagnois }}
-                                                                                </h4>
-                                                                        
-                                                                                <h4 class="prescription-h4" *ngIf="_consultationDto.followupDate">
-                                                                                    <strong>Follow-up Date:</strong> {{ _consultationDto.followupDate | date:'dd-MM-yyyy' }}
-                                                                                </h4>
+                                                                                </h4>                                                                        
+                                                                    
                                                                             </ng-container>
                                                                             <!-- <ng-container class="section-title" *ngIf="vitalDto">
                                                                                 <h4 class="prescription-h4"><strong> Presenting complaints:</strong></h4>
@@ -1330,7 +1332,8 @@
 
                                     </div>
                                     <div class="btnOuter1">
-                                        <button class="uploadbtn" (click)="downloadPreviewAsPdf()">Download</button>
+                                        <button class="uploadbtn" (click)="downloadPreviewAsPdf('print')">Print</button>
+                                        <button class="uploadbtn" (click)="downloadPreviewAsPdf('download')">Download</button>
                                         <button class="uploadbtn" (click)="gotodocuments()">Next</button>
                                         <button class="uploadbtn" (click)="saveAsPDF()">Save</button>
                                     </div>

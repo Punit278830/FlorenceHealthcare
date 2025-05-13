@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { IMedicationGroup, IMedicinesGroup } from '../../models/models';
+import { IMedicationGroup, ImedicineMaster, IMedicinesGroup } from '../../models/models';
 import { Observable } from 'rxjs';
 import { api_Url } from 'src/environment/environment';
 import { ApiHttpService } from '../../apiService/apiHttpService';
@@ -16,6 +16,12 @@ export class MedicinesGroupService {
 
   addMedicineGroup(medDetails: IMedicinesGroup): Observable<any> {
     return this.http.post(this.apiUrl + 'MedicinesGroup', medDetails)
+  }
+
+  getAllMedicine():Observable<ImedicineMaster[]>
+  {
+    return this.http.get(this.apiUrl + 'MedicineMasters');
+    //http://localhost:5020/api/MedicineMasters
   }
 
   getAllMedicinesGroup(): Observable<IMedicinesGroup[]> {

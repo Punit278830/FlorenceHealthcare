@@ -8,7 +8,7 @@ export class CheckValidityPipe implements PipeTransform {
   transform(value: any): any {
     if (!value) return null;
     const date = new Date(value);
-    date.setDate(date.getDate() + 7);
+    date.setDate(date.getDate() + 6);
     return date;
   }
 

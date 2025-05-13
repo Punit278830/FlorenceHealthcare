@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
+import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, departmentList, Idepartment } from 'src/app/shared/models/models';
@@ -19,6 +20,7 @@ export class DepartmentListComponent implements OnInit{
   public routes = routes;
 
   public departmentList: Array<Idepartment> = [];
+  public _depDto: Idepartment[] = []
   dataSource!: MatTableDataSource<Idepartment>;
 
   public showFilter = false;
@@ -34,18 +36,22 @@ export class DepartmentListComponent implements OnInit{
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
+  public staffList: Array<any> = [];
 
   constructor(public data : DataService,
     private departmentservice:DepartmentService,
     private route: Router,
     private  modalservice : ModalServiceService,
     private toaster : ToastrService,
-    private loaderService : LoadingService
+    private loaderService : LoadingService,
+    private departmentService: DepartmentService,
+    private staffService: StaffService
   ){
 
   }
   ngOnInit() {
     this.getTableData();
+    this.getDepartmentList();
   }
 
   deleteDepartment(idhere: number) {
@@ -55,6 +61,8 @@ export class DepartmentListComponent implements OnInit{
       confirmCallback: () => this.confirmDelete(idhere)
     });
   }
+
+
 
   confirmDelete(idhere: number) {
     this.departmentservice.deleteDepartment(idhere).subscribe(res => {
@@ -195,5 +203,20 @@ export class DepartmentListComponent implements OnInit{
       this.pageNumberArray.push(i);
       this.pageSelection.push({ skip: skip, limit: limit });
     }
+  }
+  getDepartmentList() {
+    this.departmentService.getDepartmentList().subscribe(res => {
+      this._depDto = res;
+
+
+    })
+  }
+  async onDepartmentChange(event:any)
+  {
+    await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
+      debugger
+this.staffList=data.filter((item:any) => item.designation === 'Doctor');
+
+    })
   }
 }

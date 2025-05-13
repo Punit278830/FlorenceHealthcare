@@ -16,7 +16,7 @@
         width: 100%;
         display: block;
         float: none;
-        font-size: 8px;
+        font-size: 10px;
     }
 
     .card {
@@ -37,14 +37,14 @@
     .invoice-payment,
     .invoice-info {
         margin-bottom: 2px;
-        font-size: 5px;
+        font-size: 8px;
         
     }
 
     h4,
     h5 {
         margin: 3px 0;
-        font-size: 8px;
+        font-size: 10px;
     }
 
     ul.list-unstyled {
@@ -55,7 +55,7 @@
     .invoice-table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 8px;
+        font-size: 10px;
         /* Reduced font size */
     }
 
@@ -81,7 +81,7 @@
 
     .custom-badge {
        text-align: left;
-       font-size: 8px;
+       font-size: 10px;
        
     }
 
@@ -98,15 +98,15 @@
 
     .bold-total-invoice h5 {
         font-weight: bold;
-        font-size: 8px;
+        font-size: 10px;
     }
 
     .text-muted {
-        font-size: 8px;
+        font-size: 10px;
     }
 
     li{
-        font-size: 8px;
+        font-size: 10px;
     }
     .custom-invoice{
         display: flex;
@@ -124,5 +124,9 @@
       /* Ensure other elements are styled appropriately */
       .no-print {
         display: none !important;
+      }
+      .arial-font {
+        font-family: Arial, sans-serif !important;
+        font-weight: bold !important;
       }
 }

@@ -515,7 +515,7 @@ public partial class FlorenceDbContext : DbContext
           .HasColumnName("designation");
       entity.Property(e => e.Doj).HasColumnName("DOJ");
       entity.Property(e => e.Education)
-          .HasMaxLength(100)
+          .HasMaxLength(200)
           .IsUnicode(false)
           .HasColumnName("education");
       entity.Property(e => e.Email)

@@ -234,9 +234,10 @@ export class AddAppointmentComponent implements OnInit {
     this.fileFormInitlize();
     this.flag = false;
     this.patientAppointmentData = [];
-    if(this.patierntService.patientId)
+    if(this.patierntService.patientId && localStorage.getItem('lastPath')==='patientList')
     {
       this.postDatatoAppointment(this.patierntService.patientId);
+      localStorage.removeItem('lastPath');
       this.patientService.patientId =0;
     }
     //this.updateFormattedDateTime();

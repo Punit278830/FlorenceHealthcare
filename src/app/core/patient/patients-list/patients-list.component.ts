@@ -6,12 +6,14 @@ import { Sort } from '@angular/material/sort';
 import { DataService } from 'src/app/shared/data/data.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { DatePipe } from '@angular/common';
-
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
 import { FormBuilder, FormGroup } from '@angular/forms';
-import * as jsPDF from 'jspdf';
+import jsPDF from 'jspdf';
 import { Router } from '@angular/router';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
+import html2canvas from 'html2canvas';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
@@ -55,7 +57,8 @@ export class PatientsListComponent implements OnInit {
     private route: Router,
     private modalservice: ModalServiceService,
     private toaster: ToastrService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private loaderService: LoadingService
   ) {
 
 
@@ -336,8 +339,8 @@ export class PatientsListComponent implements OnInit {
 
   onBookAppointment(id: number) {
     this.patientService.patientId = id;
+    localStorage.setItem('lastPath','patientList');
     console.log("stafflist", this.patientList)
-
   }
 
   calculateDateDifference(dob: Date) {
@@ -374,14 +377,61 @@ export class PatientsListComponent implements OnInit {
 
   }
 
+
   movetoProfile(id: number) {
     this.patientService.patientId = id;
     this.route.navigate([routes.profile], { queryParams: { patientId: id } });
   }
 
-  movetoBookappointment(id: number) {
+  movetoBookappointment(id: number) {    
     this.patientService.patientId = id;
     this.route.navigate([routes.addAppointment]);
   }
+
+  exportPatientList() {
+      if(this.patientList.length>0)
+      {
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.patientList);
+    const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
+    
+    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+    // Call saveAsExcel
+    this.saveAsExcelFile(excelBuffer, 'PatientList');
+      }  
+    
+  }
+
+  downloadPatientListAsPdf(type:string) {
+    this.loaderService.showLoader();
+    const data = document.getElementById('convertToPdf');
+    if (data) {
+      html2canvas(data).then(canvas => {
+        const imgWidth = 208;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        const contentDataURL = canvas.toDataURL('image/png');
+        let pdf = new jsPDF('p', 'mm', 'a4');
+        const position = 0;
+
+        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+        const date = new Date();
+        const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+        pdf.save(`PatientList${formattedDate}.pdf`);        
+      })
+    }
+
+    this.loaderService.hideLoader();
+  }
+
+  
+  private saveAsExcelFile(buffer: any, fileName: string): void {
+    const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+    const date = new Date();
+const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
+    
+  }
+  
 
 }

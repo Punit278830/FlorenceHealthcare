@@ -126,8 +126,10 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="Consulting">Identity Proof<span
-                                                class="login-danger">*</span></label>
+                                        <label for="Consulting">Identity Proof
+                                            <!-- <span
+                                                 class="login-danger">*</span>-->
+                                                </label>
                                         <mat-select formControlName="IdentiyName" formControlName="IdentiyName"
                                             class="form-control select" placeholder="Select Identity">
                                             <mat-option *ngFor="let data of IdentityDocNumber"
@@ -135,12 +137,12 @@
                                                 {{data.value}}
                                             </mat-option>
                                         </mat-select>
-                                        <div *ngIf="patientReg.get('IdentiyName')?.invalid && (patientReg.get('IdentiyName')?.dirty || patientReg.get('IdentiyName')?.touched)"
+                                        <!--<div *ngIf="patientReg.get('IdentiyName')?.invalid && (patientReg.get('IdentiyName')?.dirty || patientReg.get('IdentiyName')?.touched)"
                                             class="text-danger">
-                                            <div
+                                             <div
                                                 *ngIf="patientReg.get('IdentiyName')?.errors?.['required']">
                                                 Proof is required.</div>
-                                        </div>
+                                        </div> -->
 
                                     </div>
                                 </div>
@@ -150,24 +152,27 @@
                                                 class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="IdentiyNumber" type="text"
                                             placeholder="Enter Identity doc Number">
-                                        <div *ngIf="patientReg.get('IdentiyNumber')?.invalid && (patientReg.get('IdentiyNumber')?.dirty || patientReg.get('IdentiyNumber')?.touched)"
+                                        <!-- <div *ngIf="patientReg.get('IdentiyNumber')?.invalid && (patientReg.get('IdentiyNumber')?.dirty || patientReg.get('IdentiyNumber')?.touched)"
                                             class="text-danger">
                                             <div
                                                 *ngIf="patientReg.get('IdentiyNumber')?.errors?.['required']">
                                                 Number is required.</div>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-4">
+                                <div class="col-12 col-md-6 col-xl-2">
                                     <div class="form-group local-forms">
                                         <label for="email">Age </label>
-                                        <input class="form-control" formControlName="age" #age (change)="changedob(age.value)" type="number"
+                                        <input class="form-control" formControlName="age" #age (change)="changedob(age.value)"
                                             placeholder="">
                                     </div>
                                     
                                 </div>
-
-
+                                <div class="col-12 col-md-6 col-xl-2">
+                                    
+                                        <label><strong>{{ displayAge }}</strong></label>
+                                         
+                                         </div>
 
 
                                 <!-- <div class="col-12 col-md-6 col-xl-4">

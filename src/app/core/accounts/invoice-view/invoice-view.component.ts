@@ -252,7 +252,7 @@ export class InvoiceViewComponent implements OnInit {
     // Check and add the transactionId from invoiceDetails if it exists
     if (this.invoiceDetails && this.invoiceDetails.transactionId) {
       // Ignore "Cash Payment"
-      if (this.invoiceDetails.transactionId !== 'Cash Payment') {
+      if (this.invoiceDetails.transactionId !== 'Cash') {
         transactionIds.push({ transactionId: this.invoiceDetails.transactionId });
       }
     }

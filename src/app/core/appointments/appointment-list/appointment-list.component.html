@@ -59,9 +59,15 @@
                         </div>
                         
                         </form>
+                        <div style="margin-left: 10px;">
+                          <a href="javascript:;" (click)="exportAppointmentList()" class=" me-2"><img src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
+                          <a href="javascript:;" (click)="exportAppointmentListAsPdf()" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
+                        </div>
                     </div>
                   </div>
+                  
                 </div>
+                
                 <!-- DO NOT DELETE -->
                 <!-- <div class="col-auto text-end float-end ms-auto download-grp">
                   <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
@@ -74,7 +80,7 @@
             </div>
             <!-- /Table Header -->
 
-            <div class="table-responsive">
+            <div class="table-responsive" id="convertToPdf">
               <table matSort (matSortChange)="sortData($event)"
                 class="table border-0 custom-table comman-table datatable mb-0">
                 <thead>

@@ -295,7 +295,7 @@ export interface Iconsultation {
   examinationNote: string,
   advice: number,
   diffDiagnosis: string,
-  finalDiagnois: string,
+  finalDiagnosis: string,
   followupDate: Date
 }
 

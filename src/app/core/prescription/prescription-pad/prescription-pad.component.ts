@@ -24,6 +24,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
   minPenSize = 1;
   maxPenSize = 5;
   isEraserActive = false;
+  drawingpad=false;
   debounceTimer: any;
   fileId?: number;
   private FileUploadDto: IconsultationFiles = {} as IconsultationFiles;
@@ -34,6 +35,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
     private fileUploadServie: FileUploadService,
     private router: Router,
     private patientService: PatientService
+
   ) {
 
   }
@@ -49,12 +51,14 @@ export class PrescriptionPadComponent implements AfterViewInit {
       }
       
       // this.FileUploadDto.docName = this.title == 'Draw' ? "prescription" : 'pen-prescription';
-      if(this.title== 'Prescription Pad')
+      if(this.title== 'Prescription Pad' && this.drawingpad===false)
       {
         this.FileUploadDto.docName = 'pen-prescription';
       }
       else
       {
+        this.drawingpad=true;
+        this.title='Drawing Pad';
         this.FileUploadDto.docName='drawing'
       }
        
@@ -87,7 +91,6 @@ export class PrescriptionPadComponent implements AfterViewInit {
       // Set CSS dimensions for display
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
-
       // Set actual canvas dimensions for drawing
       canvas.width = displayWidth * dpr;
       canvas.height = displayHeight * dpr;
@@ -106,6 +109,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
       velocityFilterWeight: 0.7,
       throttle: 16, // Smoother drawing
     });
+    this.setCursor('pen');
   }
 
   // Handle the beginning of drawing
@@ -159,6 +163,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   // Toggle eraser mode
   toggleEraser(): void {
+    this.isEraserActive ? this.setCursor('pen'):this.setCursor('crosshair')
     this.isEraserActive = !this.isEraserActive;
     this.prescriptionPad.penColor = this.isEraserActive ? '#f9f9f9' : this.penColor;
     this.prescriptionPad.minWidth = this.isEraserActive ? 10 : this.penWidth;
@@ -236,6 +241,8 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
 
   saveCanvasToDatabase(): void {
+    debugger
+    
     if (this.prescriptionPad.isEmpty()) {
       this.toastr.error("No content to save! Please draw something.", "Error");
       return;
@@ -290,9 +297,11 @@ export class PrescriptionPadComponent implements AfterViewInit {
       this.loaderService.hideLoader();
       this.toastr.error('Failed to process the canvas.', 'Error');
     }
+   
   }
 
   uploadNewImage() {
+    
      console.log("foleDto" + this.FileUploadDto)
     this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
       result => {
@@ -301,9 +310,17 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
         // Append the file ID to the URL as a query parameter
         this.loaderService.hideLoader();
-        this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
+        //this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
+        this.router.navigate([routes.profile], {
+          queryParams: {
+            patientId: this.patientService.patientId,
+            step: 4 // for example, go to step 3 (index 2)
+          }
+        });
         this.toastr.success('Canvas image uploaded successfully', 'Success');
-
+        this.clearPad();
+        
+        
         if (newFileId) {
           const queryParams = newFileId ? { newFileId } : {}; // Include fileId in queryParams if provided
           const urlTree = this.router.createUrlTree(['/prescription-pad', this.appointmentId, this.title], { queryParams });
@@ -336,8 +353,14 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   backToPrescription() {
      //navigate to prescription
-     this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
-  }
+     //this.router.navigate([routes.profile], { queryParams: { patientId: this.patientService.patientId } });
+     this.router.navigate([routes.profile], {
+      queryParams: {
+        patientId: this.patientService.patientId,
+        step: 4 // for example, go to step 3 (index 2)
+      }
+    }); 
+    }
 
   loadImageData(base64Image: string): void {
     if (!base64Image.startsWith('data:image')) {

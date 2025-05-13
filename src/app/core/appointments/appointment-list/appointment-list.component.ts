@@ -7,6 +7,10 @@ import { Router } from '@angular/router';
 import { s } from '@fullcalendar/core/internal-common';
 import { Validators } from 'ngx-editor';
 import { ToastrService } from 'ngx-toastr';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { forkJoin } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
@@ -135,7 +139,7 @@ export class AppointmentListComponent implements OnInit {
     if (from !== null && to !== null) {
       console.log("from to", from, to)
 
-      if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing') {
+      if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing' || this.loggedIn.userRole == 'Doctor') {
 
         appointmentData$ = this.appointmentService.getAppointmentByDate(from, to);
         this.isAppointmentDateSelected = false;
@@ -155,15 +159,8 @@ export class AppointmentListComponent implements OnInit {
       }
     }
 
-     this.isAllowed = this.loggedIn.userRole == 'reception' ? false : true;
-
-    // if(this.loggedIn.userRole=='admin')
-    // {
-    //   appointmentData$=this.appointmentService.getAppointmentList();
-    // }
-    // else{
-    //   appointmentData$=this.appointmentService.getAppointmentByDoctorId(this.loggedIn.loginId);
-    // }
+    this.isAllowed = this.loggedIn.userRole == 'reception' ? false : true;
+ 
     const departmentData$ = this.departmentService.getDepartmentList();
     const staffData$ = this.staffService.getDoctorsList();
     const patientData$ = this.patientService.getPatientList();
@@ -350,11 +347,6 @@ export class AppointmentListComponent implements OnInit {
     }
   }
 
-  // onEditPatient(id:number){
-  //   this.patientService.patientId=id;
-
-  // }
-
   calculateDateDifference(dob: Date) {
     const start = new Date(dob);
     const end = new Date();
@@ -375,7 +367,8 @@ export class AppointmentListComponent implements OnInit {
 
   movetoProfile(patientId: number, appointmentId: number, departmentId: number, status: string, doctorId: number) {
     this.loadingService.showLoader();
-    this.patientService.patientId = patientId;
+    //this.patientService.patientId = patientId;
+    this.patientService.patientId=0;
     this.appointmentService.appointmentId = appointmentId;
     this.departmentService.departmentId = departmentId;
     this.dosctoService.staffId = doctorId;
@@ -391,8 +384,6 @@ export class AppointmentListComponent implements OnInit {
   }
 
   appointmentByDate(event: any, type: string): void {
-    // Extract the date part only
-    // const datePipe = new DatePipe('en-US');
     this.dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     if (type == 'from') {
       this.minToDate = this.dateOnly;
@@ -406,36 +397,60 @@ export class AppointmentListComponent implements OnInit {
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
-    //this.dateOnly = this.datePipe.transform(event.value, 'dd-MM-yyyy');
     if (from !== null && to !== null) {
       this.isAppointmentDateSelected = true;
       this.fetchCombineData();
 
     }
 
-
-
-    //     this.appointmentService.getappointmentByIdAndDate(19,this.dateOnly).subscribe((data:any)=>{
-
-    //     this.totalData=data.length;
-    //      // this.staffList.push(data);
-
-    //          console.log(data)
-    //          data.map((res: any, index: number) => {
-    //    const serialNumber = index + 1;
-    //    if (index >= this.skip && serialNumber <= this.limit) {
-    //      // this.calculateDateDifference(res.dob);
-    //      // res.ageinYear=this.age;
-
-    //      this.appointmentList.push(res);
-    //      // console.log(res.DOJ)
-    //      this.serialNumberArray.push(serialNumber);
-    //    }
-    //  });
-    //          this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
-    //          this.calculateTotalPages(this.totalData, this.pageSize);
-
-    //  })
-
   }
+    exportAppointmentList()
+    {
+      if (this.appointmentList.length > 0) 
+        {
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.appointmentList);
+        const workbook: XLSX.WorkBook = { Sheets: { 'Appointment': worksheet }, SheetNames: ['Appointment'] };
+
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+        // Call saveAsExcel
+        this.saveAsExcelFile(excelBuffer, 'Appointment');
+      }
+
+    }
+
+    exportAppointmentListAsPdf()
+    {
+      this.loadingService.showLoader();
+      const data = document.getElementById('convertToPdf');
+      if (data) {
+        html2canvas(data).then(canvas => {
+          const imgWidth = 208;
+          const pageHeight = 295;
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          const contentDataURL = canvas.toDataURL('image/png');
+          let pdf = new jsPDF('p', 'mm', 'a4');
+          const position = 0;
+  
+          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+          const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+           pdf.save(`Appointment${formattedDate}.pdf`);
+          
+        })
+      }
+  
+      this.loadingService.hideLoader();
+    }
+      
+      private saveAsExcelFile(buffer: any, fileName: string): void 
+      {
+    const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+    const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
+        
+  }
+
+
 }

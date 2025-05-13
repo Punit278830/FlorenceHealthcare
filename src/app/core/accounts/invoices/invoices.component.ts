@@ -11,6 +11,10 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import * as XLSX from 'xlsx';
+import * as FileSaver from 'file-saver';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface data {
   value: string;
@@ -268,4 +272,50 @@ export class InvoicesComponent implements OnInit {
     this.selectedPaymentMode = event.value;
     this.getTableData();
   }
+  exportInvoiceList()
+      {
+        if (this.invoices.length > 0) 
+          {
+          const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.invoices);
+          const workbook: XLSX.WorkBook = { Sheets: { 'Invoice': worksheet }, SheetNames: ['Invoice'] };
+  
+          const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+  
+          // Call saveAsExcel
+          this.saveAsExcelFile(excelBuffer, 'Invoice');
+        }
+  
+      }
+        
+        private saveAsExcelFile(buffer: any, fileName: string): void 
+        {
+          const date = new Date();
+          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+      const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+      FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
+    }
+
+    exportInvoiceListAsPdf() {
+      this.loadingService.showLoader();
+      const data = document.getElementById('convertToPdf');
+      if (data) {
+        html2canvas(data).then(canvas => {
+          const imgWidth = 208;
+          const pageHeight = 295;
+          const imgHeight = canvas.height * imgWidth / canvas.width;
+          const contentDataURL = canvas.toDataURL('image/png');
+          let pdf = new jsPDF('p', 'mm', 'a4');
+          const position = 0;
+  
+          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+          const date = new Date();
+          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+          pdf.save(`Invoice${formattedDate}.pdf`);        
+        })
+      }
+  
+      this.loadingService.hideLoader();
+    }
+  
+  
 }

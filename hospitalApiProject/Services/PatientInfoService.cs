@@ -30,14 +30,14 @@ namespace hospitalApiProject.Services
       {
         //PatientInfo? toReturn = default;
         // Check if a patient with the same IdentityNumber already exists
-        var existingPatient = await _context.PatientInfos
-                                            .FirstOrDefaultAsync(p => p.IdentityNumber == patientInfo.IdentityNumber);
+        //var existingPatient = await _context.PatientInfos
+        //                                    .FirstOrDefaultAsync(p => p.IdentityNumber == patientInfo.IdentityNumber);
 
-        if (existingPatient != null)
-        {
-          this.ErrorMessage = "Identity Number already exists.";
-          //return toReturn;
-        }
+        //if (existingPatient != null)
+        //{
+        //  this.ErrorMessage = "Identity Number already exists.";
+          
+        //}
 
         // Add the new PatientInfo
         _context.PatientInfos.Add(patientInfo);

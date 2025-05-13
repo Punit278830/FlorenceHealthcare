@@ -25,7 +25,7 @@ export class AddStaffComponent {
   private _staffDto!: IstaffInfo;
   public passwordClass = false;
   public passwordClass1 = false;
-  public _depDto: Idepartment[] = []
+  public _depDto: Idepartment[] = [];
   public maxDate: Date | null = null;
 
 

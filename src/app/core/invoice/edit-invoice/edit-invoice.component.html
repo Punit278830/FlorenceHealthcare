@@ -20,25 +20,47 @@
 
                 <div class="card ">
                     <div class="card-body">
-                        <form [formGroup]="invoiceItemForm">
-                        <div class="form-group local-forms">
-                            <label for="InvoiceItem">Invoice Item <span
-                                    class="login-danger">*</span></label>
-                            <mat-select formControlName="InvoiceItem"
-                                (selectionChange)="addItemToInvoice($event)" class="form-control select">
-                                <mat-option *ngFor="let data of allnvoiceItems" [value]="data.itemId">
-                                    {{data.itemName}}
-                                </mat-option>
-                            </mat-select>
-                        </div>
-                    </form>
+                        <div class="col">
+                                <div class="doctor-table-blk">
+                                  <h3>Search Item List</h3>
+                                  <div class="doctor-search-blk">
+                                    <div class="top-nav-search table-search-blk">
+                                      <!-- <input type="text" class="form-control" placeholder="Search here" [(ngModel)]="searchDataValue"
+                                        (ngModelChange)="searchItem(searchDataValue)"> -->
+                                        <input type="text" #itmeid class="form-control" placeholder="Search here">
+                                      <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
+                                    </div>                          
+                                  </div>
+                                  <button class="btn btn-primary submit-form me-2" (click)="searchItem(itmeid.value)">Search</button>
+                                </div>
+                              </div>                       
                     </div>
+                    </div>
+                    <div class="table-responsive" *ngIf="invoiceItemDto">
+                        <table class="table border-0 custom-table comman-table datatable mb-0">
+                            <thead>
+                                <tr>                                   
+                                    <th >Item Id</th>
+                                    <th >Name</th>
+                                    <th >Description</th>
+                                    <th >Disccount</th>
+                                    <th >Fee</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngIf="invoiceItemDto">
+                                <td>{{invoiceItemDto.itemId}}</td>                                        
+                              <td style="cursor: pointer;"><a (click)="addItemToInvoice(invoiceItemDto.itemId)">{{invoiceItemDto.itemName}}</a></td>
+                              <td>{{invoiceItemDto.description}}</td>
+                              <td>{{invoiceItemDto.discount}}</td>
+                             <td>{{invoiceItemDto.fee}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
 
                 <div *ngIf="flag" class="card ">
-                    <div class="card-body">
-
-                       
+                    <div class="card-body">                       
                         <form [formGroup]="addItemFormGroup" (submit)="submitItemToInvoice(addItemFormGroup)">
                             <div class="row">
                                 <div class="col-12">
