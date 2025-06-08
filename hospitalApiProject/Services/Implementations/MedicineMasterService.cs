@@ -13,7 +13,7 @@ namespace hospitalApiProject.Services.Implementations
 
         protected override int GetEntityId(MedicineMaster entity)
         {
-            return entity.MedicineId;
+            return entity.MedicineMasterId;
         }
 
         public async Task<IEnumerable<MedicineMaster>> GetAllMedicineMastersAsync()

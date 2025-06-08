@@ -78,36 +78,41 @@ namespace hospitalApiProject.Controllers
       return Ok(totalAmount);
     }
 
-    [HttpPost("createInvoice/{patientId}")]
-    public async Task<ActionResult> PostInvoiceWithAdditionalItems(int patientId, NewInvoiceDto request)
+    [HttpPost]
+    public async Task<ActionResult<Invoice>> CreateInvoice(NewInvoiceDto invoiceDto)
     {
-      try
+      var invoice = new Invoice
       {
-        var invoice = await _invoiceService.CreateInvoiceWithAdditionalItemsAsync(patientId, request);
-        return CreatedAtAction(nameof(GetInvoiceInfo), new { id = invoice.InvoiceId }, invoice);
-      }
-      catch (Exception ex)
-      {
-        return BadRequest(ex.Message);
-      }
+        PatientId = invoiceDto.PatientId,
+        AppointmentId = invoiceDto.AppointmentId,
+        TotalAmount = invoiceDto.TotalAmount,
+        PaymentStatus = "Pending"
+      };
+
+      await _invoiceService.AddAsync(invoice);
+      return Ok(invoice);
     }
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> PutInvoiceInfo(int id, InvoicePaymentDto invoicePaymentDto)
+    public async Task<ActionResult<Invoice>> UpdateInvoicePayment(int id, InvoicePaymentDto paymentDto)
     {
-      try
-      {
-        await _invoiceService.UpdateInvoicePaymentAsync(id, invoicePaymentDto);
-        return NoContent();
-      }
-      catch (KeyNotFoundException)
+      var invoice = await _invoiceService.GetByIdAsync(id);
+      if (invoice == null)
       {
         return NotFound();
       }
-      catch (Exception ex)
+
+      var paymentInfo = new PaymentInfo
       {
-        return BadRequest(ex.Message);
-      }
+        InvoiceId = id,
+        Amount = paymentDto.Amount,
+        PaymentMode = paymentDto.PaymentMode,
+        PaymentDate = DateTime.Now
+      };
+
+      invoice.PaymentInfos.Add(paymentInfo);
+      await _invoiceService.UpdateAsync(invoice);
+      return Ok(invoice);
     }
 
     [HttpPost("paymentMode")]

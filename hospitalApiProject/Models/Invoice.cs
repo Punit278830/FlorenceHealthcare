@@ -34,6 +34,11 @@ namespace hospitalApiProject.Models
         public DateTime CreatedDate { get; set; }
         
         public DateTime? ModifiedDate { get; set; }
+
+        [Required]
+        public DateTime InvoiceDate { get; set; }
+
+        public decimal PaidAmount { get; set; }
         
         [ForeignKey("PatientId")]
         public virtual Patient Patient { get; set; }

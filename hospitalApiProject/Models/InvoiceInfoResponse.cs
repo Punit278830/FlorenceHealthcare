@@ -21,7 +21,7 @@ namespace hospitalApiProject.Models
     // A list of payment modes associated with this invoice
     public string PaymentModes { get; set; } = string.Empty;
 
-    public List<PaymentModeInfo> PaymentDetails { get; set; }
+    public List<PaymentModeInfo> PaymentDetails { get; set; } = new List<PaymentModeInfo>();
 
   }
 }

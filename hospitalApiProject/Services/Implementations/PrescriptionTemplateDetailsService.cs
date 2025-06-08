@@ -13,7 +13,7 @@ namespace hospitalApiProject.Services.Implementations
 
         protected override int GetEntityId(PrescriptionTemplateDetail entity)
         {
-            return entity.TemplateDetailId;
+            return entity.PrescriptionTemplateDetailId;
         }
 
         public async Task<IEnumerable<PrescriptionTemplateDetail>> GetAllPrescriptionTemplateDetailsAsync()
@@ -29,7 +29,7 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<IEnumerable<PrescriptionTemplateDetail>> GetPrescriptionTemplateDetailsByTemplateIdAsync(int templateId)
         {
             return await _context.PrescriptionTemplateDetails
-                .Where(p => p.TemplateId == templateId)
+                .Where(p => p.PrescriptionTemplateId == templateId)
                 .ToListAsync();
         }
 

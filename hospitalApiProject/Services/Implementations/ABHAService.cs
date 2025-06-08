@@ -1187,9 +1187,25 @@ namespace hospitalApiProject.Services.Implementations
       }
     }
 
-    public async Task<Patient> AddPatient(Patient patient)
+    public async Task<Patient> AddPatient(PatientInfo patientInfo)
     {
-      return await _patientService.AddAsync(patient);
+        var patient = new Patient
+        {
+            FirstName = patientInfo.FirstName,
+            LastName = patientInfo.LastName,
+            Email = patientInfo.Email,
+            Phone = patientInfo.PhoneNumber,
+            DateOfBirth = patientInfo.DateOfBirth,
+            Gender = patientInfo.Gender,
+            Address = patientInfo.Address,
+            RegistrationDate = DateTime.Now
+        };
+
+        await _patientService.AddAsync(patient);
+        return patient;
     }
+
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
+    public string ErrorMessage { get; set; }
   }
 }

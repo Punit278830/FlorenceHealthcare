@@ -11,11 +11,9 @@ namespace hospitalApiProject.Models
 
         public int Id { get; set; }
 
-        [Required]
-        public string FirstName { get; set; }
+        public string? FirstName { get; set; }
 
-        [Required]
-        public string LastName { get; set; }
+        public string? LastName { get; set; }
 
         public string? MiddleName { get; set; }
 
@@ -35,7 +33,7 @@ namespace hospitalApiProject.Models
 
         public string? PostalCode { get; set; }
 
-        public string? PhoneNumber { get; set; }
+        public string? Phone { get; set; }
 
         public string? Email { get; set; }
 
@@ -52,6 +50,14 @@ namespace hospitalApiProject.Models
         public DateTime CreatedDate { get; set; }
 
         public DateTime? ModifiedDate { get; set; }
+
+        public DateTime RegistrationDate { get; set; }
+
+        public string? PatientImage { get; set; }
+
+        public string? IdentityName { get; set; }
+
+        public string? IdentityNumber { get; set; }
 
         public virtual ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
         public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();

@@ -26,7 +26,7 @@ namespace hospitalApiProject.Models
         [ForeignKey("PrescriptionTemplateId")]
         public virtual PrescriptionTemplateMaster PrescriptionTemplate { get; set; }
         
-        [ForeignKey("MedicineId")]
+        [ForeignKey("MedicineMasterId")]
         public virtual MedicineMaster Medicine { get; set; }
     }
 } 

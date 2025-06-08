@@ -1,15 +1,24 @@
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Models.Response;
 using hospitalApiProject.Services.Base;
-using hospitalApiProject.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Infrastructure.Repository.Interfaces;
 
 namespace hospitalApiProject.Services.Implementations
 {
     public class InvoiceService : EntityServiceBase<Invoice>, IInvoiceService
     {
-        public InvoiceService(FlorenceDbContext context) : base(context)
+        private readonly IGenericRepository<Invoice> _invoiceRepository;
+        private readonly IGenericRepository<PaymentInfo> _paymentInfoRepository;
+
+        public InvoiceService(FlorenceDbContext context, IGenericRepository<Invoice> invoiceRepository, IGenericRepository<PaymentInfo> paymentInfoRepository) : base(context)
         {
+            _invoiceRepository = invoiceRepository;
+            _paymentInfoRepository = paymentInfoRepository;
         }
 
         protected override int GetEntityId(Invoice entity)
@@ -34,6 +43,8 @@ namespace hospitalApiProject.Services.Implementations
 
         public async Task<Invoice> CreateInvoiceAsync(Invoice invoice)
         {
+            invoice.CreatedDate = DateTime.UtcNow;
+            invoice.InvoiceDate = DateTime.UtcNow;
             return await CreateAsync(invoice);
         }
 
@@ -61,34 +72,35 @@ namespace hospitalApiProject.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<InvoiceSummaryResponse> GetInvoiceSummaryAsync(int invoiceId)
+        public async Task<InvoiceInfoResponse> GetInvoiceSummaryAsync(int invoiceId)
         {
             var invoice = await _context.Invoices
-                .Include(i => i.Patient)
                 .Include(i => i.PaymentInfos)
-                .Include(i => i.PaymentModeInfos)
                 .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
 
             if (invoice == null)
                 return null;
 
-            var invoiceInfoResponse = new InvoiceInfoResponse
+            var totalPaid = invoice.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0;
+            var totalUnpaid = invoice.TotalAmount - totalPaid;
+
+            return new InvoiceInfoResponse
             {
                 InvoiceId = invoice.InvoiceId,
-                PatientName = $"{invoice.Patient.FirstName} {invoice.Patient.LastName}",
-                InvoiceDate = invoice.InvoiceDate,
+                PatientId = invoice.PatientId,
+                AppointmentId = invoice.AppointmentId,
                 TotalAmount = invoice.TotalAmount,
-                PaidAmount = invoice.PaymentInfos.Sum(p => p.Amount),
-                RemainingAmount = invoice.TotalAmount - invoice.PaymentInfos.Sum(p => p.Amount),
-                PaymentModes = invoice.PaymentModeInfos.Select(p => p.PaymentMode).ToList()
-            };
-
-            return new InvoiceSummaryResponse
-            {
-                Invoices = new List<InvoiceInfoResponse> { invoiceInfoResponse },
-                TotalOnlineAmount = invoice.PaymentModeInfos.Where(p => p.PaymentMode == "Online").Sum(p => p.Amount),
-                TotalCashAmount = invoice.PaymentModeInfos.Where(p => p.PaymentMode == "Cash").Sum(p => p.Amount),
-                TotalAmount = invoice.TotalAmount
+                TotalPaid = totalPaid,
+                TotalUnpaid = totalUnpaid,
+                Status = invoice.PaymentStatus,
+                PaymentModes = invoice.PaymentInfos?.Select(p => p.PaymentMode).Distinct().ToArray() ?? Array.Empty<string>(),
+                PaymentDetails = invoice.PaymentInfos?.Select(p => new PaymentDetailResponse
+                {
+                    PaymentId = p.PaymentId,
+                    Amount = p.Amount ?? 0,
+                    PaymentMode = p.PaymentMode,
+                    PaymentDate = p.PaymentDate
+                }).ToList() ?? new List<PaymentDetailResponse>()
             };
         }
 
@@ -98,7 +110,7 @@ namespace hospitalApiProject.Services.Implementations
 
             if (!string.IsNullOrEmpty(paymentMode))
             {
-                query = query.Where(i => i.PaymentMode == paymentMode);
+                query = query.Where(i => i.PaymentModeInfos.Any(p => p.PaymentMode == paymentMode));
             }
 
             if (!string.IsNullOrEmpty(paymentStatus))
@@ -113,17 +125,29 @@ namespace hospitalApiProject.Services.Implementations
                 query = query.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate);
             }
 
-            var invoices = await query.ToListAsync();
-            var totalAmount = invoices.Sum(i => i.TotalAmount);
-            var totalPaid = invoices.Sum(i => i.PaidAmount);
-            var totalDue = totalAmount - totalPaid;
+            var invoices = await query
+                .Include(i => i.PaymentModeInfos)
+                .ToListAsync();
+
+            var invoiceResponses = invoices.Select(i => new InvoiceInfoResponse
+            {
+                InvoiceId = i.InvoiceId,
+                PatientId = i.PatientId,
+                AppointmentId = i.AppointmentId,
+                CreatedDate = DateOnly.FromDateTime(i.CreatedDate),
+                Amount = (int)i.TotalAmount,
+                TotalUnpaidAmount = i.TotalAmount - i.PaidAmount,
+                Status = i.PaymentStatus,
+                PaymentModes = string.Join(",", i.PaymentModeInfos.Select(p => p.PaymentMode)),
+                PaymentDetails = i.PaymentModeInfos.ToList()
+            }).ToList();
 
             return new InvoiceSummaryResponse
             {
-                TotalAmount = totalAmount,
-                TotalPaid = totalPaid,
-                TotalDue = totalDue,
-                Invoices = invoices
+                Invoices = invoiceResponses,
+                TotalOnlineAmount = invoices.Sum(i => i.PaymentModeInfos.Where(p => p.PaymentMode == "Online").Sum(p => p.Amount)),
+                TotalCashAmount = invoices.Sum(i => i.PaymentModeInfos.Where(p => p.PaymentMode == "Cash").Sum(p => p.Amount)),
+                TotalAmount = invoices.Sum(i => i.TotalAmount)
             };
         }
 
@@ -143,33 +167,27 @@ namespace hospitalApiProject.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<TotalPaymentDetailsResponse> GetTotalPaymentAmountAsync(string fromDate, string toDate)
+        public async Task<TotalPaymentDetailsResponse> GetTotalAmountAsync(int patientId)
         {
-            var query = _context.Invoices.AsQueryable();
+            var invoices = await _invoiceRepository.GetAll()
+                .Include(i => i.PaymentInfos)
+                .Where(i => i.PatientId == patientId)
+                .ToListAsync();
 
-            if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
-            {
-                var startDate = DateTime.Parse(fromDate);
-                var endDate = DateTime.Parse(toDate);
-                query = query.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate);
-            }
-
-            var invoices = await query.ToListAsync();
             var totalAmount = invoices.Sum(i => i.TotalAmount);
-            var totalPaid = invoices.Sum(i => i.PaidAmount);
-            var totalDue = totalAmount - totalPaid;
+            var totalPaid = invoices.Sum(i => i.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0);
 
             return new TotalPaymentDetailsResponse
             {
-                TotalAmount = totalAmount,
-                TotalPaid = totalPaid,
-                TotalDue = totalDue
+                TotalAmount = (int)totalAmount,
+                TotalPaid = (int)totalPaid,
+                TotalDue = (int)(totalAmount - totalPaid)
             };
         }
 
         public async Task<int> GetTotalAmountAsync()
         {
-            return await _context.Invoices.SumAsync(i => i.TotalAmount);
+            return (int)await _context.Invoices.SumAsync(i => i.TotalAmount);
         }
 
         public async Task<InvoiceInfo> CreateInvoiceInfoAsync(InvoiceInfo invoiceInfo)
@@ -201,10 +219,14 @@ namespace hospitalApiProject.Services.Implementations
 
             return new InvoiceInfoDetail
             {
-                Invoice = invoice,
-                Patient = invoice.Patient,
-                PaymentInfos = invoice.PaymentInfos,
-                PaymentModeInfos = invoice.PaymentModeInfos
+                InvoiceId = invoice.InvoiceId,
+                PatientId = invoice.PatientId,
+                AppointmentId = invoice.AppointmentId,
+                CreatedDate = DateOnly.FromDateTime(invoice.CreatedDate),
+                Amount = (int)invoice.TotalAmount,
+                Status = invoice.PaymentStatus,
+                IsConsultationPaid = invoice.PaidAmount >= invoice.TotalAmount,
+                TransactionId = invoice.PaymentModeInfos.FirstOrDefault()?.TransactionId
             };
         }
 
@@ -214,6 +236,47 @@ namespace hospitalApiProject.Services.Implementations
                 .FirstOrDefaultAsync(i => i.PatientId == patientId);
 
             return invoice?.InvoiceId ?? 0;
+        }
+
+        public async Task<TotalPaymentDetailsResponse> GetTotalPaymentAmountAsync(string fromDate, string toDate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public async Task<InvoiceSummaryResponse> GetInvoiceSummaryAsync(int patientId)
+        {
+            var invoices = await _invoiceRepository.GetAll()
+                .Include(i => i.PaymentInfos)
+                .Where(i => i.PatientId == patientId)
+                .ToListAsync();
+
+            var totalPaid = invoices.Sum(i => i.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0);
+            var totalUnpaid = invoices.Sum(i => i.TotalAmount - (i.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0));
+
+            var paymentModes = invoices
+                .SelectMany(i => i.PaymentInfos ?? Enumerable.Empty<PaymentInfo>())
+                .Select(p => p.PaymentMode)
+                .Distinct()
+                .ToList();
+
+            var paymentDetails = invoices
+                .SelectMany(i => i.PaymentInfos ?? Enumerable.Empty<PaymentInfo>())
+                .Select(p => new PaymentDetailResponse
+                {
+                    Amount = p.Amount ?? 0,
+                    PaymentMode = p.PaymentMode,
+                    PaymentDate = p.PaymentDate
+                })
+                .ToList();
+
+            return new InvoiceSummaryResponse
+            {
+                Invoices = invoices,
+                TotalPaid = (int)totalPaid,
+                TotalDue = (int)totalUnpaid,
+                PaymentModes = paymentModes,
+                PaymentDetails = paymentDetails
+            };
         }
     }
 }

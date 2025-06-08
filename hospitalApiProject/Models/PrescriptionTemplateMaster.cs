@@ -31,10 +31,6 @@ namespace hospitalApiProject.Models
 
         public DateTime? ModifiedDate { get; set; }
 
-        public int Id { get; set; }
-
-        public int PrescriptionTemplateMasterId { get; set; }
-
         public virtual ICollection<PrescriptionTemplateDetail> PrescriptionTemplateDetails { get; set; }
     }
 }
