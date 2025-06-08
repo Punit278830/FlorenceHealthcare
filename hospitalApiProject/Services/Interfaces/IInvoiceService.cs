@@ -3,7 +3,7 @@ using hospitalApiProject.Models.Response;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IInvoiceService: ISimpleServiceBase
+    public interface IInvoiceService
     {
         Task<IEnumerable<Invoice>> GetAllInvoicesAsync();
         Task<Invoice> GetInvoiceByIdAsync(int id);

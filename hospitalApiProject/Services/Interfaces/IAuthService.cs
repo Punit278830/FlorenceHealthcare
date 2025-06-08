@@ -1,6 +1,6 @@
 namespace hospitalApiProject.Services.Interfaces
 {
-  public interface IAuthService: ISimpleServiceBase
+  public interface IAuthService
   {
     Task<string> GetTokenAsync();
   }

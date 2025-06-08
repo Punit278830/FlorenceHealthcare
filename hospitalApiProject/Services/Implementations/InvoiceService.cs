@@ -61,7 +61,7 @@ namespace hospitalApiProject.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<InvoiceSummary> GetInvoiceSummaryAsync(int invoiceId)
+        public async Task<InvoiceSummaryResponse> GetInvoiceSummaryAsync(int invoiceId)
         {
             var invoice = await _context.Invoices
                 .Include(i => i.Patient)
@@ -72,7 +72,7 @@ namespace hospitalApiProject.Services.Implementations
             if (invoice == null)
                 return null;
 
-            return new InvoiceSummary
+            var invoiceInfoResponse = new InvoiceInfoResponse
             {
                 InvoiceId = invoice.InvoiceId,
                 PatientName = $"{invoice.Patient.FirstName} {invoice.Patient.LastName}",
@@ -82,102 +82,138 @@ namespace hospitalApiProject.Services.Implementations
                 RemainingAmount = invoice.TotalAmount - invoice.PaymentInfos.Sum(p => p.Amount),
                 PaymentModes = invoice.PaymentModeInfos.Select(p => p.PaymentMode).ToList()
             };
+
+            return new InvoiceSummaryResponse
+            {
+                Invoices = new List<InvoiceInfoResponse> { invoiceInfoResponse },
+                TotalOnlineAmount = invoice.PaymentModeInfos.Where(p => p.PaymentMode == "Online").Sum(p => p.Amount),
+                TotalCashAmount = invoice.PaymentModeInfos.Where(p => p.PaymentMode == "Cash").Sum(p => p.Amount),
+                TotalAmount = invoice.TotalAmount
+            };
         }
 
         public async Task<InvoiceSummaryResponse> GetInvoiceWithPaymentsAsync(string paymentMode, string paymentStatus, string fromDate, string toDate)
         {
-            // Implementation for getting invoice summary with payments
-            throw new NotImplementedException();
+            var query = _context.Invoices.AsQueryable();
+
+            if (!string.IsNullOrEmpty(paymentMode))
+            {
+                query = query.Where(i => i.PaymentMode == paymentMode);
+            }
+
+            if (!string.IsNullOrEmpty(paymentStatus))
+            {
+                query = query.Where(i => i.PaymentStatus == paymentStatus);
+            }
+
+            if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+            {
+                var startDate = DateTime.Parse(fromDate);
+                var endDate = DateTime.Parse(toDate);
+                query = query.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate);
+            }
+
+            var invoices = await query.ToListAsync();
+            var totalAmount = invoices.Sum(i => i.TotalAmount);
+            var totalPaid = invoices.Sum(i => i.PaidAmount);
+            var totalDue = totalAmount - totalPaid;
+
+            return new InvoiceSummaryResponse
+            {
+                TotalAmount = totalAmount,
+                TotalPaid = totalPaid,
+                TotalDue = totalDue,
+                Invoices = invoices
+            };
         }
 
         public async Task<IEnumerable<object>> GetInvoicesForTodayAsync()
         {
-            // Implementation for getting today's invoices
-            throw new NotImplementedException();
+            var today = DateTime.Today;
+            return await _context.Invoices
+                .Where(i => i.InvoiceDate.Date == today)
+                .Select(i => new
+                {
+                    i.InvoiceId,
+                    i.PatientId,
+                    i.TotalAmount,
+                    i.PaidAmount,
+                    i.PaymentStatus
+                })
+                .ToListAsync();
         }
 
         public async Task<TotalPaymentDetailsResponse> GetTotalPaymentAmountAsync(string fromDate, string toDate)
         {
-            // Implementation for getting total payment amount
-            throw new NotImplementedException();
+            var query = _context.Invoices.AsQueryable();
+
+            if (!string.IsNullOrEmpty(fromDate) && !string.IsNullOrEmpty(toDate))
+            {
+                var startDate = DateTime.Parse(fromDate);
+                var endDate = DateTime.Parse(toDate);
+                query = query.Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate);
+            }
+
+            var invoices = await query.ToListAsync();
+            var totalAmount = invoices.Sum(i => i.TotalAmount);
+            var totalPaid = invoices.Sum(i => i.PaidAmount);
+            var totalDue = totalAmount - totalPaid;
+
+            return new TotalPaymentDetailsResponse
+            {
+                TotalAmount = totalAmount,
+                TotalPaid = totalPaid,
+                TotalDue = totalDue
+            };
         }
 
         public async Task<int> GetTotalAmountAsync()
         {
-            // Implementation for getting total amount
-            throw new NotImplementedException();
+            return await _context.Invoices.SumAsync(i => i.TotalAmount);
         }
 
         public async Task<InvoiceInfo> CreateInvoiceInfoAsync(InvoiceInfo invoiceInfo)
         {
-            // Implementation for creating invoice info
-            throw new NotImplementedException();
+            _context.InvoiceInfos.Add(invoiceInfo);
+            await _context.SaveChangesAsync();
+            return invoiceInfo;
         }
 
         public async Task<PaymentModeInfo> AddPaymentModeAsync(PaymentModeInfo paymentModeInfo)
         {
-            // Implementation for adding payment mode
-            throw new NotImplementedException();
+            _context.PaymentModeInfos.Add(paymentModeInfo);
+            await _context.SaveChangesAsync();
+            return paymentModeInfo;
         }
 
         public async Task<InvoiceInfoDetail> GetInvoiceInfoByIdAsync(int id)
         {
-            var invoiceInfo = await _context.InvoiceInfos
-                .Where(i => i.InvoiceId == id)
-                .Select(i => new InvoiceInfoDetail
-                {
-                    InvoiceId = i.InvoiceId,
-                    PatientId = (int)(i.PatientId ?? 0),
-                    AppointmentId = (int)(i.AppointmentId ?? 0),
-                    CreatedDate = i.CreatedDate,
-                    Amount = i.Amount,
-                    Status = i.Status,
-                    IsConsultationPaid = i.IsConsultationPaid,
-                    TransactionId = (bool)i.IsConsultationPaid
-                        ? _context.PaymentModeInfo
-                            .Where(p => p.InvoiceId == i.InvoiceId && p.ItemName == "Consultation")
-                            .OrderByDescending(p => p.PaymentDate)
-                            .Select(p => p.TransactionId)
-                            .FirstOrDefault()
-                        : null
-                })
-                .FirstOrDefaultAsync();
+            var invoice = await _context.Invoices
+                .Include(i => i.Patient)
+                .Include(i => i.PaymentInfos)
+                .Include(i => i.PaymentModeInfos)
+                .FirstOrDefaultAsync(i => i.InvoiceId == id);
 
-            if (invoiceInfo?.IsConsultationPaid == true)
+            if (invoice == null)
             {
-                var paymentInfo = await GetPaymentModeInfoByInvoiceId(id);
-                if (paymentInfo?.Count > 0)
-                {
-                    invoiceInfo.TransactionId = paymentInfo[0].TransactionId ?? "Cash";
-                }
-                else
-                {
-                    invoiceInfo.TransactionId = "Cash";
-                }
+                throw new KeyNotFoundException($"Invoice with ID {id} not found");
             }
 
-            return invoiceInfo;
-        }
-
-        private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? id)
-        {
-            if (id == 0)
+            return new InvoiceInfoDetail
             {
-                return null;
-            }
-
-            return await _context.PaymentModeInfo
-                .Where(e => e.InvoiceId == id && e.PaymentMode == "Online" && e.ItemId.HasValue && e.ItemId.ToString().Contains("Consultation"))
-                .ToListAsync();
+                Invoice = invoice,
+                Patient = invoice.Patient,
+                PaymentInfos = invoice.PaymentInfos,
+                PaymentModeInfos = invoice.PaymentModeInfos
+            };
         }
 
         public async Task<int> GetInvoiceByPatientIdAsync(int patientId)
         {
-            var maxInvoiceId = await _context.InvoiceInfos
-                .Where(i => i.PatientId == patientId)
-                .MaxAsync(i => i.InvoiceId);
+            var invoice = await _context.Invoices
+                .FirstOrDefaultAsync(i => i.PatientId == patientId);
 
-            return maxInvoiceId;
+            return invoice?.InvoiceId ?? 0;
         }
     }
 }

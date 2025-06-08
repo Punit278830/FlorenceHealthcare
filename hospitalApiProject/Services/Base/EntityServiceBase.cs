@@ -1,10 +1,11 @@
 using hospitalApiProject.Services.Interfaces;
+using hospitalApiProject.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace hospitalApiProject.Services.Base
 {
-    public abstract class EntityServiceBase<T> : SimpleServiceBase where T : class
+    public abstract class EntityServiceBase<T> where T : class
     {
         protected readonly FlorenceDbContext _context;
 

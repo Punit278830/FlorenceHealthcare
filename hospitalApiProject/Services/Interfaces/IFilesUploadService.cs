@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IFilesUploadService: ISimpleServiceBase
+    public interface IFilesUploadService
     {
         Task<IEnumerable<FilesUpload>> GetAllFilesUploadsAsync();
         Task<FilesUpload> GetFilesUploadByIdAsync(int id);

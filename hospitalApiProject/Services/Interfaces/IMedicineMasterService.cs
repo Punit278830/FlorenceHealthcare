@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IMedicineMasterService: ISimpleServiceBase
+    public interface IMedicineMasterService
     {
         Task<IEnumerable<MedicineMaster>> GetAllMedicineMastersAsync();
         Task<MedicineMaster> GetMedicineMasterByIdAsync(int id);

@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IDiagnosisTemplateMasterService: ISimpleServiceBase
+    public interface IDiagnosisTemplateMasterService
     {
         Task<IEnumerable<DiagnosisTemplateMaster>> GetAllDiagnosisTemplateMastersAsync();
         Task<DiagnosisTemplateMaster> GetDiagnosisTemplateMasterByIdAsync(int id);

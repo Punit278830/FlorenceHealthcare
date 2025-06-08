@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IPrescriptionService: ISimpleServiceBase
+    public interface IPrescriptionService
     {
         Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync();
         Task<Prescription> GetPrescriptionByIdAsync(int id);

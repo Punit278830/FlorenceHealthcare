@@ -2,38 +2,18 @@ using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace hospitalApiProject.Services.Implementations
 {
-  public class PatientInfoService : ServiceBase<PatientInfo>, IPatientInfoService
+  public class PatientInfoService : EntityServiceBase<PatientInfo>, IPatientInfoService
   {
-    private new readonly FlorenceDbContext _context;
-
     public PatientInfoService(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
-
-    public string ErrorMessage { get; set; }
-
-    public bool HasError
-    {
-      get { return !string.IsNullOrEmpty(ErrorMessage); }
-    }
-
-    public HttpStatusCode StatusCode { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
     public async Task AddPatient(PatientInfo patientInfo)
     {
-      try
-      {
-        await CreateAsync(patientInfo);
-      }
-      catch (Exception ex)
-      {
-        this.ErrorMessage = "Some error occurred while add new patient in the system.";
-      }
+      await CreateAsync(patientInfo);
     }
 
     public async Task<IEnumerable<PatientInfo>> GetAllPatientInfosAsync()
