@@ -25,7 +25,10 @@ public partial class PatientInfo
 
     public DateOnly? RegstrationDate { get; set; }
 
-  public string? IdentityName { get; set; }
+    public DateTime CreatedDate { get; set; }
+    public string MobileNumber { get; set; } = string.Empty;
 
-  public string? IdentityNumber { get; set; }
+    public string? IdentityName { get; set; }
+
+    public string? IdentityNumber { get; set; }
 }

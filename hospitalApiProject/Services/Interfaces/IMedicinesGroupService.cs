@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IMedicinesGroupService
+    public interface IMedicinesGroupService: ISimpleServiceBase
     {
         Task<IEnumerable<MedicinesGroup>> GetAllMedicinesGroupsAsync();
         Task<MedicinesGroup> GetMedicinesGroupByIdAsync(int id);

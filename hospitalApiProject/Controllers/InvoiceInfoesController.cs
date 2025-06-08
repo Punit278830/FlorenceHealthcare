@@ -83,7 +83,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var invoice = await _invoiceService.CreateInvoiceAsync(patientId, request);
+        var invoice = await _invoiceService.CreateInvoiceWithAdditionalItemsAsync(patientId, request);
         return CreatedAtAction(nameof(GetInvoiceInfo), new { id = invoice.InvoiceId }, invoice);
       }
       catch (Exception ex)
@@ -97,7 +97,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        await _invoiceService.UpdateInvoiceAsync(id, invoicePaymentDto);
+        await _invoiceService.UpdateInvoicePaymentAsync(id, invoicePaymentDto);
         return NoContent();
       }
       catch (KeyNotFoundException)

@@ -2,7 +2,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-    public interface IPaymentModeInfoService
+    public interface IPaymentModeInfoService: ISimpleServiceBase
     {
         Task<IEnumerable<PaymentModeInfo>> GetAllPaymentModeInfosAsync();
         Task<PaymentModeInfo> GetPaymentModeInfoByIdAsync(int id);

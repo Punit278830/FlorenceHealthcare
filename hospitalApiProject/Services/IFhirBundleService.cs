@@ -2,7 +2,7 @@ using Hl7.Fhir.Model;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-  public interface IFhirBundleService
+  public interface IFhirBundleService: ISimpleServiceBase
   {
     Bundle GetPrescriptionBundle();
 

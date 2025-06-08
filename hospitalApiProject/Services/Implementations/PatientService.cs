@@ -5,28 +5,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PatientService : ServiceBase<Patient>, IPatientService
+    public class PatientService : ServiceBase<PatientInfo>, IPatientService
     {
         public PatientService(FlorenceDbContext context) : base(context)
         {
         }
 
-        public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
+        public async Task<IEnumerable<PatientInfo>> GetAllPatientsAsync()
         {
             return await GetAllAsync();
         }
 
-        public async Task<Patient> GetPatientByIdAsync(int id)
+        public async Task<PatientInfo> GetPatientByIdAsync(int id)
         {
             return await GetByIdAsync(id);
         }
 
-        public async Task<Patient> UpdatePatientAsync(int id, Patient patient)
+        public async Task<PatientInfo> UpdatePatientAsync(int id, PatientInfo patient)
         {
             return await UpdateAsync(id, patient);
         }
 
-        public async Task<Patient> CreatePatientAsync(Patient patient)
+        public async Task<PatientInfo> CreatePatientAsync(PatientInfo patient)
         {
             return await CreateAsync(patient);
         }
@@ -41,7 +41,44 @@ namespace hospitalApiProject.Services.Implementations
             return await ExistsAsync(id);
         }
 
-        protected override int GetEntityId(Patient entity)
+        public async Task<PatientInfo[]> GetPatientsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
+        {
+            return await _context.PatientInfos
+                .Where(p => p.CreatedDate.Date >= startDate.ToDateTime(TimeOnly.MinValue) && 
+                           p.CreatedDate.Date <= endDate.ToDateTime(TimeOnly.MaxValue))
+                .ToArrayAsync();
+        }
+
+        public async Task<object> GetPatientCountByGenderAsync()
+        {
+            var genderCounts = await _context.PatientInfos
+                .GroupBy(p => p.Gender)
+                .Select(g => new { Gender = g.Key, Count = g.Count() })
+                .ToListAsync();
+
+            return genderCounts;
+        }
+
+        public async Task<IEnumerable<PatientInfo>> SearchPatientsAsync(string searchTerm)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+                return Enumerable.Empty<PatientInfo>();
+
+            return await _context.PatientInfos
+                .Where(p => p.FirstName.Contains(searchTerm) || 
+                           p.LastName.Contains(searchTerm) || 
+                           p.MobileNumber.Contains(searchTerm))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<PatientInfo>> GetByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.PatientInfos
+                .Where(p => p.CreatedDate >= startDate && p.CreatedDate <= endDate)
+                .ToListAsync();
+        }
+
+        protected override int GetEntityId(PatientInfo entity)
         {
             return entity.PatientId;
         }

@@ -17,14 +17,14 @@ namespace hospitalApiProject.Services.Implementations
     private new readonly IAuthService _authService;
     private new readonly string _token;
     private readonly FlorenceDbContext _context;
-    private readonly IPatientInfoService _patientInfoService;
+    private readonly IPatientService _patientService;
 
-    public ABHAService(ITokenService tokenService, IAuthService authService, FlorenceDbContext context, IPatientInfoService patientInfoService) : base(tokenService, authService)
+    public ABHAService(ITokenService tokenService, IAuthService authService, FlorenceDbContext context, IPatientService patientService) : base(tokenService, authService)
     {
       _baseUrl = "https://abhasbx.abdm.gov.in/abha";
       _phrBaseUrl = "https://phrsbx.abdm.gov.in";
       _context = context;
-      _patientInfoService = patientInfoService;
+      _patientService = patientService;
     }
 
     public async Task<string> GenerateOtp(string aadhar)
@@ -418,11 +418,11 @@ namespace hospitalApiProject.Services.Implementations
       };
 
       // Add the new PatientInfo
-      await _patientInfoService.AddPatient(patientInfo);
+      await _patientService.AddPatient(patientInfo);
 
-      if (_patientInfoService.HasError)
+      if (_patientService.HasError)
       {
-        toReturn.ErrorMessage = _patientInfoService.ErrorMessage;
+        toReturn.ErrorMessage = _patientService.ErrorMessage;
       }
 
       toReturn.PatientId = patientInfo.PatientId;

@@ -30,7 +30,7 @@ namespace hospitalApiProject.Services.Implementations
             {
                 throw new ArgumentException("Medicine name cannot be empty");
             }
-            return await ExistsAsync(e => e.MedName == medName);
+            return await _context.MedicineMasters.AnyAsync(e => e.MedName == medName);
         }
 
         public async Task<IEnumerable<MedicineMaster>> SearchAllMedicineMatchWithNameAsync(string medName)

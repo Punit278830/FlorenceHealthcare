@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Interfaces
 {
-  public interface IPatientInfoService
+  public interface IPatientInfoService: ISimpleServiceBase
   {
     Task<IEnumerable<PatientInfo>> GetAllPatientInfosAsync();
     Task<PatientInfo> GetPatientInfoByIdAsync(int id);
