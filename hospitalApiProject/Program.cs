@@ -4,6 +4,12 @@ using hospitalApiProject.Services.Implementations;
 using hospitalApiProject.Repository.Implementations;
 using hospitalApiProject.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Infrastructure.Interfaces;
+using Infrastructure.Implementations;
+using Repositories.Interfaces;
+using Repositories.Implementations;
+using Services.Interfaces;
+using Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<FlorenceDbContext>(options =>
-        options.UseSqlServer("myDb1"));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -36,6 +42,14 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
 builder.Services.AddScoped<IFhirBundleService, FhirBundleService>();
 builder.Services.AddTransient<FideliusEncryption>();
+
+// Register Repository Pattern
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IDbContextFactory, DbContextFactory>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+// Register Services
+builder.Services.AddScoped<IPatientService, PatientService>();
 
 var app = builder.Build();
 

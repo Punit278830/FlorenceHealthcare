@@ -10,10 +10,27 @@ namespace Repositories.Implementations
         private readonly IDbContextFactory _dbContextFactory;
         private DbContext? _context;
         private readonly Dictionary<string, DbContext> _contexts = new();
+        private IPatientRepository? _patientRepository;
 
         public UnitOfWork(IDbContextFactory dbContextFactory)
         {
             _dbContextFactory = dbContextFactory;
+        }
+
+        public IPatientRepository PatientRepository
+        {
+            get
+            {
+                if (_patientRepository == null)
+                {
+                    _context = _dbContextFactory.CreateDbContext("FlorenceDbContext");
+                    if (_context != null)
+                    {
+                        _patientRepository = new PatientRepository(_context);
+                    }
+                }
+                return _patientRepository!;
+            }
         }
 
         public IGenericRepository<T> GetRepository<T>(string dbContextName) where T : class

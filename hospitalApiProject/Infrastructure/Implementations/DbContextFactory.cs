@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Interfaces;
-using Models;
+using hospitalApiProject.Models;
 
 namespace Infrastructure.Implementations
 {

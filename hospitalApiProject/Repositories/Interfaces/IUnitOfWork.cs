@@ -6,5 +6,6 @@ namespace Repositories.Interfaces
     {
         void SaveChanges();
         IGenericRepository<T> GetRepository<T>(string dbContextName) where T : class;
+        IPatientRepository PatientRepository { get; }
     }
 } 

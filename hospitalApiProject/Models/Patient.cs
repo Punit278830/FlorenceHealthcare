@@ -32,5 +32,7 @@ namespace hospitalApiProject.Models
         public string? AbhaAddress { get; set; }
 
         public ICollection<InvoiceInfo> Invoices { get; set; } = new List<InvoiceInfo>();
+        
+        public ICollection<AppointmentInfo> AppointmentInfos { get; set; } = new List<AppointmentInfo>();
     }
 } 
