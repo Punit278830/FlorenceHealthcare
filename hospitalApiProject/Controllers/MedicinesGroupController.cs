@@ -1,105 +1,82 @@
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Controllers
 {
-  [Route("api/[controller]")]
-  [ApiController]
-  public class MedicinesGroupController : ControllerBase
-  {
-
-    private readonly FlorenceDbContext _context;
-
-    public MedicinesGroupController(FlorenceDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class MedicinesGroupController : ControllerBase
     {
-      _context = context;
-    }
+        private readonly IMedicinesGroupService _medicinesGroupService;
 
-    // GET: api/MedicinesGroup
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<MedicinesGroup>>> GetMedicinesGroup()
-    {
-      return await _context.MedicinesGroups.OrderByDescending(x => x.Id).ToListAsync();
-    }
-
-    // GET: api/MedicinesGroup/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<MedicinesGroup>> GetMedicinesGroup(int id)
-    {
-      var medicinesGroup = await _context.MedicinesGroups.FindAsync(id);
-
-      if (medicinesGroup == null)
-      {
-        return NotFound();
-      }
-
-      return medicinesGroup;
-    }
-
-    // PUT: api/MedicinesGroup/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutMedicinesGroup(int id, MedicinesGroup medicinesGroup)
-    {
-      if (id != medicinesGroup.Id)
-      {
-        return BadRequest();
-      }
-
-      _context.Entry(medicinesGroup).State = EntityState.Modified;
-
-      try
-      {
-        await _context.SaveChangesAsync();
-      }
-      catch (DbUpdateConcurrencyException)
-      {
-        if (!MedicinesGroupExists(id))
+        public MedicinesGroupController(IMedicinesGroupService medicinesGroupService)
         {
-          return NotFound();
+            _medicinesGroupService = medicinesGroupService;
         }
-        else
+
+        // GET: api/MedicinesGroup
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<MedicinesGroup>>> GetMedicinesGroup()
         {
-          throw;
+            var medicinesGroups = await _medicinesGroupService.GetAllMedicinesGroupsAsync();
+            return Ok(medicinesGroups);
         }
-      }
 
-      return NoContent();
+        // GET: api/MedicinesGroup/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<MedicinesGroup>> GetMedicinesGroup(int id)
+        {
+            var medicinesGroup = await _medicinesGroupService.GetMedicinesGroupByIdAsync(id);
+
+            if (medicinesGroup == null)
+            {
+                return NotFound();
+            }
+
+            return medicinesGroup;
+        }
+
+        // PUT: api/MedicinesGroup/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMedicinesGroup(int id, MedicinesGroup medicinesGroup)
+        {
+            try
+            {
+                await _medicinesGroupService.UpdateMedicinesGroupAsync(id, medicinesGroup);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+        }
+
+        // POST: api/MedicinesGroup
+        [HttpPost]
+        public async Task<ActionResult<MedicinesGroup>> PostMedicinesGroup(MedicinesGroup medicinesGroup)
+        {
+            var createdMedicinesGroup = await _medicinesGroupService.CreateMedicinesGroupAsync(medicinesGroup);
+            return CreatedAtAction("GetMedicinesGroup", new { id = createdMedicinesGroup.Id }, createdMedicinesGroup);
+        }
+
+        // DELETE: api/MedicinesGroup/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMedicinesGroup(int id)
+        {
+            try
+            {
+                await _medicinesGroupService.DeleteMedicinesGroupAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
-
-    // POST: api/MedicinesGroup
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<MedicinesGroup>> PostMedicinesGroup(MedicinesGroup medicinesGroup)
-    {
-      _context.MedicinesGroups.Add(medicinesGroup);
-      await _context.SaveChangesAsync();
-
-      return CreatedAtAction("GetMedicinesGroup", new { id = medicinesGroup.Id }, medicinesGroup);
-    }
-
-    // DELETE: api/MedicinesGroup/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMedicinesGroup(int id)
-    {
-      var medicinesGroup = await _context.MedicinesGroups.FindAsync(id);
-      if (medicinesGroup == null)
-      {
-        return NotFound();
-      }
-
-      _context.MedicinesGroups.Remove(medicinesGroup);
-      await _context.SaveChangesAsync();
-
-      return NoContent();
-    }
-
-    private bool MedicinesGroupExists(int id)
-    {
-      return _context.MedicinesGroups.Any(e => e.Id == id);
-    }
-
-
-  }
 }

@@ -39,7 +39,8 @@ builder.Services.AddScoped<IAbhaM2Service, ABHAService>();
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
+builder.Services.AddScoped<IPatientInfoService, PatientInfoService>();
+builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IFhirBundleService, FhirBundleService>();
 builder.Services.AddTransient<FideliusEncryption>();
 
@@ -50,6 +51,18 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // Register Services
 builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IMedicinesGroupService, MedicinesGroupService>();
+builder.Services.AddScoped<IDiagnosisTemplateMasterService, DiagnosisTemplateMasterService>();
+builder.Services.AddScoped<IMedicineMasterService, MedicineMasterService>();
+builder.Services.AddScoped<IFilesUploadService, FilesUploadService>();
+builder.Services.AddScoped<IPrescriptionTemplateMasterService, PrescriptionTemplateMasterService>();
+builder.Services.AddScoped<IPrescriptionTemplateDetailsService, PrescriptionTemplateDetailsService>();
+builder.Services.AddScoped<IPrescriptionDetailsService, PrescriptionDetailsService>();
+builder.Services.AddScoped<IPrescriptionService, PrescriptionService>();
+builder.Services.AddScoped<IPaymentModeInfoService, PaymentModeInfoService>();
+builder.Services.AddScoped<IPaymentInfoService, PaymentInfoService>();
+builder.Services.AddScoped<IDiagnosisService, DiagnosisService>();
 
 var app = builder.Build();
 

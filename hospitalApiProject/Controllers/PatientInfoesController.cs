@@ -1,196 +1,114 @@
-using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 
 namespace hospitalApiProject.Controllers
 {
-  [Route("api/[controller]")]
-  [ApiController]
-  public class PatientInfoesController : ControllerBase
-  {
-    private readonly FlorenceDbContext _context;
-    private readonly IPatientInfoService _patientInfoService;
-
-    public PatientInfoesController(FlorenceDbContext context, IPatientInfoService patientInfoService)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PatientInfoesController : ControllerBase
     {
-      _context = context;
-      _patientInfoService = patientInfoService;
-    }
+        private readonly IPatientService _patientService;
 
-    // GET: api/PatientInfoes
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<PatientInfo>>> GetPatientInfos()
-    {
-      return await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
-    }
-
-    [HttpGet("regestrationDateRange/{startDate}/{endDate}")]
-    public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateOnly startDate, DateOnly endDate)
-    {
-
-
-      List<PatientInfo> patientData = await _context.PatientInfos
-          .Where(e => e.RegstrationDate >= startDate && e.RegstrationDate <= endDate)
-          .ToListAsync();
-
-
-      if (patientData != null)
-      {
-        return Ok(patientData);
-      }
-
-      return NotFound();
-    }
-    // GET: api/PatientInfoes/PatientCountByGender
-    [HttpGet("PatientCountByGender")]
-    public async Task<ActionResult<PatientInfo>> GetPatientCountByGender()
-    {
-      var maleCount = await _context.PatientInfos
-                                .Where(p => p.Gender == "male")
-                                .CountAsync();
-      var femaleCount = await _context.PatientInfos
-                                       .Where(p => p.Gender == "female")
-                                       .CountAsync();
-      var transgenderCount = await _context.PatientInfos
-                                            .Where(p => p.Gender == "transgender")
-                                            .CountAsync();
-
-      // Calculate total count
-      var totalCount = maleCount + femaleCount + transgenderCount;
-
-      // Calculate percentages 
-      var malePercentage = totalCount > 0 ? (int)((maleCount / (double)totalCount) * 100) : 0;
-      var femalePercentage = totalCount > 0 ? (int)((femaleCount / (double)totalCount) * 100) : 0;
-      var transgenderPercentage = totalCount > 0 ? (int)((transgenderCount / (double)totalCount) * 100) : 0;
-
-      var result = new
-      {
-        Male = malePercentage,
-        Female= femalePercentage,
-        Transgender = transgenderPercentage
-      };
-
-      return Ok(result);
-    }
-
-    //GET: api/PatientInfoes/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PatientInfo>> GetPatientInfo(int id)
-    {
-      var patientInfo = await _context.PatientInfos.FindAsync(id);
-
-
-      if (patientInfo == null)
-      {
-        return NotFound();
-      }
-
-      return patientInfo;
-    }
-    // GET: api/PatientInfoes/searchData
-    [HttpGet("SearchData")]
-    public async Task<IActionResult> SearchPatient(string data)
-    {
-      try
-      {
-
-        IQueryable<PatientInfo> query = _context.PatientInfos;
-        if (!string.IsNullOrEmpty(data))
+        public PatientInfoesController(IPatientService patientService)
         {
-          query = query.Where(e => EF.Functions.Like(e.Mobile, $"%{data}%"));
-          List<PatientInfo> result = await query.ToListAsync();
-          return Ok(result);
-        }
-        return NotFound();
-      }
-      catch (Exception ex)
-      {
-        return BadRequest(ex.Message);
-      }
-    }
-
-
-
-    // PUT: api/PatientInfoes/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutPatientInfo(int id, PatientInfo patientInfo)
-    {
-      if (id != patientInfo.PatientId)
-      {
-        return BadRequest();
-      }
-
-      _context.Entry(patientInfo).State = EntityState.Modified;
-
-      try
-      {
-        await _context.SaveChangesAsync();
-      }
-      catch (DbUpdateConcurrencyException)
-      {
-        if (!PatientInfoExists(id))
-        {
-          return NotFound();
-        }
-        else
-        {
-          throw;
-        }
-      }
-
-      return NoContent();
-    }
-
-    // POST: api/PatientInfoes
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<PatientInfo>> PostPatientInfo(PatientInfo patientInfo)
-    {
-      if (patientInfo == null)
-      {
-        return BadRequest("Invalid input request provided.");
-      }
-      // Check if a patient with the same IdentityNumber already exists
-      await _patientInfoService.AddPatient(patientInfo);
-
-      if (_patientInfoService.HasError)
-      {
-        // Return a conflict response if the IdentityNumber already exists
-        if (_patientInfoService.ErrorMessage == "Identity Number already exists.")
-        {
-          return Conflict(new { message = _patientInfoService.ErrorMessage });
+            _patientService = patientService;
         }
 
-        return StatusCode(500, new { message = _patientInfoService.ErrorMessage });
-      }
+        // GET: api/PatientInfoes
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PatientInfo>>> GetPatientInfos()
+        {
+            var patients = await _patientService.GetAllPatientsAsync();
+            return Ok(patients);
+        }
 
-      return CreatedAtAction("GetPatientInfo", new { id = patientInfo.PatientId }, patientInfo);
+        // GET: api/PatientInfoes/date-range
+        [HttpGet("date-range")]
+        public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange([FromQuery] DateOnly startDate, [FromQuery] DateOnly endDate)
+        {
+            var patients = await _patientService.GetPatientsByDateRangeAsync(startDate, endDate);
+            return Ok(patients);
+        }
+
+        // GET: api/PatientInfoes/gender-count
+        [HttpGet("gender-count")]
+        public async Task<ActionResult<object>> GetPatientCountByGender()
+        {
+            var genderCount = await _patientService.GetPatientCountByGenderAsync();
+            return Ok(genderCount);
+        }
+
+        // GET: api/PatientInfoes/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PatientInfo>> GetPatientInfo(int id)
+        {
+            var patientInfo = await _patientService.GetPatientByIdAsync(id);
+
+            if (patientInfo == null)
+            {
+                return NotFound();
+            }
+
+            return patientInfo;
+        }
+
+        // GET: api/PatientInfoes/search
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<PatientInfo>>> SearchPatients([FromQuery] string searchTerm)
+        {
+            var patients = await _patientService.SearchPatientsAsync(searchTerm);
+            return Ok(patients);
+        }
+
+        // PUT: api/PatientInfoes/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPatientInfo(int id, PatientInfo patientInfo)
+        {
+            try
+            {
+                await _patientService.UpdatePatientAsync(id, patientInfo);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+        }
+
+        // POST: api/PatientInfoes
+        [HttpPost]
+        public async Task<ActionResult<PatientInfo>> PostPatientInfo(PatientInfo patientInfo)
+        {
+            try
+            {
+                var createdPatient = await _patientService.CreatePatientAsync(patientInfo);
+                return CreatedAtAction("GetPatientInfo", new { id = createdPatient.PatientId }, createdPatient);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        // DELETE: api/PatientInfoes/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePatientInfo(int id)
+        {
+            try
+            {
+                await _patientService.DeletePatientAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
-
-
-    // DELETE: api/PatientInfoes/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePatientInfo(int id)
-    {
-      var patientInfo = await _context.PatientInfos.FindAsync(id);
-      if (patientInfo == null)
-      {
-        return NotFound();
-      }
-
-      _context.PatientInfos.Remove(patientInfo);
-      await _context.SaveChangesAsync();
-
-      return NoContent();
-    }
-
-    private bool PatientInfoExists(int id)
-    {
-      return _context.PatientInfos.Any(e => e.PatientId == id);
-    }
-
-
-  }
 }

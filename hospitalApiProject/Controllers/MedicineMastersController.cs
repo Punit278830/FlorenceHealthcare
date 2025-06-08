@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 
 namespace hospitalApiProject.Controllers
 {
@@ -13,25 +14,26 @@ namespace hospitalApiProject.Controllers
     [ApiController]
     public class MedicineMastersController : ControllerBase
     {
-        private readonly FlorenceDbContext _context;
+        private readonly IMedicineMasterService _medicineMasterService;
 
-        public MedicineMastersController(FlorenceDbContext context)
+        public MedicineMastersController(IMedicineMasterService medicineMasterService)
         {
-            _context = context;
+            _medicineMasterService = medicineMasterService;
         }
 
         // GET: api/MedicineMasters
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MedicineMaster>>> GetMedicineMasters()
         {
-            return await _context.MedicineMasters.OrderByDescending(x => x.MedId).ToListAsync();
+            var medicines = await _medicineMasterService.GetAllMedicineMastersAsync();
+            return Ok(medicines);
         }
 
         // GET: api/MedicineMasters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicineMaster>> GetMedicineMaster(int id)
         {
-            var medicineMaster = await _context.MedicineMasters.FindAsync(id);
+            var medicineMaster = await _medicineMasterService.GetMedicineMasterByIdAsync(id);
 
             if (medicineMaster == null)
             {
@@ -41,109 +43,74 @@ namespace hospitalApiProject.Controllers
             return medicineMaster;
         }
 
-
         [HttpGet("medName/{medName}")]
-        public async Task<ActionResult<Boolean>> SearchMedicine(string medName)
+        public async Task<ActionResult<bool>> SearchMedicine(string medName)
         {
-            if (!string.IsNullOrEmpty(medName))
+            try
             {
-                var medExists = await _context.MedicineMasters.AnyAsync(e => e.MedName == medName);
+                var medExists = await _medicineMasterService.SearchMedicineAsync(medName);
                 return Ok(medExists);
             }
-            else
+            catch (ArgumentException ex)
             {
-                return BadRequest("Bad Request");
+                return BadRequest(ex.Message);
             }
         }
 
         [HttpGet("matchMedicineName/{medName}")]
         public async Task<ActionResult<IEnumerable<MedicineMaster>>> SearchAllMedicineMatchWithName(string medName)
         {
-            if (!string.IsNullOrEmpty(medName))
+            try
             {
-                var medExists = await _context.MedicineMasters
-            .Where(e => e.MedName.Contains(medName))
-            .ToListAsync();
-                if(medExists.Any())
-                {
-                    return Ok(medExists);
-                }
-                else
-                {
-                    return NotFound("No Match found");
-                }
-                
+                var medicines = await _medicineMasterService.SearchAllMedicineMatchWithNameAsync(medName);
+                return Ok(medicines);
             }
-            else
+            catch (ArgumentException ex)
             {
-                return BadRequest("Bad Request");
+                return BadRequest(ex.Message);
             }
         }
 
-
-
-
         // PUT: api/MedicineMasters/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMedicineMaster(int id, MedicineMaster medicineMaster)
         {
-            if (id != medicineMaster.MedId)
+            try
+            {
+                await _medicineMasterService.UpdateMedicineMasterAsync(id, medicineMaster);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException)
             {
                 return BadRequest();
             }
-
-            _context.Entry(medicineMaster).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MedicineMasterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         // POST: api/MedicineMasters
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<MedicineMaster>> PostMedicineMaster(MedicineMaster medicineMaster)
         {
-            _context.MedicineMasters.Add(medicineMaster);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetMedicineMaster", new { id = medicineMaster.MedId }, medicineMaster);
+            var createdMedicine = await _medicineMasterService.CreateMedicineMasterAsync(medicineMaster);
+            return CreatedAtAction("GetMedicineMaster", new { id = createdMedicine.MedId }, createdMedicine);
         }
 
         // DELETE: api/MedicineMasters/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicineMaster(int id)
         {
-            var medicineMaster = await _context.MedicineMasters.FindAsync(id);
-            if (medicineMaster == null)
+            try
+            {
+                await _medicineMasterService.DeleteMedicineMasterAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-
-            _context.MedicineMasters.Remove(medicineMaster);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool MedicineMasterExists(int id)
-        {
-            return _context.MedicineMasters.Any(e => e.MedId == id);
         }
     }
 }

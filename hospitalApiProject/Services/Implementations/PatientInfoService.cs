@@ -1,17 +1,15 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces;
+using hospitalApiProject.Services.Base;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace hospitalApiProject.Services.Implementations
 {
-  public class PatientInfoService : IPatientInfoService
+  public class PatientInfoService : ServiceBase<PatientInfo>, IPatientInfoService
   {
-    private readonly FlorenceDbContext _context;
-
-    public PatientInfoService(FlorenceDbContext context)
+    public PatientInfoService(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     public string ErrorMessage { get; set; }
@@ -27,28 +25,47 @@ namespace hospitalApiProject.Services.Implementations
     {
       try
       {
-        //PatientInfo? toReturn = default;
-        // Check if a patient with the same IdentityNumber already exists
-        //var existingPatient = await _context.PatientInfos
-        //                                    .FirstOrDefaultAsync(p => p.IdentityNumber == patientInfo.IdentityNumber);
-
-        //if (existingPatient != null)
-        //{
-        //  this.ErrorMessage = "Identity Number already exists.";
-          
-        //}
-
-        // Add the new PatientInfo
-        _context.PatientInfos.Add(patientInfo);
-        await _context.SaveChangesAsync();
-
-        //return patientInfo;
+        await CreateAsync(patientInfo);
       }
       catch (Exception ex)
       {
         this.ErrorMessage = "Some error occurred while add new patient in the system.";
-        //return null;
       }
+    }
+
+    public async Task<IEnumerable<PatientInfo>> GetAllPatientInfosAsync()
+    {
+      return await GetAllAsync();
+    }
+
+    public async Task<PatientInfo> GetPatientInfoByIdAsync(int id)
+    {
+      return await GetByIdAsync(id);
+    }
+
+    public async Task<PatientInfo> UpdatePatientInfoAsync(int id, PatientInfo patientInfo)
+    {
+      return await UpdateAsync(id, patientInfo);
+    }
+
+    public async Task<PatientInfo> CreatePatientInfoAsync(PatientInfo patientInfo)
+    {
+      return await CreateAsync(patientInfo);
+    }
+
+    public async Task DeletePatientInfoAsync(int id)
+    {
+      await DeleteAsync(id);
+    }
+
+    public async Task<bool> PatientInfoExistsAsync(int id)
+    {
+      return await ExistsAsync(id);
+    }
+
+    protected override int GetEntityId(PatientInfo entity)
+    {
+      return entity.PatientId;
     }
   }
 }

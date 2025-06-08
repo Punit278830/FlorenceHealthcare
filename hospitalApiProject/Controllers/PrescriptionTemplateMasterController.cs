@@ -1,122 +1,82 @@
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Controllers
 {
-  [Route("api/[controller]")]
-  [ApiController]
-  public class PrescriptionTemplateMasterController : ControllerBase
-  {
-    private readonly FlorenceDbContext _context;
-
-    public PrescriptionTemplateMasterController(FlorenceDbContext context)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class PrescriptionTemplateMasterController : ControllerBase
     {
-      _context = context;
-    }
+        private readonly IPrescriptionTemplateMasterService _prescriptionTemplateMasterService;
 
-    // GET: api/PrescriptionTemplateMaster
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<PrescriptionTemplateMaster>>> GetAllPrescriptionTemplates()
-    {
-      return await _context.PrescriptionTemplateMaster.OrderBy(x => x.TemplateName).ToListAsync();
-    }
-
-    // GET: api/PrescriptionTemplateMaster/5
-    [HttpGet("{id}")]
-    public async Task<ActionResult<PrescriptionTemplateMaster>> GetPrescriptionTemplate(int id)
-    {
-      var prescriptionTemplateMaster = await _context.PrescriptionTemplateMaster.FindAsync(id);
-
-      if (prescriptionTemplateMaster == null)
-      {
-        return NotFound();
-      }
-
-      return prescriptionTemplateMaster;
-    }
-
-    // PUT: api/PrescriptionTemplateMaster/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPut("{id}")]
-    public async Task<IActionResult> PutPrescriptionTemplate(int id, PrescriptionTemplateMaster prescriptionTemplateMaster)
-    {
-      if (id != prescriptionTemplateMaster.Id)
-      {
-        return BadRequest();
-      }
-
-      var existingTemplate = await _context.PrescriptionTemplateMaster
-          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName && pt.Id != id);
-
-      if (existingTemplate != null)
-      {
-        return Conflict(new { message = "A template with this name already exists." });
-      }
-
-      _context.Entry(prescriptionTemplateMaster).State = EntityState.Modified;
-
-      try
-      {
-        await _context.SaveChangesAsync();
-      }
-      catch (DbUpdateConcurrencyException)
-      {
-        if (!PrescriptionTemplateExists(id))
+        public PrescriptionTemplateMasterController(IPrescriptionTemplateMasterService prescriptionTemplateMasterService)
         {
-          return NotFound();
+            _prescriptionTemplateMasterService = prescriptionTemplateMasterService;
         }
-        else
+
+        // GET: api/PrescriptionTemplateMaster
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<PrescriptionTemplateMaster>>> GetPrescriptionTemplateMasters()
         {
-          throw;
+            var prescriptionTemplateMasters = await _prescriptionTemplateMasterService.GetAllPrescriptionTemplateMastersAsync();
+            return Ok(prescriptionTemplateMasters);
         }
-      }
 
-      return NoContent();
-    } 
+        // GET: api/PrescriptionTemplateMaster/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<PrescriptionTemplateMaster>> GetPrescriptionTemplateMaster(int id)
+        {
+            var prescriptionTemplateMaster = await _prescriptionTemplateMasterService.GetPrescriptionTemplateMasterByIdAsync(id);
 
-    // POST: api/PrescriptionTemplate
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<PrescriptionTemplateMaster>> PostPrescriptionTemplate(PrescriptionTemplateMaster prescriptionTemplateMaster)
-    {
-      // Check if a template with the same name already exists
-      var existingTemplate = await _context.PrescriptionTemplateMaster
-          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName);
+            if (prescriptionTemplateMaster == null)
+            {
+                return NotFound();
+            }
 
-      if (existingTemplate != null)
-      {
-        // Return a 409 Conflict response if the template name already exists
-        return Conflict(new { message = "A template with this name already exists." });
-      }
+            return prescriptionTemplateMaster;
+        }
 
-      // If no duplicate is found, save the new template
-      _context.PrescriptionTemplateMaster.Add(prescriptionTemplateMaster);
-      await _context.SaveChangesAsync();
+        // PUT: api/PrescriptionTemplateMaster/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutPrescriptionTemplateMaster(int id, PrescriptionTemplateMaster prescriptionTemplateMaster)
+        {
+            try
+            {
+                await _prescriptionTemplateMasterService.UpdatePrescriptionTemplateMasterAsync(id, prescriptionTemplateMaster);
+                return NoContent();
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
 
-      return CreatedAtAction("GetAllPrescriptionTemplates", new { id = prescriptionTemplateMaster.Id }, prescriptionTemplateMaster);
+        // POST: api/PrescriptionTemplateMaster
+        [HttpPost]
+        public async Task<ActionResult<PrescriptionTemplateMaster>> PostPrescriptionTemplateMaster(PrescriptionTemplateMaster prescriptionTemplateMaster)
+        {
+            var createdPrescriptionTemplateMaster = await _prescriptionTemplateMasterService.CreatePrescriptionTemplateMasterAsync(prescriptionTemplateMaster);
+            return CreatedAtAction("GetPrescriptionTemplateMaster", new { id = createdPrescriptionTemplateMaster.PrescriptionTemplateId }, createdPrescriptionTemplateMaster);
+        }
+
+        // DELETE: api/PrescriptionTemplateMaster/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePrescriptionTemplateMaster(int id)
+        {
+            try
+            {
+                await _prescriptionTemplateMasterService.DeletePrescriptionTemplateMasterAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+        }
     }
-
-
-    // DELETE: api/PrescriptionTemplateMaster/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeletePrescriptionTemplate(int id)
-    {
-      var prescriptionTemplate = await _context.PrescriptionTemplateMaster.FindAsync(id);
-      if (prescriptionTemplate == null)
-      {
-        return NotFound();
-      }
-
-      _context.PrescriptionTemplateMaster.Remove(prescriptionTemplate);
-      await _context.SaveChangesAsync();
-
-      return NoContent();
-    }
-
-    private bool PrescriptionTemplateExists(int id)
-    {
-      return _context.PrescriptionTemplateMaster.Any(e => e.Id == id);
-    }
-  }
 }

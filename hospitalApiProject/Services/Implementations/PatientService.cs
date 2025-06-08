@@ -1,55 +1,49 @@
 using hospitalApiProject.Models;
-using Services.Interfaces;
-using Repositories.Interfaces;
+using hospitalApiProject.Services.Interfaces;
+using hospitalApiProject.Services.Base;
+using Microsoft.EntityFrameworkCore;
 
-namespace Services.Implementations
+namespace hospitalApiProject.Services.Implementations
 {
-    public class PatientService : IPatientService
+    public class PatientService : ServiceBase<Patient>, IPatientService
     {
-        private readonly IUnitOfWork _unitOfWork;
-
-        public PatientService(IUnitOfWork unitOfWork)
+        public PatientService(FlorenceDbContext context) : base(context)
         {
-            _unitOfWork = unitOfWork;
         }
 
         public async Task<IEnumerable<Patient>> GetAllPatientsAsync()
         {
-            return await _unitOfWork.PatientRepository.GetPatientsWithAppointmentsAsync();
+            return await GetAllAsync();
         }
 
-        public async Task<Patient?> GetPatientByIdAsync(int id)
+        public async Task<Patient> GetPatientByIdAsync(int id)
         {
-            return await _unitOfWork.PatientRepository.GetPatientWithDetailsAsync(id);
+            return await GetByIdAsync(id);
+        }
+
+        public async Task<Patient> UpdatePatientAsync(int id, Patient patient)
+        {
+            return await UpdateAsync(id, patient);
         }
 
         public async Task<Patient> CreatePatientAsync(Patient patient)
         {
-            var result = await _unitOfWork.PatientRepository.Insert(patient);
-            _unitOfWork.SaveChanges();
-            return result;
-        }
-
-        public async Task<Patient> UpdatePatientAsync(Patient patient)
-        {
-            var result = await _unitOfWork.PatientRepository.UpdateAsync(patient);
-            _unitOfWork.SaveChanges();
-            return result;
+            return await CreateAsync(patient);
         }
 
         public async Task DeletePatientAsync(int id)
         {
-            var patient = await _unitOfWork.PatientRepository.GetByID(id);
-            if (patient != null)
-            {
-                _unitOfWork.PatientRepository.Update(patient);
-                _unitOfWork.SaveChanges();
-            }
+            await DeleteAsync(id);
         }
 
-        public async Task<IEnumerable<Patient>> SearchPatientsAsync(string searchTerm)
+        public async Task<bool> PatientExistsAsync(int id)
         {
-            return await _unitOfWork.PatientRepository.SearchPatientsAsync(searchTerm);
+            return await ExistsAsync(id);
+        }
+
+        protected override int GetEntityId(Patient entity)
+        {
+            return entity.PatientId;
         }
     }
 } 

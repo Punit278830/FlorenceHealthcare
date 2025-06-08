@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 
 namespace hospitalApiProject.Controllers
 {
@@ -13,25 +12,26 @@ namespace hospitalApiProject.Controllers
     [ApiController]
     public class DiagnosisTemplateMastersController : ControllerBase
     {
-        private readonly FlorenceDbContext _context;
+        private readonly IDiagnosisTemplateMasterService _diagnosisTemplateMasterService;
 
-        public DiagnosisTemplateMastersController(FlorenceDbContext context)
+        public DiagnosisTemplateMastersController(IDiagnosisTemplateMasterService diagnosisTemplateMasterService)
         {
-            _context = context;
+            _diagnosisTemplateMasterService = diagnosisTemplateMasterService;
         }
 
         // GET: api/DiagnosisTemplateMasters
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DiagnosisTemplateMaster>>> GetDiagnosisTemplateMasters()
         {
-            return await _context.DiagnosisTemplateMasters.ToListAsync();
+            var templates = await _diagnosisTemplateMasterService.GetAllDiagnosisTemplateMastersAsync();
+            return Ok(templates);
         }
 
         // GET: api/DiagnosisTemplateMasters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DiagnosisTemplateMaster>> GetDiagnosisTemplateMaster(int id)
         {
-            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FindAsync(id);
+            var diagnosisTemplateMaster = await _diagnosisTemplateMasterService.GetDiagnosisTemplateMasterByIdAsync(id);
 
             if (diagnosisTemplateMaster == null)
             {
@@ -46,30 +46,19 @@ namespace hospitalApiProject.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDiagnosisTemplateMaster(int id, DiagnosisTemplateMaster diagnosisTemplateMaster)
         {
-            if (id != diagnosisTemplateMaster.DiagnosId)
+            try
+            {
+                await _diagnosisTemplateMasterService.UpdateDiagnosisTemplateMasterAsync(id, diagnosisTemplateMaster);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
+            {
+                return NotFound();
+            }
+            catch (ArgumentException)
             {
                 return BadRequest();
             }
-
-            _context.Entry(diagnosisTemplateMaster).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DiagnosisTemplateMasterExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         // POST: api/DiagnosisTemplateMasters
@@ -77,31 +66,23 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<DiagnosisTemplateMaster>> PostDiagnosisTemplateMaster(DiagnosisTemplateMaster diagnosisTemplateMaster)
         {
-            _context.DiagnosisTemplateMasters.Add(diagnosisTemplateMaster);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDiagnosisTemplateMaster", new { id = diagnosisTemplateMaster.DiagnosId }, diagnosisTemplateMaster);
+            var createdTemplate = await _diagnosisTemplateMasterService.CreateDiagnosisTemplateMasterAsync(diagnosisTemplateMaster);
+            return CreatedAtAction("GetDiagnosisTemplateMaster", new { id = createdTemplate.Id }, createdTemplate);
         }
 
         // DELETE: api/DiagnosisTemplateMasters/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDiagnosisTemplateMaster(int id)
         {
-            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FindAsync(id);
-            if (diagnosisTemplateMaster == null)
+            try
+            {
+                await _diagnosisTemplateMasterService.DeleteDiagnosisTemplateMasterAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-
-            _context.DiagnosisTemplateMasters.Remove(diagnosisTemplateMaster);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool DiagnosisTemplateMasterExists(int id)
-        {
-            return _context.DiagnosisTemplateMasters.Any(e => e.DiagnosId == id);
         }
     }
 }

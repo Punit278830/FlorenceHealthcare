@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Services.Interfaces;
 
 namespace hospitalApiProject.Controllers
 {
@@ -13,26 +14,27 @@ namespace hospitalApiProject.Controllers
     [ApiController]
     public class FilesUploadsController : ControllerBase
     {
-        private readonly FlorenceDbContext _context;
+        private readonly IFilesUploadService _filesUploadService;
 
-        public FilesUploadsController(FlorenceDbContext context)
+        public FilesUploadsController(IFilesUploadService filesUploadService)
         {
-            _context = context;
+            _filesUploadService = filesUploadService;
         }
 
         // GET: api/FilesUploads
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FilesUpload>>> GetFilesUploads()
         {
-            return await _context.FilesUploads.ToListAsync();
+            var filesUploads = await _filesUploadService.GetAllFilesUploadsAsync();
+            return Ok(filesUploads);
         }
 
         // GET: api/FilesUploads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FilesUpload>> GetFilesUpload(int id)
         {
-            var filesUpload = await _context.FilesUploads.FindAsync(id);
-            
+            var filesUpload = await _filesUploadService.GetFilesUploadByIdAsync(id);
+
             if (filesUpload == null)
             {
                 return NotFound();
@@ -41,50 +43,32 @@ namespace hospitalApiProject.Controllers
             return filesUpload;
         }
 
-        [HttpGet("appointmentId/{appointmentId}")]
-        public async Task<ActionResult<List<FilesUpload>>> GetFilesUploadByAppointment(int appointmentId)
+        // GET: api/FilesUploads/appointment/5
+        [HttpGet("appointment/{appointmentId}")]
+        public async Task<ActionResult<List<FilesUpload>>> GetFilesUploadByAppointmentId(int appointmentId)
         {
-            List<FilesUpload> fileUpload = await _context.FilesUploads.Where(e=>e.AppointmentId==appointmentId).ToListAsync();
-
-            if (fileUpload == null || fileUpload.Count == 0)
-            {
-                return NotFound();
-            }
-
-            return fileUpload;
+            var filesUploads = await _filesUploadService.GetFilesUploadByAppointmentIdAsync(appointmentId);
+            return Ok(filesUploads);
         }
-
-
 
         // PUT: api/FilesUploads/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutFilesUpload(int id, FilesUpload filesUpload)
         {
-            if (id != filesUpload.FileId)
+            try
+            {
+                await _filesUploadService.UpdateFilesUploadAsync(id, filesUpload);
+                return NoContent();
+            }
+            catch (ArgumentException)
             {
                 return BadRequest();
             }
-
-            _context.Entry(filesUpload).State = EntityState.Modified;
-
-            try
+            catch (KeyNotFoundException)
             {
-                await _context.SaveChangesAsync();
+                return NotFound();
             }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!FilesUploadExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
         }
 
         // POST: api/FilesUploads
@@ -92,32 +76,23 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<FilesUpload>> PostFilesUpload(FilesUpload filesUpload)
         {
-            _context.FilesUploads.Add(filesUpload);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetFilesUpload", new { id = filesUpload.FileId }, filesUpload);
+            var createdFilesUpload = await _filesUploadService.CreateFilesUploadAsync(filesUpload);
+            return CreatedAtAction("GetFilesUpload", new { id = createdFilesUpload.FileId }, createdFilesUpload);
         }
 
         // DELETE: api/FilesUploads/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFilesUpload(int id)
         {
-            
-            var filesUpload = await _context.FilesUploads.FindAsync(id);
-            if (filesUpload == null)
+            try
+            {
+                await _filesUploadService.DeleteFilesUploadAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException)
             {
                 return NotFound();
             }
-
-            _context.FilesUploads.Remove(filesUpload);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool FilesUploadExists(int id)
-        {
-            return _context.FilesUploads.Any(e => e.FileId == id);
         }
     }
 }
