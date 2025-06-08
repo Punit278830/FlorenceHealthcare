@@ -242,41 +242,5 @@ namespace hospitalApiProject.Services.Implementations
         {
             throw new NotImplementedException();
         }
-
-        public async Task<InvoiceSummaryResponse> GetInvoiceSummaryAsync(int patientId)
-        {
-            var invoices = await _invoiceRepository.GetAll()
-                .Include(i => i.PaymentInfos)
-                .Where(i => i.PatientId == patientId)
-                .ToListAsync();
-
-            var totalPaid = invoices.Sum(i => i.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0);
-            var totalUnpaid = invoices.Sum(i => i.TotalAmount - (i.PaymentInfos?.Sum(p => p.Amount ?? 0) ?? 0));
-
-            var paymentModes = invoices
-                .SelectMany(i => i.PaymentInfos ?? Enumerable.Empty<PaymentInfo>())
-                .Select(p => p.PaymentMode)
-                .Distinct()
-                .ToList();
-
-            var paymentDetails = invoices
-                .SelectMany(i => i.PaymentInfos ?? Enumerable.Empty<PaymentInfo>())
-                .Select(p => new PaymentDetailResponse
-                {
-                    Amount = p.Amount ?? 0,
-                    PaymentMode = p.PaymentMode,
-                    PaymentDate = p.PaymentDate
-                })
-                .ToList();
-
-            return new InvoiceSummaryResponse
-            {
-                Invoices = invoices,
-                TotalPaid = (int)totalPaid,
-                TotalDue = (int)totalUnpaid,
-                PaymentModes = paymentModes,
-                PaymentDetails = paymentDetails
-            };
-        }
     }
 }
