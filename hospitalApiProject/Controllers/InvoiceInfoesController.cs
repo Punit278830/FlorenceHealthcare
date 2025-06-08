@@ -125,17 +125,10 @@ namespace hospitalApiProject.Controllers
     }
 
     [HttpPost]
-    public async Task<ActionResult<InvoiceInfo>> PostInvoiceInfo(InvoiceInfo invoiceInfo)
+    public async Task<ActionResult<Invoice>> CreateInvoice(Invoice invoice)
     {
-      try
-      {
-        var result = await _invoiceService.CreateInvoiceInfoAsync(invoiceInfo);
-        return CreatedAtAction(nameof(GetInvoiceInfo), new { id = result.InvoiceId }, result);
-      }
-      catch (Exception ex)
-      {
-        return BadRequest(ex.Message);
-      }
+      var createdInvoice = await _invoiceService.CreateInvoiceAsync(invoice);
+      return CreatedAtAction(nameof(GetInvoiceInfo), new { id = createdInvoice.InvoiceId }, createdInvoice);
     }
 
     [HttpDelete("{id}")]

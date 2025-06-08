@@ -14,7 +14,7 @@ namespace hospitalApiProject.Services.Interfaces
         Task<bool> InvoiceExistsAsync(int id);
         Task<InvoiceSummaryResponse> GetInvoiceWithPaymentsAsync(string paymentMode, string paymentStatus, string fromDate, string toDate);
         Task<IEnumerable<object>> GetInvoicesForTodayAsync();
-        Task<InvoiceInfoDetail> GetInvoiceByIdAsync(int id);
+        Task<InvoiceInfoDetail> GetInvoiceInfoByIdAsync(int id);
         Task<int> GetInvoiceByPatientIdAsync(int patientId);
         Task<TotalPaymentDetailsResponse> GetTotalPaymentAmountAsync(string fromDate, string toDate);
         Task<int> GetTotalAmountAsync();

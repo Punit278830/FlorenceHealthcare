@@ -37,6 +37,20 @@ namespace hospitalApiProject.Controllers
             return invoice;
         }
 
+        // GET: api/Invoice/info/5
+        [HttpGet("info/{id}")]
+        public async Task<ActionResult<InvoiceInfoDetail>> GetInvoiceInfo(int id)
+        {
+            var invoiceInfo = await _invoiceService.GetInvoiceInfoByIdAsync(id);
+
+            if (invoiceInfo == null)
+            {
+                return NotFound();
+            }
+
+            return invoiceInfo;
+        }
+
         // GET: api/Invoice/patient/5
         [HttpGet("patient/{patientId}")]
         public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoicesByPatientId(int patientId)

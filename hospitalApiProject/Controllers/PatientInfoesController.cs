@@ -110,5 +110,12 @@ namespace hospitalApiProject.Controllers
                 return NotFound();
             }
         }
+
+        [HttpGet("byDateRange")]
+        public async Task<ActionResult<IEnumerable<PatientInfo>>> GetPatientsByDateRange(DateTime startDate, DateTime endDate)
+        {
+            var patients = await _patientService.GetByDateRangeAsync(startDate, endDate);
+            return Ok(patients);
+        }
     }
 }

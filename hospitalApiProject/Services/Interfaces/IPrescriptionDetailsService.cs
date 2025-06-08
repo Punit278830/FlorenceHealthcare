@@ -4,11 +4,11 @@ namespace hospitalApiProject.Services.Interfaces
 {
     public interface IPrescriptionDetailsService
     {
-        Task<IEnumerable<PrescriptionDetails>> GetAllPrescriptionDetailsAsync();
-        Task<PrescriptionDetails> GetPrescriptionDetailsByIdAsync(int id);
-        Task<IEnumerable<PrescriptionDetails>> GetPrescriptionDetailsByPrescriptionIdAsync(int prescriptionId);
-        Task<PrescriptionDetails> UpdatePrescriptionDetailsAsync(int id, PrescriptionDetails prescriptionDetails);
-        Task<PrescriptionDetails> CreatePrescriptionDetailsAsync(PrescriptionDetails prescriptionDetails);
+        Task<IEnumerable<PrescriptionDetail>> GetAllPrescriptionDetailsAsync();
+        Task<PrescriptionDetail> GetPrescriptionDetailsByIdAsync(int id);
+        Task<IEnumerable<PrescriptionDetail>> GetPrescriptionDetailsByPrescriptionIdAsync(int prescriptionId);
+        Task<PrescriptionDetail> UpdatePrescriptionDetailsAsync(int id, PrescriptionDetail prescriptionDetail);
+        Task<PrescriptionDetail> CreatePrescriptionDetailsAsync(PrescriptionDetail prescriptionDetail);
         Task DeletePrescriptionDetailsAsync(int id);
         Task<bool> PrescriptionDetailsExistsAsync(int id);
     }

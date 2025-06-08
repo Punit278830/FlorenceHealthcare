@@ -67,7 +67,7 @@ namespace hospitalApiProject.Controllers
         public async Task<ActionResult<DiagnosisTemplateMaster>> PostDiagnosisTemplateMaster(DiagnosisTemplateMaster diagnosisTemplateMaster)
         {
             var createdTemplate = await _diagnosisTemplateMasterService.CreateDiagnosisTemplateMasterAsync(diagnosisTemplateMaster);
-            return CreatedAtAction("GetDiagnosisTemplateMaster", new { id = createdTemplate.Id }, createdTemplate);
+            return CreatedAtAction("GetDiagnosisTemplateMaster", new { id = createdTemplate.DiagnosisTemplateMasterId }, createdTemplate);
         }
 
         // DELETE: api/DiagnosisTemplateMasters/5

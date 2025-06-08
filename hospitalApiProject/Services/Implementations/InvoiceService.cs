@@ -8,8 +8,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class InvoiceService : ServiceBase<Invoice>, IInvoiceService
     {
+        private new readonly FlorenceDbContext _context;
+
         public InvoiceService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<Invoice>> GetAllInvoicesAsync()
@@ -85,7 +88,7 @@ namespace hospitalApiProject.Services.Implementations
             throw new NotImplementedException();
         }
 
-        public async Task<InvoiceInfoDetail> GetInvoiceByIdAsync(int id)
+        public async Task<InvoiceInfoDetail> GetInvoiceInfoByIdAsync(int id)
         {
             var invoiceInfo = await _context.InvoiceInfos
                 .Where(i => i.InvoiceId == id)
@@ -100,7 +103,7 @@ namespace hospitalApiProject.Services.Implementations
                     IsConsultationPaid = i.IsConsultationPaid,
                     TransactionId = (bool)i.IsConsultationPaid
                         ? _context.PaymentModeInfo
-                            .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
+                            .Where(p => p.InvoiceId == i.InvoiceId && p.ItemName == "Consultation")
                             .OrderByDescending(p => p.PaymentDate)
                             .Select(p => p.TransactionId)
                             .FirstOrDefault()
@@ -132,7 +135,7 @@ namespace hospitalApiProject.Services.Implementations
             }
 
             return await _context.PaymentModeInfo
-                .Where(e => e.InvoiceId == id && e.PaymentMode == "Online" && e.itemId.Contains("Consultation"))
+                .Where(e => e.InvoiceId == id && e.PaymentMode == "Online" && e.ItemId.HasValue && e.ItemId.ToString().Contains("Consultation"))
                 .ToListAsync();
         }
 

@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class DiagnosisService : ServiceBase<Diagnosis>, IDiagnosisService
     {
+        private new readonly FlorenceDbContext _context;
+
         public DiagnosisService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<Diagnosis>> GetAllDiagnosesAsync()

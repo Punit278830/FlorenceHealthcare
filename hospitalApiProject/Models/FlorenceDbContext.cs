@@ -67,6 +67,14 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<CareContext> CareContexts { get; set; }
 
+  public DbSet<Diagnosis> Diagnoses { get; set; }
+  public DbSet<Invoice> Invoices { get; set; }
+  public DbSet<PaymentInfo> PaymentInfos { get; set; }
+  public DbSet<PaymentModeInfo> PaymentModeInfos { get; set; }
+  public DbSet<Prescription> Prescriptions { get; set; }
+  public DbSet<PrescriptionDetail> PrescriptionDetails { get; set; }
+  public DbSet<PrescriptionTemplateDetail> PrescriptionTemplateDetails { get; set; }
+
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
@@ -280,21 +288,26 @@ public partial class FlorenceDbContext : DbContext
 
     modelBuilder.Entity<DiagnosisTemplateMaster>(entity =>
     {
-      entity.HasKey(e => e.DiagnosId).HasName("PK__diagnosi__330F5D69B0F1B8E9");
+      entity.HasKey(e => e.DiagnosisTemplateMasterId);
 
       entity.ToTable("diagnosisTemplateMaster");
 
-      entity.Property(e => e.DiagnosId).HasColumnName("diagnosId");
-      entity.Property(e => e.DiagnosName)
+      entity.Property(e => e.DiagnosisTemplateMasterId).HasColumnName("diagnosisTemplateMasterId");
+      entity.Property(e => e.DiagnosisTemplateName)
           .HasMaxLength(100)
           .IsUnicode(false)
-          .HasColumnName("diagnosName");
-      entity.Property(e => e.DiagnosStatus).HasColumnName("diagnosStatus");
-      entity.Property(e => e.DiagnosText)
+          .HasColumnName("diagnosisTemplateName");
+      entity.Property(e => e.DiagnosisTemplateStatus).HasColumnName("diagnosisTemplateStatus");
+      entity.Property(e => e.DiagnosisTemplateText)
           .HasMaxLength(255)
           .IsUnicode(false)
-          .HasColumnName("diagnosText");
+          .HasColumnName("diagnosisTemplateText");
     });
+
+    modelBuilder.Entity<DiagnosisTemplateMaster>()
+        .HasMany(d => d.Diagnoses)
+        .WithOne(d => d.DiagnosisTemplate)
+        .HasForeignKey(d => d.DiagnosisTemplateId);
 
     modelBuilder.Entity<FilesUpload>(entity =>
     {
@@ -621,6 +634,115 @@ public partial class FlorenceDbContext : DbContext
     });
 
     OnModelCreatingPartial(modelBuilder);
+
+    // Configure relationships and constraints
+    modelBuilder.Entity<Appointment>()
+        .HasOne(a => a.Patient)
+        .WithMany(p => p.Appointments)
+        .HasForeignKey(a => a.PatientId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Appointment>()
+        .HasOne(a => a.Doctor)
+        .WithMany(d => d.Appointments)
+        .HasForeignKey(a => a.DoctorId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Diagnosis>()
+        .HasOne(d => d.Patient)
+        .WithMany(p => p.Diagnoses)
+        .HasForeignKey(d => d.PatientId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Diagnosis>()
+        .HasOne(d => d.Doctor)
+        .WithMany(d => d.Diagnoses)
+        .HasForeignKey(d => d.DoctorId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Diagnosis>()
+        .HasOne(d => d.Appointment)
+        .WithMany(a => a.Diagnoses)
+        .HasForeignKey(d => d.AppointmentId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Diagnosis>()
+        .HasOne(d => d.DiagnosisTemplate)
+        .WithMany()
+        .HasForeignKey(d => d.DiagnosisTemplateId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Invoice>()
+        .HasOne(i => i.Patient)
+        .WithMany(p => p.Invoices)
+        .HasForeignKey(i => i.PatientId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Invoice>()
+        .HasOne(i => i.Appointment)
+        .WithMany()
+        .HasForeignKey(i => i.AppointmentId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PaymentInfo>()
+        .HasOne(p => p.Invoice)
+        .WithMany(i => i.PaymentInfos)
+        .HasForeignKey(p => p.InvoiceId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PaymentModeInfo>()
+        .HasOne(p => p.Invoice)
+        .WithMany(i => i.PaymentModeInfos)
+        .HasForeignKey(p => p.InvoiceId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Prescription>()
+        .HasOne(p => p.Patient)
+        .WithMany(p => p.Prescriptions)
+        .HasForeignKey(p => p.PatientId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Prescription>()
+        .HasOne(p => p.Doctor)
+        .WithMany(d => d.Prescriptions)
+        .HasForeignKey(p => p.DoctorId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Prescription>()
+        .HasOne(p => p.Appointment)
+        .WithMany(a => a.Prescriptions)
+        .HasForeignKey(p => p.AppointmentId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PrescriptionDetail>()
+        .HasOne(p => p.Prescription)
+        .WithMany(p => p.PrescriptionDetails)
+        .HasForeignKey(p => p.PrescriptionId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PrescriptionDetail>()
+        .HasOne(p => p.Medicine)
+        .WithMany(m => m.PrescriptionDetails)
+        .HasForeignKey(p => p.MedicineMasterId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PrescriptionTemplateDetail>()
+        .HasOne(p => p.PrescriptionTemplate)
+        .WithMany(p => p.PrescriptionTemplateDetails)
+        .HasForeignKey(p => p.PrescriptionTemplateId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<PrescriptionTemplateDetail>()
+        .HasOne(p => p.Medicine)
+        .WithMany(m => m.PrescriptionTemplateDetails)
+        .HasForeignKey(p => p.MedicineMasterId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<FilesUpload>()
+        .HasOne(f => f.Appointment)
+        .WithMany(a => a.FilesUploads)
+        .HasForeignKey(f => f.AppointmentId)
+        .OnDelete(DeleteBehavior.Restrict);
   }
 
   partial void OnModelCreatingPartial(ModelBuilder modelBuilder);

@@ -8,8 +8,11 @@ namespace hospitalApiProject.Services.Implementations
 {
   public class PatientInfoService : ServiceBase<PatientInfo>, IPatientInfoService
   {
+    private new readonly FlorenceDbContext _context;
+
     public PatientInfoService(FlorenceDbContext context) : base(context)
     {
+      _context = context;
     }
 
     public string ErrorMessage { get; set; }

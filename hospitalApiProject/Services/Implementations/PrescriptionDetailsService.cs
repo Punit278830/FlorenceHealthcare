@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class PrescriptionDetailsService : ServiceBase<PrescriptionDetail>, IPrescriptionDetailsService
     {
+        private new readonly FlorenceDbContext _context;
+
         public PrescriptionDetailsService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<PrescriptionDetail>> GetAllPrescriptionDetailsAsync()
@@ -16,7 +19,7 @@ namespace hospitalApiProject.Services.Implementations
             return await GetAllAsync();
         }
 
-        public async Task<PrescriptionDetail> GetPrescriptionDetailByIdAsync(int id)
+        public async Task<PrescriptionDetail> GetPrescriptionDetailsByIdAsync(int id)
         {
             return await GetByIdAsync(id);
         }
@@ -28,22 +31,22 @@ namespace hospitalApiProject.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<PrescriptionDetail> UpdatePrescriptionDetailAsync(int id, PrescriptionDetail prescriptionDetail)
+        public async Task<PrescriptionDetail> UpdatePrescriptionDetailsAsync(int id, PrescriptionDetail prescriptionDetail)
         {
             return await UpdateAsync(id, prescriptionDetail);
         }
 
-        public async Task<PrescriptionDetail> CreatePrescriptionDetailAsync(PrescriptionDetail prescriptionDetail)
+        public async Task<PrescriptionDetail> CreatePrescriptionDetailsAsync(PrescriptionDetail detail)
         {
-            return await CreateAsync(prescriptionDetail);
+            return await CreateAsync(detail);
         }
 
-        public async Task DeletePrescriptionDetailAsync(int id)
+        public async Task DeletePrescriptionDetailsAsync(int id)
         {
             await DeleteAsync(id);
         }
 
-        public async Task<bool> PrescriptionDetailExistsAsync(int id)
+        public async Task<bool> PrescriptionDetailsExistsAsync(int id)
         {
             return await ExistsAsync(id);
         }

@@ -12,5 +12,8 @@ namespace hospitalApiProject.Services.Interfaces
     Task<PatientInfo> CreatePatientInfoAsync(PatientInfo patientInfo);
     Task DeletePatientInfoAsync(int id);
     Task<bool> PatientInfoExistsAsync(int id);
+    Task AddPatient(PatientInfo patientInfo);
+    string ErrorMessage { get; set; }
+    bool HasError { get; }
   }
 }

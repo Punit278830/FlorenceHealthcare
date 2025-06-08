@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class PrescriptionTemplateMasterService : ServiceBase<PrescriptionTemplateMaster>, IPrescriptionTemplateMasterService
     {
+        private new readonly FlorenceDbContext _context;
+
         public PrescriptionTemplateMasterService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<PrescriptionTemplateMaster>> GetAllPrescriptionTemplateMastersAsync()
@@ -26,9 +29,9 @@ namespace hospitalApiProject.Services.Implementations
             return await UpdateAsync(id, prescriptionTemplateMaster);
         }
 
-        public async Task<PrescriptionTemplateMaster> CreatePrescriptionTemplateMasterAsync(PrescriptionTemplateMaster prescriptionTemplateMaster)
+        public async Task<PrescriptionTemplateMaster> CreatePrescriptionTemplateMasterAsync(PrescriptionTemplateMaster template)
         {
-            return await CreateAsync(prescriptionTemplateMaster);
+            return await CreateAsync(template);
         }
 
         public async Task DeletePrescriptionTemplateMasterAsync(int id)

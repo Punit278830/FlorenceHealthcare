@@ -14,8 +14,8 @@ namespace hospitalApiProject.Services.Implementations
     protected readonly string _baseUrl;
     protected readonly string _phrBaseUrl;
 
-    protected readonly IAuthService _authService;
-    protected readonly string _token;
+    private new readonly IAuthService _authService;
+    private new readonly string _token;
     private readonly FlorenceDbContext _context;
     private readonly IPatientInfoService _patientInfoService;
 
@@ -1185,6 +1185,11 @@ namespace hospitalApiProject.Services.Implementations
         // Log the exception
         throw new InvalidOperationException($"Failed to get patient details by ABHA address: {ex.Message}", ex);
       }
+    }
+
+    public async Task<Patient> AddPatient(Patient patient)
+    {
+      return await _patientService.AddAsync(patient);
     }
   }
 }

@@ -1,19 +1,37 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace hospitalApiProject.Models;
 
-public partial class FilesUpload
+public class FilesUpload
 {
-    public int FileId { get; set; }
+    [Key]
+    public int FilesUploadId { get; set; }
 
+    [Required]
     public int AppointmentId { get; set; }
 
-    public string FileName { get; set; } = null!;
+    [Required]
+    public string FileName { get; set; }
 
-    public string FileType { get; set; } = null!;
+    public string? FilePath { get; set; }
 
-    public string FileData { get; set; } = null!;
+    public string? FileType { get; set; }
 
-    public DateTime? UploadDate { get; set; }
+    public long? FileSize { get; set; }
+
+    public DateTime UploadDate { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
+    public int FileId { get; set; }
+    public byte[] FileData { get; set; }
+
+    [ForeignKey("AppointmentId")]
+    public virtual Appointment Appointment { get; set; }
 }

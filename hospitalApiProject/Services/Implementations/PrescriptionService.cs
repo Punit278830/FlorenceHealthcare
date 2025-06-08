@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class PrescriptionService : ServiceBase<Prescription>, IPrescriptionService
     {
+        private new readonly FlorenceDbContext _context;
+
         public PrescriptionService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync()

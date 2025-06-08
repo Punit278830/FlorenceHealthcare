@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class PaymentModeInfoService : ServiceBase<PaymentModeInfo>, IPaymentModeInfoService
     {
+        private new readonly FlorenceDbContext _context;
+
         public PaymentModeInfoService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<PaymentModeInfo>> GetAllPaymentModeInfosAsync()

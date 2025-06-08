@@ -17,7 +17,7 @@ namespace hospitalApiProject.Controllers
 
         // GET: api/PrescriptionTemplateDetails
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PrescriptionTemplateDetails>>> GetPrescriptionTemplateDetails()
+        public async Task<ActionResult<IEnumerable<PrescriptionTemplateDetail>>> GetPrescriptionTemplateDetails()
         {
             var prescriptionTemplateDetails = await _prescriptionTemplateDetailsService.GetAllPrescriptionTemplateDetailsAsync();
             return Ok(prescriptionTemplateDetails);
@@ -25,7 +25,7 @@ namespace hospitalApiProject.Controllers
 
         // GET: api/PrescriptionTemplateDetails/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<PrescriptionTemplateDetails>> GetPrescriptionTemplateDetails(int id)
+        public async Task<ActionResult<PrescriptionTemplateDetail>> GetPrescriptionTemplateDetails(int id)
         {
             var prescriptionTemplateDetails = await _prescriptionTemplateDetailsService.GetPrescriptionTemplateDetailsByIdAsync(id);
 
@@ -39,7 +39,7 @@ namespace hospitalApiProject.Controllers
 
         // GET: api/PrescriptionTemplateDetails/template/5
         [HttpGet("template/{templateId}")]
-        public async Task<ActionResult<IEnumerable<PrescriptionTemplateDetails>>> GetPrescriptionTemplateDetailsByTemplateId(int templateId)
+        public async Task<ActionResult<IEnumerable<PrescriptionTemplateDetail>>> GetPrescriptionTemplateDetailsByTemplateId(int templateId)
         {
             var prescriptionTemplateDetails = await _prescriptionTemplateDetailsService.GetPrescriptionTemplateDetailsByTemplateIdAsync(templateId);
             return Ok(prescriptionTemplateDetails);
@@ -47,11 +47,11 @@ namespace hospitalApiProject.Controllers
 
         // PUT: api/PrescriptionTemplateDetails/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutPrescriptionTemplateDetails(int id, PrescriptionTemplateDetails prescriptionTemplateDetails)
+        public async Task<IActionResult> PutPrescriptionTemplateDetails(int id, PrescriptionTemplateDetail prescriptionTemplateDetail)
         {
             try
             {
-                await _prescriptionTemplateDetailsService.UpdatePrescriptionTemplateDetailsAsync(id, prescriptionTemplateDetails);
+                await _prescriptionTemplateDetailsService.UpdatePrescriptionTemplateDetailsAsync(id, prescriptionTemplateDetail);
                 return NoContent();
             }
             catch (ArgumentException)
@@ -66,10 +66,10 @@ namespace hospitalApiProject.Controllers
 
         // POST: api/PrescriptionTemplateDetails
         [HttpPost]
-        public async Task<ActionResult<PrescriptionTemplateDetails>> PostPrescriptionTemplateDetails(PrescriptionTemplateDetails prescriptionTemplateDetails)
+        public async Task<ActionResult<PrescriptionTemplateDetail>> PostPrescriptionTemplateDetails(PrescriptionTemplateDetail prescriptionTemplateDetail)
         {
-            var createdPrescriptionTemplateDetails = await _prescriptionTemplateDetailsService.CreatePrescriptionTemplateDetailsAsync(prescriptionTemplateDetails);
-            return CreatedAtAction("GetPrescriptionTemplateDetails", new { id = createdPrescriptionTemplateDetails.PrescriptionTemplateDetailsId }, createdPrescriptionTemplateDetails);
+            var createdPrescriptionTemplateDetails = await _prescriptionTemplateDetailsService.CreatePrescriptionTemplateDetailsAsync(prescriptionTemplateDetail);
+            return CreatedAtAction("GetPrescriptionTemplateDetails", new { id = createdPrescriptionTemplateDetails.PrescriptionTemplateDetailId }, createdPrescriptionTemplateDetails);
         }
 
         // DELETE: api/PrescriptionTemplateDetails/5

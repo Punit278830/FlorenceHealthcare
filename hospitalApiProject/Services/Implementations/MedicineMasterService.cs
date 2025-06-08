@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class MedicineMasterService : ServiceBase<MedicineMaster>, IMedicineMasterService
     {
+        private new readonly FlorenceDbContext _context;
+
         public MedicineMasterService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<MedicineMaster>> GetAllMedicineMastersAsync()
@@ -36,17 +39,17 @@ namespace hospitalApiProject.Services.Implementations
             {
                 throw new ArgumentException("Medicine name cannot be empty");
             }
-            return await GetAllAsync(e => EF.Functions.Like(e.MedName, $"%{medName}%"));
+            return await _context.MedicineMasters.Where(e => EF.Functions.Like(e.MedicineName, $"%{medName}%")).ToListAsync();
         }
 
-        public async Task<MedicineMaster> UpdateMedicineMasterAsync(int id, MedicineMaster medicineMaster)
+        public async Task<MedicineMaster> UpdateMedicineMasterAsync(int id, MedicineMaster medicine)
         {
-            return await UpdateAsync(id, medicineMaster);
+            return await UpdateAsync(id, medicine);
         }
 
-        public async Task<MedicineMaster> CreateMedicineMasterAsync(MedicineMaster medicineMaster)
+        public async Task<MedicineMaster> CreateMedicineMasterAsync(MedicineMaster medicine)
         {
-            return await CreateAsync(medicineMaster);
+            return await CreateAsync(medicine);
         }
 
         public async Task DeleteMedicineMasterAsync(int id)
@@ -61,7 +64,7 @@ namespace hospitalApiProject.Services.Implementations
 
         protected override int GetEntityId(MedicineMaster entity)
         {
-            return entity.MedicineMasterId;
+            return entity.MedId;
         }
     }
 } 

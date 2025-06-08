@@ -1,15 +1,27 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace hospitalApiProject.Models;
 
-public partial class DiagnosisTemplateMaster
+public class DiagnosisTemplateMaster
 {
-    public int DiagnosId { get; set; }
+    [Key]
+    public int DiagnosisTemplateMasterId { get; set; }
 
-    public string DiagnosName { get; set; } = null!;
+    [Required]
+    public string DiagnosisTemplateName { get; set; }
 
-    public string DiagnosText { get; set; } = null!;
+    public string? DiagnosisTemplateStatus { get; set; }
 
-    public int DiagnosStatus { get; set; }
+    public string? DiagnosisTemplateText { get; set; }
+
+    public bool IsActive { get; set; }
+
+    public DateTime CreatedDate { get; set; }
+
+    public DateTime? ModifiedDate { get; set; }
+
+    public virtual ICollection<Diagnosis> Diagnoses { get; set; }
 }

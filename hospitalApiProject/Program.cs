@@ -3,18 +3,13 @@ using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Implementations;
 using hospitalApiProject.Repository.Implementations;
 using hospitalApiProject.Repository.Interfaces;
+using hospitalApiProject.Infrastructure.Repository.Interfaces;
+using hospitalApiProject.Infrastructure.Repository.Implementations;
 using Microsoft.EntityFrameworkCore;
-using Infrastructure.Interfaces;
-using Infrastructure.Implementations;
-using Repositories.Interfaces;
-using Repositories.Implementations;
-using Services.Interfaces;
-using Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<FlorenceDbContext>(options =>
@@ -29,7 +24,6 @@ builder.Services.AddCors(options =>
   .AllowAnyOrigin()
   .AllowAnyMethod()
   .AllowAnyHeader());
-
 });
 
 // Add services to the container
@@ -69,30 +63,23 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-
   app.UseCors("AllowAngularDev");
   app.UseSwagger();
   app.UseSwaggerUI();
-
 }
 else
 {
   app.UseCors("AllowAngularDev");
 }
 
-
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
-
 
 // Map controllers and additional endpoints
 app.UseEndpoints(endpoints =>
 {
   endpoints.MapControllers();
 });
-
-
-
 
 app.Run();

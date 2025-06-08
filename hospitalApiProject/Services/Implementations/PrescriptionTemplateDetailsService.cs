@@ -7,8 +7,11 @@ namespace hospitalApiProject.Services.Implementations
 {
     public class PrescriptionTemplateDetailsService : ServiceBase<PrescriptionTemplateDetail>, IPrescriptionTemplateDetailsService
     {
+        private new readonly FlorenceDbContext _context;
+
         public PrescriptionTemplateDetailsService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         public async Task<IEnumerable<PrescriptionTemplateDetail>> GetAllPrescriptionTemplateDetailsAsync()
@@ -16,7 +19,7 @@ namespace hospitalApiProject.Services.Implementations
             return await GetAllAsync();
         }
 
-        public async Task<PrescriptionTemplateDetail> GetPrescriptionTemplateDetailByIdAsync(int id)
+        public async Task<PrescriptionTemplateDetail> GetPrescriptionTemplateDetailsByIdAsync(int id)
         {
             return await GetByIdAsync(id);
         }
@@ -28,22 +31,22 @@ namespace hospitalApiProject.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<PrescriptionTemplateDetail> UpdatePrescriptionTemplateDetailAsync(int id, PrescriptionTemplateDetail prescriptionTemplateDetail)
+        public async Task<PrescriptionTemplateDetail> UpdatePrescriptionTemplateDetailsAsync(int id, PrescriptionTemplateDetail prescriptionTemplateDetail)
         {
             return await UpdateAsync(id, prescriptionTemplateDetail);
         }
 
-        public async Task<PrescriptionTemplateDetail> CreatePrescriptionTemplateDetailAsync(PrescriptionTemplateDetail prescriptionTemplateDetail)
+        public async Task<PrescriptionTemplateDetail> CreatePrescriptionTemplateDetailsAsync(PrescriptionTemplateDetail detail)
         {
-            return await CreateAsync(prescriptionTemplateDetail);
+            return await CreateAsync(detail);
         }
 
-        public async Task DeletePrescriptionTemplateDetailAsync(int id)
+        public async Task DeletePrescriptionTemplateDetailsAsync(int id)
         {
             await DeleteAsync(id);
         }
 
-        public async Task<bool> PrescriptionTemplateDetailExistsAsync(int id)
+        public async Task<bool> PrescriptionTemplateDetailsExistsAsync(int id)
         {
             return await ExistsAsync(id);
         }

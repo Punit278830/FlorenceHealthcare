@@ -77,7 +77,7 @@ namespace hospitalApiProject.Controllers
                e.Status,
                // Assign the single TransactionId if it exists; otherwise fetch based on conditions
                TransactionId = transactionIdForInvoice ?? _context.PaymentModeInfo
-                     .Where(p => p.InvoiceId == e.InvoiceId && p.itemName == e.ItemName)
+                     .Where(p => p.InvoiceId == e.InvoiceId && p.ItemName == e.ItemName)
                      .OrderByDescending(p => p.PaymentDate)
                      .Select(p => p.TransactionId)
                      .FirstOrDefault(),
@@ -110,8 +110,8 @@ namespace hospitalApiProject.Controllers
       }
       var tempRes = await this.GetPaymentModeInfoByInvoiceId(tempModel[0].InvoiceId);
       // Split the string by commas and convert each item to an integer
-      var values = tempRes.Where(x => x.itemId.Contains(","))
-    .Select(x => new { x.itemId, x.TransactionId })
+      var values = tempRes.Where(x => x.ItemId.HasValue && x.ItemId.ToString().Contains(","))
+    .Select(x => new { x.ItemId, x.TransactionId })
     .ToList();
 
       if (values.Count > 0)
@@ -121,10 +121,10 @@ namespace hospitalApiProject.Controllers
         string tempTransactionId = "";
         foreach (var value in values)
         {
-          if (value.itemId.Contains(","))
+          if (value.ItemId.HasValue && value.ItemId.ToString().Contains(","))
           {
             // Split the string by commas and join them back to a single string if needed
-            data = value.itemId.Split(',');
+            data = value.ItemId.ToString().Split(',');
             tempTransactionId = value.TransactionId;
           }
         }

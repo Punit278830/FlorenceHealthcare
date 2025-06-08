@@ -69,7 +69,7 @@ namespace hospitalApiProject.Controllers
         public async Task<ActionResult<PaymentModeInfo>> PostPaymentModeInfo(PaymentModeInfo paymentModeInfo)
         {
             var createdPaymentModeInfo = await _paymentModeInfoService.CreatePaymentModeInfoAsync(paymentModeInfo);
-            return CreatedAtAction("GetPaymentModeInfo", new { id = createdPaymentModeInfo.PaymentModeId }, createdPaymentModeInfo);
+            return CreatedAtAction("GetPaymentModeInfo", new { id = createdPaymentModeInfo.PaymentModeInfoId }, createdPaymentModeInfo);
         }
 
         // DELETE: api/PaymentModeInfo/5
