@@ -259,7 +259,7 @@ namespace hospitalApiProject.Controllers
 
         if (invoiceInfo != null)
         {
-          if (invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value)
+          if (!invoiceInfo.IsConsultationPaid)
           {
             unpaidAmount += invoiceInfo.Amount;
             invoiceInfo.IsConsultationPaid = true;
@@ -269,8 +269,7 @@ namespace hospitalApiProject.Controllers
           _context.InvoiceInfos.Update(invoiceInfo);
           await _context.SaveChangesAsync();
 
-          if (paymentModeInfo != null && paymentModeInfo.InvoiceId != 0 && (unpaidInvoiceItems.Count != 0 ||
-            (invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value)))
+          if (paymentModeInfo != null && paymentModeInfo.InvoiceId != 0 && (unpaidInvoiceItems.Count != 0 || !invoiceInfo.IsConsultationPaid))
           {
             paymentModeInfo.Amount = unpaidAmount;
             await AddPaymentModeInfo(paymentModeInfo);

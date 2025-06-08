@@ -1,6 +1,7 @@
 using hospitalApiProject.Services.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json;
 
 namespace hospitalApiProject.Services.Implementations
 {
@@ -392,10 +393,6 @@ namespace hospitalApiProject.Services.Implementations
     private void GetAuthToken()
     {
       _token = _tokenService.GetTokenFromCache();
-      if (_token == null)
-      {
-        _token = _authService.GenerateAuthToken();
-      }
     }
 
     public async Task<string> SendPostRequestAsync(string url, HttpClient client, string content)
@@ -444,5 +441,69 @@ namespace hospitalApiProject.Services.Implementations
       }
     }
 
+    protected async Task<T?> ExecuteGetAsync<T>(string endpoint)
+    {
+      using var client = new HttpClient();
+      var token = await _authService.GetTokenAsync();
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var response = await client.GetAsync($"{URL}{endpoint}");
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<T>(content);
+    }
+
+    protected async Task<T?> ExecutePostAsync<T>(string endpoint, object data)
+    {
+      using var client = new HttpClient();
+      var token = await _authService.GetTokenAsync();
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var response = await client.PostAsJsonAsync($"{URL}{endpoint}", data);
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<T>(content);
+    }
+
+    protected async Task<T?> ExecutePutAsync<T>(string endpoint, object data)
+    {
+      using var client = new HttpClient();
+      var token = await _authService.GetTokenAsync();
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var response = await client.PutAsJsonAsync($"{URL}{endpoint}", data);
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<T>(content);
+    }
+
+    protected async Task<T?> ExecuteDeleteAsync<T>(string endpoint)
+    {
+      using var client = new HttpClient();
+      var token = await _authService.GetTokenAsync();
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var response = await client.DeleteAsync($"{URL}{endpoint}");
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<T>(content);
+    }
+
+    protected async Task<T?> ExecutePatchAsync<T>(string endpoint, object data)
+    {
+      using var client = new HttpClient();
+      var token = await _authService.GetTokenAsync();
+      client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+      var response = await client.PatchAsJsonAsync($"{URL}{endpoint}", data);
+      response.EnsureSuccessStatusCode();
+
+      var content = await response.Content.ReadAsStringAsync();
+      return JsonSerializer.Deserialize<T>(content);
+    }
   }
 }

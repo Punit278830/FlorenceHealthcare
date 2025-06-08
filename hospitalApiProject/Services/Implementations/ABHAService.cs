@@ -1122,5 +1122,69 @@ namespace hospitalApiProject.Services.Implementations
 
     #endregion
 
+    public async Task<AbhaPatientDetails?> GetPatientDetailsAsync(string abhaNumber)
+    {
+      try
+      {
+        return await ExecuteGetAsync<AbhaPatientDetails>($"/api/v1/patients/{abhaNumber}");
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        throw new InvalidOperationException($"Failed to get patient details: {ex.Message}", ex);
+      }
+    }
+
+    public async Task<AbhaPatientDetails?> GetPatientDetailsByMobileAsync(string mobile)
+    {
+      try
+      {
+        return await ExecuteGetAsync<AbhaPatientDetails>($"/api/v1/patients/mobile/{mobile}");
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        throw new InvalidOperationException($"Failed to get patient details by mobile: {ex.Message}", ex);
+      }
+    }
+
+    public async Task<AbhaPatientDetails?> GetPatientDetailsByAadharAsync(string aadhar)
+    {
+      try
+      {
+        return await ExecuteGetAsync<AbhaPatientDetails>($"/api/v1/patients/aadhar/{aadhar}");
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        throw new InvalidOperationException($"Failed to get patient details by Aadhar: {ex.Message}", ex);
+      }
+    }
+
+    public async Task<AbhaPatientDetails?> GetPatientDetailsByHealthIdAsync(string healthId)
+    {
+      try
+      {
+        return await ExecuteGetAsync<AbhaPatientDetails>($"/api/v1/patients/healthid/{healthId}");
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        throw new InvalidOperationException($"Failed to get patient details by Health ID: {ex.Message}", ex);
+      }
+    }
+
+    public async Task<AbhaPatientDetails?> GetPatientDetailsByAbhaAddressAsync(string abhaAddress)
+    {
+      try
+      {
+        return await ExecuteGetAsync<AbhaPatientDetails>($"/api/v1/patients/abhaaddress/{abhaAddress}");
+      }
+      catch (Exception ex)
+      {
+        // Log the exception
+        throw new InvalidOperationException($"Failed to get patient details by ABHA address: {ex.Message}", ex);
+      }
+    }
   }
 }

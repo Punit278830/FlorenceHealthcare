@@ -1,59 +1,51 @@
-using hospitalApiProject.Services.Interfaces;
-using Newtonsoft.Json.Linq;
-using System.Security.Policy;
-using System.Text;
 using System.Text.Json;
+using hospitalApiProject.Services.Interfaces;
+using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Implementations
 {
-  public class AuthService : IAuthService
-  {
-    protected readonly string _clientId;
-    protected readonly string _clientSecret;
-    protected readonly string _token;
-    protected readonly ITokenService _tokenService;
-
-    public AuthService(IConfiguration configuration, ITokenService tokenService)
+    public class AuthService : IAuthService
     {
-      _clientId = configuration.GetSection("ABDMService").GetSection("ClientId").Value;
-      _clientSecret = configuration.GetSection("ABDMService").GetSection("ClientSecret").Value;
+        private readonly string _clientId;
+        private readonly string _clientSecret;
+        private string _token = string.Empty;
+        private readonly IConfiguration _configuration;
 
-      _tokenService = tokenService;
-    }
-
-    public string GenerateAuthToken()
-    {
-      string token = null;
-      //ExecuteGet();
-      var client = new HttpClient();
-      client.DefaultRequestHeaders.Add("REQUEST-ID", Guid.NewGuid().ToString());
-      client.DefaultRequestHeaders.Add("TIMESTAMP", DateTime.UtcNow.ToString("yyyy-MM-dd'T'HH:mm:ss.fff'Z'"));
-      client.DefaultRequestHeaders.Add("X-CM-ID", "sbx");
-
-      using StringContent jsonContent = new(
-        JsonSerializer.Serialize(new
+        public AuthService(IConfiguration configuration)
         {
-          clientId = _clientId,
-          clientSecret = _clientSecret,
-          grantType = "client_credentials"
-        }),
-        Encoding.UTF8,
-        "application/json");
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+            _clientId = _configuration["Auth:ClientId"] ?? throw new InvalidOperationException("ClientId configuration is missing");
+            _clientSecret = _configuration["Auth:ClientSecret"] ?? throw new InvalidOperationException("ClientSecret configuration is missing");
+        }
 
-      var response = client.PostAsync("https://dev.abdm.gov.in/api/hiecm/gateway/v3/sessions", jsonContent).Result;
+        public async Task<string> GetTokenAsync()
+        {
+            if (!string.IsNullOrEmpty(_token))
+            {
+                return _token;
+            }
 
-      if (response.IsSuccessStatusCode)
-      {
-        var jsonResponse = response.Content.ReadAsStringAsync().Result;
+            using var client = new HttpClient();
+            var tokenEndpoint = _configuration["Auth:TokenEndpoint"] ?? throw new InvalidOperationException("TokenEndpoint configuration is missing");
+            
+            var tokenRequest = new
+            {
+                client_id = _clientId,
+                client_secret = _clientSecret,
+                grant_type = "client_credentials"
+            };
 
-        var jObject = JObject.Parse(jsonResponse);
-        token = jObject["accessToken"].ToString();
-        string expiresIn = jObject["expiresIn"].ToString();
+            var response = await client.PostAsJsonAsync(tokenEndpoint, tokenRequest);
+            response.EnsureSuccessStatusCode();
 
-        _tokenService.SaveTokenInCache(token, expiresIn);
-      }
+            var tokenResponse = await response.Content.ReadFromJsonAsync<TokenResponse>();
+            if (tokenResponse?.AccessToken == null)
+            {
+                throw new InvalidOperationException("Failed to obtain access token");
+            }
 
-      return token;
+            _token = tokenResponse.AccessToken;
+            return _token;
+        }
     }
-  }
 }

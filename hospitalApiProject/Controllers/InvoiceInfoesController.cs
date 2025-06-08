@@ -65,9 +65,9 @@ namespace hospitalApiProject.Controllers
             CreatedDate = invoice.CreatedDate,
 
             // Set Amount to the total of base amount + additional items' amounts
-            Amount = invoice.Amount + _context.AdditionalInvoiceItems
+            Amount = (invoice.Amount + (_context.AdditionalInvoiceItems
                       .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                      .Sum(ai => ai.FinalAmount) ?? 0,  // Sum of additional item amounts; handle null case
+                      .Sum(ai => (int?)ai.FinalAmount) ?? 0)),
 
             Status = invoice.Status,
 
@@ -94,11 +94,11 @@ namespace hospitalApiProject.Controllers
                       .Distinct()) : null,
 
             // Total unpaid amount calculation: Amount - total paid from PaymentDetails
-            TotalUnpaidAmount = invoice.Amount + _context.AdditionalInvoiceItems
+            TotalUnpaidAmount = (invoice.Amount + (_context.AdditionalInvoiceItems
                       .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                      .Sum(ai => ai.FinalAmount) - _context.PaymentModeInfo
+                      .Sum(ai => (int?)ai.FinalAmount) ?? 0)) - (_context.PaymentModeInfo
                       .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                      .Sum(pm => pm.Amount) ?? 0
+                      .Sum(pm => (int?)pm.Amount) ?? 0),
           })
           .OrderByDescending(o => o.InvoiceId)
           .ToListAsync();
@@ -106,14 +106,14 @@ namespace hospitalApiProject.Controllers
       // Aggregating totals for online, cash, and all payments across all invoices
       var totalOnlineAmount = invoices.Sum(inv => inv.PaymentDetails
           .Where(pm => pm.PaymentMode.ToLower() == "online")
-          .Sum(pm => pm.Amount)) ?? 0;
+          .Sum(pm => pm.Amount ?? 0));
 
       var totalCashAmount = invoices.Sum(inv => inv.PaymentDetails
           .Where(pm => pm.PaymentMode.ToLower() == "cash")
-          .Sum(pm => pm.Amount)) ?? 0;
+          .Sum(pm => pm.Amount ?? 0));
 
       var totalAmount = invoices.Sum(inv => inv.PaymentDetails
-          .Sum(pm => pm.Amount)) ?? 0; // Sum of all payment amounts for all invoices
+          .Sum(pm => pm.Amount ?? 0)); // Sum of all payment amounts for all invoices
 
       // Returning the result with summary data
       return new InvoiceSummaryResponse
@@ -168,8 +168,8 @@ namespace hospitalApiProject.Controllers
     .Select(i => new InvoiceInfoDetail
     {
       InvoiceId = i.InvoiceId,
-      PatientId = i.PatientId,
-      AppointmentId = i.AppointmentId,
+      PatientId = (int)(i.PatientId ?? 0),
+      AppointmentId = (int)(i.AppointmentId ?? 0),
       CreatedDate = i.CreatedDate,
       Amount = i.Amount,
       Status = i.Status,
