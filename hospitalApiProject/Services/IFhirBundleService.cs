@@ -1,6 +1,6 @@
 using Hl7.Fhir.Model;
 
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Interfaces
 {
   public interface IFhirBundleService
   {

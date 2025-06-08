@@ -1,9 +1,9 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
-using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Interfaces;
 
-namespace hospitalApiProject.Services.Abha
+namespace hospitalApiProject.Services.Implementations
 {
   public interface IAbhaM2Service : ISimpleServiceBase
   {

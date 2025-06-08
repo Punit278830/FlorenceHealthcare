@@ -3,12 +3,11 @@ using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
 using hospitalApiProject.Models.Abha.response;
 using hospitalApiProject.Services.Interfaces;
-using hospitalApiProject.Services.Interfaces.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Patient = hospitalApiProject.Models.Abha.M2.Patient;
 
-namespace hospitalApiProject.Services.Abha
+namespace hospitalApiProject.Services.Implementations
 {
   public class ABHAService : ApiBase, IAbhaService, IAbhaM2Service
   {

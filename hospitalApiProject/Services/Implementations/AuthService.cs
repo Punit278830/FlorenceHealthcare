@@ -1,10 +1,10 @@
-using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Interfaces;
 using Newtonsoft.Json.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Text.Json;
 
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Implementations
 {
   public class AuthService : IAuthService
   {

@@ -1,7 +1,7 @@
-using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace hospitalApiProject.Services.Shared
+namespace hospitalApiProject.Services.Implementations
 {
   public class TokenService : ITokenService
   {

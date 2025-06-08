@@ -1,9 +1,8 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services;
-using hospitalApiProject.Services.Abha;
 using hospitalApiProject.Services.Interfaces;
-using hospitalApiProject.Services.Interfaces.Shared;
-using hospitalApiProject.Services.Shared;
+using hospitalApiProject.Services.Implementations;
+using hospitalApiProject.Repository.Implementations;
+using hospitalApiProject.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

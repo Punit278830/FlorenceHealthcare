@@ -1,9 +1,8 @@
-using hospitalApiProject.Services.Interfaces.Shared;
-using hospitalApiProject.Services.Shared;
+using hospitalApiProject.Services.Interfaces;
 using System.Net.Http.Headers;
 using System.Text;
 
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Implementations
 {
   public class ApiBase : SimpleServiceBase
   {

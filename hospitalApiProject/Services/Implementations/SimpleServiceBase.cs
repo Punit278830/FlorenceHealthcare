@@ -1,7 +1,7 @@
-using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Interfaces;
 using System.Net;
 
-namespace hospitalApiProject.Services.Shared
+namespace hospitalApiProject.Services.Implementations
 {
   public abstract class SimpleServiceBase : ISimpleServiceBase
   {

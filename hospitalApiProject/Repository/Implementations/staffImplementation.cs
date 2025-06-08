@@ -1,8 +1,7 @@
-﻿
-using hospitalApiProject.Repository.Interface;
+﻿using hospitalApiProject.Repository.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace hospitalApiProject.Repository
+namespace hospitalApiProject.Repository.Implementations
 {
     public class staffImplementation : IStaffRepository
     {

@@ -1,11 +1,11 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.response;
-using hospitalApiProject.Services.Interfaces.Shared;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 
-namespace hospitalApiProject.Services.Abha
+namespace hospitalApiProject.Services.Implementations
 {
   public interface IAbhaService : ISimpleServiceBase
   {

@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace hospitalApiProject.Services.Interfaces.Shared
+namespace hospitalApiProject.Services.Interfaces
 {
   public interface ISimpleServiceBase
   {

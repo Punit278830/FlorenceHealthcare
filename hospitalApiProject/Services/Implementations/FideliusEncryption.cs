@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace hospitalApiProject.Services.Shared
+namespace hospitalApiProject.Services.Implementations
 {
   public class FideliusEncryption
   {

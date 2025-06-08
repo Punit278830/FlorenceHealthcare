@@ -1,12 +1,12 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Abha;
 using hospitalApiProject.Models.Abha.M2;
-using hospitalApiProject.Services.Abha;
 using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure.Internal;
 using System.Net;
+using hospitalApiProject.Services.Implementations;
 
 namespace hospitalApiProject.Controllers
 {

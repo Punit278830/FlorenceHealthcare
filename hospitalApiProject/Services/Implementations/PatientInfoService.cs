@@ -1,10 +1,9 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces;
-using hospitalApiProject.Services.Interfaces.Shared;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace hospitalApiProject.Services
+namespace hospitalApiProject.Services.Implementations
 {
   public class PatientInfoService : IPatientInfoService
   {
