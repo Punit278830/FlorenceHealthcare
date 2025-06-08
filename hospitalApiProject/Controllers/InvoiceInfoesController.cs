@@ -60,8 +60,8 @@ namespace hospitalApiProject.Controllers
           .Select(invoice => new InvoiceInfoResponse
           {
             InvoiceId = invoice.InvoiceId,
-            AppointmentId = invoice.AppointmentId,
-            PatientId = invoice.PatientId,
+            AppointmentId = (int)(invoice.AppointmentId ?? 0),
+            PatientId = (int)(invoice.PatientId ?? 0),
             CreatedDate = invoice.CreatedDate,
 
             // Set Amount to the total of base amount + additional items' amounts
