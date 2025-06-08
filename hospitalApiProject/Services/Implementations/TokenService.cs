@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace hospitalApiProject.Services.Implementations
 {
-  public class TokenService : ITokenService
+  public class TokenService : SimpleServiceBase, ITokenService
   {
     private readonly IMemoryCache _memoryCache;
     private readonly string _tokenCacheKey = "authToken";

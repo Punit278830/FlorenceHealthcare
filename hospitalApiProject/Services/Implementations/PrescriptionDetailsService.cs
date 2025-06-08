@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PrescriptionDetailsService : ServiceBase<PrescriptionDetail>, IPrescriptionDetailsService
+    public class PrescriptionDetailsService : EntityServiceBase<PrescriptionDetail>, IPrescriptionDetailsService
     {
-        private new readonly FlorenceDbContext _context;
-
         public PrescriptionDetailsService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(PrescriptionDetail entity)
+        {
+            return entity.PrescriptionDetailId;
         }
 
         public async Task<IEnumerable<PrescriptionDetail>> GetAllPrescriptionDetailsAsync()
@@ -36,9 +38,9 @@ namespace hospitalApiProject.Services.Implementations
             return await UpdateAsync(id, prescriptionDetail);
         }
 
-        public async Task<PrescriptionDetail> CreatePrescriptionDetailsAsync(PrescriptionDetail detail)
+        public async Task<PrescriptionDetail> CreatePrescriptionDetailsAsync(PrescriptionDetail prescriptionDetail)
         {
-            return await CreateAsync(detail);
+            return await CreateAsync(prescriptionDetail);
         }
 
         public async Task DeletePrescriptionDetailsAsync(int id)
@@ -50,10 +52,5 @@ namespace hospitalApiProject.Services.Implementations
         {
             return await ExistsAsync(id);
         }
-
-        protected override int GetEntityId(PrescriptionDetail entity)
-        {
-            return entity.PrescriptionDetailId;
-        }
     }
-} 
+}

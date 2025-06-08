@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PaymentModeInfoService : ServiceBase<PaymentModeInfo>, IPaymentModeInfoService
+    public class PaymentModeInfoService : EntityServiceBase<PaymentModeInfo>, IPaymentModeInfoService
     {
-        private new readonly FlorenceDbContext _context;
-
         public PaymentModeInfoService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(PaymentModeInfo entity)
+        {
+            return entity.PaymentModeInfoId;
         }
 
         public async Task<IEnumerable<PaymentModeInfo>> GetAllPaymentModeInfosAsync()
@@ -26,7 +28,7 @@ namespace hospitalApiProject.Services.Implementations
 
         public async Task<IEnumerable<PaymentModeInfo>> GetPaymentModeInfosByInvoiceIdAsync(int invoiceId)
         {
-            return await _context.PaymentModeInfo
+            return await _context.PaymentModeInfos
                 .Where(p => p.InvoiceId == invoiceId)
                 .ToListAsync();
         }
@@ -50,10 +52,5 @@ namespace hospitalApiProject.Services.Implementations
         {
             return await ExistsAsync(id);
         }
-
-        protected override int GetEntityId(PaymentModeInfo entity)
-        {
-            return entity.PaymentModeInfoId;
-        }
     }
-} 
+}

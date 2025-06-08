@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PrescriptionService : ServiceBase<Prescription>, IPrescriptionService
+    public class PrescriptionService : EntityServiceBase<Prescription>, IPrescriptionService
     {
-        private new readonly FlorenceDbContext _context;
-
         public PrescriptionService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(Prescription entity)
+        {
+            return entity.PrescriptionId;
         }
 
         public async Task<IEnumerable<Prescription>> GetAllPrescriptionsAsync()
@@ -49,11 +51,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<bool> PrescriptionExistsAsync(int id)
         {
             return await ExistsAsync(id);
-        }
-
-        protected override int GetEntityId(Prescription entity)
-        {
-            return entity.PrescriptionId;
         }
     }
 } 

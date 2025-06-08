@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PrescriptionTemplateDetailsService : ServiceBase<PrescriptionTemplateDetail>, IPrescriptionTemplateDetailsService
+    public class PrescriptionTemplateDetailsService : EntityServiceBase<PrescriptionTemplateDetail>, IPrescriptionTemplateDetailsService
     {
-        private new readonly FlorenceDbContext _context;
-
         public PrescriptionTemplateDetailsService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(PrescriptionTemplateDetail entity)
+        {
+            return entity.TemplateDetailId;
         }
 
         public async Task<IEnumerable<PrescriptionTemplateDetail>> GetAllPrescriptionTemplateDetailsAsync()
@@ -27,7 +29,7 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<IEnumerable<PrescriptionTemplateDetail>> GetPrescriptionTemplateDetailsByTemplateIdAsync(int templateId)
         {
             return await _context.PrescriptionTemplateDetails
-                .Where(p => p.PrescriptionTemplateId == templateId)
+                .Where(p => p.TemplateId == templateId)
                 .ToListAsync();
         }
 
@@ -36,9 +38,9 @@ namespace hospitalApiProject.Services.Implementations
             return await UpdateAsync(id, prescriptionTemplateDetail);
         }
 
-        public async Task<PrescriptionTemplateDetail> CreatePrescriptionTemplateDetailsAsync(PrescriptionTemplateDetail detail)
+        public async Task<PrescriptionTemplateDetail> CreatePrescriptionTemplateDetailsAsync(PrescriptionTemplateDetail prescriptionTemplateDetail)
         {
-            return await CreateAsync(detail);
+            return await CreateAsync(prescriptionTemplateDetail);
         }
 
         public async Task DeletePrescriptionTemplateDetailsAsync(int id)
@@ -49,11 +51,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<bool> PrescriptionTemplateDetailsExistsAsync(int id)
         {
             return await ExistsAsync(id);
-        }
-
-        protected override int GetEntityId(PrescriptionTemplateDetail entity)
-        {
-            return entity.PrescriptionTemplateDetailId;
         }
     }
 } 

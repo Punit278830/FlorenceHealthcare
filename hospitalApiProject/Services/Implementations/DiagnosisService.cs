@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class DiagnosisService : ServiceBase<Diagnosis>, IDiagnosisService
+    public class DiagnosisService : EntityServiceBase<Diagnosis>, IDiagnosisService
     {
-        private new readonly FlorenceDbContext _context;
-
         public DiagnosisService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(Diagnosis entity)
+        {
+            return entity.DiagnosisId;
         }
 
         public async Task<IEnumerable<Diagnosis>> GetAllDiagnosesAsync()
@@ -22,13 +24,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<Diagnosis> GetDiagnosisByIdAsync(int id)
         {
             return await GetByIdAsync(id);
-        }
-
-        public async Task<IEnumerable<Diagnosis>> GetDiagnosesByPatientIdAsync(int patientId)
-        {
-            return await _context.Diagnoses
-                .Where(d => d.PatientId == patientId)
-                .ToListAsync();
         }
 
         public async Task<Diagnosis> UpdateDiagnosisAsync(int id, Diagnosis diagnosis)
@@ -51,9 +46,11 @@ namespace hospitalApiProject.Services.Implementations
             return await ExistsAsync(id);
         }
 
-        protected override int GetEntityId(Diagnosis entity)
+        public async Task<IEnumerable<Diagnosis>> GetDiagnosesByPatientIdAsync(int patientId)
         {
-            return entity.DiagnosisId;
+            return await _context.Diagnoses
+                .Where(d => d.PatientId == patientId)
+                .ToListAsync();
         }
     }
 } 

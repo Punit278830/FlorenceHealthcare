@@ -1,14 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PatientService : ServiceBase<PatientInfo>, IPatientService
+    public class PatientService : EntityServiceBase<PatientInfo>, IPatientService
     {
         public PatientService(FlorenceDbContext context) : base(context)
         {
+        }
+
+        protected override int GetEntityId(PatientInfo entity)
+        {
+            return entity.PatientId;
         }
 
         public async Task<IEnumerable<PatientInfo>> GetAllPatientsAsync()
@@ -44,30 +49,25 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<PatientInfo[]> GetPatientsByDateRangeAsync(DateOnly startDate, DateOnly endDate)
         {
             return await _context.PatientInfos
-                .Where(p => p.CreatedDate.Date >= startDate.ToDateTime(TimeOnly.MinValue) && 
-                           p.CreatedDate.Date <= endDate.ToDateTime(TimeOnly.MaxValue))
+                .Where(p => p.RegstrationDate >= startDate && p.RegstrationDate <= endDate)
                 .ToArrayAsync();
         }
 
         public async Task<object> GetPatientCountByGenderAsync()
         {
-            var genderCounts = await _context.PatientInfos
+            return await _context.PatientInfos
                 .GroupBy(p => p.Gender)
                 .Select(g => new { Gender = g.Key, Count = g.Count() })
                 .ToListAsync();
-
-            return genderCounts;
         }
 
         public async Task<IEnumerable<PatientInfo>> SearchPatientsAsync(string searchTerm)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-                return Enumerable.Empty<PatientInfo>();
-
             return await _context.PatientInfos
                 .Where(p => p.FirstName.Contains(searchTerm) || 
                            p.LastName.Contains(searchTerm) || 
-                           p.MobileNumber.Contains(searchTerm))
+                           p.Mobile.Contains(searchTerm) ||
+                           p.Email.Contains(searchTerm))
                 .ToListAsync();
         }
 
@@ -76,11 +76,6 @@ namespace hospitalApiProject.Services.Implementations
             return await _context.PatientInfos
                 .Where(p => p.CreatedDate >= startDate && p.CreatedDate <= endDate)
                 .ToListAsync();
-        }
-
-        protected override int GetEntityId(PatientInfo entity)
-        {
-            return entity.PatientId;
         }
     }
 } 

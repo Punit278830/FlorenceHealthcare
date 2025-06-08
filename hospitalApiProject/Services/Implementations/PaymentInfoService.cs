@@ -1,14 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PaymentInfoService : ServiceBase<PaymentInfo>, IPaymentInfoService
+    public class PaymentInfoService : EntityServiceBase<PaymentInfo>, IPaymentInfoService
     {
         public PaymentInfoService(FlorenceDbContext context) : base(context)
         {
+        }
+
+        protected override int GetEntityId(PaymentInfo entity)
+        {
+            return entity.PaymentInfoId;
         }
 
         public async Task<IEnumerable<PaymentInfo>> GetAllPaymentInfosAsync()
@@ -46,11 +51,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<bool> PaymentInfoExistsAsync(int id)
         {
             return await ExistsAsync(id);
-        }
-
-        protected override int GetEntityId(PaymentInfo entity)
-        {
-            return entity.PaymentInfoId;
         }
     }
 } 

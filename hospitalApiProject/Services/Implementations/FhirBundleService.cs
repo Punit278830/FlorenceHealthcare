@@ -3,7 +3,7 @@ using hospitalApiProject.Services.Interfaces;
 
 namespace hospitalApiProject.Services.Implementations
 {
-  public class FhirBundleService : IFhirBundleService
+  public class FhirBundleService : SimpleServiceBase, IFhirBundleService
   {
     public Bundle GetPrescriptionBundle()
     {

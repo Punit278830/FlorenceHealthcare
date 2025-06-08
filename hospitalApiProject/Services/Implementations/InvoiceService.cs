@@ -1,18 +1,20 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class InvoiceService : ServiceBase<Invoice>, IInvoiceService
+    public class InvoiceService : EntityServiceBase<Invoice>, IInvoiceService
     {
-        private new readonly FlorenceDbContext _context;
-
         public InvoiceService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(Invoice entity)
+        {
+            return entity.InvoiceId;
         }
 
         public async Task<IEnumerable<Invoice>> GetAllInvoicesAsync()
@@ -23,13 +25,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<Invoice> GetInvoiceByIdAsync(int id)
         {
             return await GetByIdAsync(id);
-        }
-
-        public async Task<IEnumerable<Invoice>> GetInvoicesByPatientIdAsync(int patientId)
-        {
-            return await _context.Invoices
-                .Where(i => i.PatientId == patientId)
-                .ToListAsync();
         }
 
         public async Task<Invoice> UpdateInvoiceAsync(int id, Invoice invoice)
@@ -50,6 +45,43 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<bool> InvoiceExistsAsync(int id)
         {
             return await ExistsAsync(id);
+        }
+
+        public async Task<IEnumerable<Invoice>> GetInvoicesByPatientIdAsync(int patientId)
+        {
+            return await _context.Invoices
+                .Where(i => i.PatientId == patientId)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Invoice>> GetInvoicesByDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            return await _context.Invoices
+                .Where(i => i.InvoiceDate >= startDate && i.InvoiceDate <= endDate)
+                .ToListAsync();
+        }
+
+        public async Task<InvoiceSummary> GetInvoiceSummaryAsync(int invoiceId)
+        {
+            var invoice = await _context.Invoices
+                .Include(i => i.Patient)
+                .Include(i => i.PaymentInfos)
+                .Include(i => i.PaymentModeInfos)
+                .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+
+            if (invoice == null)
+                return null;
+
+            return new InvoiceSummary
+            {
+                InvoiceId = invoice.InvoiceId,
+                PatientName = $"{invoice.Patient.FirstName} {invoice.Patient.LastName}",
+                InvoiceDate = invoice.InvoiceDate,
+                TotalAmount = invoice.TotalAmount,
+                PaidAmount = invoice.PaymentInfos.Sum(p => p.Amount),
+                RemainingAmount = invoice.TotalAmount - invoice.PaymentInfos.Sum(p => p.Amount),
+                PaymentModes = invoice.PaymentModeInfos.Select(p => p.PaymentMode).ToList()
+            };
         }
 
         public async Task<InvoiceSummaryResponse> GetInvoiceWithPaymentsAsync(string paymentMode, string paymentStatus, string fromDate, string toDate)
@@ -147,10 +179,5 @@ namespace hospitalApiProject.Services.Implementations
 
             return maxInvoiceId;
         }
-
-        protected override int GetEntityId(Invoice entity)
-        {
-            return entity.InvoiceId;
-        }
     }
-} 
+}

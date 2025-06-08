@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class PrescriptionTemplateMasterService : ServiceBase<PrescriptionTemplateMaster>, IPrescriptionTemplateMasterService
+    public class PrescriptionTemplateMasterService : EntityServiceBase<PrescriptionTemplateMaster>, IPrescriptionTemplateMasterService
     {
-        private new readonly FlorenceDbContext _context;
-
         public PrescriptionTemplateMasterService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(PrescriptionTemplateMaster entity)
+        {
+            return entity.TemplateId;
         }
 
         public async Task<IEnumerable<PrescriptionTemplateMaster>> GetAllPrescriptionTemplateMastersAsync()
@@ -29,9 +31,9 @@ namespace hospitalApiProject.Services.Implementations
             return await UpdateAsync(id, prescriptionTemplateMaster);
         }
 
-        public async Task<PrescriptionTemplateMaster> CreatePrescriptionTemplateMasterAsync(PrescriptionTemplateMaster template)
+        public async Task<PrescriptionTemplateMaster> CreatePrescriptionTemplateMasterAsync(PrescriptionTemplateMaster prescriptionTemplateMaster)
         {
-            return await CreateAsync(template);
+            return await CreateAsync(prescriptionTemplateMaster);
         }
 
         public async Task DeletePrescriptionTemplateMasterAsync(int id)
@@ -42,11 +44,6 @@ namespace hospitalApiProject.Services.Implementations
         public async Task<bool> PrescriptionTemplateMasterExistsAsync(int id)
         {
             return await ExistsAsync(id);
-        }
-
-        protected override int GetEntityId(PrescriptionTemplateMaster entity)
-        {
-            return entity.PrescriptionTemplateMasterId;
         }
     }
 } 

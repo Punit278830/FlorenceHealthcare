@@ -1,17 +1,19 @@
 using hospitalApiProject.Models;
-using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Base;
+using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class FilesUploadService : ServiceBase<FilesUpload>, IFilesUploadService
+    public class FilesUploadService : EntityServiceBase<FilesUpload>, IFilesUploadService
     {
-        private new readonly FlorenceDbContext _context;
-
         public FilesUploadService(FlorenceDbContext context) : base(context)
         {
-            _context = context;
+        }
+
+        protected override int GetEntityId(FilesUpload entity)
+        {
+            return entity.FileId;
         }
 
         public async Task<IEnumerable<FilesUpload>> GetAllFilesUploadsAsync()
@@ -36,9 +38,9 @@ namespace hospitalApiProject.Services.Implementations
             return await UpdateAsync(id, filesUpload);
         }
 
-        public async Task<FilesUpload> CreateFilesUploadAsync(FilesUpload file)
+        public async Task<FilesUpload> CreateFilesUploadAsync(FilesUpload filesUpload)
         {
-            return await CreateAsync(file);
+            return await CreateAsync(filesUpload);
         }
 
         public async Task DeleteFilesUploadAsync(int id)
@@ -50,10 +52,5 @@ namespace hospitalApiProject.Services.Implementations
         {
             return await ExistsAsync(id);
         }
-
-        protected override int GetEntityId(FilesUpload entity)
-        {
-            return entity.FileId;
-        }
     }
-} 
+}

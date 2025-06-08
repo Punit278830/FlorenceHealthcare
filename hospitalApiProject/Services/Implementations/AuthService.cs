@@ -4,7 +4,7 @@ using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class AuthService : IAuthService
+    public class AuthService : SimpleServiceBase, IAuthService
     {
         private readonly string _clientId;
         private readonly string _clientSecret;

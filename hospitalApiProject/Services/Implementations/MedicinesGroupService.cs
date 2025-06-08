@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace hospitalApiProject.Services.Implementations
 {
-    public class MedicinesGroupService : IMedicinesGroupService
+    public class MedicinesGroupService : SimpleServiceBase, IMedicinesGroupService
     {
         private readonly FlorenceDbContext _context;
 

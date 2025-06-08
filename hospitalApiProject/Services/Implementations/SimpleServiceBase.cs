@@ -5,13 +5,8 @@ namespace hospitalApiProject.Services.Implementations
 {
   public abstract class SimpleServiceBase : ISimpleServiceBase
   {
-    public string ErrorMessage { get; set; }
     public HttpStatusCode StatusCode { get; set; }
-
-
-    public bool HasError
-    {
-      get { return !string.IsNullOrEmpty(ErrorMessage); }
-    }
+    public string ErrorMessage { get; set; }
+    public bool HasError => !string.IsNullOrEmpty(ErrorMessage);
   }
 }
