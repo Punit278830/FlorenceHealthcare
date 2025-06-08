@@ -1,5 +1,8 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
+using hospitalApiProject.Models.DTOs;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace hospitalApiProject.Services.Interfaces
 {
@@ -14,11 +17,14 @@ namespace hospitalApiProject.Services.Interfaces
         Task<bool> InvoiceExistsAsync(int id);
         Task<InvoiceSummaryResponse> GetInvoiceWithPaymentsAsync(string paymentMode, string paymentStatus, string fromDate, string toDate);
         Task<IEnumerable<object>> GetInvoicesForTodayAsync();
-        Task<InvoiceInfoDetail> GetInvoiceInfoByIdAsync(int id);
-        Task<int> GetInvoiceByPatientIdAsync(int patientId);
         Task<TotalPaymentDetailsResponse> GetTotalPaymentAmountAsync(string fromDate, string toDate);
         Task<int> GetTotalAmountAsync();
         Task<InvoiceInfo> CreateInvoiceInfoAsync(InvoiceInfo invoiceInfo);
         Task<PaymentModeInfo> AddPaymentModeAsync(PaymentModeInfo paymentModeInfo);
+        Task<InvoiceInfoResponse> GetInvoiceById(int invoiceId);
+        Task<InvoiceInfoResponse> GetInvoiceByAppointmentId(int appointmentId);
+        Task<InvoiceInfoResponse> CreateInvoice(NewInvoiceDto invoiceDto);
+        Task<InvoiceInfoResponse> UpdateInvoicePayment(InvoicePaymentDto paymentDto);
+        Task<InvoiceInfoDetail> GetInvoiceInfoByIdAsync(int id);
     }
 } 

@@ -2,13 +2,18 @@ using hospitalApiProject.Models;
 using hospitalApiProject.Services.Base;
 using hospitalApiProject.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
+using hospitalApiProject.Models.Response;
 
 namespace hospitalApiProject.Services.Implementations
 {
     public class PatientService : EntityServiceBase<PatientInfo>, IPatientService
     {
+        private readonly FlorenceDbContext _context;
+
         public PatientService(FlorenceDbContext context) : base(context)
         {
+            _context = context;
         }
 
         protected override int GetEntityId(PatientInfo entity)
@@ -76,6 +81,27 @@ namespace hospitalApiProject.Services.Implementations
             return await _context.PatientInfos
                 .Where(p => p.CreatedDate >= startDate && p.CreatedDate <= endDate)
                 .ToListAsync();
+        }
+
+        public async Task<PatientInfo> GetPatientById(int patientId)
+        {
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.PatientId == patientId);
+
+            if (patient == null)
+                return null;
+
+            return new PatientInfo
+            {
+                PatientId = patient.PatientId,
+                FirstName = patient.FirstName,
+                LastName = patient.LastName,
+                Email = patient.Email,
+                DateOfBirth = patient.DateOfBirth,
+                PhoneNumber = patient.PhoneNumber,
+                Address = patient.Address,
+                Gender = patient.Gender
+            };
         }
     }
 } 

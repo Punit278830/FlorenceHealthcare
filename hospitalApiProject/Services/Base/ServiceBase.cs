@@ -1,11 +1,14 @@
+using System;
 using hospitalApiProject.Models;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Infrastructure.Repository.Interfaces;
 
 namespace hospitalApiProject.Services.Base
 {
-    public abstract class ServiceBase<T> where T : class
+    public abstract class ServiceBase<T> : SimpleServiceBase where T : class
     {
         protected readonly FlorenceDbContext _context;
+        internal T _repository;
 
         protected ServiceBase(FlorenceDbContext context)
         {
@@ -71,5 +74,19 @@ namespace hospitalApiProject.Services.Base
         }
 
         protected abstract int GetEntityId(T entity);
+
+        protected internal virtual async Task<PagingList<O>?> ExecuteStoreProcedure<I, O>(string procName, DbContextName context, I input, string output = "") where O : class
+        {
+            var unitOfWork = _repository as IUnitOfWork;
+
+            var repository = unitOfWork?.GetRepository<O>(context);
+
+            if (repository != null)
+            {
+                var result = await repository.ExecuteStoredProcedure(procName, input, output);
+                return result;
+            }
+            return default;
+        }
     }
 } 

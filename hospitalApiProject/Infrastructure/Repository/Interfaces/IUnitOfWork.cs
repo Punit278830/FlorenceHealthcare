@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using hospitalApiProject.Models;
 
 namespace hospitalApiProject.Infrastructure.Repository.Interfaces
@@ -21,5 +22,9 @@ namespace hospitalApiProject.Infrastructure.Repository.Interfaces
         IGenericRepository<MedicinesGroup> MedicinesGroupRepository { get; }
 
         Task<int> SaveChangesAsync();
+
+        Task<int?> ExecuteStoreProcedure<I>(string query, SqlParameter[] sqlParameters);
+        IGenericRepository<T> GetRepository<T>(DbContextName dbContextName) where T : class;
+        void SaveChanges();
     }
 } 
