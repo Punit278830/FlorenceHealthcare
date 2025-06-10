@@ -26,100 +26,109 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-xl-2">
-                                    <div class="form-group local-forms">
-                                      <label for="department">Apply Leave <span class="login-danger">*</span></label>
-                                      <mat-select formControlName="leaveStatus" (selectionChange)="setLeaveValue($event)" class="form-control select">
-                                        <mat-option *ngFor="let data of leaveOption" [value]="data.value">
-                                          {{data.key}}
-                                        </mat-option>
-                                      </mat-select>
-                                      <div *ngIf="scheduleGroup.get('leaveStatus')?.invalid && (scheduleGroup.get('leaveStatus')?.dirty || scheduleGroup.get('leaveStatus')?.touched)" class="text-danger">
-                                        <div *ngIf="scheduleGroup.get('leaveStatus')?.errors?.['required']">Leave status is required.</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                  <div class="col-12 col-md-4 col-xl-4">
-                                    <div class="form-group local-forms">
-                                      <label for="Date">Adjust schedule <span class="login-danger">*</span></label>
-                                      <input class="form-control datetimepicker" formControlName="scheduleDate" readonly type="text" placeholder="DD/MM/YYYY"
-                                             matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" (dateChange)="onDateChange($event)" [min]="minDate">
-                                      <mat-datepicker #picker></mat-datepicker>
-                                      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                                      <div *ngIf="scheduleGroup.get('scheduleDate')?.invalid && (scheduleGroup.get('scheduleDate')?.dirty || scheduleGroup.get('scheduleDate')?.touched)" class="text-danger">
-                                        <div *ngIf="scheduleGroup.get('scheduleDate')?.errors?.['required']">Schedule date is required.</div>
-                                      </div>
-                                    </div>
-                                  </div>
-                                  
-                                  <ng-container *ngIf="!leaveCheckBoxStatus">
-                                    <div class="col-12 col-md-4 col-xl-1">
-                                      <div class="form-group local-forms">
-                                        <label for="Consulting">From</label>
-                                        <mat-select class="form-control select" formControlName="fromTime" placeholder="From">
-                                          <mat-option *ngFor="let data of DayTime" [value]="data">
-                                            {{data}}
-                                          </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="scheduleGroup.get('fromTime')?.invalid && (scheduleGroup.get('fromTime')?.dirty || scheduleGroup.get('fromTime')?.touched)" class="text-danger">
-                                          <div *ngIf="scheduleGroup.get('fromTime')?.errors?.['required']">From time is required.</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  
-                                    <div class="col-12 col-md-4 col-xl-1">
-                                      <div class="form-group local-forms">
-                                        <label for="Consulting">AM/PM</label>
-                                        <mat-select class="form-control select" formControlName="fromPostfix">
-                                          <mat-option *ngFor="let data of postFix" [value]="data">
-                                            {{data}}
-                                          </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="scheduleGroup.get('fromPostfix')?.invalid && (scheduleGroup.get('fromPostfix')?.dirty || scheduleGroup.get('fromPostfix')?.touched)" class="text-danger">
-                                          <div *ngIf="scheduleGroup.get('fromPostfix')?.errors?.['required']">From AM/PM is required.</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  
-                                    <div class="col-12 col-md-6 col-xl-1">
-                                      <div class="form-group local-forms">
-                                        <label for="Consulting">To</label>
-                                        <mat-select class="form-control select" formControlName="toTime" placeholder="To">
-                                          <mat-option *ngFor="let data of DayTime" [value]="data">
-                                            {{data}}
-                                          </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="scheduleGroup.get('toTime')?.invalid && (scheduleGroup.get('toTime')?.dirty || scheduleGroup.get('toTime')?.touched)" class="text-danger">
-                                          <div *ngIf="scheduleGroup.get('toTime')?.errors?.['required']">To time is required.</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  
-                                    <div class="col-12 col-md-4 col-xl-1">
-                                      <div class="form-group local-forms">
-                                        <label for="Consulting">AM/PM</label>
-                                        <mat-select class="form-control select" formControlName="toPostfix">
-                                          <mat-option *ngFor="let data of postFix" [value]="data">
-                                            {{data}}
-                                          </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="scheduleGroup.get('toPostfix')?.invalid && (scheduleGroup.get('toPostfix')?.dirty || scheduleGroup.get('toPostfix')?.touched)" class="text-danger">
-                                          <div *ngIf="scheduleGroup.get('toPostfix')?.errors?.['required']">To AM/PM is required.</div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  </ng-container>
-                                  
-                                  <div class="col-12 col-sm-12">
-                                    <div class="form-group local-forms">
-                                      <label for="Notes">Notes <span class="login-danger">*</span></label>
-                                      <textarea class="form-control" formControlName="notes" rows="3" cols="30"></textarea>
-                                      <div *ngIf="scheduleGroup.get('notes')?.invalid && (scheduleGroup.get('notes')?.dirty || scheduleGroup.get('notes')?.touched)" class="text-danger">
-                                        <div *ngIf="scheduleGroup.get('notes')?.errors?.['required']">Notes are required.</div>
-                                      </div>
-                                    </div>
-                                  </div>
+                             <!-- Top Row: Apply Leave, Adjust Schedule, Notes -->
+<div class="row">
+  <!-- Apply Leave -->
+  <div class="col-12 col-md-6 col-xl-2">
+    <div class="form-group local-forms">
+      <label for="department">Apply Leave <span class="login-danger">*</span></label>
+      <mat-select formControlName="leaveStatus" (selectionChange)="setLeaveValue($event)" class="form-control select">
+        <mat-option *ngFor="let data of leaveOption" [value]="data.value">
+          {{ data.key }}
+        </mat-option>
+      </mat-select>
+      <div *ngIf="scheduleGroup.get('leaveStatus')?.invalid && (scheduleGroup.get('leaveStatus')?.dirty || scheduleGroup.get('leaveStatus')?.touched)" class="text-danger">
+        <div *ngIf="scheduleGroup.get('leaveStatus')?.errors?.['required']">Leave status is required.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adjust Schedule -->
+  <div class="col-12 col-md-4 col-xl-3">
+    <div class="form-group local-forms">
+      <label>Adjust Schedule <span class="login-danger">*</span></label>
+      <input class="form-control datetimepicker" formControlName="scheduleDate" readonly type="text" placeholder="DD/MM/YYYY"
+        matInput [matDatepicker]="picker" [matDatepickerFilter]="dateFilter" (dateChange)="onDateChange($event)" [min]="minDate">
+      <mat-datepicker #picker></mat-datepicker>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <div *ngIf="scheduleGroup.get('scheduleDate')?.invalid && (scheduleGroup.get('scheduleDate')?.dirty || scheduleGroup.get('scheduleDate')?.touched)" class="text-danger">
+        <div *ngIf="scheduleGroup.get('scheduleDate')?.errors?.['required']">Schedule date is required.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes -->
+  <div class="col-12 col-md-6 col-xl-5">
+    <div class="form-group local-forms">
+      <label>Notes <span class="login-danger">*</span></label>
+      <textarea class="form-control" formControlName="notes" rows="3"></textarea>
+      <div *ngIf="scheduleGroup.get('notes')?.invalid && (scheduleGroup.get('notes')?.dirty || scheduleGroup.get('notes')?.touched)" class="text-danger">
+        <div *ngIf="scheduleGroup.get('notes')?.errors?.['required']">Notes are required.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Row: From, AM/PM, To, AM/PM -->
+<ng-container *ngIf="!leaveCheckBoxStatus">
+  <div class="row">
+    <!-- From -->
+    <div class="col-6 col-md-3 col-xl-2">
+      <div class="form-group local-forms">
+        <label>From</label>
+        <mat-select class="form-control select" formControlName="fromTime">
+          <mat-option *ngFor="let data of DayTime" [value]="data">{{ data }}</mat-option>
+        </mat-select>
+        <div *ngIf="scheduleGroup.get('fromTime')?.invalid && (scheduleGroup.get('fromTime')?.dirty || scheduleGroup.get('fromTime')?.touched)" class="text-danger">
+          <div *ngIf="scheduleGroup.get('fromTime')?.errors?.['required']">From time is required.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- From AM/PM -->
+    <div class="col-6 col-md-3 col-xl-2">
+      <div class="form-group local-forms">
+        <label>AM/PM</label>
+        <mat-select class="form-control select" formControlName="fromPostfix">
+          <mat-option *ngFor="let data of postFix" [value]="data">{{ data }}</mat-option>
+        </mat-select>
+        <div *ngIf="scheduleGroup.get('fromPostfix')?.invalid && (scheduleGroup.get('fromPostfix')?.dirty || scheduleGroup.get('fromPostfix')?.touched)" class="text-danger">
+          <div *ngIf="scheduleGroup.get('fromPostfix')?.errors?.['required']">From AM/PM is required.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- To -->
+    <div class="col-6 col-md-3 col-xl-2">
+      <div class="form-group local-forms">
+        <label>To</label>
+        <mat-select class="form-control select" formControlName="toTime">
+          <mat-option *ngFor="let data of DayTime" [value]="data">{{ data }}</mat-option>
+        </mat-select>
+        <div *ngIf="scheduleGroup.get('toTime')?.invalid && (scheduleGroup.get('toTime')?.dirty || scheduleGroup.get('toTime')?.touched)" class="text-danger">
+          <div *ngIf="scheduleGroup.get('toTime')?.errors?.['required']">To time is required.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- To AM/PM -->
+    <div class="col-6 col-md-3 col-xl-2">
+      <div class="form-group local-forms">
+        <label>AM/PM</label>
+        <mat-select class="form-control select" formControlName="toPostfix">
+          <mat-option *ngFor="let data of postFix" [value]="data">{{ data }}</mat-option>
+        </mat-select>
+        <div *ngIf="scheduleGroup.get('toPostfix')?.invalid && (scheduleGroup.get('toPostfix')?.dirty || scheduleGroup.get('toPostfix')?.touched)" class="text-danger">
+          <div *ngIf="scheduleGroup.get('toPostfix')?.errors?.['required']">To AM/PM is required.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+
+
+
+                                
                                   
                                 <!-- <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group select-gender">

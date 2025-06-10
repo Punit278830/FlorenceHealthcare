@@ -23,4 +23,9 @@ private readonly apiUrl = api_Url;
 
   }
 
+  getAllItems() {
+  return this.http.get(this.apiUrl + 'InvoiceItemMaster') as unknown as Observable<IinvoiceItem[]>;
+}
+
+
 }

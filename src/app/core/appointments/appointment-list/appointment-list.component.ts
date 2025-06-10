@@ -272,8 +272,29 @@ export class AppointmentListComponent implements OnInit {
   }
 
   public searchData(value: any): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.appointmentList = this.dataSource.filteredData;
+  if (value != '') {
+      console.log("value", value)
+      console.log("datasource", this.dataSource)
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.appointmentList = this.dataSource.filteredData;
+      console.log("value", this.appointmentList)
+      if (this.appointmentList.length > 0) {
+        this.appointmentList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.appointmentList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+
+    }
+    else {
+      this.getTableData()
+    }
   }
 
   public sortData(sort: Sort) {
@@ -418,6 +439,7 @@ export class AppointmentListComponent implements OnInit {
       }
 
     }
+    
 
     exportAppointmentListAsPdf()
     {

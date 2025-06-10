@@ -15,6 +15,8 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
+
+
 interface data {
   value: string;
 }
@@ -44,6 +46,8 @@ export class AddAppointmentComponent implements OnInit {
   public selectedDoctor: IstaffInfo = {} as IstaffInfo;
   public departmentList: Idepartment[] = [];
   public flag: boolean = false;
+  public minDate: Date = new Date(); // sets today as the minimum selectable date
+
   // public deleteIcon=false;
   // public selectedFile!:File
   // private FileUploadDto:IfileUpload={}as IfileUpload;
@@ -276,7 +280,7 @@ export class AddAppointmentComponent implements OnInit {
       appointmentStatus: ['Active', Validators.required],
 
       departmentid: ['', Validators.required],
-      appointTime: [null],
+      appointTime: ['', Validators.required],
 
     })
   }

@@ -1,32 +1,32 @@
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { forkJoin } from 'rxjs';
+import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
-import { Idepartment, IstaffInfo, apiResultFormat, pageSelection, staffList } from 'src/app/shared/models/models';
+import { pageSelection, apiResultFormat, schedule, IstaffInfo, Idepartment, Istaffschedule } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
-import { Router } from '@angular/router';
-import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
-  selector: 'app-staff-list',
-  templateUrl: './staff-list.component.html',
-  styleUrls: ['./staff-list.component.scss']
+  selector: 'app-schedule',
+  templateUrl: './schedule-list.component.html',
+  styleUrls: ['./schedule-list.component.scss']
 })
-export class StaffListComponent implements OnInit {
+export class ScheduleComponent implements OnInit {
   public routes = routes;
-  public staffList: Array<any> = [];
-  public allstaffList: Array<any> = [];
-  dataSource!: MatTableDataSource<IstaffInfo>;
+  public schedule: any[] = [];
+  dataSource!: MatTableDataSource<any[]>;
 
   public showFilter = false;
   public searchDataValue = '';
   public lastIndex = 0;
-  public pageSize = 30;
+  public pageSize = 10;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;
@@ -36,34 +36,39 @@ export class StaffListComponent implements OnInit {
   public pageNumberArray: Array<number> = [];
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
-  private _staffDto!: Array<IstaffInfo>;
-  public img = "assets/img/profiles/avatar-08.jpg";
   public combinedData: any[] = [];
-  public loggedIn: any;
+  public flag: boolean = false;
+  public loggedInUser!:any;
 
   constructor(public data: DataService,
     private staffService: StaffService,
     private departmentService: DepartmentService,
-    private modalservice: ModalServiceService,
+    private staffScheduleService: StaffScheduleService, 
     private route: Router,
-    private toaster: ToastrService,
-    private loadingService: LoadingService) {
-    //this.fetchCombineData();
+  private modalservice : ModalServiceService,
+  private toaster: ToastrService,
+private loaderService : LoadingService) {
 
   }
+  ngOnInit() {
+    // this.fetchCombineData()
+    this.loggedInUser=JSON.parse(localStorage.getItem('data')||'')
 
-  deleteStaff(idhere: number) {
+    this.fetchCombineData();
+  }
+
+  deleteSchedule(idhere:number){
     this.modalservice.openModal({
-      type: 'staff',
+      type: 'schedule',
       id: idhere,
       confirmCallback: () => this.confirmDelete(idhere)
     });
   }
 
-  confirmDelete(idhere: number) {
-    this.staffService.deleteStaff(idhere).subscribe(res => {
+  confirmDelete(idhere:number){
+    this.staffScheduleService.deleteScheuleById(idhere).subscribe(res => {
       if (res == null) {
-        this.toaster.success("Staff is deleted!")
+        this.toaster.success("Schedule is deleted!")
         this.fetchCombineData()
       }
     })
@@ -72,57 +77,66 @@ export class StaffListComponent implements OnInit {
 
 
 
-  ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
-    console.log("loggedin", this.loggedIn)
 
 
-    //this.getTableData();
-    this.fetchCombineData();
-
-  }
   onRefresh() {
-    this.staffList = [];
-    this.searchDataValue = '';
+    this.schedule = [];
+    this.searchDataValue = ''
     this.fetchCombineData()
   }
+  moveToEdit(idhere: number) {
+    this.staffScheduleService.scheduleId = idhere;
+    // this.staffScheduleService.data=this.schedule;
+    this.route.navigate([routes.editSchedule])
+  }
+
 
   fetchCombineData() {
-    this.loadingService.showLoader();
-
+    this.loaderService.showLoader();
     const departmentData$ = this.departmentService.getDepartmentList();
-    const staffData$ = this.staffService.getStaffList();
+    const staffData$ = this.staffService.getScheduleList();
+    const staffData1$ = this.staffService.getStaffList();
 
-    forkJoin([staffData$, departmentData$]).subscribe(([staff, department]) => {
-      this.totalData = staff.length;
-      this.staffList = [];
-      this.allstaffList = [];
+
+    forkJoin([staffData$, departmentData$, staffData1$]).subscribe(([staff, department, allStaff]) => {
+      
+      this.schedule = [];
       this.serialNumberArray = [];
 
-      this.combinedData = staff.map((staffres: IstaffInfo) => {
-
+      this.combinedData = staff.map((staffres: Istaffschedule) => {
         const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
+        console.log("dept", dept)
         return {
           ...staffres,
           departmentName: dept ? dept.departmentName : null
         };
       });
+      console.log("the com", this.combinedData)
+      this.combinedData = this.combinedData.map((staffres) => {
+
+        const staff = allStaff.find((dept: IstaffInfo) => dept.staffId == staffres.staffId);
+        return {
+          ...staffres,
+          staffName: staff ? `${staff.firstName} ${staff?.lastName}` : null
+        };
+      });
+      if(this.loggedInUser.userRole == "doctor"){
+        this.combinedData=this.combinedData.filter((item)=>item.staffId == this.loggedInUser.loginId)
+
+      }
       this.combinedData.map((res: any, index: number) => {
         const serialNumber = index + 1;
-        this.allstaffList.push(res)
 
         if (index >= this.skip && serialNumber <= this.limit) {
-          this.staffList.push(res);
+          this.schedule.push(res);
           //console.log(res.DOJ)
           this.serialNumberArray.push(serialNumber);
         }
       });
-      console.log("list",this.staffList);
-
-      this.loadingService.hideLoader();
-      
-      this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
-      // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
+      console.log("list", this.schedule)
+      this.totalData = this.schedule.length;
+      this.loaderService.hideLoader();
+      this.dataSource = new MatTableDataSource<any[]>(this.schedule);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
 
@@ -133,100 +147,73 @@ export class StaffListComponent implements OnInit {
 
 
   }
-  private getTableData() {
-    this.staffList = [];
+
+
+
+
+
+
+  private getTableData(): void {
+    this.schedule = [];
     this.serialNumberArray = [];
 
-    this.staffService.getStaffList().subscribe((data: any) => {
+    this.staffService.getScheduleList().subscribe((data) => {
       this.totalData = data.length;
-      this.allstaffList = data;
-      data.map((res: any, index: number) => {
+      data.map((res, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
-          this.staffList.push(res);
-          console.log(res.DOJ)
+
+          this.schedule.push(res);
           this.serialNumberArray.push(serialNumber);
         }
       });
-
-      // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
-      this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
+      console.log("data", this.schedule)
+      // this.dataSource = new MatTableDataSource<schedule>(this.schedule);
       this.calculateTotalPages(this.totalData, this.pageSize);
-
-    })
-    
-    console.log("stafflist", this.staffList)
-
-    // this.data.getStaffList().subscribe((data: apiResultFormat) => {
-    //   this.totalData = data.totalData;
-
-
-    // });
+    });
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
+    this.serialNumberArray = [];
+    this.totalData = 0;
+
     if (value != '') {
-      console.log("value", value)
-      console.log("datasource", this.dataSource)
       this.dataSource.filter = value.trim().toLowerCase();
-      this.staffList = this.dataSource.filteredData;
-      console.log("value", this.staffList)
-      if (this.staffList.length > 0) {
-        this.staffList.map((item: any, index: number) => {
+      this.schedule = this.dataSource.filteredData;
+      if (this.schedule.length > 0) {
+        this.flag = false;
+        this.schedule.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)
         })
-        this.totalData = this.staffList.length;
+        this.totalData = this.schedule.length;
         this.calculateTotalPages(this.totalData, this.pageSize);
 
       }
       else {
+        this.flag = true;
         this.serialNumberArray = [];
         this.totalData = 0;
       }
 
     }
     else {
-      this.getTableData()
+      this.fetchCombineData()
     }
-  
 
   }
 
-  // sortData(sort: Sort) {
-  //   const data = this.staffList.slice();
-  //   if (!sort.active || sort.direction === "") {
-  //     this.staffList = data;
-  //     return;
-  //   }
-
-  //   this.staffList = data.sort((a, b) => {
-  //     console.log("a b", a, b)
-  //     const isAsc = sort.direction === "asc";
-  //     switch (sort.active) {
-  //       case "doj":
-  //         return this.compare(a.doj, b.doj, isAsc);
-
-  //       default:
-  //         return 0;
-  //     }
-  //   });
-  // }
-
-
-  // compare(a: number | string, b: number | string, isAsc: boolean) {
-  //   return (a > b ? -1 : 1) * (isAsc ? -1 : 1);
-  // }
   public sortData(sort: Sort) {
-    const data = this.staffList.slice();
+    const data = this.schedule.slice();
 
     if (!sort.active || sort.direction === '') {
-      this.staffList = data;
+      this.schedule = data;
     } else {
-      this.staffList = data.sort((a, b) => {
+      this.schedule = data.sort((a, b) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const aValue = (a as any)[sort.active];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const bValue = (b as any)[sort.active];
+
         return (aValue < bValue ? -1 : 1) * (sort.direction === 'asc' ? 1 : -1);
       });
     }
@@ -238,14 +225,12 @@ export class StaffListComponent implements OnInit {
       this.pageIndex = this.currentPage - 1;
       this.limit += this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      //this.getTableData();
-      this.fetchCombineData();
+      this.fetchCombineData()
     } else if (event == 'previous') {
       this.currentPage--;
       this.pageIndex = this.currentPage - 1;
       this.limit -= this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      // this.getTableData();
       this.fetchCombineData()
     }
   }
@@ -259,8 +244,7 @@ export class StaffListComponent implements OnInit {
     } else if (pageNumber < this.currentPage) {
       this.pageIndex = pageNumber + 1;
     }
-    // this.getTableData();
-    this.fetchCombineData();
+    this.fetchCombineData()
   }
 
   public PageSize(): void {
@@ -268,8 +252,7 @@ export class StaffListComponent implements OnInit {
     this.limit = this.pageSize;
     this.skip = 0;
     this.currentPage = 1;
-    //this.getTableData();
-    this.fetchCombineData();
+    this.fetchCombineData()
   }
 
   private calculateTotalPages(totalData: number, pageSize: number): void {
@@ -285,12 +268,6 @@ export class StaffListComponent implements OnInit {
       this.pageNumberArray.push(i);
       this.pageSelection.push({ skip: skip, limit: limit });
     }
-  }
-
-  onEditStaff(item: number) {
-    this.staffService.staffId = item;
-    this.staffService.staffId = item;
-
   }
   moveToProfile(idhere: number) {
     this.staffService.staffId = idhere;

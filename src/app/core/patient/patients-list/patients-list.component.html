@@ -147,7 +147,7 @@
                             Edit</a>
                           <!-- <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
                             data-bs-target="#delete_patient"><i class="fa fa-trash-alt m-r-5"></i> Delete</a> -->
-                          <a *ngIf="loggedIn.userRole == 'admin' " class="dropdown-item" href="javascript:void(0);"
+                          <a *ngIf="loggedIn.userRole == 'admin' || loggedIn.userRole == 'reception' " class="dropdown-item" href="javascript:void(0);"
                             (click)="deletePatient(data.patientId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>

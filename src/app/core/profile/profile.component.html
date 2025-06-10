@@ -61,7 +61,7 @@
                                         </li>
 
                                         <li>
-                                            <span class="title">Regestration Date:</span>
+                                            <span class="title">Registration Date:</span>
                                             <span class="text">{{patientInfo?.regstrationDate}}</span>
                                         </li>
                                         <li>
@@ -69,11 +69,11 @@
                                             <span class="text">{{patientInfo?.gender}}</span>
                                         </li>
                                         <li>
-                                            <span class="title">Idendity Proof:</span>
+                                            <span class="title">Identity Proof:</span>
                                             <span class="text">{{patientInfo?.IdentityName}}</span>
                                         </li>
                                         <li>
-                                            <span class="title">Idendity Number:</span>
+                                            <span class="title">Identity Number:</span>
                                             <span class="text">{{patientInfo?.IdentityNumber}}</span>
                                         </li>
                                     </ul>
@@ -269,6 +269,8 @@
                                                     <select class="form-control" formControlName="diabetes">
                                                         <option [ngValue]="true">Yes</option>
                                                         <option [ngValue]="false">No</option>
+                                                             <option [ngValue]="false">N.A.</option>
+
                                                     </select>
                                                 </div>
                                             </div>
@@ -369,7 +371,7 @@
 
                                 </mat-step>
 
-                                <mat-step label="Questionary">
+                                <mat-step label="Questionnaire">
 
                                     <div class="card">
                                         <div class="card-body">

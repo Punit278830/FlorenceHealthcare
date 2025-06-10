@@ -25,7 +25,7 @@ namespace hospitalApiProject.Controllers
       return await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
     }
 
-    [HttpGet("regestrationDateRange/{startDate}/{endDate}")]
+    [HttpGet("registrationDateRange/{startDate}/{endDate}")]
     public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateOnly startDate, DateOnly endDate)
     {
 

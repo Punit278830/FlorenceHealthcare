@@ -53,91 +53,95 @@
             </div>
         </div>
 
-        <div class="row d-flex">
-            <div class="col-12 col-md-12 col-xl-4 d-flex flex-column">
-                <div class="card flex-grow-1">
-                    <div class="card-body d-flex flex-column">
-                        <div class="row align-items-center justify-content-between">
-                            <div class="col-4 form-heading">
-                                <h4>Avaliable Groups</h4>
-                            </div>
-                        </div>
+        <div class="container">
+  <div class="mb-4">
+    <div class="card flex-grow-1">
+      <div class="card-body d-flex flex-column">
+        <div class="row align-items-center justify-content-between">
+          <div class="col-4 form-heading">
+            <h4>Available Groups</h4>
+          </div>
+        </div>
 
-                        <div class="table-responsive flex-grow-1" style="overflow-x:clip;">
-                            <table class="table border-0 custom-table comman-table datatable mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Group Name</th>
-                                        <th>Group Description</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-
-                                    <ng-container *ngFor="let group of groups; let i = index">
-                                        <tr [class.selectedGroup]="i === selectedRow" (click)="selectRow(i)">
-                                            <td (click)="OnGroupChange(group); $event.stopPropagation()">
-                                                <a href="javascript:void(0);">
-                                                    {{ group.name }}
-                                                </a>
-                                            </td>
-                                            <td (click)="OnGroupChange(group); $event.stopPropagation()">
-                                                <a href="javascript:void(0);">
-                                                    {{ group.description }}
-                                                </a>
-                                            </td>
-                                            <td class="text-end" (click)="$event.stopPropagation()">
-                                                <div class="dropdown dropdown-action">
-                                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle"
-                                                        data-bs-toggle="dropdown" aria-expanded="false">
-                                                        <i class="fa fa-ellipsis-v"></i>
-                                                    </a>
-                                                    <div class="dropdown-menu dropdown-menu-end">
-                                                        <a class="dropdown-item" href="javascript:void(0);"
-                                                            (click)="onEdit(group.id)">
-                                                            <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
-                                                        </a>
-                                                        <a class="dropdown-item" href="javascript:void(0);"
-                                                            (click)="onDelete(group.id)">
-                                                            <i class="fa fa-trash-alt m-r-5"></i> Delete
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </ng-container>
-
-                                </tbody>
-                            </table>
-
-                        </div>
+        <!-- ✅ SCROLLABLE TABLE CONTAINER -->
+        <div
+          class="table-responsive flex-grow-1"
+          style="max-height: 300px; overflow-y: auto; overflow-x: auto;">
+          <table class="table border-0 custom-table comman-table datatable mb-0">
+            <thead>
+              <tr>
+                <th>Group Name</th>
+                <th>Group Description</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <ng-container *ngFor="let group of groups; let i = index">
+                <tr [class.selectedGroup]="i === selectedRow" (click)="selectRow(i)">
+                  <td (click)="OnGroupChange(group); $event.stopPropagation()">
+                    <a href="javascript:void(0);">{{ group.name }}</a>
+                  </td>
+                  <td (click)="OnGroupChange(group); $event.stopPropagation()">
+                    <a href="javascript:void(0);">{{ group.description }}</a>
+                  </td>
+                  <td class="text-end" (click)="$event.stopPropagation()">
+                    <div class="dropdown dropdown-action">
+                      <a
+                        href="javascript:void(0);"
+                        class="action-icon dropdown-toggle"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        <i class="fa fa-ellipsis-v"></i>
+                      </a>
+                      <div class="dropdown-menu dropdown-menu-end">
+                        <a class="dropdown-item" href="javascript:void(0);" (click)="onEdit(group.id)">
+                          <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                        </a>
+                        <a class="dropdown-item" href="javascript:void(0);" (click)="onDelete(group.id)">
+                          <i class="fa fa-trash-alt m-r-5"></i> Delete
+                        </a>
+                      </div>
                     </div>
-                </div>
-            </div>
-            <div class="col-12 col-md-12 col-xl-8 d-flex flex-column">
-                <div class="card flex-grow-1">
-                    <div class="card-body d-flex flex-column">
-                        <div class="col-12 form-heading" *ngIf="selectedGroup != undefined">
-                            <h4>List of medicines in the selected Group: {{selectedGroup.name}}</h4>
-                        </div>
-                        <div class="col-12 form-heading" *ngIf="selectedGroup == undefined">
-                            <h4>List of medicines</h4>
-                        </div>
-                        <div class="table-responsive flex-grow-1">
-                            <table class="table border-0 custom-table comman-table datatable mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Medicine Name</th>
-                                        <th>Medicine Type</th>
-                                        <th>Dose</th>
-                                        <th>Frequency</th>
-                                        <th>Timing</th>
-                                        <th>Duration</th>
-                                        <th>Instructions</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </table>
+        </div>
+        <!-- ⬆ SCROLLBAR AREA END -->
+
+      </div> <!-- card-body -->
+    </div> <!-- card -->
+  </div> <!-- col -->
+
+
+            <div class="mb-4">
+  <div class="card flex-grow-1">
+    <div class="card-body d-flex flex-column">
+
+      <div class="col-12 form-heading" *ngIf="selectedGroup != undefined">
+        <h4>List of medicines in the selected Group: {{ selectedGroup.name }}</h4>
+      </div>
+      <div class="col-12 form-heading" *ngIf="selectedGroup == undefined">
+        <h4>List of medicines</h4>
+      </div>
+
+      <!-- SCROLLABLE CONTAINER -->
+      <div class="table-responsive flex-grow-1" style="max-height: 400px; overflow-y: auto;">
+        <table class="table border-0 custom-table comman-table datatable mb-0">
+          <thead>
+            <tr>
+              <th>Medicine Name</th>
+              <th>Medicine Type</th>
+              <th>Dose</th>
+              <th>Frequency</th>
+              <th>Timing</th>
+              <th>Duration</th>
+              <th>Instructions</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
                                     <tr *ngIf="medicationGroup.length === 0">
                                         <td colspan="8" class="text-center">No Data Found</td>
                                     </tr>

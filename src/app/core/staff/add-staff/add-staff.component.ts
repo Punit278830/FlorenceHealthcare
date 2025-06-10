@@ -150,7 +150,7 @@ export class AddStaffComponent {
       dob: ['', Validators.required],
       doj: ['', Validators.required],
       IdentityNumber: ['', Validators.required],
-      regestrationNumber:[''],
+      registrationNumber:[''],
       IdentityName: ['', Validators.required],
 
 
