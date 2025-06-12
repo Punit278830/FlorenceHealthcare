@@ -181,17 +181,15 @@ export class AppointmentListComponent implements OnInit {
           const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
           const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
 
-
           return {
             ...appointment,
             doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
             doctorLname: doctor ? doctor.lastName : '',
             departmentName: department ? department.departmentName : 'Unknown Department',
-            patientFname: patients ? patients.firstName : 'Unknon Patients',
-            patientLname: patients ? patients.lastName : 'Unknon Patients',
-            patientId: patients ? patients.patientId : 'Unknon Patients'
+            patientFname: patients ? patients.firstName : 'Unknown Patient',
+            patientLname: patients ? patients.lastName : '',
+            patientId: patients ? patients.patientId : null
           };
-
         });
 
 
@@ -293,7 +291,9 @@ export class AppointmentListComponent implements OnInit {
 
     }
     else {
-      this.getTableData()
+    this.searchDataValue = '';
+    this.serialNumberArray = [];
+    this.fetchCombineData();
     }
   }
 

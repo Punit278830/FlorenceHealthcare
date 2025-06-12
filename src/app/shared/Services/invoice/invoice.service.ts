@@ -74,8 +74,8 @@ export class InvoiceService {
     );
   }
   deleteInvoice(invoiceId: number): Observable<any> {
-  return this.http.delete(`${this.apiUrl}/InvoiceInfoes/${invoiceId}`);
-}
+    return this.http.delete(`${this.apiUrl}InvoiceInfoes/${invoiceId}`);
+  }
 
 
   private handleError(err: HttpErrorResponse): Observable<never> {
