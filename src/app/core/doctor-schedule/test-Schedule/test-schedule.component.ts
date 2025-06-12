@@ -217,7 +217,7 @@ export class TestScheduleComponent implements OnInit {
           })
         }
         else {
-          this.toster.error("Record cann't be Modify as schedule date less then one day", "Error");
+          this.toster.error("Record can't be modified as schedule date is less than 6 days", "Error");
         }
 
       }
@@ -275,12 +275,12 @@ export class TestScheduleComponent implements OnInit {
         if (lessDate) {
           this.staffScheduleService.deleteScheuleById(scheduleId).subscribe(result => {
             console.log(result)
-            this.toster.success("Rescore deleted successfully", "Delete schedule")
+            this.toster.success("Record deleted successfully", "Delete schedule")
             this.showAdujestmentSchedule(this.loggedInUser.loginId);
           })
         }
         else {
-          this.toster.error("Record cann't be deleted as schedule date less then one day", "Error");
+          this.toster.error("Record can't be deleted as schedule date is less than 6 days", "Error");
         }
 
       }

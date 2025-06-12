@@ -63,6 +63,7 @@ namespace hospitalApiProject.Controllers
             AppointmentId = invoice.AppointmentId,
             PatientId = invoice.PatientId,
             CreatedDate = invoice.CreatedDate,
+            CreatedTime = invoice.CreatedDate.ToDateTime(TimeOnly.MinValue).ToString("HH:mm:ss"), // Add time in IST format
 
             // Set Amount to the total of base amount + additional items' amounts
             Amount = invoice.Amount + _context.AdditionalInvoiceItems
@@ -421,14 +422,33 @@ namespace hospitalApiProject.Controllers
 
     // DELETE: api/InvoiceInfoes/5
     [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteInvoiceInfo(int id)
+    public async Task<IActionResult> DeleteInvoiceInfo(int id, [FromHeader] string userRole)
     {
+      // Check if user is admin
+      if (string.IsNullOrEmpty(userRole) || userRole.ToLower() != "admin")
+      {
+        return Unauthorized("Only administrators can delete invoices");
+      }
+
       var invoiceInfo = await _context.InvoiceInfos.FindAsync(id);
       if (invoiceInfo == null)
       {
         return NotFound();
       }
 
+      // Delete associated payment records first
+      var paymentRecords = await _context.PaymentModeInfo
+          .Where(p => p.InvoiceId == id)
+          .ToListAsync();
+      _context.PaymentModeInfo.RemoveRange(paymentRecords);
+
+      // Delete associated additional invoice items
+      var additionalItems = await _context.AdditionalInvoiceItems
+          .Where(a => a.InvoiceId == id)
+          .ToListAsync();
+      _context.AdditionalInvoiceItems.RemoveRange(additionalItems);
+
+      // Finally delete the invoice
       _context.InvoiceInfos.Remove(invoiceInfo);
       await _context.SaveChangesAsync();
 

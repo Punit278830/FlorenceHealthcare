@@ -1,6 +1,9 @@
 import { Time } from "@angular/common";
 import { DateTime } from "luxon";
 
+// Add DateOnly type definition
+export type DateOnly = string; // We'll use string format for dates in TypeScript
+
 export interface pageSelection {
   skip: number;
   limit: number;
@@ -380,14 +383,15 @@ interface PaymentDetail {
 
 export interface InvoiceInfoResponse {
   invoiceId: number;
-  patientId: number;
   appointmentId: number;
-  createdDate?: string; 
-  amount?: number;
-  totalUnpaidAmount: number;
-  status?: string;
-  paymentModes: string;
+  patientId: number;
+  createdDate: string; // Changed from DateOnly to string
+  createdTime: string;
+  amount: number;
+  status: string;
   paymentDetails: PaymentModeInfo[];
+  paymentModes: string;
+  totalUnpaidAmount: number;
 }
 export interface PaymentModeInfo {
   paymentId?: number;

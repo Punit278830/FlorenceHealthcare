@@ -363,7 +363,7 @@ namespace hospitalApiProject.Controllers
           {
             Amount = appointmentInfo.Fee,
             AppointmentId = appointmentInfo.Id,
-            CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
+            CreatedDate = DateOnly.FromDateTime(DateTime.Now),
             PatientId = appointmentInfo.PatientId,
             Status = "Unpaid",
             IsConsultationPaid = false

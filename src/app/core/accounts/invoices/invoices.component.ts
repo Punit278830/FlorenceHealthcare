@@ -4,8 +4,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { combineLatest } from 'rxjs';
+import { forkJoin, combineLatest } from 'rxjs';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
@@ -38,6 +37,16 @@ export class InvoicesComponent implements OnInit {
   public selectedValue !: string;
   public invoices: any[] = [];
     public loggedIn: any;
+  public displayedColumns: string[] = [
+    'invoiceId',
+    'date',
+    'time',
+    'patientName',
+    'amount',
+    'status',
+    'paymentModes',
+    'actions'
+  ];
 
   dataSource!: MatTableDataSource<Iinvoice>;
   
@@ -63,6 +72,29 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   selectedPaymentStatus: string = 'All';
   totalPaymentAmount: number = 0;
   public searchForm!: FormGroup;
+
+  // Add payment statistics properties
+  public paymentStats = {
+    paid: 0,
+    partiallyPaid: 0,
+    unpaid: 0,
+    total: 0
+  };
+
+  // Add progress circle data
+  public progressCircleData = {
+    paid: 0,
+    partiallyPaid: 0,
+    unpaid: 0,
+    total: 0
+  };
+
+  // Add color scheme for progress circles
+  public progressColors = {
+    paid: '#28a745',      // Green
+    partiallyPaid: '#ffa500', // Orange
+    unpaid: '#dc3545'     // Red
+  };
 
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
@@ -146,6 +178,8 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
         };
       });
 
+      // Calculate payment statistics
+      this.calculatePaymentStats();
       this.loadingService.hideLoader();
     },
     (error) => {
@@ -323,13 +357,21 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
   }
 
   confirmDelete(idhere: number) {
-    this.invoiceService.deleteInvoice(idhere).subscribe(res => {
-      if (res == null) {
-        this.toaster.success("Staff is deleted!")
-        this.getTableData();
+    this.invoiceService.deleteInvoice(idhere).subscribe({
+      next: (res) => {
+        if (res == null) {
+          this.toaster.success("Invoice deleted successfully!");
+          this.getTableData();
+        }
+      },
+      error: (err) => {
+        if (err.status === 401) {
+          this.toaster.error("Only administrators can delete invoices");
+        } else {
+          this.toaster.error("Failed to delete invoice");
+        }
       }
-    })
-
+    });
   }
 
 
@@ -383,4 +425,62 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
     }
   
   
+  }
+
+  private calculatePaymentStats(): void {
+    if (!this.combinedData || !Array.isArray(this.combinedData)) {
+      this.paymentStats = {
+        paid: 0,
+        partiallyPaid: 0,
+        unpaid: 0,
+        total: 0
+      };
+      this.progressCircleData = {
+        paid: 0,
+        partiallyPaid: 0,
+        unpaid: 0,
+        total: 0
+      };
+      return;
+    }
+
+    const stats = {
+      paid: 0,
+      partiallyPaid: 0,
+      unpaid: 0,
+      total: this.combinedData.length
+    };
+
+    this.combinedData.forEach((invoice: Iinvoice) => {
+      switch (invoice.status) {
+        case 'Paid':
+          stats.paid++;
+          break;
+        case 'Partially Paid':
+          stats.partiallyPaid++;
+          break;
+        case 'Unpaid':
+          stats.unpaid++;
+          break;
+      }
+    });
+
+    this.paymentStats = stats;
+
+    // Calculate percentages for progress circles
+    if (stats.total > 0) {
+      this.progressCircleData = {
+        paid: (stats.paid / stats.total) * 100,
+        partiallyPaid: (stats.partiallyPaid / stats.total) * 100,
+        unpaid: (stats.unpaid / stats.total) * 100,
+        total: 100
+      };
+    } else {
+      this.progressCircleData = {
+        paid: 0,
+        partiallyPaid: 0,
+        unpaid: 0,
+        total: 0
+      };
+    }
   }

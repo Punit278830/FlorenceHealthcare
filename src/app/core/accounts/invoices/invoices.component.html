@@ -15,6 +15,90 @@
     </div>
     <!-- /Page Header -->
 
+    <!-- Add Payment Statistics Cards -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Paid Invoices</h5>
+            <div class="d-flex align-items-center">
+              <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                  <circle cx="50" cy="50" r="45" fill="none" 
+                    [style.stroke]="progressColors.paid"
+                    stroke-width="10"
+                    [style.strokeDasharray]="'283'"
+                    [style.strokeDashoffset]="283 - (283 * progressCircleData.paid / 100)"/>
+                </svg>
+                <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                  {{progressCircleData.paid | number:'1.0-0'}}%
+                </div>
+              </div>
+              <div class="ms-3">
+                <h3 class="mb-0">{{paymentStats.paid}}</h3>
+                <p class="text-muted mb-0">Total Paid</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Partially Paid Invoices</h5>
+            <div class="d-flex align-items-center">
+              <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                  <circle cx="50" cy="50" r="45" fill="none" 
+                    [style.stroke]="progressColors.partiallyPaid"
+                    stroke-width="10"
+                    [style.strokeDasharray]="'283'"
+                    [style.strokeDashoffset]="283 - (283 * progressCircleData.partiallyPaid / 100)"/>
+                </svg>
+                <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                  {{progressCircleData.partiallyPaid | number:'1.0-0'}}%
+                </div>
+              </div>
+              <div class="ms-3">
+                <h3 class="mb-0">{{paymentStats.partiallyPaid}}</h3>
+                <p class="text-muted mb-0">Total Partially Paid</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card">
+          <div class="card-body">
+            <h5 class="card-title">Unpaid Invoices</h5>
+            <div class="d-flex align-items-center">
+              <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                <svg width="100" height="100" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                  <circle cx="50" cy="50" r="45" fill="none" 
+                    [style.stroke]="progressColors.unpaid"
+                    stroke-width="10"
+                    [style.strokeDasharray]="'283'"
+                    [style.strokeDashoffset]="283 - (283 * progressCircleData.unpaid / 100)"/>
+                </svg>
+                <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                  {{progressCircleData.unpaid | number:'1.0-0'}}%
+                </div>
+              </div>
+              <div class="ms-3">
+                <h3 class="mb-0">{{paymentStats.unpaid}}</h3>
+                <p class="text-muted mb-0">Total Unpaid</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-sm-12">
 
@@ -59,153 +143,196 @@
               </div>
             </div>
             <!-- /Table Header -->
-           <!-- /Table Header -->
-           <div class="staff-search-table">
-            <form [formGroup]="searchForm" (submit)="searchInvoices()">
-              <div class="row">
-                <!-- First Row: Start Date, End Date -->
-                <div class="col-12 col-md-6">
-                  <div class="form-group local-forms">
-                    <label for="from">From </label>
-                    <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1" formControlName="from">
-                    <mat-datepicker #picker1></mat-datepicker>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
-                  </div>
-                </div>
-            
-                <div class="col-12 col-md-6">
-                  <div class="form-group local-forms">
-                    <label for="to">To </label>
-                    <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2" formControlName="to">
-                    <mat-datepicker #picker2></mat-datepicker>
-                    <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
-                  </div>
-                </div>
-              </div>
-            
-              <div class="row">
-                <!-- Second Row: Payment Status, Payment Mode -->
-                <div class="col-12 col-md-6">
-                  <div class="form-group local-forms">
-                    <label for="paymentStatus">Payment Status </label>
-                    <mat-select formControlName="paymentStatus" class="form-control select" placeholder="Select Payment Status">
-                      <mat-option *ngFor="let data of selectedList" [value]="data.value">
-                        {{data.value}}
-                      </mat-option>
-                    </mat-select>
-                  </div>
-                </div>
-            
-                <div class="col-12 col-md-6">
-                  <div class="form-group local-forms">
-                    <label for="paymentMode">Payment Mode </label>
-                    <mat-select formControlName="paymentMode" (selectionChange)="onPaymentModeChange($event)" class="form-control select" placeholder="Select Payment Mode">
-                      <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
-                        {{data.value}}
-                      </mat-option>
-                    </mat-select>
-                  </div>
-                </div>
-              </div>
-            
-              <div class="row">
-                <!-- Third Row: Search Button, Total Amount for the Day -->
-                <div class="col-12 col-md-6">
-                  <div class="doctor-submit" style="margin-top: 10px;"> <!-- Adjusted margin -->
-                    <button type="submit" class="btn btn-primary submit-list-form me-2" style="padding: 10px 15px;">Search</button> <!-- Optional padding adjustment -->
-                  </div>
-                </div>
-            
-                <div class="col-12 col-md-6">
-                  <div class="dash-widget" style="margin-bottom: 10px;">
-                    <div class="dash-content dash-count" style="margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between;">
-                      <h4 style="margin-right: 10px; margin-bottom: 5px;">Total Amount for the Day ({{ selectedPaymentMode }})</h4>
-                      <h2 style="margin-bottom: 5px;">
-                        <span  class="counter-up" [countUp]="totalPaymentAmount" [options]="{duration: 10}">{{ totalPaymentAmount | currency: 'INR' }}</span>
-                      </h2>
+            <div class="row mb-4">
+              <!-- Payment Statistics Cards -->
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Paid Invoices</h5>
+                    <div class="d-flex align-items-center">
+                      <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                        <svg width="100" height="100" viewBox="0 0 100 100">
+                          <!-- Background circle -->
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                          <!-- Progress circle -->
+                          <circle cx="50" cy="50" r="45" fill="none" 
+                            [style.stroke]="progressColors.paid"
+                            stroke-width="10"
+                            [style.strokeDasharray]="'283'"
+                            [style.strokeDashoffset]="283 - (283 * progressCircleData.paid / 100)"/>
+                        </svg>
+                        <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                          {{progressCircleData.paid | number:'1.0-0'}}%
+                        </div>
+                      </div>
+                      <div class="ms-3">
+                        <h3 class="mb-0">{{paymentStats.paid}}</h3>
+                        <p class="text-muted mb-0">Total Paid</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </form>
-          
-          
-            
+
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Partially Paid Invoices</h5>
+                    <div class="d-flex align-items-center">
+                      <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                        <svg width="100" height="100" viewBox="0 0 100 100">
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                          <circle cx="50" cy="50" r="45" fill="none" 
+                            [style.stroke]="progressColors.partiallyPaid"
+                            stroke-width="10"
+                            [style.strokeDasharray]="'283'"
+                            [style.strokeDashoffset]="283 - (283 * progressCircleData.partiallyPaid / 100)"/>
+                        </svg>
+                        <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                          {{progressCircleData.partiallyPaid | number:'1.0-0'}}%
+                        </div>
+                      </div>
+                      <div class="ms-3">
+                        <h3 class="mb-0">{{paymentStats.partiallyPaid}}</h3>
+                        <p class="text-muted mb-0">Total Partially Paid</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-4">
+                <div class="card">
+                  <div class="card-body">
+                    <h5 class="card-title">Unpaid Invoices</h5>
+                    <div class="d-flex align-items-center">
+                      <div class="progress-circle" style="width: 100px; height: 100px; position: relative;">
+                        <svg width="100" height="100" viewBox="0 0 100 100">
+                          <circle cx="50" cy="50" r="45" fill="none" stroke="#e9ecef" stroke-width="10"/>
+                          <circle cx="50" cy="50" r="45" fill="none" 
+                            [style.stroke]="progressColors.unpaid"
+                            stroke-width="10"
+                            [style.strokeDasharray]="'283'"
+                            [style.strokeDashoffset]="283 - (283 * progressCircleData.unpaid / 100)"/>
+                        </svg>
+                        <div class="progress-text" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+                          {{progressCircleData.unpaid | number:'1.0-0'}}%
+                        </div>
+                      </div>
+                      <div class="ms-3">
+                        <h3 class="mb-0">{{paymentStats.unpaid}}</h3>
+                        <p class="text-muted mb-0">Total Unpaid</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
+
+            <div class="staff-search-table">
+              <form [formGroup]="searchForm" (submit)="searchInvoices()">
+                <div class="row">
+                  <!-- First Row: Start Date, End Date -->
+                  <div class="col-12 col-md-6">
+                    <div class="form-group local-forms">
+                      <label for="from">From </label>
+                      <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker1" formControlName="from">
+                      <mat-datepicker #picker1></mat-datepicker>
+                      <mat-datepicker-toggle matIconSuffix [for]="picker1"></mat-datepicker-toggle>
+                    </div>
+                  </div>
+              
+                  <div class="col-12 col-md-6">
+                    <div class="form-group local-forms">
+                      <label for="to">To </label>
+                      <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker2" formControlName="to">
+                      <mat-datepicker #picker2></mat-datepicker>
+                      <mat-datepicker-toggle matIconSuffix [for]="picker2"></mat-datepicker-toggle>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="row">
+                  <!-- Second Row: Payment Status, Payment Mode -->
+                  <div class="col-12 col-md-6">
+                    <div class="form-group local-forms">
+                      <label for="paymentStatus">Payment Status </label>
+                      <mat-select formControlName="paymentStatus" class="form-control select" placeholder="Select Payment Status">
+                        <mat-option *ngFor="let data of selectedList" [value]="data.value">
+                          {{data.value}}
+                        </mat-option>
+                      </mat-select>
+                    </div>
+                  </div>
+              
+                  <div class="col-12 col-md-6">
+                    <div class="form-group local-forms">
+                      <label for="paymentMode">Payment Mode </label>
+                      <mat-select formControlName="paymentMode" (selectionChange)="onPaymentModeChange($event)" class="form-control select" placeholder="Select Payment Mode">
+                        <mat-option *ngFor="let data of paymentModeList" [value]="data.value">
+                          {{data.value}}
+                        </mat-option>
+                      </mat-select>
+                    </div>
+                  </div>
+                </div>
+              
+                <div class="row">
+                  <!-- Third Row: Search Button, Total Amount for the Day -->
+                  <div class="col-12 col-md-6">
+                    <div class="doctor-submit" style="margin-top: 10px;"> <!-- Adjusted margin -->
+                      <button type="submit" class="btn btn-primary submit-list-form me-2" style="padding: 10px 15px;">Search</button> <!-- Optional padding adjustment -->
+                    </div>
+                  </div>
+              
+                  <div class="col-12 col-md-6">
+                    <div class="dash-widget" style="margin-bottom: 10px;">
+                      <div class="dash-content dash-count" style="margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between;">
+                        <h4 style="margin-right: 10px; margin-bottom: 5px;">Total Amount for the Day ({{ selectedPaymentMode }})</h4>
+                        <h2 style="margin-bottom: 5px;">
+                          <span  class="counter-up" [countUp]="totalPaymentAmount" [options]="{duration: 10}">{{ totalPaymentAmount | currency: 'INR' }}</span>
+                        </h2>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
             <div class="table-responsive" id="convertToPdf">
-              <table matSort (matSortChange)="sortData($event)"
-                class="table border-0 custom-table comman-table datatable mb-0">
+              <table matSort (matSortChange)="sortData($event)" class="table border-0 custom-table comman-table datatable mb-0">
                 <thead>
                   <tr>
-                    <!-- <th mat-sort-header="checkbox">
-                                            <div class="form-check check-tables">
-                                                <input class="form-check-input" type="checkbox" value="something">
-                                            </div>
-                                        </th> -->
                     <th>#</th>
-                     <th mat-sort-header="invoiceNumber">Invoice Number</th>
+                    <th mat-sort-header="invoiceNumber">Invoice Number</th>
                     <th mat-sort-header="patient">Patient Name</th>
                     <th mat-sort-header="createdDate">Created Date</th>
+                    <th mat-sort-header="createdTime">Time (IST)</th>
                     <th mat-sort-header="appointmentId">Appointment Id</th>
                     <th mat-sort-header="amount">Amount</th>
                     <th mat-sort-header="totalUnpaidAmount">Unpaid Amount</th>
                     <th mat-sort-header="status">Status</th>
                     <th mat-sort-header="paymentMode">Payment Mode</th>
-                     <th mat-sort-header="email">Time</th>
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let data of combinedData; let i = index">
-                      <!-- <td>
-                                            <div class="form-check check-tables">
-                                                <input class="form-check-input" type="checkbox" value="something">
-                                            </div>
-                                        </td> -->
-                  <td>{{ i + 1 }}</td>
-                    <td><a href="javascript:void(0);"
-                        (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
-                          
-
-                        <td> {{data.patientFname}} {{data.patientLname}}</td>
-
+                  <tr *ngFor="let data of combinedData; let i = index">
+                    <td><a href="javascript:void(0);" (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
+                    <td>{{data.patientFname}} {{data.patientLname}}</td>
                     <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
+                    <td>{{data.createdTime}}</td>
                     <td>{{data.appointmentId}}</td>
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
-                    <td><button
-                        [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
-                        class="custom-badge">{{data.status}}</button></td>
-                    <td><button
-                      [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
-                        class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
-
-                        <td>
-                          {{
-                            data.paymentTime
-                              ? (data.paymentTime | date: 'dd-MM-yyyy, h:mm a')
-                              : 'Not Paid Yet'
-                          }}
-                        </td>
-                    
-                <td class="text-end"> 
-
+                    <td><button [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}" class="custom-badge">{{data.status}}</button></td>
+                    <td><button [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null}" class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
+                    <td class="text-end">
                       <div class="dropdown dropdown-action">
-                        <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
-                          aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
+                        <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
                         <div class="dropdown-menu dropdown-menu-end">
-                          <a class="dropdown-item" href="javascript:void(0);"
-                            (click)="moveToEditInvoice(data.invoiceId)"><i class="fa-solid fa-pen-to-square m-r-5"></i>
-                            Add items</a>
-                              <a *ngIf="loggedIn.userRole == 'admin' "class="dropdown-item" href="javascript:void(0);" (click)="deleteInvoice(data.invoiceId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
-
-                          <!-- <a class="dropdown-item" [routerLink]="routes.invoiceView"><i
-                                                            class="feather icon-eye m-r-5"></i> View</a>
-                                                    <a class="dropdown-item" href="javascript:;"><i
-                                                            class="feather icon-download m-r-5"></i> Download</a>
-                                                    <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
-                                                        data-bs-target="#delete_patient"><i
-                                                            class="fa fa-trash-alt m-r-5"></i> Delete</a> -->
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="moveToEditInvoice(data.invoiceId)"><i class="fa-solid fa-pen-to-square m-r-5"></i> Add items</a>
+                          <a *ngIf="loggedIn.userRole == 'admin'" class="dropdown-item" href="javascript:void(0);" (click)="deleteInvoice(data.invoiceId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>
                     </td>
@@ -242,7 +369,7 @@
                                               pageNumberArray.length !== item)
                                               ? 'hide-page-no'
                                               : 'show-page-no'
-                                          ">
+                                        ">
                           <a (click)="moveToPage(item)" class="page-link" href="javascript:void(0);">
                             {{ item }}
                           </a>

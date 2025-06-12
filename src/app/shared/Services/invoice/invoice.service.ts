@@ -74,8 +74,13 @@ export class InvoiceService {
     );
   }
   deleteInvoice(invoiceId: number): Observable<any> {
-  return this.http.delete(`${this.apiUrl}/InvoiceInfoes/${invoiceId}`);
-}
+    const userData = JSON.parse(localStorage.getItem('data') || '');
+    return this.http.delete(`${this.apiUrl}/InvoiceInfoes/${invoiceId}`, {
+      headers: {
+        'userRole': userData.userRole
+      }
+    });
+  }
 
 
   private handleError(err: HttpErrorResponse): Observable<never> {
