@@ -318,56 +318,51 @@ export class InvoiceViewComponent implements OnInit {
     if (this.appointmentList.length > 0) {
       // Sort the appointments by date in descending order
       this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      let SelDoctor: Number | null = 0;
       const selectedAppointmentDate = new Date(this.appointmentDetails.date);
-      SelDoctor = this.appointmentDetails.doctorId;
+      const selectedDoctor = this.appointmentDetails.doctorId;
       let previousAppointmentDate: Date | null = null;
-      let previousDoctor: Number | null = 0;
+      let previousDoctor: Number | null = null;
 
+      // Find the most recent appointment before the current one
       for (let appointment of this.appointmentList) {
-
         const appointmentDate = new Date(appointment.date);
         if (appointmentDate < selectedAppointmentDate) {
           previousAppointmentDate = appointmentDate;
           previousDoctor = appointment.doctorId;
           break;
         }
-
       }
+
+      // Reset flags and discount
+      this.flag = false;
+      this.IsDoctorSameflag = false;
+      this.disc = 0;
 
       if (previousAppointmentDate) {
         const differenceInTime = selectedAppointmentDate.getTime() - previousAppointmentDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 3600 * 24);
 
-        // Check if the difference between the selected and previous appointment is within 6 days
-        this.flag = differenceInDays <= 6 && differenceInDays >= 0;
-
-        if (previousDoctor == SelDoctor) {
-          this.IsDoctorSameflag = true;
-        }
-        else {
-          this.IsDoctorSameflag = false;
+        // Check if within 6 days and same doctor
+        if (differenceInDays <= 6 && differenceInDays >= 0) {
+          this.flag = true;
+          this.IsDoctorSameflag = (previousDoctor === selectedDoctor);
+          
+          // Apply discount only if same doctor within 6 days
+          if (this.IsDoctorSameflag) {
+            this.disc = 100;
+            // Subtract only the consultation fee from total
+            if (this.invoiceDetails && this.invoiceDetails.amount) {
+              this.totalInvoiceAmount = Math.max(0, this.totalInvoiceAmount - this.invoiceDetails.amount);
+            }
+          }
         }
       } else {
-        console.warn("No appointment found before the selected appointment date.");
-        this.flag = false;
+        console.log("No previous appointment found");
       }
     } else {
       this.flag = false;
-    }
-
-    if (this.flag) {
-
-      if (this.IsDoctorSameflag == false) {
-        this.flag = false;
-        this.totalInvoiceAmount = this.totalInvoiceAmount;
-        this.disc = 0;
-      }
-      if (this.IsDoctorSameflag == true) {
-        this.flag = true;
-        this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
-        this.disc = 100;
-      }
+      this.IsDoctorSameflag = false;
+      this.disc = 0;
     }
   }
   backToAppointmentList()

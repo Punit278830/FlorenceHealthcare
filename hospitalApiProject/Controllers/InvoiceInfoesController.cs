@@ -63,7 +63,6 @@ namespace hospitalApiProject.Controllers
             AppointmentId = invoice.AppointmentId,
             PatientId = invoice.PatientId,
             CreatedDate = invoice.CreatedDate,
-            CreatedTime = invoice.CreatedDate.ToDateTime(TimeOnly.MinValue).ToString("HH:mm:ss"), // Add time in IST format
 
             // Set Amount to the total of base amount + additional items' amounts
             Amount = invoice.Amount + _context.AdditionalInvoiceItems

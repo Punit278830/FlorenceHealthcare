@@ -379,16 +379,24 @@ export class AddAppointmentComponent implements OnInit {
       }
 
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = this.formattedDateTime;
+      
+      // Create a proper Date object from the form date
+      const appointmentDate = new Date(appointment.value.date);
+      // Set the time from the time picker
+      if (appointment.value.appointTime) {
+        const time = new Date(appointment.value.appointTime);
+        appointmentDate.setHours(time.getHours(), time.getMinutes(), 0, 0);
+      }
+      
+      this.appointmentDto.date = appointmentDate; // Now sending a proper Date object
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-
       this.appointmentDto.appointTime = formattedTime;
-      console.log("tme", this.appointmentDto)
-      //this.appointmentDto.departmentId=3;
+      this.appointmentDto.departmentid = appointment.value.departmentid;
       this.appointmentDto.scheduledByid = userData.loginId;
+
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
         console.log("result", result);
         this.toater.success("Appointment booked succesfully", "Book Appointment");
@@ -396,14 +404,10 @@ export class AddAppointmentComponent implements OnInit {
         this.invoiceService.invoiceId = result.invoiceId;
         this.route.navigate(['/accounts/invoice-view']);
       });
-
     }
     else {
       this.bookappointment.markAllAsTouched();
     }
-
-
-
   }
   // calculateDateDifference(dob:Date) {
   //   const start = new Date(dob);

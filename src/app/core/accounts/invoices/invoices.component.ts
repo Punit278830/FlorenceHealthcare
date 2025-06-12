@@ -424,9 +424,6 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
       this.loadingService.hideLoader();
     }
   
-  
-  }
-
   private calculatePaymentStats(): void {
     if (!this.combinedData || !Array.isArray(this.combinedData)) {
       this.paymentStats = {
@@ -484,3 +481,4 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
       };
     }
   }
+}

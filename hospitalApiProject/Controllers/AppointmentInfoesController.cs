@@ -352,6 +352,26 @@ namespace hospitalApiProject.Controllers
 
       try
       {
+        // Check for previous appointments within 6 days with the same doctor
+        var previousAppointments = await _context.AppointmentInfos
+          .Where(a => a.PatientId == appointmentInfo.PatientId && 
+                      a.DoctorId == appointmentInfo.DoctorId &&
+                      a.Date < appointmentInfo.Date)
+          .OrderByDescending(a => a.Date)
+          .ToListAsync();
+
+        if (previousAppointments.Any())
+        {
+          var latestAppointment = previousAppointments.First();
+          var daysDifference = (appointmentInfo.Date - latestAppointment.Date).TotalDays;
+          
+          // If within 6 days, set fee to 0
+          if (daysDifference <= 6 && daysDifference >= 0)
+          {
+            appointmentInfo.Fee = 0;
+          }
+        }
+
         // Add and save the appointment information
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
