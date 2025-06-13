@@ -73,6 +73,7 @@ export class AddAppointmentComponent implements OnInit {
   @ViewChild('searchDataValue') searchInput!: ElementRef;
 
   //public searchDataValue = '';
+  public searchDataValue: string = '';
   constructor(private patierntService: PatientService, 
     private route: Router,
     private appointmentService: AppointmentService,
@@ -297,15 +298,18 @@ export class AddAppointmentComponent implements OnInit {
 
   searchData(data: string) {
     this.searchResults = [];
-    this.patierntService.serarchPatient(data).subscribe((result: any) => {
-
-      result.map((res: any) => {
-
-        this.searchResults.push(res);
-        this.searchResults = this.searchResults.slice(0, 3)
-      })
-    })
-
+    if (!data || data.trim() === '') {
+      return;
+    }
+    this.patierntService.getPatientList().subscribe((patients: any[]) => {
+      const search = data.trim().toLowerCase();
+      this.searchResults = patients.filter(p =>
+        (p.firstName && p.firstName.toLowerCase().includes(search)) ||
+        (p.lastName && p.lastName.toLowerCase().includes(search)) ||
+        (p.mobile && p.mobile.toLowerCase().includes(search)) ||
+        (p.email && p.email.toLowerCase().includes(search))
+      );
+    });
   }
   // ngAfterViewInit()
   // {

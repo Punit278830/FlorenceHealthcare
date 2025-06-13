@@ -155,7 +155,7 @@
                   </tr>
                 </tbody>
               </table>
-              <div class="table_footer">
+              <div class="table_footer" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0 16px;">
                 <div class="col-sm-12 col-md-5">
                   <div *ngIf="patientList.length == 0 "   class="dataTables_info">
                     No records found
@@ -166,66 +166,32 @@
                     {{ totalData }} entries
                   </div>
                 </div>
-
-                <div class="col-sm-12 col-md-7">
+                <div class="col-sm-12 col-md-7" style="display: flex; justify-content: flex-end;">
                   <div class="pagination_section">
                     <ul class="pagination">
-                      <li class="page-item" [ngClass]="{
-                                          disabled: currentPage === 1
-                                        }">
-                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);"
-                          tabindex="-1">Previous</a>
+                      <li class="page-item" [ngClass]="{disabled: currentPage === 1}">
+                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);" tabindex="-1">Previous</a>
                       </li>
-
                       <ng-container *ngFor="let item of pageNumberArray; let i = index">
-                        <li class="page-item" [class.active]="item === currentPage" [ngClass]="
-                                            (pageNumberArray[currentPage - 2] > item &&
-                                              item !== 1 &&
-                                              pageNumberArray.length > 6) ||
-                                            (pageNumberArray[currentPage] < item &&
-                                              item !== 1 &&
-                                              pageNumberArray.length > 6 &&
-                                              pageNumberArray.length !== item)
-                                              ? 'hide-page-no'
-                                              : 'show-page-no'
-                                          ">
-                          <a (click)="moveToPage(item)" class="page-link" href="javascript:void(0);">
-                            {{ item }}
-                          </a>
-                        </li>
-                        <li class="page-item" *ngIf="
-                                            i === 0 &&
-                                            pageNumberArray.length > 6 &&
-                                            currentPage > 2
-                                          " [hidden]="currentPage === 1" (click)="moveToPage(currentPage - 2)"
-                          (keyup.enter)="moveToPage(currentPage - 2)" tabindex="0">
-                          <a class="page-link" href="javascript:void(0);">
-                            ...
-                          </a>
-                        </li>
-                        <li *ngIf="
-                                            i === pageNumberArray.length - 2 &&
-                                            pageNumberArray.length > 6
-                                          " [hidden]="
-                                            currentPage >=
-                                              pageNumberArray[pageNumberArray.length - 2] ||
-                                            totalData <
-                                              serialNumberArray[serialNumberArray.length - 1]
-                                          " class="page-item" (click)="moveToPage(currentPage + 2)"
-                          (keyup.enter)="moveToPage(currentPage + 2)" tabindex="0">
-                          <a class="page-link" href="javascript:void(0);">
-                            ...
-                          </a>
-                        </li>
+                        <ng-container *ngIf="
+                          item === 1 ||
+                          item === pageNumberArray.length ||
+                          (item >= currentPage - 4 && item <= currentPage + 4 && pageNumberArray.length > 10) ||
+                          (pageNumberArray.length <= 10)
+                        ">
+                          <li class="page-item" [class.active]="item === currentPage">
+                            <a (click)="moveToPage(item)" class="page-link" href="javascript:void(0);">{{ item }}</a>
+                          </li>
+                        </ng-container>
+                        <ng-container *ngIf="
+                          (i === 1 && currentPage > 6 && pageNumberArray.length > 10) ||
+                          (i === pageNumberArray.length - 2 && currentPage < pageNumberArray.length - 5 && pageNumberArray.length > 10)
+                        ">
+                          <li class="page-item disabled"><span class="page-link">...</span></li>
+                        </ng-container>
                       </ng-container>
-
-                      <li class="page-item" [ngClass]="{
-                                          disabled:
-                                            currentPage ===
-                                              pageNumberArray[pageNumberArray.length - 1] ||  patientList.length === 0
-                                        }">
-                        <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next
-                        </a>
+                      <li class="page-item" [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] ||  patientList.length === 0}">
+                        <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next</a>
                       </li>
                     </ul>
                   </div>

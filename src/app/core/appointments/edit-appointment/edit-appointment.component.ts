@@ -214,7 +214,9 @@ export class EditAppointmentComponent implements OnInit {
     this.appointmentService.updateAppointment(this.appointmentService.appointmentId, this.appointmentDto).subscribe(result => {
       console.log(result);
       this.toastr.success("Appointmnt Updated Successfuly", "Update Appointment");
-      this.route.navigate([routes.appointmentList]);
+      setTimeout(() => {
+        this.route.navigate(['/accounts/invoice-view']);
+      }, 1200); // 1.2 seconds delay to show the success message
     })
 
 

@@ -19,7 +19,7 @@
 
                 <div class="card">
                     <div class="card-body">
-                        <form [formGroup]="patientReg" (ngSubmit)="UpdatePatientInfo(patientReg)">
+                        <form [formGroup]="patientReg" (ngSubmit)="UpdatePatientInfo()">
                             <div class="row">
                                 <div class="col-12">
                                     <div class="form-heading">
@@ -77,7 +77,7 @@
                                                         </div> -->
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="mobile">Mobile <span class="login-danger">*</span></label>
+                                        <label for="mobile">Mobile </label>
                                         <input class="form-control" formControlName="mobile" type="text" placeholder="">
                                         <div *ngIf="patientReg.controls['mobile'].invalid && (patientReg.controls['mobile'].dirty 
                                         || patientReg.controls['mobile'].touched)" class="text-danger">
@@ -190,15 +190,15 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="Consulting">Identity Proof</label>
-                                        <mat-select formControlName="IdentityName" formControlName="identityName"
+                                        <mat-select formControlName="identityName"
                                             class="form-control select" placeholder="Select Identity">
                                             <mat-option *ngFor="let data of IdentityDocNumber" [value]="data.value">
                                                 {{data.value}}
                                             </mat-option>
                                         </mat-select>
-                                        <div *ngIf="patientReg.get('IdentityName')?.invalid && (patientReg.get('IdentityName')?.dirty || patientReg.get('IdentityName')?.touched)"
+                                        <div *ngIf="patientReg.get('identityName')?.invalid && (patientReg.get('identityName')?.dirty || patientReg.get('identityName')?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="patientReg.get('IdentityName')?.errors?.['required']">
+                                            <div *ngIf="patientReg.get('identityName')?.errors?.['required']">
                                                 Proof is required.</div>
                                         </div>
 
@@ -209,9 +209,9 @@
                                         <label for="lastname">Identity Number </label>
                                         <input class="form-control" formControlName="identityNumber" type="text"
                                             placeholder="Enter Identity doc Number">
-                                        <div *ngIf="patientReg.get('IdentityNumber')?.invalid && (patientReg.get('IdentityNumber')?.dirty || patientReg.get('IdentiyNumber')?.touched)"
+                                        <div *ngIf="patientReg.get('identityNumber')?.invalid && (patientReg.get('identityNumber')?.dirty || patientReg.get('identityNumber')?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="patientReg.get('IdentityNumber')?.errors?.['required']">
+                                            <div *ngIf="patientReg.get('identityNumber')?.errors?.['required']">
                                                 Number is required.</div>
                                         </div>
                                     </div>

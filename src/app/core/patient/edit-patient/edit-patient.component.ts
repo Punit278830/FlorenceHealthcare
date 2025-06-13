@@ -124,27 +124,21 @@ export class EditPatientComponent implements OnInit {
     this.patientReg.get('age')?.setValue(age);
   }
 
-  UpdatePatientInfo(patientData: FormGroup) {
-
-    if (patientData.valid) {
-      console.log(patientData.value)
-      this._patientDto = patientData.value;
+  UpdatePatientInfo() {
+    if (this.patientReg.valid) {
+      console.log(this.patientReg.value)
+      this._patientDto = this.patientReg.value;
       this._patientDto.patientId = this.patientId;
-      this._patientDto.IdentityName = patientData.value.IdentiyName;
-      this._patientDto.IdentityNumber= patientData.value.IdentiyNumber;
+      this._patientDto.IdentityName = this.patientReg.value.IdentityName;
+      this._patientDto.IdentityNumber = this.patientReg.value.IdentityNumber;
       this._patientDto.patientImage = this.previewImage;
       this.patientService.updatePatientData(this.patientId, this._patientDto).subscribe(res => {
         res ? this.toastr.success("Patien info updated Successfully", "Update Patient Info") : null;
         this.route.navigate([routes.patientsList]);
       })
-
-      //this.resetAddPatientForm()
-
+    } else {
+      this.patientReg.markAllAsTouched();
     }
-    else {
-      patientData.markAllAsTouched()
-    }
-
   }
 
   resetAddPatientForm() {
