@@ -316,6 +316,19 @@ export interface IPredefineDiagnosis {
   diagnosStatus: number;
 }
 
+export interface IinvoiceItem {
+  id: number,
+  invoiceId: number,
+  itemName: string,
+  description: string,
+  discount: number,
+  fee: number,
+  createdBy: number,
+  finalAmount: number,
+  status: string,
+  itemId: number,
+}
+
 export interface Iinvoice {
   invoiceId: number,
   appointmentId: number,
@@ -325,6 +338,11 @@ export interface Iinvoice {
   totalUnpaidAmount: number,
   status: string,
   paymentModes: string,
+    paymentId: number;
+  paymentMode: string;
+  itemId: number | null;
+  paymentDetails: PaymentModeInfo[];
+  paymentDate: string; // or Date if you parse it
   isConsultationPaid: boolean,
   transactionId: string
   itemName: string;
@@ -346,18 +364,40 @@ export interface ITotalPaymentDetails {
   totalCashAmount: number,
   totalOnlineAmount: number
 }
+interface PaymentDetail {
+  paymentId: number;
+  invoiceId: number;
+  paymentMode: string;
+  itemName: string | null;
+  itemId: number | null;
+  paymentDate: string; 
+  transactionId: string | null;
+  amount: number;
+  // add other properties if needed
+}
 
-export interface IinvoiceItem {
-  id: number,
-  invoiceId: number,
-  itemName: string,
-  description: string,
-  discount: number,
-  fee: number,
-  createdBy: number,
-  finalAmount: number,
-  status: string,
-  itemId: number,
+
+
+export interface InvoiceInfoResponse {
+  invoiceId: number;
+  patientId: number;
+  appointmentId: number;
+  createdDate?: string; 
+  amount?: number;
+  totalUnpaidAmount: number;
+  status?: string;
+  paymentModes: string;
+  paymentDetails: PaymentModeInfo[];
+}
+export interface PaymentModeInfo {
+  paymentId?: number;
+  invoiceId: number;
+  paymentMode: string;
+  itemName: string;
+  itemId?: string;
+  transactionId?: string;
+  paymentDate?: string; 
+  amount?: number;
 }
 
 export interface IPaymentMode {

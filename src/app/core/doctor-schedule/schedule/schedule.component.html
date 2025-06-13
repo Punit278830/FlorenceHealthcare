@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-sm-12">
           <ul class="breadcrumb">
-            <li class="breadcrumb-item"><a [routerLink]="routes.schedule">Doctor Shedule </a></li>
+            <li class="breadcrumb-item"><a [routerLink]="routes.schedule">Doctor Schedule </a></li>
             <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
             <li class="breadcrumb-item active">Schedule List</li>
           </ul>
@@ -64,6 +64,7 @@
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </th> -->
+                      <span style="padding-left: 20px;"></span>
                     <th mat-sort-header="doctorName">Doctor Name</th>
                     <th mat-sort-header="department">Department</th>
                     <th mat-sort-header="scheduledate">Date applied</th>
@@ -74,12 +75,13 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let data of schedule">
+                  <tr *ngFor="let data of schedule;let i=index">
                     <!-- <td>
                       <div class="form-check check-tables">
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </td> -->
+                    <td>{{serialNumberArray[i]}}</td>
                     <td class="profile-image"><a (click)="moveToProfile(data.staffId)"> {{data.staffName}}</a></td>
                     <!-- <img width="28" height="28"
                           [src]="data.img" class="rounded-circle m-r-5" alt=""> -->

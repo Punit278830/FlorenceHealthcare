@@ -36,6 +36,30 @@
                               </div>                       
                     </div>
                     </div>
+                      <div class="table-responsive mt-4">
+                    <table matSort class="table border-0 custom-table comman-table datatable mb-0">
+                      <thead>
+                        <tr>
+                          <th mat-sort-header="itemId">Item ID</th>
+                          <th mat-sort-header="itemName">Item Name</th>
+                          <th mat-sort-header="description">Description</th>
+                          <th mat-sort-header="discount">Discount (%)</th>
+                          <th mat-sort-header="fee">Fee</th>
+                          <th class="text-end">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let item of invoiceitems; let i = index">
+                          <td>{{ item.itemId }}</td>
+                          <td>{{ item.itemName }}</td>
+                          <td>{{ item.description }}</td>
+                          <td>{{ item.discount }}</td>
+                          <td>{{ item.fee |  currency: 'INR'  }}</td>
+                         
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                     <div class="table-responsive" *ngIf="invoiceItemDto">
                         <table class="table border-0 custom-table comman-table datatable mb-0">
                             <thead>

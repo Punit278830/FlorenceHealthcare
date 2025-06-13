@@ -309,12 +309,12 @@ export class InvoiceViewComponent implements OnInit {
     this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
       this.appointmentList = res;
 
-      // Find the latest appointment and check if it is within the last 7 days
-      this.checkLatestAppointmentWithin7Days();
+      // Find the latest appointment and check if it is within the last 6 days
+      this.checkLatestAppointmentWithin6Days();
     });
   }
 
-  checkLatestAppointmentWithin7Days() {
+  checkLatestAppointmentWithin6Days() {
     if (this.appointmentList.length > 0) {
       // Sort the appointments by date in descending order
       this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -339,8 +339,8 @@ export class InvoiceViewComponent implements OnInit {
         const differenceInTime = selectedAppointmentDate.getTime() - previousAppointmentDate.getTime();
         const differenceInDays = differenceInTime / (1000 * 3600 * 24);
 
-        // Check if the difference between the selected and previous appointment is within 7 days
-        this.flag = differenceInDays <= 7 && differenceInDays >= 0;
+        // Check if the difference between the selected and previous appointment is within 6 days
+        this.flag = differenceInDays <= 6 && differenceInDays >= 0;
 
         if (previousDoctor == SelDoctor) {
           this.IsDoctorSameflag = true;

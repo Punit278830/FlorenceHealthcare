@@ -22,6 +22,7 @@
                             <div class="row">
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
+
                                         <label for="templateName">Prescription Template Name <span class="login-danger">*</span></label>
                                         <input class="form-control" formControlName="templateName" type="text" placeholder="">
                                         <div *ngIf="consultForm.get('templateName')?.invalid || ((consultForm.get('templateName')?.dirty && consultForm.get('templateName')?.touched))" class="text-danger">
@@ -79,60 +80,59 @@
                                             class="btn btn-primary cancel-form">
                                             Cancel
                                         </button>
+                                        
                                     </div>
                                 </div>
                             </div>
                         </form>
                     </div>
                 </div>
-                <div class="table-responsive mt-4">
-                    <table matSort class="table border-0 custom-table comman-table datatable mb-0">
-                        <thead>
-                            <tr>
-                                <th mat-sort-header="templateName">Template Name</th>
-                                <th mat-sort-header="examinationNote">Examination Note</th>
-                                <th mat-sort-header="advice">Advice</th>
-                                <th mat-sort-header="differentialDiagnosis">Differential diagnosis</th>
-                                <th mat-sort-header="finalDiagnosis">Final diagnosis</th>
-                                <th mat-sort-header="preDefinedDiagnosis">Pre Defined Diagnosis</th>
-                                <th mat-sort-header="actions">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr *ngFor="let template of templates; let i = index">
-                                <td>{{ template.templateName }}</td>
-                                <td>{{ template.examinationNote }}</td>
-                                <td>{{ template.advice }}</td>
-                                <td>{{ template.diffDiagnosis }}</td>
-                                <td>{{ template.finalDiagnosis }}</td>
-                                <td>{{ getPreDiagnosisById(template.diagnosisId)?.diagnosName }}</td>
+             <div class="table-responsive mt-4">
+  <table matSort class="table border-0 custom-table comman-table datatable mb-0">
+    <thead>
+      <tr>
 
-                                <td class="text-end">
-                                  <div class="dropdown dropdown-action">
-                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
-                                      aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                                    <div class="dropdown-menu dropdown-menu-end">
-                                      <a class="dropdown-item" href="javascript:void(0);" (click)="onEdit(template.id)">
-                                          <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
-                                       </a>
-                                       
-                                      <!-- *ngIf="loggedIn.userRole == 'admin' " -->
-                                      <a class="dropdown-item" href="javascript:void(0);"
-                                      (click)="onDelete(template.id)">
-                                      <i class="fa fa-trash-alt m-r-5"></i> Delete
-                                   </a>
-                                   
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
-                        </tbody>
-                    </table>
+        <th style="width: 150px;">Template Name</th>
+        <th style="width: 200px;">Examination Note</th>
+        <th style="width: 200px;">Advice</th>
+        <th style="width: 150px;">Differential Diagnosis</th>
+        <th style="width: 150px;">Final Diagnosis</th>
+        <th style="width: 180px;">Pre Defined Diagnosis</th>
+        <th style="width: 80px;">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let template of templates; let i = index">
 
-                    <!-- No items found message -->
-                    <div class="dataTables_info text-center mt-3">
-                        No Data found
-                    </div>
+        <td style="white-space: normal;">{{ template.templateName }}</td>
+        <td style="white-space: normal;">{{ template.examinationNote }}</td>
+        <td style="white-space: normal;">{{ template.advice }}</td>
+        <td style="white-space: normal;">{{ template.diffDiagnosis }}</td>
+        <td style="white-space: normal;">{{ template.finalDiagnosis }}</td>
+        <td style="white-space: normal;">
+          {{ getPreDiagnosisById(template.diagnosisId)?.diagnosName }}
+        </td>
+        <td class="text-end">
+          <div class="dropdown dropdown-action">
+            <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="fa fa-ellipsis-v"></i>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+              <a class="dropdown-item" href="javascript:void(0);" (click)="onEdit(template.id)">
+                <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+              </a>
+              <a class="dropdown-item" href="javascript:void(0);" (click)="onDelete(template.id)">
+                <i class="fa fa-trash-alt m-r-5"></i> Delete
+              </a>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+
+                   
                 </div>
             </div>
         </div>

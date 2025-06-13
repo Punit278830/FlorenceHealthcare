@@ -25,17 +25,17 @@
                 <div class="col">
                   <div class="doctor-table-blk">
                     <h3>Staff List</h3>
-                    <div class="doctor-search-blk">
+                     <div class="doctor-search-blk">
                       <div class="top-nav-search table-search-blk">
                         <input class="form-control" placeholder="Search here" [(ngModel)]="searchDataValue"
                           (ngModelChange)="searchData(searchDataValue)">
                         <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
                       </div>
                       <div class="add-group">
-                        <a [routerLink]="routes.addStaff" class="btn btn-primary add-pluss ms-2"><img
-                            src="assets/img/icons/plus.svg" alt=""></a>
+                        <!-- <a [routerLink]="routes.addAppointment" class="btn btn-primary add-pluss ms-2"><img
+                            src="assets/img/icons/plus.svg" alt=""></a> -->
                         <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2" (click)="onRefresh()"><img
-                            src="assets/img/icons/re-fresh.svg" alt=""></a>
+                            src="assets/img/icons/re-fresh.svg" alt="" ></a>
                       </div>
                     </div>
                   </div>
@@ -86,10 +86,15 @@
                     <td class="profile-image" style="cursor: pointer;"><a (click)="moveToProfile(data.staffId)"><img width="28" height="28" [src]="img"
                           class="rounded-circle m-r-5" alt="">
                         {{data.firstName}} {{ data.lastName}}</a></td>
-                    <td>{{data.departmentName}}</td>
+<td style="width: 120px; white-space: normal; word-break: break-word;">{{ data.departmentName }}</td>
                     <td>{{data.designation}}</td>
-                    <td>{{data.education}}</td>
-                    <td>{{data.mobile}}</td>
+                   <td style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+  {{data.education}}
+</td>
+<td style="max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+  {{data.mobile}}
+</td>
+
                     <td>{{data.email}}</td>
                     <td>{{data.doj}}</td>
                     <td class="text-end">

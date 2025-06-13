@@ -91,26 +91,28 @@
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </th> -->
+                    <span style="padding-left: 20px;"></span>
                     <th mat-sort-header="name">Patient Name</th>
                     <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
                     <th mat-sort-header="treatment">Department</th>
                     <th mat-sort-header="mobile">Treatment</th>
                     <th mat-sort-header="email">Status</th>
                     <th mat-sort-header="email">Fee</th>
-                    <th mat-sort-header="email">Payment Status</th>
+                    <th mat-sort-header="email">Payment</th>
                     <th mat-sort-header="email">Time</th>
 
                     <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let data of appointmentList">
+                  <tr *ngFor="let data of appointmentList;let i=index">
                     <!-- DO NOT DELETE -->
                     <!-- <td>
                       <div class="form-check check-tables">
                         <input class="form-check-input" type="checkbox" value="something">
                       </div>
                     </td> -->
+                    <td>{{serialNumberArray[i]}}</td>
                     <td class="profile-image"><a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
                         (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"><img
                           width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
@@ -150,7 +152,7 @@
                     {{ totalData }} entries
                   </div>
                 </div>
-
+ <span style="padding-left: 180px;"></span>
                 <div class="col-sm-12 col-md-7">
                   <div class="pagination_section">
                     <ul class="pagination">

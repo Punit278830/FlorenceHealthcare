@@ -181,17 +181,15 @@ export class AppointmentListComponent implements OnInit {
           const patients = patient.find((patient: any) => patient.patientId === appointment.patientId)
           const department = departments.find((department: any) => department.departmentId === appointment.departmentid)
 
-
           return {
             ...appointment,
             doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
             doctorLname: doctor ? doctor.lastName : '',
             departmentName: department ? department.departmentName : 'Unknown Department',
-            patientFname: patients ? patients.firstName : 'Unknon Patients',
-            patientLname: patients ? patients.lastName : 'Unknon Patients',
-            patientId: patients ? patients.patientId : 'Unknon Patients'
+            patientFname: patients ? patients.firstName : 'Unknown Patient',
+            patientLname: patients ? patients.lastName : '',
+            patientId: patients ? patients.patientId : null
           };
-
         });
 
 
@@ -272,8 +270,31 @@ export class AppointmentListComponent implements OnInit {
   }
 
   public searchData(value: any): void {
-    this.dataSource.filter = value.trim().toLowerCase();
-    this.appointmentList = this.dataSource.filteredData;
+  if (value != '') {
+      console.log("value", value)
+      console.log("datasource", this.dataSource)
+      this.dataSource.filter = value.trim().toLowerCase();
+      this.appointmentList = this.dataSource.filteredData;
+      console.log("value", this.appointmentList)
+      if (this.appointmentList.length > 0) {
+        this.appointmentList.map((item: any, index: number) => {
+          this.serialNumberArray.push(index + 1)
+        })
+        this.totalData = this.appointmentList.length;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+
+      }
+      else {
+        this.serialNumberArray = [];
+        this.totalData = 0;
+      }
+
+    }
+    else {
+    this.searchDataValue = '';
+    this.serialNumberArray = [];
+    this.fetchCombineData();
+    }
   }
 
   public sortData(sort: Sort) {
@@ -418,6 +439,7 @@ export class AppointmentListComponent implements OnInit {
       }
 
     }
+    
 
     exportAppointmentListAsPdf()
     {

@@ -73,6 +73,10 @@ export class InvoiceService {
       catchError(this.handleError)
     );
   }
+  deleteInvoice(invoiceId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}InvoiceInfoes/${invoiceId}`);
+  }
+
 
   private handleError(err: HttpErrorResponse): Observable<never> {
     return throwError(() => err.error);
@@ -113,6 +117,8 @@ export class InvoiceService {
   deleteSubInvoiceItem(invoiceId: number, itemName: string): Observable<any> {
     return this.http.delete(this.apiUrl + 'AdditionalInvoiceItems/' + invoiceId + '/' + itemName);
   }
+ 
+
 
   deleteInvoiceItems(id:number):Observable<any>{
     return this.http.delete(this.apiUrl+'InvoiceItemMasters/'+ id);

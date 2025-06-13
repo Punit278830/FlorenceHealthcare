@@ -32,9 +32,7 @@
                                                 <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
                                             </div>
                                             <div class="add-group">
-                                                <a [routerLink]="routes.addPatient"
-                                                    class="btn btn-primary add-pluss ms-2"><img
-                                                        src="assets/img/icons/plus.svg" alt=""></a>
+                                               
                                                 <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2"><img
                                                         src="assets/img/icons/re-fresh.svg" (click)="refresh()"
                                                         alt=""></a>
@@ -76,6 +74,8 @@
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
                                         </td>
+                                                            
+
                                         <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
                                             (keydown.enter)="postDatatoAppointment(data.patientId)" tabindex="0">
                                             <img width="28" height="28" class="rounded-circle m-r-5"
@@ -142,41 +142,52 @@
                                                 <h4>Appointment Details</h4>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-md-6 col-xl-6">
-                                            <div class="form-group local-forms">
-                                                <label for="Date">Date of Appointment <span
-                                                        class="login-danger">*</span></label>
-                                                <input class="form-control  datetimepicker" formControlName="date"
-                                                    type="text" matInput [matDatepicker]="picker"
-                                                    placeholder="DD/MM/YYYY"
-                                                    (dateChange)="updateFormattedDateTime($event)">
-                                                <mat-datepicker #picker></mat-datepicker>
-                                                <mat-datepicker-toggle matIconSuffix [for]="
-                                                picker"></mat-datepicker-toggle>
-                                                <div *ngIf="bookappointment.get('date')?.invalid && (bookappointment.get('date')?.dirty || bookappointment.get('date')?.touched)"
-                                                    class="text-danger">
-                                                    <div *ngIf="bookappointment.get('date')?.errors?.['required']">Date
-                                                        of appointment is required.</div>
-                                                </div>
-                                            </div>
+                                       <div class="col-12 col-md-6 col-xl-6">
+                                    <div class="form-group local-forms">
+                                 <label for="Date">Date of Appointment <span class="login-danger">*</span></label>
+
+                                 <input class="form-control datetimepicker"
+                                  type="text" matInput [matDatepicker]="picker" [min]="minDate" formControlName="date" />
+                                        <mat-datepicker #picker></mat-datepicker>
+                                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+
+                                        <div
+                                        *ngIf="bookappointment.get('date')?.invalid && (bookappointment.get('date')?.dirty || bookappointment.get('date')?.touched)"
+                                        class="text-danger"
+                                        >
+                                        <div *ngIf="bookappointment.get('date')?.errors?.['required']">
+                                            Date of appointment is required.
                                         </div>
-                                        <div class="col-12 col-md-6 col-xl-6">
+                                        </div>
+                                    </div>
+                                    </div>
+
+                                       <div class="col-12 col-md-6 col-xl-6">
                                             <div class="form-group local-forms">
-                                              <label for="AppointTime">Appointment Time </label>
-                                              <timepicker [(ngModel)]="bookappointment.value.appointTime"
-                                                          formControlName="appointTime" 
-                                                          [showMeridian]="true" [hourStep]="1" [minuteStep]="1"></timepicker>
-                                              <div *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
-                                                  class="text-danger">
+                                                <label for="AppointTime">Appointment Time</label>
+
+                                                <timepicker
+                                                formControlName="appointTime"
+                                                [showMeridian]="true"
+                                                [hourStep]="1"
+                                                [minuteStep]="1">
+                                                </timepicker>
+                                                                                            
+
+                                                <div
+                                                *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
+                                                class="text-danger"
+                                                >
                                                 <div *ngIf="bookappointment.get('appointTime')?.errors?.['required']">
-                                                  Appointment Time is required.
+                                                    Appointment Time is required.
                                                 </div>
-                                              </div>
+                                                </div>
                                             </div>
-                                          </div>
-                                          
-                                        
-                                        
+                                            </div>
+
+                                                                                    
+                                                                                    
+                                                                                    
 
 
 
@@ -247,14 +258,13 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-12">
-                                            <div class="doctor-submit text-end">
-                                                <button type="submit"
-                                                    class="btn btn-primary submit-form me-2">Submit</button>
-                                                <button type="button" class="btn btn-primary cancel-form"
-                                                    (click)="OnCancel()">Cancel</button>
-                                            </div>
-                                        </div>
+                                       <div class="col-12">
+                                    <div class="doctor-submit text-end">
+                                        <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
+                                        <button type="button" class="btn btn-primary cancel-form" (click)="OnCancel()">Cancel</button>
+                                    </div>
+                                    </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -272,6 +282,8 @@
                                       <input class="form-check-input" type="checkbox" value="something">
                                     </div>
                                   </th> -->
+                                         <span style="padding-left: 20px;"></span>
+
                                         <th mat-sort-header="name">Name</th>
                                         <th mat-sort-header="department">Age</th>
                                         <th mat-sort-header="specialization">Mobile</th>
@@ -281,13 +293,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr *ngFor="let data of patientlist">
+                                    <tr *ngFor="let data of patientlist; let i=index">
                                         <!-- DO NOT DELETE -->
                                         <!-- <td>
                                     <div class="form-check check-tables">
                                       <input class="form-check-input" type="checkbox" value="something">
                                     </div>
                                   </td>-->
+                                                                <td>{{serialNumberArray[i]}}</td>
 
                                         <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
                                             (keydown.enter)="postDatatoAppointment(data.patientId)"> <a

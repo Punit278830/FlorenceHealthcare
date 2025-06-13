@@ -5,16 +5,19 @@ import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { DataService } from 'src/app/shared/data/data.service';
-import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo } from 'src/app/shared/models/models';
+import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { ToastrService } from 'ngx-toastr';
 
 interface data {
   value: string;
@@ -24,12 +27,22 @@ interface data {
   templateUrl: './invoices.component.html',
   styleUrls: ['./invoices.component.scss'],
   providers: [DatePipe]
+  
+  
 })
+
+
+
 export class InvoicesComponent implements OnInit {
   public routes = routes;
   public selectedValue !: string;
   public invoices: any[] = [];
+    public loggedIn: any;
+
   dataSource!: MatTableDataSource<Iinvoice>;
+  
+  invoiceId: InvoiceInfoResponse[] = [];           // Full list from API
+filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   public showFilter = false;
   public searchDataValue = '';
@@ -57,11 +70,14 @@ export class InvoicesComponent implements OnInit {
     private route: Router,
     private loadingService: LoadingService,
     private fb: FormBuilder,
-    private datePipe: DatePipe
-  ) {
+    private datePipe: DatePipe,
+    private modalservice: ModalServiceService,
+    private toaster: ToastrService  ) {
 
   }
   ngOnInit() {
+        this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+
     this.initSearchForm();  // Initialize the search form
     this.getTableData();
   }
@@ -105,39 +121,70 @@ export class InvoicesComponent implements OnInit {
   }
 
   // Now you can call getFormData in getTableData directly
-  private getTableData(): void {
-    const { paymentMode, paymentStatus, fromDate, toDate } = this.getFormData();
-  
-    this.loadingService.showLoader();
-  
-    // Fetch invoices with the specified parameters
-    const invoicesSummary$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
-    const patients$ = this.patientService.getPatientList();
-  
-    forkJoin([invoicesSummary$, patients$]).subscribe(([invoicesSummary, patients]) => {
+ public getTableData(): void {
+  const { paymentMode, paymentStatus, fromDate, toDate } = this.getFormData();
 
-      // Set total payment amounts based on paymentMode
-      if (paymentMode === "All") {
-        this.totalPaymentAmount = invoicesSummary.totalAmount; // Total amount for all payments
-      } else if (paymentMode === "Cash") {
-        this.totalPaymentAmount = invoicesSummary.totalCashAmount; // Total cash amount
-      } else if (paymentMode === "Online") {
-        this.totalPaymentAmount = invoicesSummary.totalOnlineAmount; // Total online amount
-      } else {
-        this.totalPaymentAmount = 0; // Default to 0 if mode doesn't match
-      }
+  this.loadingService.showLoader();
+
+  const invoicesSummary$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
+  const patients$ = this.patientService.getPatientList();
+
   
-      // Now properly map invoices from the invoices array in the response
-      this.combinedData = invoicesSummary?.invoices.map((invoice: Iinvoice) => {
+  combineLatest([invoicesSummary$, patients$]).subscribe(
+    ([invoicesSummary, patients]: [{ invoices: Iinvoice[] }, IpatientInfo[]]) => {
+      this.combinedData = invoicesSummary.invoices.map((invoice: Iinvoice) => {
         const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
+        const paymentDetail = invoice.paymentDetails?.[0];
+
+
         return {
           ...invoice,
-          patientFname: patient ? patient.firstName : 'Unknown Patient',
-          patientLname: patient ? patient.lastName : 'Unknown Patient',
+          patientFname: patient?.firstName ?? 'Unknown Patient',
+          patientLname: patient?.lastName ?? 'Unknown Patient',
+          paymentTime: paymentDetail?.paymentDate ?? 'Not Paid Yet'
+
         };
       });
-  
-      // Initialize required arrays
+
+      this.loadingService.hideLoader();
+    },
+    (error) => {
+      console.error('Error loading data:', error);
+      this.loadingService.hideLoader();
+    }
+  );
+ 
+
+
+
+
+forkJoin([invoicesSummary$, patients$]).subscribe(([invoicesSummary, patients]) => {
+  // Set total amount based on payment mode
+  if (paymentMode === "All") {
+    this.totalPaymentAmount = invoicesSummary.totalAmount;
+  } else if (paymentMode === "Cash") {
+    this.totalPaymentAmount = invoicesSummary.totalCashAmount;
+  } else if (paymentMode === "Online") {
+    this.totalPaymentAmount = invoicesSummary.totalOnlineAmount;
+  } else {
+    this.totalPaymentAmount = 0;
+  }
+
+  // ✅ Process each invoice
+  this.combinedData = invoicesSummary.invoices.map((invoice: Iinvoice) => {
+    const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
+const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
+
+    return {
+      ...invoice,
+      patientFname: patient?.firstName ?? 'Unknown Patient',
+      patientLname: patient?.lastName ?? 'Unknown Patient',
+      paymentTime: paymentDetail?.paymentDate ?? null   // ✅ Actual backend time
+    };
+  });
+});
+
+   // Initialize required arrays
       this.invoices = [];
       this.serialNumberArray = [];
   
@@ -154,10 +201,8 @@ export class InvoicesComponent implements OnInit {
       this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.calculateTotalPages(this.totalData, this.pageSize);
       this.loadingService.hideLoader();
-    });
-  }
+    };
   
-
   // Method to get payment modes for a specific invoice
   private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
     // Mocking the logic to get payment modes for an invoice
@@ -204,6 +249,7 @@ export class InvoicesComponent implements OnInit {
     }
   }
 
+
   public moveToPage(pageNumber: number): void {
     this.currentPage = pageNumber;
     this.skip = this.pageSelection[pageNumber - 1].skip;
@@ -238,6 +284,7 @@ export class InvoicesComponent implements OnInit {
       this.pageSelection.push({ skip: skip, limit: limit });
     }
   }
+  
   selectedList: data[] = [
     { value: 'Select Payment Status' },
     { value: 'All' },
@@ -267,6 +314,24 @@ export class InvoicesComponent implements OnInit {
     this.route.navigate(['/invoice/edit-invoice'])
 
   }
+ deleteInvoice(idhere: number) {
+    this.modalservice.openModal({
+      type: 'invoice',
+      id: idhere,
+      confirmCallback: () => this.confirmDelete(idhere)
+    });
+  }
+
+  confirmDelete(idhere: number) {
+    this.invoiceService.deleteInvoice(idhere).subscribe(res => {
+      if (res == null) {
+        this.toaster.success("Staff is deleted!")
+        this.getTableData();
+      }
+    })
+
+  }
+
 
   onPaymentModeChange(event: any) {
     this.selectedPaymentMode = event.value;
@@ -318,4 +383,4 @@ export class InvoicesComponent implements OnInit {
     }
   
   
-}
+  }

@@ -14,89 +14,153 @@
             </div>
         </div>
         <!-- /Page Header -->
-        <div class="row">
+        <div class="container">
             <div class="col-sm-12">
             
                 <div class="card">
                     <div class="card-body">
-                        <form>
-                            <div class="row">
-                                <div class="col-12">
-                                    <div class="form-heading">
-                                        <h4>Add Schedule</h4>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-6">  
-                                    <div class="form-group local-forms">
-                                        <label for="Doctor">Doctor Name <span class="login-danger">*</span></label>
-                                        <input class="form-control" type="text" >
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-6">
-                                    <div class="form-group local-forms">
-                                         <label  for="department">Department  <span class="login-danger">*</span></label>
-                                        <mat-select [(ngModel)]="selectedValue" [ngModelOptions]="{standalone: true}" class="form-control select"  placeholder="Choose Department">
-                                            <mat-option *ngFor="let data of selectedList" [value]="data.value">
-                                            {{data.value}}
-                                            </mat-option>
-                                        </mat-select>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="Available">Available Days  <span class="login-danger">*</span></label>
-                                        <input class="form-control datetimepicker" type="text" matInput [matDatepicker]="picker"  >
-                                        <mat-datepicker #picker></mat-datepicker>
-                                        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="Available">From <span class="login-danger">*</span></label>
-                                        <!-- <div class="time-icon">
-                                                <input type="text"  class="form-control" [ngxTimepicker]="default1">
-                                                <ngx-material-timepicker #default1></ngx-material-timepicker>
-                                        </div> -->
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group local-forms">
-                                        <label for="To">To <span class="login-danger">*</span></label>
-                                        <!-- <div class="time-icon">
-                                            <input type="text"  class="form-control" [ngxTimepicker]="default2">
-                                            <ngx-material-timepicker #default2></ngx-material-timepicker>
-                                        </div> -->
-                                    </div>
-                                </div>
-                                <div class="col-12 col-sm-12">
-                                    <div class="form-group local-forms">
-                                        <label for="Notes">Notes  <span class="login-danger">*</span></label>
-                                        <textarea class="form-control" rows="3" cols="30"></textarea>
-                                    </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    <div class="form-group select-gender">
-                                        <label for="Status" class="gen-label">Status <span class="login-danger">*</span></label>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" name="gender" class="form-check-input">Active
-                                            </label>
-                                        </div>
-                                        <div class="form-check-inline">
-                                            <label class="form-check-label">
-                                                <input type="radio" name="gender" class="form-check-input">In Active
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-12">
-                                    <div class="doctor-submit text-end">
-                                        <button type="submit" class="btn btn-primary submit-form me-2">Create Schedule</button>
-                                        <button type="submit" class="btn btn-primary cancel-form">Cancel</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
+                        <!-- Form starts here -->
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-12">
+      <div class="form-heading">
+        <h4>Add Schedule</h4>
+      </div>
+    </div>
+
+    <!-- Doctor and Department -->
+    <div class="col-12 col-md-6">
+      <div class="form-group local-forms">
+        <label>Doctor Name <span class="login-danger">*</span></label>
+        <input class="form-control" type="text" />
+      </div>
+    </div>
+    <div class="col-12 col-md-6">
+      <div class="form-group local-forms">
+        <label>Department <span class="login-danger">*</span></label>
+        <mat-select
+          [(ngModel)]="selectedValue"
+          [ngModelOptions]="{ standalone: true }"
+          class="form-control select"
+          placeholder="Choose Department"
+        >
+          <mat-option *ngFor="let data of selectedList" [value]="data.value">
+            {{ data.value }}
+          </mat-option>
+        </mat-select>
+      </div>
+    </div>
+
+    <!-- Time fields on the left -->
+    <div class="col-md-8">
+      <div class="row">
+        <div class="col-12 col-md-4">
+          <div class="form-group local-forms">
+            <label>Available Days <span class="login-danger">*</span></label>
+            <input
+              class="form-control datetimepicker"
+              matInput
+              [matDatepicker]="picker"
+              [min]="minDate"
+              formControlName="date"
+              type="text"
+            />
+            <mat-datepicker #picker></mat-datepicker>
+            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="form-group local-forms">
+            <label>From <span class="login-danger">*</span></label>
+            <input type="time" class="form-control" formControlName="fromTime" />
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="form-group local-forms">
+            <label>To <span class="login-danger">*</span></label>
+            <input type="time" class="form-control" formControlName="toTime" />
+          </div>
+          <div class="d-flex justify-content-end mt-2">
+            <button type="button" class="btn btn-outline-primary" (click)="addSlot()">Add Slot</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes on the right -->
+    <div class="col-md-4">
+      <div class="form-group local-forms">
+        <label>Notes <span class="login-danger">*</span></label>
+        <textarea
+          class="form-control"
+          rows="6"
+          [(ngModel)]="notes"
+          [ngModelOptions]="{ standalone: true }"
+        ></textarea>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div class="col-md-6">
+      <div class="form-group select-gender">
+        <label>Status <span class="login-danger">*</span></label>
+        <div class="form-check-inline">
+          <label class="form-check-label">
+            <input
+              type="radio"
+              name="status"
+              class="form-check-input"
+              value="Active"
+              (change)="setStatus('Active')"
+              [checked]="status === 'Active'"
+            />
+            Active
+          </label>
+        </div>
+        <div class="form-check-inline">
+          <label class="form-check-label">
+            <input
+              type="radio"
+              name="status"
+              class="form-check-input"
+              value="Inactive"
+              (change)="setStatus('Inactive')"
+              [checked]="status === 'Inactive'"
+            />
+            Inactive
+          </label>
+        </div>
+      </div>
+    </div>
+     <div *ngIf="availableSlots.length > 0" class="mt-4">
+                        <h5>Available Slots</h5>
+                        <ul class="list-group">
+                            <li class="list-group-item" *ngFor="let slot of availableSlots">
+                            📅 {{ slot.date | date:'EEE MMM dd yyyy' }} | 🕒 {{ slot.from }} - {{ slot.to }}
+                            
+
+                            </li>
+                        </ul>
+                        </div>
+
+    <!-- Buttons -->
+    <div class="col-12">
+      <div class="doctor-submit text-end">
+        <button
+          type="button"
+          class="btn btn-primary submit-form me-2"
+          (click)="saveSchedule()"
+        >
+          Create Schedule
+        </button>
+        <button type="reset" class="btn btn-primary cancel-form">Cancel</button>
+      </div>
+    </div>
+  </div>
+</form>
+
+                       
+
                     </div>
                 </div>							
             </div>					

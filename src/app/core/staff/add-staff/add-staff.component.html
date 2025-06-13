@@ -41,7 +41,7 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="last">Last Name <span class="login-danger">*</span></label>
+                                        <label for="last">Last Name </label>
                                         <input class="form-control" type="text" formControlName="lastName">
                                         <div *ngIf="staffReg.get('lastName')?.invalid && (staffReg.get('lastName')?.dirty || staffReg.get('lastName')?.touched)"
                                             class="text-danger">
@@ -303,10 +303,10 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4" *ngIf="staffReg.get('designation')?.value === 'Doctor'">
                                     <div class="form-group local-forms">
-                                        <label for="lastname">Regestration Number</label>
-                                        <input class="form-control" formControlName="regestrationNumber" type="text"
-                                            placeholder="Enter Regestration Number">
-                                        <div *ngIf="staffReg.get('regestrationNumber')?.invalid && (staffReg.get('regestrationNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
+                                        <label for="lastname">Registration Number</label>
+                                        <input class="form-control" formControlName="registrationNumber" type="text"
+                                            placeholder="Enter Registration Number">
+                                        <div *ngIf="staffReg.get('registrationNumber')?.invalid && (staffReg.get('registrationNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
                                             class="text-danger">
                                         </div>
                                     </div>
