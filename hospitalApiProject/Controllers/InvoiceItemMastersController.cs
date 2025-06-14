@@ -99,6 +99,27 @@ namespace hospitalApiProject.Controllers
             return NoContent();
         }
 
+        // GET: api/InvoiceItemMasters/search
+        [HttpGet("search/{name}")]
+        public async Task<ActionResult<IEnumerable<InvoiceItemMaster>>> SearchInvoiceItemMasters(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return BadRequest("Search term cannot be null or empty.");
+            }
+
+            var results = await _context.InvoiceItemMasters
+                .Where(item => item.ItemName != null && item.ItemName.Contains(name))
+                .ToListAsync();
+
+            if (results == null || !results.Any())
+            {
+                return NotFound("No matching invoice items found.");
+            }
+
+            return Ok(results);
+        }
+
         private bool InvoiceItemMasterExists(int id)
         {
             return _context.InvoiceItemMasters.Any(e => e.ItemId == id);
