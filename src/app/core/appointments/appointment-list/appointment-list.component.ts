@@ -14,13 +14,18 @@ import html2canvas from 'html2canvas';
 import { forkJoin } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
-import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
-import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { PatientService } from 'src/app/shared/Services/patient/patient.service';
+import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Component({
   selector: 'app-appointment-list',
@@ -56,7 +61,7 @@ export class AppointmentListComponent implements OnInit {
   public appintmentDateForm!: FormGroup;
   private isAppointmentDateSelected = false;
   private dateOnly: any;
-  public minToDate: Date | null = null;
+  public minToDate: dayjs.Dayjs | null = dayjs().tz('Asia/Kolkata');
   isAllowed: boolean = false; // Patient click Not allowed for receptionist
 
   constructor(public data: DataService, private appointmentService: AppointmentService,
@@ -87,15 +92,13 @@ export class AppointmentListComponent implements OnInit {
   //   })
   // }
   initializeAppointDateForm() {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    const formattedTomorrow = this.datePipe.transform(tomorrow, 'yyyy-MM-dd');
-
+    const todayIST = dayjs().tz('Asia/Kolkata');
+    const formattedTodayIST = todayIST.format('YYYY-MM-DD');
     this.appintmentDateForm = this.fb.group({
-      appointmentFrom: [formattedTomorrow, Validators.required],
-      appointmentTo: [formattedTomorrow, Validators.required]
+      appointmentFrom: [formattedTodayIST, Validators.required],
+      appointmentTo: [formattedTodayIST, Validators.required]
     });
+    this.minToDate = todayIST;
   }
   deleteAppointment(idhere: number) {
     this.modalservice.openModal({
@@ -134,15 +137,17 @@ export class AppointmentListComponent implements OnInit {
   fetchCombineData() {
     this.loadingService.showLoader();
     this.appointmentList = [];
-    const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
-    const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
+    let from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
+    let to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
+    // Ensure 'to' date includes the full day
+    if (to) {
+      to = to + 'T23:59:59';
+    }
     let appointmentData$;
     if (from !== null && to !== null) {
       console.log("from to", from, to)
-
       if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing' || this.loggedIn.userRole == 'Doctor') {
-
         appointmentData$ = this.appointmentService.getAppointmentByDate(from, to);
         this.isAppointmentDateSelected = false;
       }
@@ -407,39 +412,30 @@ export class AppointmentListComponent implements OnInit {
   }
 
   appointmentByDate(event: any, type: string): void {
-    this.dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    const today = new Date();
-    const selectedDate = new Date(event.value);
-    
-    // Prevent selecting today's date
-    if (selectedDate.toDateString() === today.toDateString()) {
-      this.toastr.warning("Cannot select today's date", "Date Selection");
-      if (type === 'from') {
-        this.appintmentDateForm.get('appointmentFrom')?.setValue(null);
-      } else {
+    const selectedDateIST = dayjs(event.value).tz('Asia/Kolkata').format('YYYY-MM-DD');
+
+    if (type === 'from') {
+        this.minToDate = dayjs(event.value).tz('Asia/Kolkata');
+        this.appintmentDateForm.get('appointmentFrom')?.setValue(selectedDateIST);
         this.appintmentDateForm.get('appointmentTo')?.setValue(null);
-      }
-      return;
+    }
+    if (type === 'to') {
+        const fromDate = this.appintmentDateForm.get('appointmentFrom')?.value;
+        if (dayjs(selectedDateIST).isBefore(dayjs(fromDate))) {
+            this.toastr.error('End date cannot be earlier than start date');
+            return;
+        }
+        this.appintmentDateForm.get('appointmentTo')?.setValue(selectedDateIST);
     }
 
-    if (type == 'from') {
-      this.minToDate = this.dateOnly;
-      this.appintmentDateForm.get('appointmentFrom')?.setValue(this.dateOnly);
-      this.appintmentDateForm.get('appointmentTo')?.setValue(null);
-    }
-    if (type == 'to') {
-      this.appintmentDateForm.get('appointmentTo')?.setValue(this.dateOnly);
-    }
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
     if (from !== null && to !== null) {
-      this.isAppointmentDateSelected = true;
-      this.fetchCombineData();
-
+        this.isAppointmentDateSelected = true;
+        this.fetchCombineData();
     }
-
-  }
+}
     exportAppointmentList()
     {
       if (this.appointmentList.length > 0) 
@@ -489,5 +485,16 @@ export class AppointmentListComponent implements OnInit {
         
   }
 
+  // Add a method to format date/time using dayjs
+  getLocalDateTime(date: any): string {
+    if (!date) return '';
+    // Convert to local time zone (e.g., 'Asia/Kolkata')
+    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY hh:mm A');
+  }
+
+  getLocalDate(date: any): string {
+    if (!date) return '';
+    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY');
+  }
 
 }

@@ -76,6 +76,30 @@ export class EditPatientComponent implements OnInit {
   ngOnInit() {
 
     this.getPatientData(this.patientId);
+    // Add valueChanges subscriptions for age and dob
+    setTimeout(() => {
+      if (this.patientReg) {
+        this.patientReg.get('age')?.valueChanges.subscribe(age => {
+          if (age && !isNaN(age)) {
+            const today = new Date();
+            // Approximate DOB: set to July 1st of the birth year
+            const dob = new Date(today.getFullYear() - age, 6, 1); // Month is 0-indexed, so 6 = July
+            this.patientReg.get('dob')?.setValue(dob.toISOString().substring(0, 10), { emitEvent: false });
+          }
+        });
+        this.patientReg.get('dob')?.valueChanges.subscribe(dob => {
+          if (dob) {
+            const birthDate = new Date(dob);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            if (birthDate.getMonth() > 6 || (birthDate.getMonth() === 6 && today.getDate() < birthDate.getDate())) {
+              age--;
+            }
+            this.patientReg.get('age')?.setValue(age, { emitEvent: false });
+          }
+        });
+      }
+    }, 0);
   }
 
   createPatient() {
@@ -83,14 +107,14 @@ export class EditPatientComponent implements OnInit {
       firstName: ['', [Validators.required]],
       lastName: [''],
       dob: ['', Validators.required],
-      mobile: ['', Validators.required],
+      mobile: [''], // Removed Validators.required
       email: ['', [Validators.email]],
       address: ['', Validators.required],
       gender: ['Male', Validators.required],
       regstrationDate: [null, Validators.required],
       age: ['', Validators.required],
-      identityNumber: ['', Validators.required],
-      identityName: ['', Validators.required],
+      identityNumber: [''],
+      identityName: [''],
 
 
     })
