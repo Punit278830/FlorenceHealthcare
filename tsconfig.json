@@ -15,7 +15,7 @@
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "moduleResolution": "node",
-    "types": ["node"],
+    "types": ["node", "luxon"],
     "importHelpers": true,
     "target": "ES2022",
     "module": "ES2022",
@@ -30,5 +30,9 @@
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
     "strictTemplates": true
-  }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts"
+  ]
 }

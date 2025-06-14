@@ -20,7 +20,7 @@
                     <div class="profile-view">
                         <div class="profile-img-wrap">
                             <div class="profile-img">
-                                <a href="javascript:void(0);"><img class="avatar" [src]="patientInfo?.patientImage"
+                                <a href="javascript:void(0);"><img class="avatar" [src]="patientInfo.patientImage || ''"
                                         alt=""></a>
                             </div>
                         </div>
@@ -30,9 +30,9 @@
                                     <div class="profile-info-left" *ngIf="patientInfo">
                                         <h3 class="user-name m-t-0 mb-0">{{patientInfo.firstName}}
                                             {{patientInfo.lastName}}</h3>
-                                            <a class="dropdown-item" [routerLink]="routes.editPatient"
-                                            ><i class=" fa-solid fa-pen-to-square m-r-5"></i>
-                                            Edit</a>
+                                        <a class="dropdown-item" [routerLink]="routes.editPatient"
+                                        ><i class=" fa-solid fa-pen-to-square m-r-5"></i>
+                                        Edit</a>
                                         <div class="staff-id">Patient ID : P-{{patientInfo.patientId}}</div>
                                         <!-- DO NOT DELETE -->
                                         <!-- <div class="staff-msg"><a [routerLink]="routes.chat"
@@ -44,37 +44,36 @@
                                         <li style="width: 100%;">
                                             <span class="title">Phone:</span>
                                             <span class="text"><a
-                                                    href="">{{patientInfo?patientInfo.mobile:''}}</a></span>
+                                                    href="">{{patientInfo.mobile || ''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
                                             <span class="title">Email:</span>
-                                            <span class="text"><a href="">{{patientInfo.email
-                                                    ||''}}</a></span>
+                                            <span class="text"><a href="">{{patientInfo.email || ''}}</a></span>
                                         </li>
                                         <li style="width: 100%;">
                                             <span class="title">Date of Birth:</span>
-                                            <span class="text">{{patientInfo?.dob}}</span>
+                                            <span class="text">{{patientInfo.dob | date:'dd/MM/yyyy'}}</span>
                                         </li>
                                         <li>
                                             <span class="title">Address:</span>
-                                            <span class="text">{{patientInfo?.address}}</span>
+                                            <span class="text">{{patientInfo.address}}</span>
                                         </li>
 
                                         <li>
                                             <span class="title">Registration Date:</span>
-                                            <span class="text">{{patientInfo?.regstrationDate}}</span>
+                                            <span class="text">{{patientInfo.regstrationDate | date:'dd/MM/yyyy'}}</span>
                                         </li>
                                         <li>
                                             <span class="title">Gender:</span>
-                                            <span class="text">{{patientInfo?.gender}}</span>
+                                            <span class="text">{{patientInfo.gender}}</span>
                                         </li>
                                         <li>
                                             <span class="title">Identity Proof:</span>
-                                            <span class="text">{{patientInfo?.IdentityName}}</span>
+                                            <span class="text">{{patientInfo.IdentityName}}</span>
                                         </li>
                                         <li>
                                             <span class="title">Identity Number:</span>
-                                            <span class="text">{{patientInfo?.IdentityNumber}}</span>
+                                            <span class="text">{{patientInfo.IdentityNumber}}</span>
                                         </li>
                                     </ul>
                                 </div>
@@ -1185,27 +1184,26 @@
                                                                                <tr><td><p class="section-title">Patient History</p></td></tr>
                                                                                <tr>
                                                                                    <tr>
-                                                                                   <td><strong>Diabetes:</strong>{{ vitalDto?.diabetes === true ? 'Yes' : vitalDto?.diabetes === false ? 'No' : '' }}</td>
+                                                                                   <td><strong>Diabetes:</strong>{{ vitalDto.diabetes === true ? 'Yes' : vitalDto.diabetes === false ? 'No' : '' }}</td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <td><strong>Thyroid Disease:</strong>{{ vitalDto?.thyroid===true?'Yes' : vitalDto?.thyroid===false? 'No' : '' }}
-                                                                                    </td>
+                                                                                    <td><strong>Thyroid Disease:</strong>{{ vitalDto.thyroid === true ? 'Yes' : vitalDto.thyroid === false ? 'No' : '' }}</td>
                                                                                   
                                                                                   </tr>                                                                                                                                                      
                                                                               
                                                                               
-                                                                                  <tr> <td><strong>Hypertension:</strong>{{vitalDto?.hypertension===true?'Yes' : vitalDto?.hypertension===false? 'No' : '' }}</td>
+                                                                                  <tr> <td><strong>Hypertension:</strong>{{ vitalDto.hypertension === true ? 'Yes' : vitalDto.hypertension === false ? 'No' : '' }}</td>
                                                                                    </tr>
                                                                                   <tr>
-                                                                                   <td><strong>Alcohol:</strong>{{vitalDto?.alcohol===true?'Yes' : vitalDto?.alcohol===false? 'No' : '' }}</td>
+                                                                                   <td><strong>Alcohol:</strong>{{ vitalDto.alcohol === true ? 'Yes' : vitalDto.alcohol === false ? 'No' : '' }}</td>
                                                                                                                                                          
                                                                                </tr>
-                                                                               <tr><td><strong>Smoking:</strong>{{vitalDto?.smoking===true?'Yes' : vitalDto?.smoking ===false? 'No' : '' }}</td>
+                                                                               <tr><td><strong>Smoking:</strong>{{ vitalDto.smoking === true ? 'Yes' : vitalDto.smoking === false ? 'No' : '' }}</td>
                                                                                </tr>
                                                                                
                                                                                   
                                                                                    <tr>
-                                                                                   <td><strong>Tobacco:</strong>{{vitalDto?.tobacco ===true?'Yes' : vitalDto?.tobacco ===false? 'No' : '' }}</td>
+                                                                                   <td><strong>Tobacco:</strong>{{ vitalDto.tobacco === true ? 'Yes' : vitalDto.tobacco === false ? 'No' : '' }}</td>
                                                                                    
                                                                                </tr>
                                                                                                                                                              

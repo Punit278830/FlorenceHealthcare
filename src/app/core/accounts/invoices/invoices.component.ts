@@ -6,17 +6,17 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { combineLatest } from 'rxjs';
-import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
-import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
-import { PatientService } from 'src/app/shared/Services/patient/patient.service';
-import { DataService } from 'src/app/shared/data/data.service';
-import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse } from 'src/app/shared/models/models';
-import { routes } from 'src/app/shared/routes/routes';
+import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
+import { LoadingService } from '../../../shared/Services/loader/loader.service';
+import { PatientService } from '../../../shared/Services/patient/patient.service';
+import { DataService } from '../../../shared/data/data.service';
+import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse } from '../../../shared/models/models';
+import { routes } from '../../../shared/routes/routes';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
+import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 
 interface data {
@@ -141,7 +141,14 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
           ...invoice,
           patientFname: patient?.firstName ?? 'Unknown Patient',
           patientLname: patient?.lastName ?? 'Unknown Patient',
-          paymentTime: paymentDetail?.paymentDate ?? 'Not Paid Yet'
+          paymentTime: paymentDetail?.paymentDate ?? 'Not Paid Yet',
+          appointmentId: invoice.appointmentId ?? 'N/A',
+          amount: invoice.amount ?? 'N/A',
+          totalUnpaidAmount: invoice.totalUnpaidAmount ?? 'N/A',
+          status: invoice.status ?? 'N/A',
+          paymentMode: invoice.paymentMode ?? 'N/A',
+          createdDate: invoice.createdDate ?? 'N/A',
+          
 
         };
       });

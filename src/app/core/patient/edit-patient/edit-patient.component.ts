@@ -88,7 +88,7 @@ export class EditPatientComponent implements OnInit {
       address: ['', Validators.required],
       gender: ['Male', Validators.required],
       regstrationDate: [null, Validators.required],
-      age: [{ value: '', disabled: true }, Validators.required],
+      age: ['', Validators.required],
       identityNumber: ['', Validators.required],
       identityName: ['', Validators.required],
 
@@ -158,9 +158,8 @@ export class EditPatientComponent implements OnInit {
       age--;
     }
 
-    // Set age value in the form
+    // Set age value in the form but don't disable it
     this.patientReg.get('age')?.setValue(age);
-    this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
   }
 
   enableCamera() {
