@@ -169,7 +169,7 @@
 
                         <td> {{data.patientFname}} {{data.patientLname}}</td>
 
-                    <td>{{data.createdDate | date:'dd-MM-yyyy'}}</td>
+                    <td>{{data.createdDate | date:'dd-MM-yyyy, h:mm a'}}</td>
                     <td>{{data.appointmentId}}</td>
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
@@ -180,13 +180,9 @@
                       [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
 
-                        <td>
-                          {{
-                            data.paymentTime
-                              ? (data.paymentTime | date: 'dd-MM-yyyy, h:mm a')
-                              : '-'
-                          }}
-                        </td>
+                    <td>
+                      {{data.paymentTime | date:'dd-MM-yyyy, h:mm a'}}
+                    </td>
                     
                 <td class="text-end"> 
 

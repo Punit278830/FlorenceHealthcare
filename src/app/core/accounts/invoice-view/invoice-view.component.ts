@@ -2,16 +2,27 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
-import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
-import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
-import { PatientService } from 'src/app/shared/Services/patient/patient.service';
-import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { Iappointment, Iinvoice, IinvoiceTemp, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
-import { routes } from 'src/app/shared/routes/routes';
+import { AppointmentService } from '../../../shared/Services/appointment/appointment.service';
+import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
+import { PatientService } from '../../../shared/Services/patient/patient.service';
+import { StaffService } from '../../../shared/Services/staff/staff.service';
+import { Iappointment, Iinvoice, IinvoiceTemp, IpatientInfo, IstaffInfo } from '../../../shared/models/models';
+import { routes } from '../../../shared/routes/routes';
 import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
 import preset from "jss-preset-default";
 import { IInvoicePaymentDto, IPaymentMode, ISubItemInvoicePaymentDto } from '../../../shared/models/models';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Extend dayjs with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Set default timezone to IST
+dayjs.tz.setDefault('Asia/Kolkata');
+
 const styles = {
   singleLine: `
     margin-top: 0.25rem;
@@ -316,28 +327,26 @@ export class InvoiceViewComponent implements OnInit {
 
   checkLatestAppointmentWithin6Days() {
     if (this.appointmentList.length > 0) {
-      // Sort the appointments by date in descending order
-      this.appointmentList.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      // Sort the appointments by date in descending order using dayjs
+      this.appointmentList.sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
       let SelDoctor: Number | null = 0;
-      const selectedAppointmentDate = new Date(this.appointmentDetails.date);
+      const selectedAppointmentDate = dayjs(this.appointmentDetails.date).tz('Asia/Kolkata');
       SelDoctor = this.appointmentDetails.doctorId;
-      let previousAppointmentDate: Date | null = null;
+      let previousAppointmentDate: dayjs.Dayjs | null = null;
       let previousDoctor: Number | null = 0;
 
       for (let appointment of this.appointmentList) {
-
-        const appointmentDate = new Date(appointment.date);
-        if (appointmentDate < selectedAppointmentDate) {
+        const appointmentDate = dayjs(appointment.date).tz('Asia/Kolkata');
+        if (appointmentDate.isBefore(selectedAppointmentDate)) {
           previousAppointmentDate = appointmentDate;
           previousDoctor = appointment.doctorId;
           break;
         }
-
       }
 
       if (previousAppointmentDate) {
-        const differenceInTime = selectedAppointmentDate.getTime() - previousAppointmentDate.getTime();
-        const differenceInDays = differenceInTime / (1000 * 3600 * 24);
+        // Calculate difference in days using dayjs
+        const differenceInDays = selectedAppointmentDate.diff(previousAppointmentDate, 'day');
 
         // Check if the difference between the selected and previous appointment is within 6 days
         this.flag = differenceInDays <= 6 && differenceInDays >= 0;
@@ -469,8 +478,9 @@ export class InvoiceViewComponent implements OnInit {
     this.getMergedTransactionIds();
     this.thermalvisible = true;
 
-    var dateToday = new Date();
-    this.Timenow = `${dateToday.getHours()}:${dateToday.getMinutes() < 10 ? '0' : ''}${dateToday.getMinutes()}`;
+    // Use dayjs for current time in IST
+    const now = dayjs().tz('Asia/Kolkata');
+    this.Timenow = now.format('HH:mm');
 
     if (this.isTextboxVisible == false) {
       this.ReferenceTextBoxVal = 'NA';

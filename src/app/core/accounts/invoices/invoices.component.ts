@@ -18,6 +18,16 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Extend dayjs with plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
+// Set default timezone to IST
+dayjs.tz.setDefault('Asia/Kolkata');
 
 interface data {
   value: string;
@@ -84,8 +94,9 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode
   initSearchForm() {
-    const today = new Date();
-    const formattedToday = this.datePipe.transform(today, 'yyyy-MM-dd');
+    // Use dayjs to get today's date in IST
+    const today = dayjs().tz('Asia/Kolkata');
+    const formattedToday = today.format('YYYY-MM-DD');
 
     this.searchForm = this.fb.group({
       from: [formattedToday, Validators.required],
@@ -104,18 +115,18 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   // Private method to extract form data and return it
   private getFormData() {
     const formData = this.searchForm.value;
-    const today = new Date();
+    const today = dayjs().tz('Asia/Kolkata');
 
     const fromDate: string = formData.from
-      ? this.datePipe.transform(formData.from, 'yyyy-MM-dd')!
-      : this.datePipe.transform(today, 'yyyy-MM-dd')!; // Default to today's date
+      ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD')
+      : today.format('YYYY-MM-DD');
 
     const toDate: string = formData.to
-      ? this.datePipe.transform(formData.to, 'yyyy-MM-dd')!
-      : this.datePipe.transform(today, 'yyyy-MM-dd')!; // Default to today's date
+      ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD')
+      : today.format('YYYY-MM-DD');
 
-    const paymentMode: string = formData.paymentMode || 'All'; // Fallback to 'All' if paymentMode is null
-    const paymentStatus: string = formData.paymentStatus || 'All'; // Assign 'All' if null
+    const paymentMode: string = formData.paymentMode || 'All';
+    const paymentStatus: string = formData.paymentStatus || 'All';
 
     return { paymentMode, paymentStatus, fromDate, toDate };
   }
@@ -136,20 +147,26 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
         const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
         const paymentDetail = invoice.paymentDetails?.[0];
 
+        // Convert dates to IST
+        const createdDate = invoice.createdDate 
+          ? dayjs(invoice.createdDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+          : null;
+        
+        const paymentTime = paymentDetail?.paymentDate
+          ? dayjs(paymentDetail.paymentDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+          : null;
 
         return {
           ...invoice,
           patientFname: patient?.firstName ?? 'Unknown Patient',
           patientLname: patient?.lastName ?? 'Unknown Patient',
-          paymentTime: paymentDetail?.paymentDate ?? 'Not Paid Yet',
+          paymentTime: paymentTime,
+          createdDate: createdDate,
           appointmentId: invoice.appointmentId ?? 'N/A',
           amount: invoice.amount ?? 'N/A',
           totalUnpaidAmount: invoice.totalUnpaidAmount ?? 'N/A',
           status: invoice.status ?? 'N/A',
-          paymentMode: invoice.paymentMode ?? 'N/A',
-          createdDate: invoice.createdDate ?? 'N/A',
-          
-
+          paymentMode: invoice.paymentMode ?? 'N/A'
         };
       });
 
@@ -361,10 +378,10 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
         
         private saveAsExcelFile(buffer: any, fileName: string): void 
         {
-          const date = new Date();
-          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-      const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
-      FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
+          // Use dayjs for date formatting
+          const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
+          const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
+          FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
     }
 
     exportInvoiceListAsPdf() {
@@ -380,8 +397,8 @@ const paymentDetail = invoice.paymentDetails[invoice.paymentDetails.length - 1];
           const position = 0;
   
           pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          const date = new Date();
-          const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+          // Use dayjs for date formatting
+          const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
           pdf.save(`Invoice${formattedDate}.pdf`);        
         })
       }
