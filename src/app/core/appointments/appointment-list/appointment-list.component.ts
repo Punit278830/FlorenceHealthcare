@@ -88,11 +88,13 @@ export class AppointmentListComponent implements OnInit {
   // }
   initializeAppointDateForm() {
     const today = new Date();
-    const formattedToday = this.datePipe.transform(today, 'yyyy-MM-dd');
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const formattedTomorrow = this.datePipe.transform(tomorrow, 'yyyy-MM-dd');
 
     this.appintmentDateForm = this.fb.group({
-      appointmentFrom: [formattedToday, Validators.required],
-      appointmentTo: [formattedToday, Validators.required]
+      appointmentFrom: [formattedTomorrow, Validators.required],
+      appointmentTo: [formattedTomorrow, Validators.required]
     });
   }
   deleteAppointment(idhere: number) {
@@ -406,14 +408,27 @@ export class AppointmentListComponent implements OnInit {
 
   appointmentByDate(event: any, type: string): void {
     this.dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
+    const today = new Date();
+    const selectedDate = new Date(event.value);
+    
+    // Prevent selecting today's date
+    if (selectedDate.toDateString() === today.toDateString()) {
+      this.toastr.warning("Cannot select today's date", "Date Selection");
+      if (type === 'from') {
+        this.appintmentDateForm.get('appointmentFrom')?.setValue(null);
+      } else {
+        this.appintmentDateForm.get('appointmentTo')?.setValue(null);
+      }
+      return;
+    }
+
     if (type == 'from') {
       this.minToDate = this.dateOnly;
-
-      this.appintmentDateForm.get('appointmentFrom')?.setValue(this.dateOnly)
-      this.appintmentDateForm.get('appointmentTo')?.setValue(null)
+      this.appintmentDateForm.get('appointmentFrom')?.setValue(this.dateOnly);
+      this.appintmentDateForm.get('appointmentTo')?.setValue(null);
     }
     if (type == 'to') {
-      this.appintmentDateForm.get('appointmentTo')?.setValue(this.dateOnly)
+      this.appintmentDateForm.get('appointmentTo')?.setValue(this.dateOnly);
     }
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     const to = this.appintmentDateForm.get('appointmentTo')?.value || null;

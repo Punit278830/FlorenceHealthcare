@@ -532,6 +532,8 @@ export interface allInvoice {
   dueDate: string | number;
   status: string;
   img: string;
+  age?: number;
+  paymentDate?: string | number;
 }
 export interface staffList {
   name: string;

@@ -91,15 +91,13 @@ export class AddPatientComponent implements OnInit {
     this.patientReg = this.fb.group({
       firstName: ['', [Validators.required]],
       lastName: ['',],
-      dob: [null, [Validators.required]],
-      mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
+      dob: [null, [Validators.required, this.futureDateValidator()]],
+      mobile: ['', [Validators.pattern(/^\d{10}$/)]],
       email: ['', [Validators.email]],
       address: ['', [Validators.required]],
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
-      age: ['',],
-      // IdentiyNumber: ['', Validators.required],
-      // IdentiyName: ['', Validators.required],
+      age: ['', [Validators.pattern(/^\d+$/), Validators.min(0)]],
       IdentiyNumber: [''],
       IdentiyName: [''],
     })
@@ -148,7 +146,47 @@ export class AddPatientComponent implements OnInit {
     this.patientReg.reset();
   }
 
+  onAgeChange(event: any): void {
+    const age = parseInt(event.target.value);
+    if (!isNaN(age) && age >= 0) {
+      const today = new Date();
+      let birthYear = today.getFullYear() - age;
+      
+      // If birthday hasn't occurred this year, subtract one year
+      const birthDate = new Date(birthYear, today.getMonth(), today.getDate());
+      if (birthDate > today) {
+        birthYear--;
+      }
+      
+      // Create the birth date with current month and day
+      const finalBirthDate = new Date(birthYear, today.getMonth(), today.getDate());
+      
+      // Format the date for the form
+      const formattedDate = this.datePipe.transform(finalBirthDate, 'yyyy-MM-dd');
+      this.patientReg.get('dob')?.setValue(formattedDate);
+      
+      // Update display age
+      if (age < 12) {
+        this.displayAge = 'Month';
+        this.months = age;
+      } else {
+        this.displayAge = 'Year';
+      }
+
+      // Validate the calculated date is not in the future
+      if (finalBirthDate > today) {
+        this.patientReg.get('dob')?.setErrors({ 'futureDate': true });
+        this.toastr.warning('Calculated birth date cannot be in the future', 'Invalid Age');
+        return;
+      }
+    } else if (event.target.value !== '') {
+      this.toastr.warning('Please enter a valid age', 'Invalid Input');
+    }
+  }
+
   onDobDateChange(event: any): void {
+    if (!event.value) return;
+
     // Extract the date part only
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
     this.patientReg.get('dob')?.setValue(dateOnly);
@@ -156,29 +194,32 @@ export class AddPatientComponent implements OnInit {
     // Calculate age from date of birth
     const dob = new Date(event.value);
     const today = new Date();
+
+    // Validate the date is not in the future
+    if (dob > today) {
+      this.patientReg.get('dob')?.setErrors({ 'futureDate': true });
+      this.toastr.warning('Date of birth cannot be in the future', 'Invalid Date');
+      return;
+    }
+
     let age = today.getFullYear() - dob.getFullYear();
     const monthDiff = today.getMonth() - dob.getMonth();
     const months = this.getMonthDifference(dob, today);
-    this.months=months
+    this.months = months;
 
+    // Adjust age if birthday hasn't occurred this year
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) { age--; }
+    // Update age display and form value
     if (age < 12 && months < 12) {
-      // let monthDiffs = "0." + months;
-      // age = parseFloat(monthDiffs);
-      age=months;
+      this.patientReg.get('age')?.setValue(months);
+      this.displayAge = 'Month';
+    } else {
       this.patientReg.get('age')?.setValue(age);
-      this.displayAge='Month'
+      this.displayAge = 'Year';
     }
-    else
-    {
-this.patientReg.get('age')?.setValue(age);
-    this.displayAge='Year'
-    }
-
-    // Set age value in the form
-    
-    this.patientReg.get('age')?.disable(); // Enable the age field if it was disabled
   }
 
   getMonthDifference(startDate: Date, endDate: Date): number {
@@ -237,5 +278,17 @@ this.patientReg.get('age')?.setValue(age);
     this.patientReg.get('dob')?.patchValue(this.datePipe.transform(dob, 'yyyy-MM-dd'));
 
 
+  }
+
+  // Custom validator for future dates
+  futureDateValidator() {
+    return (control: AbstractControl): {[key: string]: any} | null => {
+      const date = new Date(control.value);
+      const today = new Date();
+      if (date > today) {
+        return {'futureDate': true};
+      }
+      return null;
+    };
   }
 }

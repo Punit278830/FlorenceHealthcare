@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 //import { api_Url } from 'src/environment/environment';
-import { api_Url } from 'src/environment/environment';
+import { api_Url } from '../../../../environment/environment';
 import { Iappointment, IstaffInfo } from '../../models/models';
 import { BehaviorSubject, Observable } from 'rxjs';
 
