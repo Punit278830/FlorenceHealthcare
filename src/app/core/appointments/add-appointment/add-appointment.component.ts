@@ -5,15 +5,15 @@ import { Sort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { DateTime } from 'luxon';
 import { ToastrService } from 'ngx-toastr';
-import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
-import { StaffScheduleService } from 'src/app/shared/Services/appointment/staff-schedule.service';
-import { DepartmentService } from 'src/app/shared/Services/department/department.service';
-import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-upload.service';
-import { PatientService } from 'src/app/shared/Services/patient/patient.service';
-import { StaffService } from 'src/app/shared/Services/staff/staff.service';
-import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
-import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from 'src/app/shared/models/models';
-import { routes } from 'src/app/shared/routes/routes';
+import { AppointmentService } from '../../../shared/Services/appointment/appointment.service';
+import { StaffScheduleService } from '../../../shared/Services/appointment/staff-schedule.service';
+import { DepartmentService } from '../../../shared/Services/department/department.service';
+import { FileUploadService } from '../../../shared/Services/fileUpload/file-upload.service';
+import { PatientService } from '../../../shared/Services/patient/patient.service';
+import { StaffService } from '../../../shared/Services/staff/staff.service';
+import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
+import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
+import { routes } from '../../../shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 
 
@@ -40,7 +40,7 @@ export class AddAppointmentComponent implements OnInit {
   public bookappointment!: FormGroup;
   public fileForm!: FormGroup;
   private patientId!: number;
-  private formattedDateTime: any;
+  private formattedDateTime: Date = new Date();
   public age!: number;
   public doctorList: IstaffInfo[] = [];
   public selectedDoctor: IstaffInfo = {} as IstaffInfo;
@@ -351,17 +351,15 @@ export class AddAppointmentComponent implements OnInit {
   }
 
   updateFormattedDateTime(event: any) {
-    const currentDate = new Date();
-    console.log("currentDate" + currentDate)
-
-    this.formattedDateTime = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    //this.formattedDateTime=currentDate.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    console.log("formattedDateTime" + this.formattedDateTime);
+    if (!event.value) return;
+    
+    // Convert the date to a proper Date object
+    this.formattedDateTime = new Date(event.value);
+    
+    console.log("formattedDateTime", this.formattedDateTime);
     this.bookappointment.get('doctorId')?.patchValue('');
     this.bookappointment.get('departmentid')?.patchValue('');
     this.bookappointment.get('appointTime')?.patchValue(null);
-    
-    //this.bookappointment.get('')?.patchValue('')
   }
 
   bookAppointment(appointment: any) {
@@ -439,11 +437,9 @@ export class AddAppointmentComponent implements OnInit {
     console.log(event.value);
     this.appointmentDto.departmentid = event.value;
 
-
     await this.staffScheduleService.getStaffOnLeve(event.value, this.formattedDateTime).subscribe(res => {
       if (res.length > 0) {
         res.map(e => doctorOnLeave.push(e.staffId))
-
       }
     })
     await this.staffService.getScheduleList().subscribe(data => {
@@ -451,10 +447,9 @@ export class AddAppointmentComponent implements OnInit {
       data.forEach(item => {
         allDocSchedule.push(item)
       })
-
     })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-      console.log("doctoronleave",doctorOnLeave);
+      console.log("doctoronleave", doctorOnLeave);
       data.map((res: any) => {
         console.log("doc res", res);
         
@@ -463,13 +458,17 @@ export class AddAppointmentComponent implements OnInit {
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
             console.log("entered book appoint.time")
-            const docschedule: any = allDocSchedule.find(item => item.staffId == res.staffId && item.scheduleDate == this.formattedDateTime && item.leaveStatus == 1 && item.status == "Approved")
+            const docschedule: any = allDocSchedule.find(item => 
+              item.staffId == res.staffId && 
+              item.scheduleDate.getTime() === this.formattedDateTime.getTime() && 
+              item.leaveStatus == 1 && 
+              item.status == "Approved"
+            );
             console.log("doc sche", docschedule);
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
               const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
               
-
               // Check if appointment time falls within doctor's available time range
               if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
                 console.log("Doctor added based on time:", res);
@@ -482,16 +481,12 @@ export class AddAppointmentComponent implements OnInit {
             }
           }
           else {
-            
             console.log("Doctor added without appointTime value entered:", res);
             this.doctorList.push(res);
           }
         }
-
       })
-
     })
-
   }
 
   convertToComparableTime(time: string, postfix: string): Date | null {

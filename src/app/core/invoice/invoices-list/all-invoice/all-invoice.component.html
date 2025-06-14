@@ -385,8 +385,8 @@
       <div class="col-sm-12">
         <div class="card card-table">
           <div class="card-body p-4">
-            <div class="table-responsive">
-              <div class="table_header">
+            <div class="table-responsive" style="max-height: calc(100vh - 300px); overflow-y: auto;">
+              <div class="table_header sticky-top bg-white" style="z-index: 1;">
                 <div class="row">
                   <div class="col-sm-12 col-md-6">
                     <div class="dataTables_length">
@@ -394,8 +394,8 @@
                         Show
                         <select [(ngModel)]="pageSize" (ngModelChange)="PageSize()"
                           class="form-control form-control-sm">
+                          <option value="25" selected>25</option>
                           <option value="10">10</option>
-                          <option value="25">25</option>
                           <option value="50">50</option>
                           <option value="100">100</option>
                         </select>
@@ -406,12 +406,13 @@
                 </div>
               </div>
               <table matSort (matSortChange)="sortData($event)" class="table custom-table comman-table mb-0 datatable">
-                <thead class="thead-light">
+                <thead class="thead-light sticky-top" style="top: 50px; z-index: 1;">
                   <tr>
                     <th mat-sort-header="invoiceId">Invoice ID</th>
                     <th mat-sort-header="category">Category</th>
                     <th mat-sort-header="createdOn">Created on</th>
                     <th mat-sort-header="invoiceTo">Invoice to</th>
+                    <th mat-sort-header="age">Age</th>
                     <th mat-sort-header="amount">Amount</th>
                     <th mat-sort-header="dueDate">Due date</th>
                     <th mat-sort-header="status">Status</th>
@@ -428,7 +429,7 @@
                       <a [routerLink]="routes.viewInvoice" class="invoice-link">{{ data.invoiceId }}</a>
                     </td>
                     <td>{{ data.category }}</td>
-                    <td>{{ data.createdOn }}</td>
+                    <td>{{ formatDateOnly(data.createdOn) }}</td>
                     <td>
                       <h2 class="table-avatar">
                         <a [routerLink]="routes.profile"><img class="avatar avatar-sm me-2 avatar-img rounded-circle"
@@ -436,14 +437,18 @@
                           {{ data.invoiceTo }}</a>
                       </h2>
                     </td>
+                    <td>{{ data.age }}</td>
                     <td class="text-primary">{{ data.amount }}</td>
-                    <td>{{ data.dueDate }}</td>
+                    <td>{{ formatDateOnly(data.dueDate) }}</td>
                     <td>
                       <span [ngClass]="{
                           'bg-success-light': data.status === 'Paid',
                           'bg-danger-light': data.status === 'Overdue',
                           'bg-primary-light': data.status === 'Cancelled'
                         }" class="badge">{{ data.status }}</span>
+                      <div *ngIf="data.status === 'Paid'" class="text-muted small mt-1">
+                        Paid on: {{ getPaymentDate(data) }}
+                      </div>
                     </td>
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
