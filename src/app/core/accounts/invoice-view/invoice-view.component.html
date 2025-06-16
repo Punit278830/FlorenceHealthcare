@@ -252,10 +252,8 @@
         {{patientDetails.lastName}}</div>
 
     <div [ngClass]="classes.singleLine">&nbsp;</div>
-    <div [ngClass]="classes.textRight"><strong>Date-</strong>{{invoiceDetails.createdDate |
-        date:'dd-MMMM-yyyy'}} </div>
-    <div [ngClass]="classes.textRight"><strong>Time-</strong>{{this.Timenow}}{{this.Timenow.substring(0,2) >"12" ? 'PM':
-        'AM'}} </div>
+    <div [ngClass]="classes.textRight"><strong>Date-</strong>{{invoiceDetails.createdDate | date:'dd-MMMM-yyyy'}} </div>
+    <div [ngClass]="classes.textRight"><strong>Time-</strong>{{Timenow}}{{Timenow.substring(0,2) > "12" ? 'PM' : 'AM'}} </div>
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
     <div [ngClass]="classes.textRight">
         <strong>Payment Mode:
@@ -284,10 +282,10 @@
         <div style="display: flex;flex-direction: column;">
             <div [ngClass]="classes.wrapper" >
                 <div style="width:3mm;">{{ 1 }}</div>
-                <div style="width:20mm;">Consultation </div>
-                <div style="width: 10mm;">{{appointmentDetails?.fee}}</div>
-                <div style="width: 10mm;">{{ flag ? 100 : 0 }} </div>
-                <div style="width: 10mm;">{{appointmentDetails?.fee}}</div>
+                <div style="width:20mm;">Consultation</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+                <div style="width: 10mm;">{{ flag ? 100 : 0 }}</div>
+                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
             </div>
 
             <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index">

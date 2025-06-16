@@ -40,16 +40,19 @@ export class EditInvoiceComponent implements OnInit {
   public filteredItemList: any[] = [];
   public searchDataValue: string = '';
 
+  private itemService: InvoiceItemService;
+
   constructor(
-    private fb: FormBuilder,
     private invoiceService: InvoiceService,
+    private invoiceItemService: InvoiceItemService,
     private toastr: ToastrService,
-    private itemService: InvoiceItemService,
-    private route: Router
+    private router: Router,
+    private fb: FormBuilder
   ) {
+    this.itemService = invoiceItemService;
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '');
     if (!this.invoiceService.invoiceId) {
-      this.route.navigate([routes.invoices]);
+      this.router.navigate([routes.invoices]);
     }
   }
 
@@ -106,15 +109,31 @@ export class EditInvoiceComponent implements OnInit {
     }
   }
 
-  // ❌ Old: search only by item ID
-  // ✅ You can keep this if still needed
-  searchItemById(item: any) {
-    let itemId = parseInt(item);
-    if (!isNaN(itemId)) {
-      this.itemService.getItemById(itemId).subscribe(data => {
-        this.invoiceItemDto = data;
-        console.log('invoice item.......', data);
-      });
+  // Unified search functionality
+  search(value: string) {
+    if (!value || value.trim() === '') {
+        this.filteredItemList = this.itemList;
+    } else {
+        const itemId = parseInt(value);
+
+        if (!isNaN(itemId) && itemId > 0) {
+            // Search by ID
+            this.itemService.getItemById(itemId).subscribe((data: any) => {
+                this.invoiceItemDto = data;
+                this.filteredItemList = [data];
+                console.log('Search by ID result:', data);
+            }, (error: any) => {
+                console.error('Error fetching item by ID:', error);
+            });
+        } else {
+            // Search by name
+            this.itemService.searchItemByName(value).subscribe((data: any) => {
+                this.filteredItemList = data;
+                console.log('Search by name result:', data);
+            }, (error: any) => {
+                console.error('Error fetching item by name:', error);
+            });
+        }
     }
   }
 
@@ -161,7 +180,7 @@ export class EditInvoiceComponent implements OnInit {
         this.toastr.success('Item Added to Invoice', 'Invoice Item');
         this.addItemFormGroup.reset();
         this.invoiceService.invoiceId = this.IinvoiceDto.invoiceId;
-        this.route.navigate(['/accounts/invoice-view']);
+        this.router.navigate(['/accounts/invoice-view']);
       });
     }
   }
@@ -188,5 +207,16 @@ export class EditInvoiceComponent implements OnInit {
         this.alreadyAddedItems.add(data.itemName);
       });
     });
+  }
+
+  public searchItemByName(name: string): void {
+    this.invoiceItemService.searchItemByName(name).subscribe(
+      (response: any) => {
+        this.filteredItemList = response;
+      },
+      (error: any) => {
+        console.error('Error searching items by name:', error);
+      }
+    );
   }
 }

@@ -27,5 +27,9 @@ private readonly apiUrl = api_Url;
   return this.http.get(this.apiUrl + 'InvoiceItemMaster') as unknown as Observable<IinvoiceItem[]>;
 }
 
+searchItemByName(itemName: string): Observable<IinvoiceItem[]> {
+    return this.http.get(`${this.apiUrl}InvoiceItemMasters/search/${itemName}`);
+}
+
 
 }

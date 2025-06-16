@@ -126,7 +126,8 @@
                         class="custom-badge">{{data.appointmentStatus}}</button></td>
                     <td>{{data.fee}}</td>
                     <td>{{ data.isConsultationPaid ? 'Paid' : 'Not Paid' }}</td>
-                    <td>{{data.appointTime}}</td>
+                    <td>{{ getLocalDateTime(data.date) }}</td>
+                
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"

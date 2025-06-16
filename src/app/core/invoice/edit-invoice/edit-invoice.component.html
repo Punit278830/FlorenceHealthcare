@@ -31,7 +31,7 @@
                                       <a class="btn"><img src="assets/img/icons/search-normal.svg" alt=""></a>
                                     </div>                          
                                   </div>
-                                  <button class="btn btn-primary submit-form me-2" (click)="searchItem(itmeid.value)">Search</button>
+                                  <button class="btn btn-primary submit-form me-2" (click)="search(itmeid.value)">Search</button>
                                 </div>
                               </div>                       
                     </div>
@@ -49,13 +49,22 @@
                         </tr>
                       </thead>
                       <tbody>
-                        <tr *ngFor="let item of invoiceitems; let i = index">
+                        <tr *ngFor="let item of filteredItemList; let i = index">
                           <td>{{ item.itemId }}</td>
                           <td>{{ item.itemName }}</td>
                           <td>{{ item.description }}</td>
                           <td>{{ item.discount }}</td>
-                          <td>{{ item.fee |  currency: 'INR'  }}</td>
-                         
+                          <td>{{ item.fee | currency: 'INR' }}</td>
+                          <td class="text-end">
+                            <div class="dropdown">
+                              <button class="btn btn-sm btn-light" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="feather icon-more-vertical"></i>
+                              </button>
+                              <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <li><a class="dropdown-item" (click)="addItemToInvoice(item.itemId)">Add to Invoice</a></li>
+                              </ul>
+                            </div>
+                          </td>
                         </tr>
                       </tbody>
                     </table>

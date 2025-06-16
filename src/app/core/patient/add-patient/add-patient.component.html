@@ -68,8 +68,8 @@
                                         <mat-datepicker-toggle matIconSuffix [for]="dob"></mat-datepicker-toggle>
                                         <div *ngIf="patientReg.get('dob')?.invalid && (patientReg.get('dob')?.dirty || patientReg.get('dob')?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="patientReg.get('dob')?.errors?.['required']">DOB is
-                                                required.</div>
+                                            <div *ngIf="patientReg.get('dob')?.errors?.['required']">DOB is required.</div>
+                                            <div *ngIf="patientReg.get('dob')?.errors?.['futureDate']">Date of birth cannot be in the future.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -82,13 +82,10 @@
                                 </div> -->
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="mobile">Mobile <span class="login-danger">*</span></label>
+                                        <label for="mobile">Mobile</label>
                                         <input class="form-control" formControlName="mobile" type="text" placeholder="">
                                         <div *ngIf="patientReg.controls['mobile'].invalid && (patientReg.controls['mobile'].dirty 
                                         || patientReg.controls['mobile'].touched)" class="text-danger">
-                                            <div *ngIf="patientReg.controls['mobile'].errors?.['required']">
-                                                Mobile is required.
-                                            </div>
                                             <div *ngIf="patientReg.controls['mobile'].errors?.['pattern']">
                                                 Mobile number must be exactly 10 digits.
                                             </div>
@@ -161,17 +158,23 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-2">
                                     <div class="form-group local-forms">
-                                        <label for="email">Age </label>
-                                        <input class="form-control" formControlName="age" #age (change)="changedob(age.value)"
-                                            placeholder="">
+                                        <label for="age">Age</label>
+                                        <input class="form-control" formControlName="age" type="number" 
+                                            (input)="onAgeChange($event)" placeholder="Enter age" min="0">
+                                        <div *ngIf="patientReg.get('age')?.invalid && (patientReg.get('age')?.dirty || patientReg.get('age')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="patientReg.get('age')?.errors?.['pattern']">
+                                                Please enter a valid number
+                                            </div>
+                                            <div *ngIf="patientReg.get('age')?.errors?.['min']">
+                                                Age cannot be negative
+                                            </div>
+                                        </div>
                                     </div>
-                                    
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-2">
-                                    
-                                        <label><strong>{{ displayAge }}</strong></label>
-                                         
-                                         </div>
+                                    <label><strong>{{ displayAge }}</strong></label>
+                                </div>
 
 
                                 <!-- <div class="col-12 col-md-6 col-xl-4">
@@ -286,7 +289,7 @@
                                             <label for="file" class="upload">Choose File</label>
                                         </div>
                                     </div>
-                                </div> -->
+                                </div>
                                 <!-- <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group select-gender">
                                         <label for="Status" class="gen-label">Status <span

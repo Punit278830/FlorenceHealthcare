@@ -1,14 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
-import { DataService } from 'src/app/shared/data/data.service';
-import { pageSelection, apiResultFormat, allInvoice } from 'src/app/shared/models/models';
-import { routes } from 'src/app/shared/routes/routes';
+import { DataService } from '../../../../shared/data/data.service';
+import { pageSelection, apiResultFormat, allInvoice } from '../../../../shared/models/models';
+import { routes } from '../../../../shared/routes/routes';
+import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-all-invoice',
   templateUrl: './all-invoice.component.html',
-  styleUrls: ['./all-invoice.component.scss']
+  styleUrls: ['./all-invoice.component.scss'],
+  providers: [DatePipe]
 })
 export class AllInvoiceComponent implements OnInit{
   public routes = routes;
@@ -20,7 +22,7 @@ export class AllInvoiceComponent implements OnInit{
   public showFilter = false;
   public searchDataValue = '';
   public lastIndex = 0;
-  public pageSize = 10;
+  public pageSize = 25;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;
@@ -31,30 +33,43 @@ export class AllInvoiceComponent implements OnInit{
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
 
-  constructor(public data : DataService){
-
+  constructor(public data : DataService, private datePipe: DatePipe){
+    this.initializePagination();
   }
+
+  private initializePagination(): void {
+    this.pageSelection = [];
+    this.pageNumberArray = [];
+    this.currentPage = 1;
+    this.skip = 0;
+    this.limit = this.pageSize;
+  }
+
   ngOnInit() {
     this.getTableData();
   }
+
   private getTableData(): void {
     this.allInvoice = [];
     this.serialNumberArray = [];
 
     this.data.getAllInvoice().subscribe((data: apiResultFormat) => {
       this.totalData = data.totalData;
+      const startIndex = this.skip;
+      const endIndex = Math.min(this.skip + this.pageSize, this.totalData);
+      
       data.data.map((res: allInvoice, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-        
+        if (index >= startIndex && index < endIndex) {
           this.allInvoice.push(res);
-          this.serialNumberArray.push(serialNumber);
+          this.serialNumberArray.push(index + 1);
         }
       });
+      
       this.dataSource = new MatTableDataSource<allInvoice>(this.allInvoice);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });
   }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
     this.dataSource.filter = value.trim().toLowerCase();
@@ -106,21 +121,16 @@ export class AllInvoiceComponent implements OnInit{
   }
 
   public PageSize(): void {
-    this.pageSelection = [];
-    this.limit = this.pageSize;
-    this.skip = 0;
-    this.currentPage = 1;
+    this.initializePagination();
     this.getTableData();
   }
 
   private calculateTotalPages(totalData: number, pageSize: number): void {
     this.pageNumberArray = [];
-    this.totalPages = totalData / pageSize;
-    if (this.totalPages % 1 != 0) {
-      this.totalPages = Math.trunc(this.totalPages + 1);
-    }
-    /* eslint no-var: off */
-    for (var i = 1; i <= this.totalPages; i++) {
+    this.pageSelection = [];
+    this.totalPages = Math.ceil(totalData / pageSize);
+    
+    for (let i = 1; i <= this.totalPages; i++) {
       const limit = pageSize * i;
       const skip = limit - pageSize;
       this.pageNumberArray.push(i);
@@ -133,5 +143,38 @@ export class AllInvoiceComponent implements OnInit{
     } else {
       this.checkboxes = [];
     }
+  }
+
+  formatDate(date: string | number): string {
+    if (!date) return '';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : new Date(date);
+      // Convert to IST by adding 5 hours and 30 minutes
+      const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
+      return this.datePipe.transform(istDate, 'dd/MM/yyyy HH:mm:ss', '+0530') || '';
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  }
+
+  formatDateOnly(date: string | number): string {
+    if (!date) return '';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : new Date(date);
+      const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
+      return this.datePipe.transform(istDate, 'dd/MM/yyyy', '+0530') || '';
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return '';
+    }
+  }
+
+  // Helper method to get payment date
+  getPaymentDate(data: allInvoice): string {
+    if (data.status === 'Paid' && data.paymentDate) {
+      return this.formatDate(data.paymentDate);
+    }
+    return '';
   }
 }
