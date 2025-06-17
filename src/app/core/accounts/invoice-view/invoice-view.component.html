@@ -127,17 +127,6 @@
                                             </td>
                                             <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
                                                     '--'  }}</td>
-                                            
-                                            <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
-                                                tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
-                                                ( 'Cash Payment' )  }}
-                                            </td>
-                                                
-                                            <ng-template #other_content>
-                                                    <td style="text-align: center">{{invoiceDetails.transactionId ? invoiceDetails.transactionId :
-                                                    '--'}}</td>
-                                            </ng-template> -->
-
                                             <td>
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"

@@ -134,6 +134,7 @@ export class InvoiceViewComponent implements OnInit {
   public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
+  public invoiceStatusDisplay!: string; // Added property to store invoice status for display
   formatToTwoDecimalPlaces(value: number): string {
     return value.toFixed(2); // Converts to a string with 2 decimal places
   }
@@ -254,6 +255,9 @@ export class InvoiceViewComponent implements OnInit {
     this.sheets.add(sheet);
     this.classes = sheet.attach().classes;
     this.width = '80mm';
+
+    this.getAppointDetails(this.invoiceDetails.appointmentId);
+    this.updateInvoiceStatusDisplay();
   }
 
   // Method to merge transaction IDs and remove duplicates in JSON format
@@ -576,6 +580,14 @@ export class InvoiceViewComponent implements OnInit {
     this.invoiceService.invoiceId = id;
     this.route.navigate(['/invoice/edit-invoice'])
 
+  }
+
+  updateInvoiceStatusDisplay() {
+    if (this.appointmentDetails.isConsultationPaid && this.invoiceDetails.status === 'Unpaid') {
+      this.invoiceStatusDisplay = 'Unpaid';
+    } else {
+      this.invoiceStatusDisplay = this.invoiceDetails.status;
+    }
   }
 
 }

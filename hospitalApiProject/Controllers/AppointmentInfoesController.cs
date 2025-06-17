@@ -356,7 +356,7 @@ namespace hospitalApiProject.Controllers
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
 
-        // Check for previous appointment within 6 days for the same patient
+        // Adjust logic to ensure consultation fee is not charged within 6 days
         var lastAppointment = await _context.AppointmentInfos
           .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
           .OrderByDescending(a => a.Date)
@@ -380,7 +380,7 @@ namespace hospitalApiProject.Controllers
           CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
           PatientId = appointmentInfo.PatientId,
           Status = "Unpaid",
-          IsConsultationPaid = isRepeatWithin6Days ? true : false
+          IsConsultationPaid = isRepeatWithin6Days
         };
 
         _context.InvoiceInfos.Add(invoiceInfo);
