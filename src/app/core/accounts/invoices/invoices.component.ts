@@ -118,12 +118,12 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     const today = dayjs().tz('Asia/Kolkata');
 
     const fromDate: string = formData.from
-      ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD')
-      : today.format('YYYY-MM-DD');
+      ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+      : today.tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 
     const toDate: string = formData.to
-      ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD')
-      : today.format('YYYY-MM-DD');
+      ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
+      : today.tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
 
     const paymentMode: string = formData.paymentMode || 'All';
     const paymentStatus: string = formData.paymentStatus || 'All';
