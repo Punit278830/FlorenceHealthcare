@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { IpatientInfo } from '../../models/models';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { Observable, catchError, throwError } from 'rxjs';
-import { api_Url } from 'src/environment/environment';
+import { api_Url } from '../../../../environment/environment';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Injectable({

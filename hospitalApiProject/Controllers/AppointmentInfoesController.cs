@@ -356,25 +356,38 @@ namespace hospitalApiProject.Controllers
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
 
-        if (AppointmentInfoExists(appointmentInfo.Id))
+        // Adjust logic to ensure consultation fee is not charged within 6 days
+        var lastAppointment = await _context.AppointmentInfos
+          .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
+          .OrderByDescending(a => a.Date)
+          .FirstOrDefaultAsync();
+
+        bool isRepeatWithin6Days = false;
+        if (lastAppointment != null)
         {
-          // Create and save the invoice information
-          var invoiceInfo = new InvoiceInfo()
+          var daysDiff = (appointmentInfo.Date - lastAppointment.Date).TotalDays;
+          if (daysDiff > 0 && daysDiff <= 6)
           {
-            Amount = appointmentInfo.Fee,
-            AppointmentId = appointmentInfo.Id,
-            CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
-            PatientId = appointmentInfo.PatientId,
-            Status = "Unpaid",
-            IsConsultationPaid = false
-          };
-
-          _context.InvoiceInfos.Add(invoiceInfo);
-          await _context.SaveChangesAsync();
-
-          // Get the newly created invoiceId
-          invoiceId = invoiceInfo.InvoiceId;
+            isRepeatWithin6Days = true;
+          }
         }
+
+        // Create and save the invoice information
+        var invoiceInfo = new InvoiceInfo()
+        {
+          Amount = isRepeatWithin6Days ? 0 : appointmentInfo.Fee,
+          AppointmentId = appointmentInfo.Id,
+          CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
+          PatientId = appointmentInfo.PatientId,
+          Status = "Unpaid",
+          IsConsultationPaid = isRepeatWithin6Days
+        };
+
+        _context.InvoiceInfos.Add(invoiceInfo);
+        await _context.SaveChangesAsync();
+
+        // Get the newly created invoiceId
+        invoiceId = invoiceInfo.InvoiceId;
       }
       catch (Exception ex)
       {

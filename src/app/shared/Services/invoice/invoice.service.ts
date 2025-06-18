@@ -87,7 +87,7 @@ export class InvoiceService {
   }
 
   getAddtionalInvoiceItemById(id: number): Observable<any[]> {
-    return this.http.get(this.apiUrl + 'AdditionalInvoiceItems/invoiceId/' + id);
+    return this.http.get(`${this.apiUrl}AdditionalInvoiceItems/invoiceId/${id}`);
   }
 
   getAddtionalSubInvoiceItemById(id: number): Observable<any[]> {
@@ -115,7 +115,8 @@ export class InvoiceService {
   }
 
   deleteSubInvoiceItem(invoiceId: number, itemName: string): Observable<any> {
-    return this.http.delete(this.apiUrl + 'AdditionalInvoiceItems/' + invoiceId + '/' + itemName);
+    const encodedItemName = encodeURIComponent(itemName);
+    return this.http.delete(`${this.apiUrl}AdditionalInvoiceItems/${invoiceId}/${encodedItemName}`);
   }
  
 

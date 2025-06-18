@@ -206,6 +206,7 @@ export interface Iappointment {
   fee: number;
   
   appointTime:string;
+  isConsultationPaid?: boolean; // Added property to track consultation payment status
 
 }
 

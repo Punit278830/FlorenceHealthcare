@@ -15,7 +15,12 @@ import { ModalServiceService } from '../../../shared/modalService/modal-service.
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { routes } from '../../../shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface data {
   value: string;
@@ -352,25 +357,25 @@ export class AddAppointmentComponent implements OnInit {
 
   updateFormattedDateTime(event: any) {
     if (!event.value) return;
-    
+
     // Convert the date to a proper Date object
     this.formattedDateTime = new Date(event.value);
-    
+
     console.log("formattedDateTime", this.formattedDateTime);
-    this.bookappointment.get('doctorId')?.patchValue('');
-    this.bookappointment.get('departmentid')?.patchValue('');
-    this.bookappointment.get('appointTime')?.patchValue(null);
+    this.bookappointment.patchValue({
+      date: this.formattedDateTime
+    });
   }
 
   bookAppointment(appointment: any) {
     if (this.bookappointment.valid) {
-      let formattedTime = ""
-      if (appointment.value.appointTime) {
-        console.log("value", appointment.value.appointTime)
-        const appointTime = new Date(appointment.value.appointTime);
+      let formattedTime = "";
+      if (this.bookappointment.get('appointTime')?.value) {
+        console.log("value", this.bookappointment.get('appointTime')?.value);
+        const appointTime = dayjs(this.bookappointment.get('appointTime')?.value).tz('Asia/Kolkata');
 
-        let hours = appointTime.getHours();
-        let minutes = appointTime.getMinutes();
+        let hours = appointTime.hour();
+        let minutes = appointTime.minute();
         let ampm = hours >= 12 ? 'PM' : 'AM';
 
         // Convert hours to 12-hour format
@@ -381,26 +386,25 @@ export class AddAppointmentComponent implements OnInit {
       }
 
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = this.formattedDateTime;
+      this.appointmentDto.date = dayjs(this.bookappointment.get('date')?.value).tz('Asia/Kolkata').toDate();
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
 
       this.appointmentDto.appointTime = formattedTime;
-      console.log("tme", this.appointmentDto)
-      //this.appointmentDto.departmentId=3;
+      console.log("tme", this.appointmentDto);
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
-        console.log("result", result);
-        this.toater.success("Appointment booked succesfully", "Book Appointment");
-        this.bookappointment.reset();
+        console.log("Appointment created successfully", result);
+        this.toater.success("Appointment created successfully");
         this.invoiceService.invoiceId = result.invoiceId;
         this.route.navigate(['/accounts/invoice-view']);
+      }, error => {
+        console.error("Error creating appointment", error);
+        this.toater.error("Failed to create appointment");
       });
-
-    }
-    else {
+    } else {
       this.bookappointment.markAllAsTouched();
     }
 
