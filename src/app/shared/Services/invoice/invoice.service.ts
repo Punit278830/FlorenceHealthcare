@@ -4,6 +4,12 @@ import { api_Url } from 'src/environment/environment';
 import { IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto, IInvoiceSummaryResponse } from '../../models/models';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
 import { HttpErrorResponse, HttpParams } from '@angular/common/http';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Injectable({
   providedIn: 'root'
@@ -25,16 +31,19 @@ export class InvoiceService {
   //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   // }
 
+  // All date/time handling in this file uses dayjs.tz('Asia/Kolkata') for IST compliance.
   getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<IInvoiceSummaryResponse> {
     let params = new HttpParams()
       .set('paymentMode', paymentMode)
       .set('paymentStatus', paymentStatus);
 
     if (fromDate) {
+      fromDate = dayjs(fromDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
       params = params.set('fromDate', fromDate);
     }
 
     if (toDate) {
+      toDate = dayjs(toDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
       params = params.set('toDate', toDate);
     }
 
@@ -46,10 +55,12 @@ export class InvoiceService {
   getPaymentDetails(fromDate: string, toDate: string): Observable<ITotalPaymentDetails> {
     let params = new HttpParams();
     if (fromDate) {
+      fromDate = dayjs(fromDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
       params = params.set('fromDate', fromDate);
     }
 
     if (toDate) {
+      toDate = dayjs(toDate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
       params = params.set('toDate', toDate);
     }
 

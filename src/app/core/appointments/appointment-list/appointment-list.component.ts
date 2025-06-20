@@ -24,6 +24,9 @@ import { routes } from 'src/app/shared/routes/routes';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+// Utility import for IST handling (future-proofing, if you want to centralize date logic)
+// import { toIST } from '../../../shared/Services/date-utils';
+// All date/time handling in this file uses dayjs.tz('Asia/Kolkata') for IST compliance.
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -92,6 +95,7 @@ export class AppointmentListComponent implements OnInit {
   //   })
   // }
   initializeAppointDateForm() {
+    // In initializeAppointDateForm, ensure IST for default values
     const todayIST = dayjs().tz('Asia/Kolkata');
     const formattedTodayIST = todayIST.format('YYYY-MM-DD');
     this.appintmentDateForm = this.fb.group({
@@ -260,7 +264,6 @@ export class AppointmentListComponent implements OnInit {
 
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
     //   this.totalData = data.totalData;
-    //   console.log("mock data"+data);
 
 
     //   // data.data.map((res: staffList, index: number) => {
@@ -412,6 +415,7 @@ export class AppointmentListComponent implements OnInit {
   }
 
   appointmentByDate(event: any, type: string): void {
+    // In appointmentByDate, ensure IST for all date comparisons and assignments
     const selectedDateIST = dayjs(event.value).tz('Asia/Kolkata').format('YYYY-MM-DD');
 
     if (type === 'from') {
@@ -467,7 +471,8 @@ export class AppointmentListComponent implements OnInit {
   
           pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
           const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    // In exportAppointmentListAsPdf and saveAsExcelFile, ensure IST for filenames
+    const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
            pdf.save(`Appointment${formattedDate}.pdf`);
           
         })
@@ -480,21 +485,30 @@ export class AppointmentListComponent implements OnInit {
       {
     const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
     const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    // In exportAppointmentListAsPdf and saveAsExcelFile, ensure IST for filenames
+    const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
     FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
         
   }
 
   // Add a method to format date/time using dayjs
-  getLocalDateTime(date: any): string {
+  getLocalDateTime(date: any, time?: string): string {
     if (!date) return '';
-    // Convert to local time zone (e.g., 'Asia/Kolkata')
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY hh:mm A');
+    let dt = dayjs(date).tz('Asia/Kolkata');
+    if (time) {
+      // Parse time string (e.g., "03:30 PM") and set hours/minutes
+      const [hm, ampm] = time.split(' ');
+      let [hours, minutes] = hm.split(':').map(Number);
+      if (ampm === 'PM' && hours < 12) hours += 12;
+      if (ampm === 'AM' && hours === 12) hours = 0;
+      dt = dt.hour(hours).minute(minutes);
+    }
+    return dt.format('DD/MM/YYYY hh:mm A');
   }
 
   getLocalDate(date: any): string {
     if (!date) return '';
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY');
+    return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
   }
 
 }

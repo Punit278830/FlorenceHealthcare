@@ -117,6 +117,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     const formData = this.searchForm.value;
     const today = dayjs().tz('Asia/Kolkata');
 
+    // In getFormData, ensure IST formatting for all date/time sent to backend
     const fromDate: string = formData.from
       ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss')
       : today.tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
@@ -158,14 +159,24 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
         const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
         const paymentDetail = invoice.paymentDetails?.[invoice.paymentDetails.length - 1]; // Get the last payment detail
 
-        // Convert dates to IST
+        // Pass ISO string in IST to the template for correct display
         const createdDate = invoice.createdDate 
-          ? dayjs(invoice.createdDate).tz('Asia/Kolkata').toDate()
+          ? dayjs(invoice.createdDate).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ssZ')
           : null;
         
         const paymentTime = paymentDetail?.paymentDate
-          ? dayjs(paymentDetail.paymentDate).tz('Asia/Kolkata').toDate()
+          ? dayjs(paymentDetail.paymentDate).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ssZ')
           : null;
+
+        // Fix paymentMode: If paid, must be 'Cash' or 'Online', not 'N/A'
+        let paymentMode = invoice.paymentMode;
+        if ((invoice.status === 'Paid' || invoice.status === 'Partially Paid') && (!paymentMode || paymentMode === 'N/A')) {
+          if (paymentDetail && paymentDetail.paymentMode) {
+            paymentMode = paymentDetail.paymentMode;
+          } else {
+            paymentMode = 'Cash'; // Default fallback if not specified
+          }
+        }
 
         return {
           ...invoice,
@@ -177,7 +188,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
           amount: invoice.amount ?? 'N/A',
           totalUnpaidAmount: invoice.totalUnpaidAmount ?? 'N/A',
           status: invoice.status ?? 'N/A',
-          paymentMode: invoice.paymentMode ?? 'N/A'
+          paymentMode: paymentMode ?? 'N/A'
         };
       });
 
@@ -358,7 +369,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
         
         private saveAsExcelFile(buffer: any, fileName: string): void 
         {
-          // Use dayjs for date formatting
+          // In export functions, ensure IST formatting for filenames
           const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
           const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
           FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
@@ -377,7 +388,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
           const position = 0;
   
           pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          // Use dayjs for date formatting
+          // In export functions, ensure IST formatting for filenames
           const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
           pdf.save(`Invoice${formattedDate}.pdf`);        
         })
@@ -386,5 +397,16 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
       this.loadingService.hideLoader();
     }
   
+  // Format invoice created date/time in IST for display
+  getInvoiceCreatedDateTimeIST(date: any): string {
+    if (!date) return '';
+    return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY hh:mm A');
+  }
+  
+  // Format invoice created date in IST for display (date only)
+  getInvoiceCreatedDateIST(date: any): string {
+    if (!date) return '';
+    return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
+  }
   
   }

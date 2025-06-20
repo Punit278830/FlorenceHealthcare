@@ -11,6 +11,7 @@ public partial class InvoiceInfo
 
   public int AppointmentId { get; set; }
 
+  // All DateOnly values in this model must be stored and interpreted as IST (Asia/Kolkata)
   public DateOnly? CreatedDate { get; set; }
 
   public int? Amount { get; set; }
@@ -29,6 +30,7 @@ public class InvoiceInfoDetail
 
   public int AppointmentId { get; set; }
 
+  // All DateOnly values in this model must be stored and interpreted as IST (Asia/Kolkata)
   public DateOnly? CreatedDate { get; set; }
 
   public int? Amount { get; set; }
@@ -36,5 +38,5 @@ public class InvoiceInfoDetail
   public string? Status { get; set; }
 
   public bool? IsConsultationPaid { get; set; } 
-  public string TransactionId { get; set; }
+  public string? TransactionId { get; set; }
 }

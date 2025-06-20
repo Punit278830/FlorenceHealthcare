@@ -1334,18 +1334,21 @@ export class DataService {
   ];
   public patientProfile = [
     {
+      appointmentNumber: "APT-001",
       date: "29/09/2022",
       doctor: "Dr.Ankur Lamba",
       treatment: "Check up",
       charges: "₹ 60"
     },
     {
+      appointmentNumber: "APT-002",
       date: "19/09/2022",
       doctor: "Lalima Arora",
-      treatment: "	Blood Test",
+      treatment: "Blood Test",
       charges: "₹ 50"
     },
     {
+      appointmentNumber: "APT-003",
       date: "20/09/2022",
       doctor: "Dr.Updesh Singh",
       treatment: "Blood Pressure",

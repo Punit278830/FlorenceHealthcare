@@ -4,6 +4,12 @@ import { ApiHttpService } from '../../apiService/apiHttpService';
 import { Observable, catchError, throwError } from 'rxjs';
 import { api_Url } from '../../../../environment/environment';
 import { HttpErrorResponse } from '@angular/common/http';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +49,8 @@ export class PatientService {
 
 
   getPatientdateange(sdate: any, edate: any): Observable<IpatientInfo[]> {
+    sdate = dayjs(sdate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
+    edate = dayjs(edate).tz('Asia/Kolkata').format('YYYY-MM-DD HH:mm:ss');
     return this._http.get(this.apiUrl + 'PatientInfoes/regestrationDateRange/' + sdate + '/' + edate)
 
   }

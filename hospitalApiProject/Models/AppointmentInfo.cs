@@ -15,6 +15,7 @@ public partial class AppointmentInfo
 
   public int? ScheduledByid { get; set; }
 
+  // All DateTime values in this model must be stored and interpreted as IST (Asia/Kolkata)
   public DateTime Date { get; set; }
 
   public string? Notes { get; set; }

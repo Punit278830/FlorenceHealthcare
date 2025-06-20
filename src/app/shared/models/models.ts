@@ -199,7 +199,7 @@ export interface Iappointment {
   patientId: number,
   doctorId: number,
   departmentid: number,
-  date: Date,
+  date: string, // Changed from Date to string for timezone-safe ISO string handling
   scheduledByid: number,
   notes: string,
   appointmentStatus: string,
@@ -626,6 +626,7 @@ export interface socialLinks {
   placeholder: string;
 }
 export interface patientProfile {
+  appointmentNumber: string;
   date: number | string;
   doctor: string;
   treatment: string;

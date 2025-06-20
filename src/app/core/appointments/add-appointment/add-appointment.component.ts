@@ -386,7 +386,8 @@ export class AddAppointmentComponent implements OnInit {
       }
 
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = dayjs(this.bookappointment.get('date')?.value).tz('Asia/Kolkata').toDate();
+      // Send ISO string in IST to backend for correct date/time
+      this.appointmentDto.date = dayjs(this.bookappointment.get('date')?.value).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ssZ');
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;

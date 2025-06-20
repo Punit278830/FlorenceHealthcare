@@ -20,8 +20,10 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentInfos()
     {
-      // return await _context.AppointmentInfos.ToListAsync();
-      var currentDate = DateTime.Now.Date;
+      // Enforce IST for all date/time handling
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      var indiaNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone);
+      var currentDate = indiaNow.Date;
       //var appointmentInfo = await _context.AppointmentInfos.Where(e => e.Date == currentDate).ToListAsync();
       var appointmentInfo = await _context.AppointmentInfos.OrderByDescending(p=>p.Id).ToListAsync();
 
@@ -40,7 +42,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      var indiaNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone);
+      var currentDate = indiaNow.Date;
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.Date == currentDate)
           .CountAsync();
@@ -58,7 +62,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("count/{id}")]
     public async Task<ActionResult<int>> GetAppointmentCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      var indiaNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone);
+      var currentDate = indiaNow.Date;
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.Date == currentDate)
           .CountAsync();
@@ -76,7 +82,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount")]
     public async Task<ActionResult<int>> GetConsultationCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      var indiaNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone);
+      var currentDate = indiaNow.Date;
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active")
           .CountAsync();
@@ -95,7 +103,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount/{id}")]
     public async Task<ActionResult<int>> GetConsultationCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      var indiaNow = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone);
+      var currentDate = indiaNow.Date;
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate)
           .CountAsync();

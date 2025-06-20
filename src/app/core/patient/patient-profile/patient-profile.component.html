@@ -212,6 +212,7 @@
                                                             <input class="form-check-input" type="checkbox" value="something">
                                                         </div>
                                                     </th>
+                                                    <th mat-sort-header="appointmentNumber">Appointment Number</th>
                                                     <th mat-sort-header="date">Date</th>
                                                     <th mat-sort-header="doctor">Doctor</th>
                                                     <th mat-sort-header="treatment">Treatment</th>
@@ -226,6 +227,11 @@
                                                             <input class="form-check-input" type="checkbox" value="something">
                                                         </div>
                                                     </td>
+                                                    <td>
+                                                      <a href="javascript:void(0);" (click)="openAppointmentVitals(data)" style="text-decoration:underline;cursor:pointer;">
+                                                        {{data.appointmentNumber}}
+                                                      </a>
+                                                    </td>
                                                     <td >{{data.date}} </td>
                                                     <td >{{data.doctor}}</td>
                                                     <td>{{data.treatment}}</td>
@@ -236,6 +242,7 @@
                                                             <div class="dropdown-menu dropdown-menu-end">
                                                                 <a class="dropdown-item" [routerLink]="routes.editAppointment"><i class="fa-solid fa-pen-to-square m-r-5"></i> Edit</a>
                                                                 <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#delete_appointment"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                                                                <a class="dropdown-item" href="javascript:void(0);" (click)="openDocumentsModal(data)"><i class="fa fa-folder-open m-r-5"></i> View All Documents</a>
                                                             </div>
                                                         </div>
                                                     </td>
@@ -244,6 +251,26 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- Vitals Section (persistent, not modal) -->
+                            <div class="card mt-4">
+                              <div class="card-header">
+                                <h5>Vitals for Appointment: <span *ngIf="selectedAppointment">{{selectedAppointment.appointmentNumber}} ({{selectedAppointment.date}})</span></h5>
+                              </div>
+                              <div class="card-body">
+                                <div *ngIf="selectedVitalsDocuments.length > 0; else noVitals">
+                                  <ul class="list-group">
+                                    <li *ngFor="let doc of selectedVitalsDocuments" class="list-group-item d-flex align-items-center">
+                                      <i class="fa fa-file me-2"></i>
+                                      <a [href]="doc.url" target="_blank">{{doc.name}}</a>
+                                      <a class="btn btn-link btn-sm ms-auto" [href]="doc.url" download><i class="fa fa-download"></i></a>
+                                    </li>
+                                  </ul>
+                                </div>
+                                <ng-template #noVitals>
+                                  <div class="text-muted">No vitals documents available for this appointment.</div>
+                                </ng-template>
+                              </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -251,4 +278,44 @@
         </div>
     </div>
 </div>
- 
+
+<!-- Modal for Documents Preview (Folder-like) -->
+<div class="modal fade" id="documentsModal" tabindex="-1" aria-labelledby="documentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content folder-modal">
+      <div class="modal-header folder-header">
+        <h5 class="modal-title" id="documentsModalLabel">
+          <i class="fa fa-folder-open"></i> Documents & Preview
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body folder-body d-flex flex-row gap-4">
+        <!-- Preview Section -->
+        <div class="folder-preview flex-fill" style="min-width:300px;">
+          <h6>Preview Section</h6>
+          <div *ngIf="selectedPreview; else noPreview">
+            <img [src]="selectedPreview" alt="Preview" style="max-width:100%; max-height:350px; border:1px solid #ccc; border-radius:6px;" />
+            <div class="mt-2">
+              <button class="btn btn-primary btn-sm me-2" (click)="printPreview()"><i class="fa fa-print"></i> Print</button>
+              <a class="btn btn-success btn-sm" [href]="selectedPreview" download><i class="fa fa-download"></i> Download</a>
+            </div>
+          </div>
+          <ng-template #noPreview>
+            <div class="text-muted">No preview available.</div>
+          </ng-template>
+        </div>
+        <!-- Documents Section -->
+        <div class="folder-documents flex-fill" style="min-width:300px;">
+          <h6>Uploaded Vitals Documents</h6>
+          <ul class="list-group">
+            <li *ngFor="let doc of selectedVitalsDocuments" class="list-group-item d-flex align-items-center">
+              <i class="fa fa-file me-2"></i>
+              <a [href]="doc.url" target="_blank">{{doc.name}}</a>
+              <a class="btn btn-link btn-sm ms-auto" [href]="doc.url" download><i class="fa fa-download"></i></a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

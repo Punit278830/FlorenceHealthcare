@@ -3,6 +3,9 @@ import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { dA } from '@fullcalendar/core/internal-common';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
 
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -111,7 +114,7 @@ export class EditAppointmentComponent implements OnInit {
     this.bookappointment.get('notes')?.patchValue(appointmentData.notes);
     this.bookappointment.get('appointmentStatus')?.patchValue(appointmentData.appointmentStatus);
     
-    this.bookappointment.get('date')?.patchValue(appointmentData.date);
+    this.bookappointment.get('date')?.patchValue(dayjs(appointmentData.date).tz('Asia/Kolkata').format('YYYY-MM-DD'));
     this.bookappointment.get('doctorId')?.patchValue(appointmentData.doctorId);
     // Assuming appointmentData.appointTime = "09:30 AM"
     const timeParts = appointmentData.appointTime.split(' ');
@@ -201,7 +204,7 @@ export class EditAppointmentComponent implements OnInit {
 
     console.log("date", appointment.date)
     // this.appointmentDto.date=this.formattedDateTime;
-    this.appointmentDto.date = appointment.value.date;
+    this.appointmentDto.date = dayjs(appointment.value.date).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ssZ');
     this.appointmentDto.doctorId = appointment.value.doctorId;
     this.appointmentDto.notes = appointment.value.notes;
     // this.appointmentDto.identiyName = appointment.value.IdentiyName;

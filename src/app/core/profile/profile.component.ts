@@ -1614,9 +1614,12 @@ printContent(): void {
     }
 
   }
-  editDetails(id: number, dateHere: Date) {
+  editDetails(id: number, dateHere: string) {
     this.latestId = id;
-    this.seletedAppointmentDate = dateHere;
+    // Always convert to IST for display and logic
+    const istDate = new Date(dateHere);
+    // Convert to IST using toLocaleString and then back to Date
+    this.seletedAppointmentDate = new Date(istDate.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     this.getUploadedFiles(id);
     this.getVitalByAppointment(this.latestId);
     this.stepper.next();
@@ -1674,11 +1677,6 @@ printContent(): void {
     //this.images=this.displayImage[0];    
 
   }
-  gotodocuments() {
-    this.getUploadedFiles(this.latestId);
-    this.stepper.next();
-  }
-
   getPreDiagnosisTemplate() {
     this.consultService.GetAllDiagnosis().subscribe(res => {
       this.preDiagnosis = res;
@@ -1734,5 +1732,10 @@ printContent(): void {
       default:
         return 'insert_drive_file'; // Generic file icon
     }
+  }
+
+  gotodocuments() {
+    // Move to the next step in the stepper
+    this.stepper.next();
   }
 }

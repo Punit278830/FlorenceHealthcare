@@ -27,6 +27,16 @@ namespace hospitalApiProject.Controllers
     [FromQuery] string fromDate,
     [FromQuery] string toDate)
     {
+      // Enforce IST for all date/time handling
+      var indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time");
+      // Parse the fromDate and toDate as UTC, then convert to IST
+      var fromDateParsed = DateTime.SpecifyKind(DateTime.Parse(fromDate), DateTimeKind.Utc);
+      var toDateParsed = DateTime.SpecifyKind(DateTime.Parse(toDate), DateTimeKind.Utc);
+      var fromDateIST = TimeZoneInfo.ConvertTimeFromUtc(fromDateParsed, indiaTimeZone);
+      var toDateIST = TimeZoneInfo.ConvertTimeFromUtc(toDateParsed, indiaTimeZone);
+      var fromDateOnly = DateOnly.FromDateTime(fromDateIST); // Convert DateTime to DateOnly
+      var toDateOnly = DateOnly.FromDateTime(toDateIST); // Convert DateTime to DateOnly
+
       // Start building the query for invoices
       var query = _context.InvoiceInfos.AsQueryable();
 
@@ -39,12 +49,6 @@ namespace hospitalApiProject.Controllers
             .Distinct()
             .Contains(paymentMode.ToLower())); // Filter by the specified payment mode
       }
-
-      // Parse the fromDate and toDate just once at the beginning.
-      var fromDateParsed = DateTime.Parse(fromDate).Date;
-      var toDateParsed = DateTime.Parse(toDate).Date;
-      var fromDateOnly = DateOnly.FromDateTime(fromDateParsed); // Convert DateTime to DateOnly
-      var toDateOnly = DateOnly.FromDateTime(toDateParsed); // Convert DateTime to DateOnly
 
       // Apply date filtering for both fromDate and toDate
       query = query.Where(invoice => invoice.CreatedDate >= fromDateOnly && invoice.CreatedDate <= toDateOnly);
@@ -79,7 +83,7 @@ namespace hospitalApiProject.Controllers
                         PaymentId = pm.PaymentId,
                         PaymentMode = pm.PaymentMode,
                         TransactionId = pm.TransactionId,
-                        PaymentDate = pm.PaymentDate,
+                        PaymentDate = pm.PaymentDate.HasValue ? TimeZoneInfo.ConvertTimeFromUtc(pm.PaymentDate.Value.ToUniversalTime(), indiaTimeZone) : (DateTime?)null,
                         Amount = pm.Amount
                       }).ToList(),
 
