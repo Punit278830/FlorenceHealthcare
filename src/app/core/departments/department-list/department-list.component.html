@@ -39,9 +39,12 @@
                         <a (click)="onRefresh()" href="javascript:;" class="btn btn-primary doctor-refresh ms-2"><img
                             src="assets/img/icons/re-fresh.svg" alt=""></a>
                       </div>
-                      <div style="margin-left: 10px;">
+                      <div style="margin-left: 10px; width: 250px;">
                         <mat-select formControlName="departmentId" class="form-control select"
-                          placeholder="Select Department" (selectionChange)="onDepartmentChange($event)">
+                          placeholder="Select Department"
+                          (selectionChange)="onDepartmentChange($event)"
+                          panelClass="department-dropdown-panel"
+                          style="min-width: 220px; width: 100%;">
                           <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
                             {{data.departmentName}}
                           </mat-option>
@@ -89,7 +92,12 @@
                                                 <input class="form-check-input" type="checkbox" value="something">
                                             </div>
                                         </td> -->
-                    <td>{{data.departmentName}}</td>
+                    <td>
+                      <a href="javascript:void(0);" class="text-primary text-decoration-underline"
+                        (click)="onDepartmentClick(data, $event)">
+                        {{data.departmentName}}
+                      </a>
+                    </td>
                     <!-- <td class="profile-image"><a [routerLink]="routes.profile"><img width="28" height="28" [src]="data.img" class="rounded-circle m-r-5" alt=""> {{data.departmentHead}}</a></td>
                                         <td>{{data.description}}</td>
                                         <td>{{data.date}}</td> -->
@@ -214,3 +222,12 @@
     </div>
   </div>
 </div>
+
+<style>
+.department-dropdown-panel {
+  min-width: 220px !important;
+  width: 300px !important;
+  max-width: 400px !important;
+  white-space: normal !important;
+}
+</style>

@@ -191,6 +191,5 @@ namespace hospitalApiProject.Controllers
       return _context.PatientInfos.Any(e => e.PatientId == id);
     }
 
-
   }
 }

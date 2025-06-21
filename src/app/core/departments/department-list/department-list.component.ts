@@ -219,4 +219,10 @@ this.staffList=data.filter((item:any) => item.designation === 'Doctor');
 
     })
   }
+  onDepartmentClick(department: Idepartment, event: Event) {
+    event.preventDefault();
+    this.staffService.getDoctorsListByDepartment(department.departmentId).subscribe((data: any) => {
+      this.staffList = data.filter((item: any) => item.designation === 'Doctor');
+    });
+  }
 }

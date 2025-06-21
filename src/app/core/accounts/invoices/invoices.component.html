@@ -169,7 +169,7 @@
 
                         <td> {{data.patientFname}} {{data.patientLname}}</td>
 
-                    <td>{{ getInvoiceCreatedDateIST(data.createdDate) }}</td>
+                    <td>{{data.createdDate | date:'dd-MM-yyyy, h:mm a':'Asia/Kolkata'}}</td>
                     <td>{{data.appointmentId}}</td>
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>

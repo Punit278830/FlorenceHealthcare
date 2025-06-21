@@ -81,6 +81,10 @@ export class AdminDashboardComponent implements OnInit {
   public combinedData:any[]  = [];
   public invoices:any[] =[];
   public patientCountByGender: any[]=[];
+  public defaultPieColors: string[] = [
+    '#008FFB', '#00E396', '#FEB019', '#FF4560', '#775DD0',
+    '#3F51B5', '#03A9F4', '#4CAF50', '#F9CE1D', '#FF9800'
+  ];
 
   constructor(public data : DataService,
     private _auth:AuthService,
@@ -411,4 +415,26 @@ public getGreetingMsg()
     {value: '2020'},
     {value: '2019'},
   ];
+
+  onYearChange(year: number) {
+    this.patientService.getPatientCountByGender().subscribe((data: any) => {
+      this.chartOptionsOne.series = [
+        {
+          name: 'Male',
+          color: '#2E37A4',
+          data: [data.male || 0]
+        },
+        {
+          name: 'Female',
+          color: '#00D3C7',
+          data: [data.female || 0]
+        },
+        {
+          name: 'Transgender',
+          color: '#FF0000',
+          data: [data.transgender || 0]
+        }
+      ];
+    });
+  }
 }

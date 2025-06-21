@@ -168,16 +168,6 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
           ? dayjs(paymentDetail.paymentDate).tz('Asia/Kolkata').format('YYYY-MM-DDTHH:mm:ssZ')
           : null;
 
-        // Fix paymentMode: If paid, must be 'Cash' or 'Online', not 'N/A'
-        let paymentMode = invoice.paymentMode;
-        if ((invoice.status === 'Paid' || invoice.status === 'Partially Paid') && (!paymentMode || paymentMode === 'N/A')) {
-          if (paymentDetail && paymentDetail.paymentMode) {
-            paymentMode = paymentDetail.paymentMode;
-          } else {
-            paymentMode = 'Cash'; // Default fallback if not specified
-          }
-        }
-
         return {
           ...invoice,
           patientFname: patient?.firstName ?? 'Unknown Patient',
@@ -188,7 +178,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
           amount: invoice.amount ?? 'N/A',
           totalUnpaidAmount: invoice.totalUnpaidAmount ?? 'N/A',
           status: invoice.status ?? 'N/A',
-          paymentMode: paymentMode ?? 'N/A'
+          paymentMode: invoice.paymentMode ?? 'N/A'
         };
       });
 
@@ -397,16 +387,5 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
       this.loadingService.hideLoader();
     }
   
-  // Format invoice created date/time in IST for display
-  getInvoiceCreatedDateTimeIST(date: any): string {
-    if (!date) return '';
-    return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY hh:mm A');
-  }
-  
-  // Format invoice created date in IST for display (date only)
-  getInvoiceCreatedDateIST(date: any): string {
-    if (!date) return '';
-    return dayjs(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
-  }
   
   }

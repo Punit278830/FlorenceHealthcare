@@ -69,7 +69,6 @@ deletePatient(id:number){
   return this._http.delete(this.apiUrl+"PatientInfoes/"+id)
 
 }
-  
 
   private handleError(err: HttpErrorResponse): Observable<never> {
     return throwError(() => err.error);
