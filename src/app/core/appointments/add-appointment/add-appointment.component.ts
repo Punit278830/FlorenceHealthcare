@@ -15,7 +15,7 @@ import { ModalServiceService } from '../../../shared/modalService/modal-service.
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { routes } from '../../../shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
-
+import dayjs from 'dayjs';
 
 interface data {
   value: string;
@@ -74,7 +74,7 @@ export class AddAppointmentComponent implements OnInit {
 
   //public searchDataValue = '';
   public searchDataValue: string = '';
-  constructor(private patierntService: PatientService, 
+  constructor(private patierntService: PatientService,
     private route: Router,
     private appointmentService: AppointmentService,
     private invoiceService: InvoiceService,
@@ -239,11 +239,10 @@ export class AddAppointmentComponent implements OnInit {
     this.fileFormInitlize();
     this.flag = false;
     this.patientAppointmentData = [];
-    if(this.patierntService.patientId && localStorage.getItem('lastPath')==='patientList')
-    {
+    if (this.patierntService.patientId && localStorage.getItem('lastPath') === 'patientList') {
       this.postDatatoAppointment(this.patierntService.patientId);
       localStorage.removeItem('lastPath');
-      this.patientService.patientId =0;
+      this.patientService.patientId = 0;
     }
     //this.updateFormattedDateTime();
     //this.downloadPatientFile();
@@ -255,12 +254,12 @@ export class AddAppointmentComponent implements OnInit {
 
   }
 
-  clearOtherFields(){
+  clearOtherFields() {
     this.bookappointment.patchValue({
-      
+
       doctorId: '',
-      departmentid:''
-      
+      departmentid: ''
+
 
     })
 
@@ -352,21 +351,21 @@ export class AddAppointmentComponent implements OnInit {
 
   updateFormattedDateTime(event: any) {
     if (!event.value) return;
-    
+
     // Convert the date to a proper Date object
     this.formattedDateTime = new Date(event.value);
-    
+
     console.log("formattedDateTime", this.formattedDateTime);
     this.bookappointment.get('doctorId')?.patchValue('');
     this.bookappointment.get('departmentid')?.patchValue('');
     this.bookappointment.get('appointTime')?.patchValue(null);
   }
 
+  // ...existing code...
   bookAppointment(appointment: any) {
     if (this.bookappointment.valid) {
-      let formattedTime = ""
+      let formattedTime = "";
       if (appointment.value.appointTime) {
-        console.log("value", appointment.value.appointTime)
         const appointTime = new Date(appointment.value.appointTime);
 
         let hours = appointTime.getHours();
@@ -380,8 +379,33 @@ export class AddAppointmentComponent implements OnInit {
         formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
       }
 
+      const datePart = this.bookappointment.value.date;      // e.g., "2025-07-01"
+      const timePart = formattedTime;                        // e.g., "02:30 PM"
+
+      // Combine date and time using Luxon
+      // Parse date and time separately, then set time on the date
+      let [year, month, day] = datePart.split('-').map(Number);
+
+      // Parse hours and minutes from formattedTime
+      let [time, meridian] = timePart.split(' ');
+      let [hourStr, minuteStr] = time.split(':');
+      let hour = Number(hourStr);
+      const minute = Number(minuteStr);
+
+      if (meridian === 'PM' && hour !== 12) hour += 12;
+      if (meridian === 'AM' && hour === 12) hour = 0;
+
+      // Create DateTime in Asia/Kolkata
+      const combinedDateTimeIST = DateTime.fromObject(
+        {
+          year, month, day, hour, minute,
+        },
+      );
+
+      console.log('Combined DateTime in IST:', combinedDateTimeIST.toISO());
+
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = this.formattedDateTime;
+      this.appointmentDto.date = combinedDateTimeIST.toJSDate();
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
@@ -389,7 +413,6 @@ export class AddAppointmentComponent implements OnInit {
 
       this.appointmentDto.appointTime = formattedTime;
       console.log("tme", this.appointmentDto)
-      //this.appointmentDto.departmentId=3;
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
         console.log("result", result);
@@ -399,14 +422,12 @@ export class AddAppointmentComponent implements OnInit {
         this.route.navigate(['/accounts/invoice-view']);
       });
 
-    }
-    else {
+    } else {
       this.bookappointment.markAllAsTouched();
     }
-
-
-
   }
+  // ...existing code...
+
   // calculateDateDifference(dob:Date) {
   //   const start = new Date(dob);
   //   const end = new Date();
@@ -452,23 +473,23 @@ export class AddAppointmentComponent implements OnInit {
       console.log("doctoronleave", doctorOnLeave);
       data.map((res: any) => {
         console.log("doc res", res);
-        
+
         const available = doctorOnLeave.find(e => e == res.staffId)
         console.log("doc avai", available);
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
             console.log("entered book appoint.time")
-            const docschedule: any = allDocSchedule.find(item => 
-              item.staffId == res.staffId && 
-              item.scheduleDate.getTime() === this.formattedDateTime.getTime() && 
-              item.leaveStatus == 1 && 
+            const docschedule: any = allDocSchedule.find(item =>
+              item.staffId == res.staffId &&
+              item.scheduleDate.getTime() === this.formattedDateTime.getTime() &&
+              item.leaveStatus == 1 &&
               item.status == "Approved"
             );
             console.log("doc sche", docschedule);
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
               const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
-              
+
               // Check if appointment time falls within doctor's available time range
               if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
                 console.log("Doctor added based on time:", res);
@@ -500,20 +521,20 @@ export class AddAppointmentComponent implements OnInit {
   isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
     const appointmentHours = appointmentTime.getHours();
     const appointmentMinutes = appointmentTime.getMinutes();
-    console.log("app 1",appointmentHours)
-    console.log("app 1",appointmentMinutes)
+    console.log("app 1", appointmentHours)
+    console.log("app 1", appointmentMinutes)
     const fromHours = fromTime.getHours();
     const fromMinutes = fromTime.getMinutes();
     const toHours = toTime.getHours();
     const toMinutes = toTime.getMinutes();
-  
+
     const appointmentTotalMinutes = appointmentHours * 60 + appointmentMinutes;
     const fromTotalMinutes = fromHours * 60 + fromMinutes;
     const toTotalMinutes = toHours * 60 + toMinutes;
-  
+
     return appointmentTotalMinutes >= fromTotalMinutes && appointmentTotalMinutes <= toTotalMinutes;
   }
-  
+
 
   addFee(event: any) {
 
