@@ -380,14 +380,19 @@ export class AddAppointmentComponent implements OnInit {
       }
 
       const datePart = this.bookappointment.value.date;      // e.g., "2025-07-01"
-      const timePart = formattedTime;                        // e.g., "02:30 PM"
+      let dateObj: Date;
+      if (typeof datePart === 'string') {
+        dateObj = new Date(datePart);
+      } else {
+        dateObj = datePart;
+      }
 
-      // Combine date and time using Luxon
-      // Parse date and time separately, then set time on the date
-      let [year, month, day] = datePart.split('-').map(Number);
+      const year = dateObj.getFullYear();
+      const month = dateObj.getMonth() + 1; // getMonth() is zero-based
+      const day = dateObj.getDate();
 
       // Parse hours and minutes from formattedTime
-      let [time, meridian] = timePart.split(' ');
+      let [time, meridian] = formattedTime.split(' ');
       let [hourStr, minuteStr] = time.split(':');
       let hour = Number(hourStr);
       const minute = Number(minuteStr);
@@ -396,14 +401,14 @@ export class AddAppointmentComponent implements OnInit {
       if (meridian === 'AM' && hour === 12) hour = 0;
 
       // Create DateTime in Asia/Kolkata
-      const combinedDateTimeIST = DateTime.fromObject(
-        {
-          year, month, day, hour, minute,
-        },
-      );
-
-      console.log('Combined DateTime in IST:', combinedDateTimeIST.toISO());
-
+      const combinedDateTimeIST = DateTime.fromObject({
+        year,
+        month,
+        day,
+        hour,
+        minute,
+      });
+      
       const userData = JSON.parse(localStorage.getItem('data') || '');
       this.appointmentDto.date = combinedDateTimeIST.toJSDate();
       this.appointmentDto.doctorId = appointment.value.doctorId;

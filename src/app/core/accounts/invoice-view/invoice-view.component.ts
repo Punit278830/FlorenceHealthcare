@@ -326,70 +326,50 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   checkLatestAppointmentWithin6Days() {
-    if (this.appointmentList.length > 0) {
-      // Sort the appointments by date in descending order using dayjs
-      this.appointmentList.sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
-      let SelDoctor: Number | null = 0;
-      const selectedAppointmentDate = dayjs(this.appointmentDetails.date).tz('Asia/Kolkata');
-      SelDoctor = this.appointmentDetails.doctorId;
-      let previousAppointmentDate: dayjs.Dayjs | null = null;
-      let previousDoctor: Number | null = 0;
+    this.flag = false;
+    this.IsDoctorSameflag = false;
+    this.disc = 0;
 
-      for (let appointment of this.appointmentList) {
-        const appointmentDate = dayjs(appointment.date).tz('Asia/Kolkata');
-        if (appointmentDate.isBefore(selectedAppointmentDate)) {
-          previousAppointmentDate = appointmentDate;
-          previousDoctor = appointment.doctorId;
-          break;
-        }
-      }
+    if (!this.appointmentList.length) return;
 
-      if (previousAppointmentDate) {
-        // Calculate difference in days using dayjs
-        const differenceInDays = selectedAppointmentDate.diff(previousAppointmentDate, 'day');
+    // Sort appointments by date descending
+    this.appointmentList.sort((a, b) => dayjs(b.date).valueOf() - dayjs(a.date).valueOf());
 
-        // Check if the difference between the selected and previous appointment is within 6 days
-        this.flag = differenceInDays <= 6 && differenceInDays >= 0;
+    const selectedDoctor = this.appointmentDetails.doctorId;
+    const selectedDate = dayjs(this.appointmentDetails.date).tz('Asia/Kolkata');
 
-        if (previousDoctor == SelDoctor) {
-          this.IsDoctorSameflag = true;
-        }
-        else {
-          this.IsDoctorSameflag = false;
-        }
-      } else {
-        console.warn("No appointment found before the selected appointment date.");
-        this.flag = false;
-      }
-    } else {
-      this.flag = false;
+    // Find the most recent previous appointment
+    const previous = this.appointmentList.find(
+      appt => dayjs(appt.date).tz('Asia/Kolkata').isBefore(selectedDate)
+    );
+
+    if (!previous) {
+      console.warn("No appointment found before the selected appointment date.");
+      return;
     }
 
-    if (this.flag) {
+    const previousDate = dayjs(previous.date).tz('Asia/Kolkata');
+    const differenceInDays = selectedDate.diff(previousDate, 'day');
+    this.IsDoctorSameflag = previous.doctorId === selectedDoctor;
 
-      if (this.IsDoctorSameflag == false) {
-        this.flag = false;
-        this.totalInvoiceAmount = this.totalInvoiceAmount;
-        this.disc = 0;
-      }
-      if (this.IsDoctorSameflag == true) {
-        this.flag = true;
-        this.totalInvoiceAmount = this.totalInvoiceAmount - this.invoiceDetails.amount;
-        this.disc = 100;
-      }
+    // Only set flag if within 6 days and doctor is the same
+    if (differenceInDays <= 6 && differenceInDays >= 0 && this.IsDoctorSameflag) {
+      this.flag = true;
+      this.totalInvoiceAmount -= this.invoiceDetails.amount;
+      this.disc = 100;
     }
+  } 
+  
+  backToAppointmentList() {
+    this.route.navigate(['/appointments/appointment-list']);
   }
-  backToAppointmentList()
-    {
-      this.route.navigate(['/appointments/appointment-list']);
-    }
 
   payAll(invoiceId: number) {
     if (this.paymentMode == '') {
       alert('Please select payment mode first!');
       return;
     }
-    
+
     if (this.paymentMode == 'Online') {
       if (this.RefNoInput.nativeElement.value == '') {
         alert('Please enter online payment reference number!');
