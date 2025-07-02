@@ -260,29 +260,29 @@
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.grid3Col">
         <div [ngClass]="classes.wrapper">
-            <div style="width: 10mm;"><strong>SR.</strong></div>
-            <div style="width: 10mm;"><strong>Item</strong></div>
-            <div style="width: 10mm;"><strong>Price</strong></div>
-            <div style="width: 20mm;"><strong>Disc.(%)</strong></div>
-            <div style="width: 10mm;"><strong>Amt</strong></div>
+            <div style="width: 7mm;"><strong>SR.</strong></div>
+            <div style="width: 16mm;"><strong>Item</strong></div>
+            <div style="width: 10mm; text-align: right;"><strong>Price</strong></div>
+            <div style="width: 12mm; text-align: right;"><strong>Disc. (%)</strong></div>
+            <div style="width: 10mm; text-align: right;"><strong>Amt</strong></div>
         </div>
 
         <div [ngClass]="[classes.gridBorder, classes.gridBorderDouble]"></div>
         <div style="display: flex;flex-direction: column;">
-            <div [ngClass]="classes.wrapper" >
-                <div style="width:3mm;">{{ 1 }}</div>
-                <div style="width:20mm;">Consultation</div>
-                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
-                <div style="width: 10mm;">{{ flag ? 100 : 0 }}</div>
-                <div style="width: 10mm;">{{appointmentDetails.fee}}</div>
+            <div [ngClass]="classes.wrapper" style="gap: 4px;">
+                <div style="width:7mm; min-width: 7mm; text-align: left;">{{ 1 }}</div>
+                <div style="width:16mm; min-width: 16mm; text-align: left;">Consultation</div>
+                <div style="width: 10mm; min-width: 10mm; text-align: right;">{{appointmentDetails.fee}}</div>
+                <div style="width: 12mm; min-width: 12mm; text-align: right;">{{ flag ? 100 : 0 }}</div>
+                <div style="width: 10mm; min-width: 10mm; text-align: right;">{{ flag ? 0 : (appointmentDetails.fee - ((disc/100) * appointmentDetails.fee)) }}</div>
             </div>
 
-            <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index">
-                <div style="width:3mm;">{{ i + 2 }}</div>
-                <div style="width:20mm;">{{data.itemName}}</div>
-                <div style="width: 10mm;">{{data.fee}}</div>
-                <div style="width: 10mm;">{{data.discount}} </div>
-                <div style="width: 10mm;">{{data.finalAmount}}</div>                
+            <div [ngClass]="classes.wrapper" *ngFor="let data of addtionalInoiveItem; let i = index" style="gap: 4px;">
+                <div style="width:7mm; min-width: 7mm; text-align: left;">{{ i + 2 }}</div>
+                <div style="width:16mm; min-width: 16mm; text-align: left;">{{data.itemName}}</div>
+                <div style="width: 10mm; min-width: 10mm; text-align: right;">{{data.fee}}</div>
+                <div style="width: 12mm; min-width: 12mm; text-align: right;">{{data.discount}} </div>
+                <div style="width: 10mm; min-width: 10mm; text-align: right;">{{data.finalAmount}}</div>                
             </div>
 
         </div>

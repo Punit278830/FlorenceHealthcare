@@ -391,16 +391,28 @@ export class PatientsListComponent implements OnInit {
   exportPatientList() {
       if(this.patientList.length>0)
       {
-        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.patientList);
-    const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
-    
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  
-    // Call saveAsExcel
-    this.saveAsExcelFile(excelBuffer, 'PatientList');
+        // Map patientList to ensure firstName and lastName are in separate columns
+        const exportList = this.patientList.map((item: any) => {
+          // If firstName contains both names, split them
+          let firstName = item.firstName || '';
+          let lastName = item.lastName || '';
+          if (firstName && !lastName && firstName.split(' ').length > 1) {
+            const parts = firstName.split(' ');
+            firstName = parts[0];
+            lastName = parts.slice(1).join(' ');
+          }
+          return {
+            ...item,
+            firstName,
+            lastName
+          };
+        });
+        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(exportList);
+        const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
+        const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        this.saveAsExcelFile(excelBuffer, 'PatientList');
       }  
-    
-  }
+    }
 
   downloadPatientListAsPdf(type:string) {
     this.loaderService.showLoader();

@@ -103,20 +103,7 @@
                         <div class="chart-title patient-visit">
                             <h4>Patient Visit by Gender</h4>
                             <div>
-                                <ul class="nav chat-user-total">
-                                    <li>
-                                        <i class="fa fa-circle current-users" aria-hidden="true"></i>
-                                        Male {{ patientCountByGender[0]?.count }}%
-                                    </li>
-                                    <li>
-                                        <i class="fa fa-circle old-users" aria-hidden="true"></i>
-                                        Female {{ patientCountByGender[1]?.count }}%
-                                    </li>
-                                    <li>
-                                        <i class="fa fa-circle current-users" aria-hidden="true"></i>
-                                        Transgender {{ patientCountByGender[2]?.count }}%
-                                    </li>
-                                </ul>
+                               
                             </div>
                             <div class="form-group mb-0">
                                 <mat-select [(ngModel)]="selectedValue" (selectionChange)="onYearChange($event.value)" class="form-control select" placeholder="{{currentYear}}" >
@@ -126,12 +113,28 @@
                                 </mat-select>
                               </div>                              
                             </div>
-                        <div id="patient-chart">
+                        <div id="patient-chart" style="position: relative;">
                             <apx-chart [series]="chartOptionsOne.series" [chart]="chartOptionsOne.chart"
                                 [dataLabels]="chartOptionsOne.dataLabels" [plotOptions]="chartOptionsOne.plotOptions"
                                 [responsive]="chartOptionsOne.responsive" [xaxis]="chartOptionsOne.xaxis"
-                                [legend]="chartOptionsOne.legend" [fill]="chartOptionsOne.fill"
+                                [legend]="{ show: false }" [fill]="chartOptionsOne.fill"
                                 [grid]="chartOptionsOne.grid" [xaxis]="chartOptionsOne.xaxis"></apx-chart>
+                            <div style="width: 100%; display: flex; justify-content: center; margin-top: 24px;">
+                              <ul class="nav chat-user-total" style="gap: 32px;">
+                                <li style="display: flex; align-items: center; gap: 6px;">
+                                  <i class="fa fa-circle" style="color: #2E37A4; font-size: 18px;" aria-hidden="true"></i>
+                                  <span>Male : <span>{{ getGenderPercentage(0) }}%</span></span>
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 6px;">
+                                  <i class="fa fa-circle" style="color: #00D3C7; font-size: 18px;" aria-hidden="true"></i>
+                                  <span>Female : <span>{{ getGenderPercentage(1) }}%</span></span>
+                                </li>
+                                <li style="display: flex; align-items: center; gap: 6px;">
+                                  <i class="fa fa-circle" style="color: #FF4560; font-size: 18px;" aria-hidden="true"></i>
+                                  <span>Transgender : <span>{{ getGenderPercentage(2) }}%</span></span>
+                                </li>
+                              </ul>
+                            </div>
                         </div>
                     </div>
                 </div>

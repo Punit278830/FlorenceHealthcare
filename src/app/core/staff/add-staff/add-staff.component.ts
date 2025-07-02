@@ -37,8 +37,9 @@ export class AddStaffComponent {
     private departmentService: DepartmentService) {
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
-    this.maxDate = new Date()
-
+    this.maxDate = new Date();
+    // Set maxDate to today minus 18 years
+    this.maxDate.setFullYear(this.maxDate.getFullYear() - 18);
   }
 
 

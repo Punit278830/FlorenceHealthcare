@@ -437,4 +437,10 @@ public getGreetingMsg()
       ];
     });
   }
+
+  getGenderPercentage(index: number): number {
+    const total = this.patientCountByGender.reduce((sum, g) => sum + (g.count || 0), 0);
+    if (!total) return 0;
+    return Math.round((this.patientCountByGender[index]?.count || 0) * 100 / total);
+  }
 }
