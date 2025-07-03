@@ -2,6 +2,7 @@
 
 # Angular specific
 /dist
+/publish
 /tmp
 /out-tsc
 /bazel-out
