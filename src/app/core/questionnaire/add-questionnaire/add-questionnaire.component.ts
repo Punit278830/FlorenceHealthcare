@@ -1,4 +1,3 @@
-
 import { Component, ViewChild, ElementRef } from '@angular/core';
 import { NgForm, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
@@ -68,6 +67,12 @@ export class AddQuestionnaireComponent {
   showQuestionList: boolean = false;
   public allOptions: Ioptions[] = [];
   textInputValue: string = '';
+
+  // --- Select All/Checkbox logic ---
+  public selectedQuestions: number[] = [];
+  public selectAllChecked: boolean = false;
+  public displayedQuestions: any[] = [];
+  public displayedQuestionIndex: number = 0;
 
 
   constructor(private fb: FormBuilder,
@@ -490,22 +495,26 @@ export class AddQuestionnaireComponent {
 
   //display question one by one on UI to select Answer
   dispalyPatientQuiz() {
-    this.questionLenth = this.combindQuestionOption.length;
-    this.subQuestionCounter = this.questionLenth > 0 ? 1 : 0;
-
-    this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-    this.currentQuestionData.options.map((e:any)=>e.optionText==""?this.optionsNotAvailable=false:this.optionsNotAvailable=true)
-    
-    this.currentQuestionIndex = this.questionCounter + 1; // Ensure this is set initially
+    this.questionLenth = this.displayedQuestions.length;
+    this.subQuestionCounter = 0;
+    this.displayedQuestionIndex = 0;
+    if (this.displayedQuestions.length > 0) {
+      this.currentQuestionData = this.displayedQuestions[0];
+      this.currentQuestionIndex = 1;
+    } else {
+      this.currentQuestionData = null;
+      this.currentQuestionIndex = 0;
+    }
   }
 
   nextQuestion() {
     var subQuestionIndex = -1;
+    // Only navigate through displayedQuestions
+    if (this.displayedQuestions.length === 0) return;
 
     // If there's a next question id, it means we need to navigate to a sub-question
-    if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId
-      ) {
-      this.subQuestionCounter ++;
+    if (this.nextQuestionId != 0 && this.nextQuestionId != this.currentQuestionData.questionId) {
+      this.subQuestionCounter = 1;
       //this.subQuestionCounter=this.currentQuestionData.mapQuestionId
 
       if (this.currentQuestionData && this.currentQuestionData.options) {
@@ -525,33 +534,21 @@ export class AddQuestionnaireComponent {
     else if(this.nextQuestionId == this.currentQuestionData.questionId){
       subQuestionIndex = -1;
       
-      this.questionCounter = this.questionLenth;
-    }
-    else {
-      // Navigate to the next main question
-      //this.questionCounter++;
-      this.questionCounter=this.currentQuestionData.mapQuestionId
-
-      if (this.questionCounter < this.questionLenth) {
-        this.currentQuestionData = this.combindQuestionOption[this.questionCounter];
-
+      this.displayedQuestionIndex = this.questionLenth;
+    } else {
+      // Go to next checked question
+      this.displayedQuestionIndex++;
+      if (this.displayedQuestionIndex < this.questionLenth) {
+        this.currentQuestionData = this.displayedQuestions[this.displayedQuestionIndex];
         subQuestionIndex = this.currentQuestionData.options.length > 0 ? 0 : -1;
         this.subQuestionCounter = this.currentQuestionData.options.length > 0 ? 1 : -1;
-
-        // Reset sub-question counter for the new main question
-        //this.subQuestionCounter = 0;
       }
     }
-
-    // Update the current question index
-    this.currentQuestionIndex = this.questionCounter + 1;
-
-    // Check if we have reached the end of the main questions and there are no more sub-questions
-    if (this.questionCounter >= this.questionLenth && subQuestionIndex == -1) {
+    this.currentQuestionIndex = this.displayedQuestionIndex + 1;
+    if (this.displayedQuestionIndex >= this.questionLenth && subQuestionIndex == -1) {
       this.finishQuestionniary = true;
       this.currentQuestionIndex = this.questionLenth;
     }
-
     this.textInputValue = '';
   }
 
@@ -651,6 +648,47 @@ export class AddQuestionnaireComponent {
 
   populateQuestionId(questionId: number): void {
     this.selectedQuestionIdToMap = questionId;
+  }
+
+  // --- Select All/Checkbox logic ---
+  toggleSelectAll() {
+    this.selectAllChecked = !this.selectAllChecked;
+    if (this.selectAllChecked) {
+      this.selectedQuestions = this.questiontoDisplay.map(q => q.questionId);
+    } else {
+      this.selectedQuestions = [];
+    }
+    this.updateDisplayedQuestions();
+  }
+
+  isQuestionSelected(questionId: number): boolean {
+    return this.selectedQuestions.includes(questionId);
+  }
+
+  toggleQuestionSelection(questionId: number) {
+    if (this.selectedQuestions.includes(questionId)) {
+      this.selectedQuestions = this.selectedQuestions.filter(id => id !== questionId);
+    } else {
+      this.selectedQuestions.push(questionId);
+    }
+    this.selectAllChecked = this.selectedQuestions.length === this.questiontoDisplay.length && this.questiontoDisplay.length > 0;
+    this.updateDisplayedQuestions();
+  }
+
+  // When questionnaire is selected or questions are loaded, filter combindQuestionOption to only include checked questions
+  updateDisplayedQuestions() {
+    this.displayedQuestions = this.combindQuestionOption.filter(q => this.selectedQuestions.includes(q.questionId));
+    this.displayedQuestionIndex = 0;
+    this.currentQuestionIndex = 1;
+    this.subQuestionCounter = 0;
+    this.finishQuestionniary = false;
+    if (this.displayedQuestions.length > 0) {
+      this.currentQuestionData = this.displayedQuestions[0];
+      this.questionLenth = this.displayedQuestions.length;
+    } else {
+      this.currentQuestionData = null;
+      this.questionLenth = 0;
+    }
   }
 }
 

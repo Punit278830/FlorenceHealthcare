@@ -150,7 +150,7 @@
                                     <tr>
                                         <th mat-sort-header="checkbox">
                                             <div class="form-check check-tables">
-                                                <input class="form-check-input" type="checkbox" value="something">
+                                                <input class="form-check-input" type="checkbox" [checked]="selectAllChecked" (change)="toggleSelectAll()">
                                             </div>
                                         </th>
                                         <th>Question Name</th>
@@ -171,7 +171,9 @@
                                     <tr *ngFor="let data of questiontoDisplay">
                                         <td>
                                             <div class="form-check check-tables">
-                                                <input class="form-check-input" type="checkbox" value="something">
+                                                <input class="form-check-input" type="checkbox"
+                                                  [checked]="isQuestionSelected(data.questionId)"
+                                                  (change)="toggleQuestionSelection(data.questionId)">
                                             </div>
                                         </td>
                                         <td class="profile-image">
@@ -336,17 +338,20 @@
                     </div>
                     <div class="col-12 col-md-12 col-xl-6">
                         <div class="card">
-                            <div class="card-body" *ngIf="combindQuestionOption.length > 0 && !finishQuestionniary">
+                            <div class="card-body" *ngIf="displayedQuestions.length > 0 && !finishQuestionniary">
+                                <div class="form-heading mb-3">
+                                    <h4>QUESTIONS</h4>
+                                </div>
                                 <div class="row align-items-center justify-content-between">
                                     <div class="col-4 form-heading">
-                                        <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter > 0">
+                                        <h4 *ngIf="displayedQuestions.length > 1 && subQuestionCounter > 0">
                                             Question {{currentQuestionIndex}}.{{subQuestionCounter}} of
                                             {{questionLenth}}
                                         </h4>
-                                        <h4 *ngIf="combindQuestionOption.length > 1 && subQuestionCounter <= 0">
+                                        <h4 *ngIf="displayedQuestions.length > 1 && subQuestionCounter === 0">
                                             Question {{currentQuestionIndex}} of {{questionLenth}}
                                         </h4>
-                                        <h4 *ngIf="combindQuestionOption.length <= 1">
+                                        <h4 *ngIf="displayedQuestions.length <= 1">
                                             Question
                                         </h4>
                                     </div>
