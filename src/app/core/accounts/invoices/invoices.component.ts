@@ -329,7 +329,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   confirmDelete(idhere: number) {
     this.invoiceService.deleteInvoice(idhere).subscribe(res => {
       if (res == null) {
-        this.toaster.success("Staff is deleted!")
+        this.toaster.success("Invoice is deleted!")
         this.getTableData();
       }
     })

@@ -116,7 +116,7 @@
                                             <td>{{ tempinvoiceDetails.tempItemName }} </td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                             <td>{{appointmentDetails.fee}}</td>
-                                            <td>{{ flag ? 100 : 0 }}</td>
+                                          <td>{{ flag ? 100 : 0 }}</td>
                                             <td>{{ appointmentDetails.fee - ((disc/100) * appointmentDetails.fee) }}
                                             </td>
                                             
@@ -145,6 +145,7 @@
                                                     ? 'Paid' : 'Pay'}}</button>
                                             </td>
                                         </tr>
+                                       
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
                                           

@@ -192,6 +192,7 @@ export interface IpatientInfo {
   IdentityName: string;
   IdentityNumber: string;
   SubQues:any[]
+  isConsultationPaid?: boolean;
 }
 
 export interface Iappointment {

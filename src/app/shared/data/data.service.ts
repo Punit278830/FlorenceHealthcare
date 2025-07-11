@@ -798,6 +798,16 @@ export class DataService {
         //     // },
         //   ],
         // },
+        {
+          menuValue: 'Invoice List',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'doctor-invoices',
+          route: '/doctor/invoices', // You can later update this to a proper route constant if needed
+          icon: 'fa-file-invoice',
+          faIcon: true,
+          subMenus: [],
+        },
       ],
     },
     {
@@ -1516,4 +1526,19 @@ export class DataService {
       status: "Paid",
     },
   ]
+
+  /**
+   * Fetches invoices for a specific doctor, filtered by date range.
+   * @param doctorId The ID of the doctor
+   * @param startDate Start date in 'yyyy-MM-dd' format
+   * @param endDate End date in 'yyyy-MM-dd' format
+   * @returns Observable<apiResultFormat>
+   */
+  public getDoctorInvoices(doctorId: string, startDate: string, endDate: string): Observable<apiResultFormat> {
+    // Replace the URL with your actual backend endpoint
+    const url = `/api/invoices/doctor?doctorId=${doctorId}&startDate=${startDate}&endDate=${endDate}`;
+    return this.http.get<apiResultFormat>(url).pipe(
+      map((res: apiResultFormat) => res)
+    );
+  }
 }

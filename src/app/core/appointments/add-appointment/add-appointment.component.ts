@@ -280,8 +280,7 @@ export class AddAppointmentComponent implements OnInit {
       appointmentStatus: ['Active', Validators.required],
 
       departmentid: ['', Validators.required],
-      appointTime: ['', Validators.required],
-
+      appointTime: [''], // Remove Validators.required to make it optional
     })
   }
 
@@ -361,22 +360,26 @@ export class AddAppointmentComponent implements OnInit {
     this.bookappointment.get('appointTime')?.patchValue(null);
   }
 
-  // ...existing code...
   bookAppointment(appointment: any) {
-    if (this.bookappointment.valid) {
+    // Remove strict form validity check for optional appointTime
+    if (
+      this.bookappointment.get('date')?.valid &&
+      this.bookappointment.get('doctorId')?.valid &&
+      this.bookappointment.get('notes')?.valid &&
+      this.bookappointment.get('appointmentStatus')?.valid &&
+      this.bookappointment.get('departmentid')?.valid
+    ) {
       let formattedTime = "";
+      let hour = 0;
+      let minute = 0;
       if (appointment.value.appointTime) {
         const appointTime = new Date(appointment.value.appointTime);
-
-        let hours = appointTime.getHours();
-        let minutes = appointTime.getMinutes();
-        let ampm = hours >= 12 ? 'PM' : 'AM';
-
-        // Convert hours to 12-hour format
-        hours = hours % 12;
-        hours = hours ? hours : 12; // Handle midnight (0 hours)
-
-        formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        hour = appointTime.getHours();
+        minute = appointTime.getMinutes();
+        let ampm = hour >= 12 ? 'PM' : 'AM';
+        let displayHour = hour % 12;
+        displayHour = displayHour ? displayHour : 12;
+        formattedTime = `${displayHour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')} ${ampm}`;
       }
 
       const datePart = this.bookappointment.value.date;      // e.g., "2025-07-01"
@@ -391,24 +394,15 @@ export class AddAppointmentComponent implements OnInit {
       const month = dateObj.getMonth() + 1; // getMonth() is zero-based
       const day = dateObj.getDate();
 
-      // Parse hours and minutes from formattedTime
-      let [time, meridian] = formattedTime.split(' ');
-      let [hourStr, minuteStr] = time.split(':');
-      let hour = Number(hourStr);
-      const minute = Number(minuteStr);
-
-      if (meridian === 'PM' && hour !== 12) hour += 12;
-      if (meridian === 'AM' && hour === 12) hour = 0;
-
-      // Create DateTime in Asia/Kolkata
-      const combinedDateTimeIST = DateTime.fromObject({
+      // Only set hour/minute if appointTime is present, else default to 0
+      let combinedDateTimeIST = DateTime.fromObject({
         year,
         month,
         day,
         hour,
         minute,
       });
-      
+
       const userData = JSON.parse(localStorage.getItem('data') || '');
       this.appointmentDto.date = combinedDateTimeIST.toJSDate();
       this.appointmentDto.doctorId = appointment.value.doctorId;
@@ -416,7 +410,7 @@ export class AddAppointmentComponent implements OnInit {
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
 
-      this.appointmentDto.appointTime = formattedTime;
+      this.appointmentDto.appointTime = formattedTime || '';
       console.log("tme", this.appointmentDto)
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
@@ -426,12 +420,10 @@ export class AddAppointmentComponent implements OnInit {
         this.invoiceService.invoiceId = result.invoiceId;
         this.route.navigate(['/accounts/invoice-view']);
       });
-
     } else {
       this.bookappointment.markAllAsTouched();
     }
   }
-  // ...existing code...
 
   // calculateDateDifference(dob:Date) {
   //   const start = new Date(dob);

@@ -412,11 +412,11 @@ export class CreateInvoiceComponent {
   addItem() {
     if (!this.alreadyAddedItems.has(this.selectedItem.itemId)) {
       this.additionalInvoiceItems.push(this.selectedItem);  // Add item to the collection
-      this.totalInvoiceAmount += this.total;
-
+      // Recalculate totalInvoiceAmount
+      this.totalInvoiceAmount = this.additionalInvoiceItems
+        .reduce((sum, item) => sum + (item.fee - ((item.discount / 100) * item.fee)), 0);
       // Mark this item as added
       this.alreadyAddedItems.add(this.selectedItem.itemId);
-
       // Disable Add button until new selection
       this.addItemflag = false;
     }
@@ -424,6 +424,9 @@ export class CreateInvoiceComponent {
 
   removeItem(index: number): void {
     this.additionalInvoiceItems.splice(index, 1); // Removes the item at the given index
+    // Recalculate totalInvoiceAmount
+    this.totalInvoiceAmount = this.additionalInvoiceItems
+      .reduce((sum, item) => sum + (item.fee - ((item.discount / 100) * item.fee)), 0);
   }
 
   submitItemToInvoice(formData: FormGroup) {
