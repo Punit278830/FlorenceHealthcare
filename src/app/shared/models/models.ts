@@ -734,3 +734,38 @@ export interface IAbhaPatientDetails extends IAbhaPatientInfo {
   abhaAddress: string,
   status: string,
 }
+
+export interface SearchCriteriaBase {
+  sortFieldName?: string;
+  sortDirection?: number; // 0 = Ascending, 1 = Descending
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface SearchResponseBase<T> {
+  errorMessage?: string;
+  hasError?: boolean;
+  results: T[];
+  totalCount: number;
+  totalPages: number;
+}
+
+export enum PaymentStatus {
+  All = 0,
+  Paid = 1,
+  Unpaid = 2,
+  PartialPaid = 3
+}
+
+export enum PaymentMode {
+  All = 0,
+  Cash = 1,
+  Online = 2
+}
+
+export interface InvoiceSearch extends SearchCriteriaBase {
+  fromDate?: string;
+  toDate?: string;
+  paymentStatus?: PaymentStatus;
+  paymentMode?: PaymentMode;
+}

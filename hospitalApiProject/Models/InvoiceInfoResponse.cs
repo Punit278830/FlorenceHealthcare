@@ -23,5 +23,8 @@ namespace hospitalApiProject.Models
 
     public List<PaymentModeInfo> PaymentDetails { get; set; }
 
+    public string? PatientFname { get; set; }
+    public string? PatientLname { get; set; }
+
   }
 }

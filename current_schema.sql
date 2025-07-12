@@ -14,7 +14,7 @@
     [RegistrationDate] date NULL,
     [Status] nvarchar(max) NULL,
     [LinkingToken] nvarchar(max) NULL,
-    [TokenDate] datetime2 NULL,
+    [TokenDate] date NULL,
     CONSTRAINT [PK_AbhaPatientDetails] PRIMARY KEY ([Id])
 );
 GO
