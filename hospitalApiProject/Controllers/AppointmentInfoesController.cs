@@ -15,312 +15,236 @@ namespace hospitalApiProject.Controllers
     {
       _context = context;
     }
-    // Get Appointment Data by  Current date 
-    // GET: api/AppointmentInfoes
+
+    private static DateTime GetCurrentISTDate()
+    {
+      TimeZoneInfo indiaTimeZone;
+      try
+      {
+        indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time"); // Windows
+      }
+      catch (TimeZoneNotFoundException)
+      {
+        indiaTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Asia/Kolkata"); // Linux
+      }
+
+      return TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, indiaTimeZone).Date;
+    }
+
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentInfos()
     {
-      // return await _context.AppointmentInfos.ToListAsync();
-      var currentDate = DateTime.Now.Date;
-      //var appointmentInfo = await _context.AppointmentInfos.Where(e => e.Date == currentDate).ToListAsync();
-      var appointmentInfo = await _context.AppointmentInfos.OrderByDescending(p=>p.Id).ToListAsync();
+      var appointmentInfo = await _context.AppointmentInfos.OrderByDescending(p => p.Id).ToListAsync();
 
-
-      if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found
-      {
-        //return NotFound();
+      if (appointmentInfo == null || !appointmentInfo.Any())
         return Ok(new { message = "No records found" });
-      }
 
       return appointmentInfo;
-
     }
 
-    //Count of Appointments 
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = GetCurrentISTDate();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.Date == currentDate)
           .CountAsync();
 
-      if (appointmentCount == 0) // Check if appointments were found
-      {
+      if (appointmentCount == 0)
         return Ok(new { message = "No appointments found for the current date" });
-      }
 
       return Ok(appointmentCount);
     }
 
-
-    //Count of Appointments by doctor id
     [HttpGet("count/{id}")]
     public async Task<ActionResult<int>> GetAppointmentCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = GetCurrentISTDate();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.Date == currentDate)
           .CountAsync();
 
-      if (appointmentCount == 0) // Check if appointments were found
-      {
+      if (appointmentCount == 0)
         return Ok(new { message = "No appointments found for the current date" });
-      }
 
       return Ok(appointmentCount);
     }
 
-
-    //Count of Consultation 
     [HttpGet("ConsultationCount")]
     public async Task<ActionResult<int>> GetConsultationCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = GetCurrentISTDate();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active")
           .CountAsync();
 
-      if (appointmentCount == 0) // Check if appointments were found
-      {
+      if (appointmentCount == 0)
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
       return Ok(appointmentCount);
     }
 
-
-
-    //Count of Consultation by doctor id
     [HttpGet("ConsultationCount/{id}")]
     public async Task<ActionResult<int>> GetConsultationCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = GetCurrentISTDate();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate)
           .CountAsync();
 
-      if (appointmentCount == 0) // Check if appointments were found
-      {
+      if (appointmentCount == 0)
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
       return Ok(appointmentCount);
     }
 
-    //Earning  by doctor id
     [HttpGet("Earning/{id}")]
     public async Task<ActionResult<int>> GetEarning(int id)
     {
-      var currentDate = DateTime.Now.Date;
-      var Earning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active").ToListAsync();
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active")
+          .ToListAsync();
 
-      if (!appointments.Any()) // Check if appointments were found
-      {
+      if (!appointments.Any())
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
-      foreach (var appointment in appointments)
-      {
-        Earning += appointment.Fee;
-
-      }
-
+      var Earning = appointments.Sum(appointment => appointment.Fee);
       return Ok(Earning);
     }
 
-    //Total Earning
     [HttpGet("TotalEarning/")]
     public async Task<ActionResult<int>> GetEarning()
     {
-     // var currentDate = DateTime.Now.Date;
-      var Earning = 0;
-      var appointments = await _context.AppointmentInfos
-          .ToListAsync();
+      var appointments = await _context.AppointmentInfos.ToListAsync();
 
-      if (!appointments.Any()) // Check if appointments were found
-      {
+      if (!appointments.Any())
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
-      foreach (var appointment in appointments)
-      {
-        Earning += appointment.Fee;
-
-      }
-
+      var Earning = appointments.Sum(appointment => appointment.Fee);
       return Ok(Earning);
     }
 
-    //Today Earning
     [HttpGet("TodayEarning/")]
     public async Task<ActionResult<int>> GetTodayEarning()
     {
-      var currentDate = DateTime.Now.Date;
-      var TodayEarning = 0;
+      var currentDate = GetCurrentISTDate();
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate).ToListAsync();
+          .Where(e => e.Date == currentDate)
+          .ToListAsync();
 
-      if (!appointments.Any()) // Check if appointments were found
-      {
+      if (!appointments.Any())
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
-      foreach (var appointment in appointments)
-      {
-        TodayEarning += appointment.Fee;
-      }
-
+      var TodayEarning = appointments.Sum(appointment => appointment.Fee);
       return Ok(TodayEarning);
     }
 
-    //Today Earning
     [HttpGet("TotalEarnings/Doctor/{id}")]
     public async Task<ActionResult<int>> GetTodayEarningDoctor(int id)
     {
-      DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
-      int? TodayEarning = 0;
+      var currentDate = DateOnly.FromDateTime(GetCurrentISTDate());
       var totalAmount = await _context.InvoiceInfos
-        .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
-          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate == currentDate).ToListAsync();
+          .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
+          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate == currentDate)
+          .ToListAsync();
 
-      if (totalAmount.Count == 0) // Check if appointments were found
-      {
+      if (totalAmount.Count == 0)
         return Ok(new { message = "No consultation found for the current date" });
-      }
 
-      foreach (var appointment in totalAmount)
-      {
-        TodayEarning += appointment.v1.Amount;
-
-      }
-
+      var TodayEarning = totalAmount.Sum(item => item.v1.Amount);
       return Ok(TodayEarning);
     }
 
-
-
-    // GET: api/AppointmentInfoes/5
     [HttpGet("{id}")]
     public async Task<ActionResult<AppointmentInfo>> GetAppointmentInfo(int id)
     {
       var appointmentInfo = await _context.AppointmentInfos.FindAsync(id);
 
       if (appointmentInfo == null)
-      {
         return NotFound();
-      }
 
       return appointmentInfo;
     }
 
-
-    // Get Appointment Data by Doctor Id and Current Date  
-    // GET: api/AppointmentInfoes/5
     [HttpGet("doctor/{id}")]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentByDoctorId(int id)
     {
-      var currentDate = DateTime.Now.Date; // Get current date without time component
+      var currentDate = GetCurrentISTDate();
       var appointmentInfo = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.Date == currentDate)
           .ToListAsync();
 
-      if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found
-      {
+      if (!appointmentInfo.Any())
         return NotFound();
-      }
 
       return appointmentInfo;
     }
 
-    // Get Appointment Data by Doctor Id and particular date 
     [HttpGet("doctor/{id}/{from}/{to}")]
     public async Task<ActionResult> GetAppointmentByDoctorId(int id, DateTime from, DateTime to)
     {
-
       var appointmentInfo = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.Date >= from && e.Date <= to)
-          .Join(
-              _context.InvoiceInfos,
-              appointment => appointment.Id,      // AppointmentInfos.Id
-              invoice => invoice.AppointmentId,   // InvoiceInfos.AppointmentId
-              (appointment, invoice) => new AppointmentWithInvoiceDto  // Single object projection
-              {
-                Id = appointment.Id,                  // Assuming AppointmentInfo.Id
-                PatientId = appointment.PatientId,              // Date from Appointment
-                Departmentid = appointment.Departmentid,  // Appointment-specific field
-                DoctorId = appointment.DoctorId,       // Invoice-specific field
-                IsConsultationPaid = invoice.IsConsultationPaid,     // to show the payment status in appoinment list get the consultationpaid data here
-                ScheduledByid = appointment.ScheduledByid,
-                Date = appointment.Date,
-                Notes = appointment.Notes,
-                AppointTime = appointment.AppointTime,
-                AppointmentStatus = appointment.AppointmentStatus,
-                Fee = appointment.Fee,
-              }
-          )
+          .Join(_context.InvoiceInfos,
+                appointment => appointment.Id,
+                invoice => invoice.AppointmentId,
+                (appointment, invoice) => new AppointmentWithInvoiceDto
+                {
+                  Id = appointment.Id,
+                  PatientId = appointment.PatientId,
+                  Departmentid = appointment.Departmentid,
+                  DoctorId = appointment.DoctorId,
+                  IsConsultationPaid = invoice.IsConsultationPaid,
+                  ScheduledByid = appointment.ScheduledByid,
+                  Date = appointment.Date,
+                  Notes = appointment.Notes,
+                  AppointTime = appointment.AppointTime,
+                  AppointmentStatus = appointment.AppointmentStatus,
+                  Fee = appointment.Fee,
+                })
           .ToListAsync();
 
-
-
-      if (appointmentInfo == null) // Check if appointments were found
-      {
+      if (appointmentInfo == null)
         return NotFound();
-      }
 
       return Ok(appointmentInfo);
     }
 
-    //Get Appointment Data for a purticular Date 
     [HttpGet("date/{from}/{to}")]
     public async Task<ActionResult> GetAppointmentByDate(DateTime from, DateTime to)
     {
       var appointmentWithInvoices = await _context.AppointmentInfos
           .Where(e => e.Date >= from && e.Date <= to)
-          .Join(
-              _context.InvoiceInfos,
-              appointment => appointment.Id,      // AppointmentInfos.Id
-              invoice => invoice.AppointmentId,   // InvoiceInfos.AppointmentId
-              (appointment, invoice) => new AppointmentWithInvoiceDto  // Single object projection
-              {
-                Id = appointment.Id,                  // Assuming AppointmentInfo.Id
-                PatientId = appointment.PatientId,              // Date from Appointment
-                Departmentid = appointment.Departmentid,  // Appointment-specific field
-                DoctorId = appointment.DoctorId,       // Invoice-specific field
-                IsConsultationPaid = invoice.IsConsultationPaid ,     // to show the payment status in appoinment list get the consultationpaid data here
-                ScheduledByid = appointment.ScheduledByid,
-                Date = appointment.Date,
-                Notes = appointment.Notes,
-                AppointTime = appointment.AppointTime,
-                AppointmentStatus = appointment.AppointmentStatus,
-                Fee = appointment.Fee,
-              }
-          )
+          .Join(_context.InvoiceInfos,
+                appointment => appointment.Id,
+                invoice => invoice.AppointmentId,
+                (appointment, invoice) => new AppointmentWithInvoiceDto
+                {
+                  Id = appointment.Id,
+                  PatientId = appointment.PatientId,
+                  Departmentid = appointment.Departmentid,
+                  DoctorId = appointment.DoctorId,
+                  IsConsultationPaid = invoice.IsConsultationPaid,
+                  ScheduledByid = appointment.ScheduledByid,
+                  Date = appointment.Date,
+                  Notes = appointment.Notes,
+                  AppointTime = appointment.AppointTime,
+                  AppointmentStatus = appointment.AppointmentStatus,
+                  Fee = appointment.Fee,
+                })
           .ToListAsync();
 
-
-
-      if (appointmentWithInvoices == null) // Check if appointments were found
-      {
+      if (appointmentWithInvoices == null)
         return NotFound();
-      }
 
       return Ok(appointmentWithInvoices);
     }
 
-
-
-    // PUT: api/AppointmentInfoes/5
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     public async Task<IActionResult> PutAppointmentInfo(int id, AppointmentInfo appointmentInfo)
     {
       if (id != appointmentInfo.Id)
-      {
         return BadRequest();
-      }
 
       _context.Entry(appointmentInfo).State = EntityState.Modified;
 
@@ -331,20 +255,14 @@ namespace hospitalApiProject.Controllers
       catch (DbUpdateConcurrencyException)
       {
         if (!AppointmentInfoExists(id))
-        {
           return NotFound();
-        }
         else
-        {
           throw;
-        }
       }
 
       return NoContent();
     }
 
-    // POST: api/AppointmentInfoes
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
     public async Task<ActionResult<AppointmentInvoiceResponse>> PostAppointmentInfo(AppointmentInfo appointmentInfo)
     {
@@ -352,27 +270,22 @@ namespace hospitalApiProject.Controllers
 
       try
       {
-        // Add and save the appointment information
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
 
-        // Check for previous appointment within 6 days for the same patient
         var lastAppointment = await _context.AppointmentInfos
-          .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
-          .OrderByDescending(a => a.Date)
-          .FirstOrDefaultAsync();
+            .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
+            .OrderByDescending(a => a.Date)
+            .FirstOrDefaultAsync();
 
         bool isRepeatWithin6Days = false;
         if (lastAppointment != null)
         {
           var daysDiff = (appointmentInfo.Date - lastAppointment.Date).TotalDays;
           if (daysDiff > 0 && daysDiff <= 6)
-          {
             isRepeatWithin6Days = true;
-          }
         }
 
-        // Create and save the invoice information
         var invoiceInfo = new InvoiceInfo()
         {
           Amount = isRepeatWithin6Days ? 0 : appointmentInfo.Fee,
@@ -380,13 +293,11 @@ namespace hospitalApiProject.Controllers
           CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
           PatientId = appointmentInfo.PatientId,
           Status = "Unpaid",
-          IsConsultationPaid = isRepeatWithin6Days ? true : false
+          IsConsultationPaid = isRepeatWithin6Days
         };
 
         _context.InvoiceInfos.Add(invoiceInfo);
         await _context.SaveChangesAsync();
-
-        // Get the newly created invoiceId
         invoiceId = invoiceInfo.InvoiceId;
       }
       catch (Exception ex)
@@ -395,7 +306,6 @@ namespace hospitalApiProject.Controllers
         throw;
       }
 
-      // Create the response with appointment info and invoiceId
       var response = new AppointmentInvoiceResponse
       {
         AppointmentInfo = appointmentInfo,
@@ -405,15 +315,12 @@ namespace hospitalApiProject.Controllers
       return CreatedAtAction("GetAppointmentInfo", new { id = appointmentInfo.Id }, response);
     }
 
-    // DELETE: api/AppointmentInfoes/5
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAppointmentInfo(int id)
     {
       var appointmentInfo = await _context.AppointmentInfos.FindAsync(id);
       if (appointmentInfo == null)
-      {
         return NotFound();
-      }
 
       _context.AppointmentInfos.Remove(appointmentInfo);
       await _context.SaveChangesAsync();
@@ -425,22 +332,18 @@ namespace hospitalApiProject.Controllers
     {
       return _context.AppointmentInfos.Any(e => e.Id == id);
     }
+
     [HttpGet("appointmentList/{patientId}/{year}")]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> AppointmentListByPatientId(int patientId, int year)
     {
       var appointmentInfo = await _context.AppointmentInfos
-     .Where(e => e.PatientId == patientId && e.Date.Year == year)
-     .ToListAsync();
+          .Where(e => e.PatientId == patientId && e.Date.Year == year)
+          .ToListAsync();
 
       if (appointmentInfo == null)
-      {
         return NotFound();
-      }
 
       return appointmentInfo;
-
-
     }
   }
-
 }

@@ -1,0 +1,25 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"label": "Run Angular Frontend",
+			"command": "npx ng serve --open",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$tsc"
+			]
+		},
+		{
+			"type": "shell",
+			"label": "Run .NET Backend",
+			"command": "dotnet run --project hospitalApiProject/hospitalApiProject.csproj",
+			"group": "build",
+			"isBackground": true,
+			"problemMatcher": [
+				"$msCompile"
+			]
+		}
+	]
+}

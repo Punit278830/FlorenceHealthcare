@@ -40,4 +40,6 @@ public partial class StaffInfo
     public DateOnly Doj { get; set; }
 
    public string? RegestrationNumber { get; set; }
+    public int HospitalId { get; set; }
+    public Hospital? Hospital { get; set; }
 }

@@ -28,4 +28,7 @@ public partial class PatientInfo
   public string? IdentityName { get; set; }
 
   public string? IdentityNumber { get; set; }
+
+    public int HospitalId { get; set; }
+    public Hospital? Hospital { get; set; }
 }

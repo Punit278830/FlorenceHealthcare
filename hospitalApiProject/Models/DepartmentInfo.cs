@@ -10,4 +10,7 @@ public partial class DepartmentInfo
     public string DepartmentName { get; set; } = null!;
 
     public string? DepartmentStatus { get; set; }
+
+    public int HospitalId { get; set; }
+    public Hospital? Hospital { get; set; }
 }

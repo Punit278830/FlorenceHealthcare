@@ -11,12 +11,15 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LoaderComponent } from './core/loader/loader.component';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClientModule } from '@angular/common/http';
+import { ReactiveFormsModule } from '@angular/forms';
+import { HospitalOnboardingComponent } from './hospital-onboarding/hospital-onboarding.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     LoaderComponent,
+    HospitalOnboardingComponent,
   ],
   imports: [
      HttpClientModule,
@@ -27,7 +30,8 @@ import { HttpClientModule } from '@angular/common/http';
     NgxExtendedPdfViewerModule,
     ToastrModule.forRoot(),
     NgxSpinnerModule.forRoot(),
-    MatIconModule
+    MatIconModule,
+    ReactiveFormsModule
   ],
   providers: [],
   bootstrap: [AppComponent]

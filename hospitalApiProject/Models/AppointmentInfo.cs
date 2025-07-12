@@ -24,4 +24,7 @@ public partial class AppointmentInfo
   public string? AppointmentStatus { get; set; }
 
   public int Fee { get; set; }
+
+  public int HospitalId { get; set; }
+  public Hospital? Hospital { get; set; }
 }

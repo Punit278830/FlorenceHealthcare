@@ -67,6 +67,8 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<CareContext> CareContexts { get; set; }
 
+  public virtual DbSet<Hospital> Hospitals { get; set; }
+
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");

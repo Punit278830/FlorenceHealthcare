@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 // import { AuthGuard } from './shared/gaurd/auth.guard';
+import { HospitalOnboardingComponent } from './hospital-onboarding/hospital-onboarding.component';
 
 const routes: Routes = [
   {
@@ -24,6 +25,10 @@ const routes: Routes = [
     path: 'error',
     loadChildren: () =>
       import('./error/error.module').then((m) => m.ErrorModule),
+  },
+  {
+    path: 'hospital-onboarding',
+    component: HospitalOnboardingComponent,
   },
   {
     path: '**',

@@ -19,6 +19,8 @@ public partial class InvoiceInfo
 
   public bool? IsConsultationPaid { get; set; }
 
+  public int HospitalId { get; set; }
+  public Hospital? Hospital { get; set; }
 }
 
 public class InvoiceInfoDetail
@@ -36,5 +38,5 @@ public class InvoiceInfoDetail
   public string? Status { get; set; }
 
   public bool? IsConsultationPaid { get; set; } 
-  public string TransactionId { get; set; }
+  public string? TransactionId { get; set; }
 }
