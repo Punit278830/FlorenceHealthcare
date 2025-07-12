@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
-import { IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto, IInvoiceSummaryResponse } from '../../models/models';
+import { IinvoiceItem, Iinvoice, IPaymentMode, IInvoicePaymentDto, ITotalPaymentDetails, ISubItemInvoicePaymentDto, ICreateInvoiceDto, IInvoiceSummaryResponse, SearchCriteriaBase, SearchResponseBase } from '../../models/models';
 import { BehaviorSubject, catchError, Observable, throwError } from 'rxjs';
-import { HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -25,10 +25,12 @@ export class InvoiceService {
   //   return this.http.get(`${this.apiUrl}InvoiceInfoes`, { params });
   // }
 
-  getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string): Observable<IInvoiceSummaryResponse> {
+  getAllInvoice(paymentMode: string, paymentStatus: string, fromDate?: string, toDate?: string, skip: number = 0, pageSize: number = 100): Observable<IInvoiceSummaryResponse> {
     let params = new HttpParams()
       .set('paymentMode', paymentMode)
-      .set('paymentStatus', paymentStatus);
+      .set('paymentStatus', paymentStatus)
+      .set('skip', skip)
+      .set('pageSize', pageSize);
 
     if (fromDate) {
       params = params.set('fromDate', fromDate);
@@ -62,6 +64,10 @@ export class InvoiceService {
 
   getInvoiceById(id: number): Observable<Iinvoice> {
     return this.http.get(this.apiUrl + 'InvoiceInfoes/' + id);
+  }
+
+  getInvoiceByInvoiceId(invoiceId: number): Observable<Iinvoice> {
+    return this.http.get(this.apiUrl + 'InvoiceInfoes/by-invoice-id/' + invoiceId);
   }
 
   updateInvoice(id: number, invoiceData: IInvoicePaymentDto): Observable<any> {
@@ -136,7 +142,14 @@ export class InvoiceService {
     return this.http.post(this.apiUrl + 'InvoiceItemMaster/', InvoiceItemMaster);
   }
 
-
-
+  searchInvoices(criteria: SearchCriteriaBase): Observable<SearchResponseBase<Iinvoice>> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    // Send criteria directly, not wrapped in { criteria: ... }
+    return this.http.post(
+      `${this.apiUrl}InvoiceInfoes/Search`,
+      criteria,
+      { headers }
+    ) as unknown as Observable<SearchResponseBase<Iinvoice>>;
+  }
 }
 

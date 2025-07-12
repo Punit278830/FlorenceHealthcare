@@ -19,11 +19,11 @@ public partial class PatientInfo
 
     public string? Gender { get; set; }
 
-    public DateOnly Dob { get; set; }
+    public DateTime Dob { get; set; }
 
     public string? PatientImage { get; set; }
 
-    public DateOnly? RegstrationDate { get; set; }
+    public DateTime? RegstrationDate { get; set; }
 
   public string? IdentityName { get; set; }
 

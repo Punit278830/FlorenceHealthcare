@@ -68,11 +68,11 @@
                                 </thead>
                                 <tbody>
                                     <tr *ngFor="let data of searchResults">
-                                        <td>
-                                            <a href="javascript:;" (click)="postDatatoAppointment(data.patientId)">
-                                                {{data.firstName}} {{data.lastName}}
-                                            </a>
-                                        </td>
+<td>
+                                                <a href="javascript:;" (click)="postDatatoAppointment(data.patientId)">
+    {{data.firstName}} {{data.lastName}}
+    </a>
+</td>
                                                 <td>{{data.ageinYear}}</td>
                                         <td><a href="javascript:;">{{data.mobile}}</a></td>
                                         <td>{{data.email}}</td>
@@ -166,14 +166,6 @@
                                                 </timepicker>
                                                                                             
 
-                                                <div
-                                                *ngIf="bookappointment.get('appointTime')?.invalid && (bookappointment.get('appointTime')?.dirty || bookappointment.get('appointTime')?.touched)"
-                                                class="text-danger"
-                                                >
-                                                <div *ngIf="bookappointment.get('appointTime')?.errors?.['required']">
-                                                    Appointment Time is required.
-                                                </div>
-                                                </div>
                                             </div>
                                             </div>
 
@@ -294,11 +286,21 @@
                                   </td>-->
                                                                 <td>{{serialNumberArray[i]}}</td>
 
-                                        <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
+<td class="profile-image">
+      <td class="profile-image" (click)="postDatatoAppointment(data.patientId)"
                                             (keydown.enter)="postDatatoAppointment(data.patientId)"> <a
                                                 href="javascript:;"> {{data.firstName}}
                                                 {{data.lastName}}</a>
-                                        </td>
+
+    <ng-container *ngIf="data.isConsultationPaid; else plainNameList">
+        <a href="javascript:;" (click)="postDatatoAppointment(data.patientId)" (keydown.enter)="postDatatoAppointment(data.patientId)">
+            {{data.firstName}} {{data.lastName}}
+        </a>
+    </ng-container>
+    <ng-template #plainNameList>
+        {{data.firstName}} {{data.lastName}}
+    </ng-template>
+</td>
                                         <td>{{data.ageinYear}}</td>
                                         <td><a href="javascript:;">{{data.mobile}}</a></td>
                                         <td>{{data.email}}</td>

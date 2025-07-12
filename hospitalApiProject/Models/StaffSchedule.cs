@@ -11,7 +11,7 @@ public partial class StaffSchedule
 
     public int DepartmentId { get; set; }
 
-    public DateOnly ScheduleDate { get; set; }
+    public DateTime ScheduleDate { get; set; }
 
     public string? FromTime { get; set; }
 
@@ -21,7 +21,7 @@ public partial class StaffSchedule
 
     public string? ToPostfix { get; set; }
 
-    public DateOnly? ApplyScheduleDate { get; set; }
+    public DateTime? ApplyScheduleDate { get; set; }
 
     public int LeaveStatus { get; set; }
 

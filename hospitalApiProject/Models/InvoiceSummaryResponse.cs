@@ -6,4 +6,5 @@ public class InvoiceSummaryResponse
   public decimal TotalOnlineAmount { get; set; }
   public decimal TotalCashAmount { get; set; }
   public decimal TotalAmount { get; set; }
+  public int TotalCount { get; set; } // Add total count for pagination
 }

@@ -10,7 +10,7 @@ namespace hospitalApiProject.Models
 
     public int AppointmentId { get; set; }
 
-    public DateOnly? CreatedDate { get; set; }
+    public DateTime? CreatedDate { get; set; }
 
     public int? Amount { get; set; }
 
@@ -22,6 +22,9 @@ namespace hospitalApiProject.Models
     public string PaymentModes { get; set; } = string.Empty;
 
     public List<PaymentModeInfo> PaymentDetails { get; set; }
+
+    public string? PatientFname { get; set; }
+    public string? PatientLname { get; set; }
 
   }
 }

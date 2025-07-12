@@ -113,11 +113,22 @@
                       </div>
                     </td> -->
                     <td>{{serialNumberArray[i]}}</td>
-                    <td class="profile-image"><a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
-                        (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"><img
-                          width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
-                        {{data.patientFname}}
-                        {{data.patientLname}}</a></td>
+                   <td class="profile-image">
+  <ng-container *ngIf="data.isConsultationPaid; else notPaid">
+    <a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
+      (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)">
+      <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+      {{data.patientFname}} {{data.patientLname}}
+    </a>
+  </ng-container>
+  <ng-template #notPaid>
+    <span>
+      <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+      {{data.patientFname}} {{data.patientLname}}
+    </span>
+  </ng-template>
+</td>
+
                     <td>{{data.doctorFname}} {{data.doctorLname}}</td>
                     <td>{{data.departmentName}}</td>
                     <td><a href="javascript:;">{{data.notes}}</a></td>

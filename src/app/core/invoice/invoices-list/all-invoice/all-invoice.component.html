@@ -416,6 +416,7 @@
                     <th mat-sort-header="amount">Amount</th>
                     <th mat-sort-header="dueDate">Due date</th>
                     <th mat-sort-header="status">Status</th>
+                    <th mat-sort-header="previousAppointmentDate">Previous Appt. Date</th>
                     <th mat-sort-header="action" class="text-end">Action</th>
                   </tr>
                 </thead>
@@ -450,6 +451,7 @@
                         Paid on: {{ getPaymentDate(data) }}
                       </div>
                     </td>
+                    <td>{{ data.previousAppointmentDate ? formatDateOnly(data.previousAppointmentDate) : '-' }}</td>
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"

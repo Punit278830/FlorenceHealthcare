@@ -20,13 +20,33 @@ namespace hospitalApiProject.Controllers
 
     // GET: api/PatientInfoes
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<PatientInfo>>> GetPatientInfos()
+    public async Task<ActionResult<IEnumerable<PatientWithPaymentStatusDto>>> GetPatientInfos()
     {
-      return await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
+        var patients = await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
+        var invoices = await _context.InvoiceInfos.ToListAsync();
+
+        var result = patients.Select(p => new PatientWithPaymentStatusDto
+        {
+            PatientId = p.PatientId,
+            FirstName = p.FirstName,
+            LastName = p.LastName,
+            Mobile = p.Mobile,
+            Email = p.Email,
+            Address = p.Address,
+            Gender = p.Gender,
+            Dob = p.Dob,
+            PatientImage = p.PatientImage,
+            RegstrationDate = p.RegstrationDate,
+            IdentityName = p.IdentityName,
+            IdentityNumber = p.IdentityNumber,
+            IsConsultationPaid = invoices.Any(i => i.PatientId == p.PatientId && i.IsConsultationPaid == true)
+        }).ToList();
+
+        return Ok(result);
     }
 
     [HttpGet("registrationDateRange/{startDate}/{endDate}")]
-    public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateOnly startDate, DateOnly endDate)
+    public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateTime startDate, DateTime endDate)
     {
 
 

@@ -39,6 +39,13 @@ const routes: Routes = [
           (m) => m.DoctorSettingModule
         ),
     },
+    {
+      path: 'invoices',
+      loadChildren: () =>
+        import('./doctor-invoices-list/doctor-invoices-list.module').then(
+          (m) => m.DoctorInvoicesListModule
+        ),
+    },
 
     
   ]

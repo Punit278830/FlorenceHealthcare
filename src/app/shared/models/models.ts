@@ -174,7 +174,7 @@ export interface IstaffInfo {
   education: string;
   IdentityName: string;
   IdentityNumber: string;
-  regestrationNumber?:string;
+  regestrationNumber?: string;
 }
 
 export interface IpatientInfo {
@@ -191,7 +191,8 @@ export interface IpatientInfo {
   regstrationDate?: Date;
   IdentityName: string;
   IdentityNumber: string;
-  SubQues:any[]
+  SubQues: any[]
+  isConsultationPaid?: boolean;
 }
 
 export interface Iappointment {
@@ -204,8 +205,8 @@ export interface Iappointment {
   notes: string,
   appointmentStatus: string,
   fee: number;
-  
-  appointTime:string;
+
+  appointTime: string;
 
 }
 
@@ -222,7 +223,7 @@ export interface IfileUpload {
   fileData?: string,
   UploadDate: Date,
   AppointmentId: number,
-  docName?:string,
+  docName?: string,
 
 }
 
@@ -232,7 +233,7 @@ export interface IconsultationFiles {
   FileType?: string,
   fileData?: string,
   appointmentId?: number,
-  docName?:string,
+  docName?: string,
 }
 
 export interface IdownloadFile {
@@ -253,8 +254,8 @@ export interface Istaffschedule {
   toPostfix: string,
   ApplyScheduleDate: Date,
   leaveStatus: number,
-  notes:string,
-  status:string,
+  notes: string,
+  status: string,
 }
 
 export interface IQuestionnaires {
@@ -338,7 +339,7 @@ export interface Iinvoice {
   totalUnpaidAmount: number,
   status: string,
   paymentModes: string,
-    paymentId: number;
+  paymentId: number;
   paymentMode: string;
   itemId: number | null;
   paymentDetails: PaymentModeInfo[];
@@ -346,10 +347,12 @@ export interface Iinvoice {
   isConsultationPaid: boolean,
   transactionId: string
   itemName: string;
+  previousAppointmentDate?: string | number; // Add this property for discount reason
+  InvoiceDate?: Date | string; // Added InvoiceDate property
 }
 
-export interface IinvoiceTemp extends  Iinvoice {
-  tempItemName:string
+export interface IinvoiceTemp extends Iinvoice {
+  tempItemName: string
 }
 
 export interface IInvoiceSummaryResponse {
@@ -370,7 +373,7 @@ interface PaymentDetail {
   paymentMode: string;
   itemName: string | null;
   itemId: number | null;
-  paymentDate: string; 
+  paymentDate: string;
   transactionId: string | null;
   amount: number;
   // add other properties if needed
@@ -382,7 +385,7 @@ export interface InvoiceInfoResponse {
   invoiceId: number;
   patientId: number;
   appointmentId: number;
-  createdDate?: string; 
+  createdDate?: string;
   amount?: number;
   totalUnpaidAmount: number;
   status?: string;
@@ -396,7 +399,7 @@ export interface PaymentModeInfo {
   itemName: string;
   itemId?: string;
   transactionId?: string;
-  paymentDate?: string; 
+  paymentDate?: string;
   amount?: number;
 }
 
@@ -405,8 +408,8 @@ export interface IPaymentMode {
   paymentMode: string,
   transactionId: string | null,
   amount: number,
-  itemName:string,
-  itemId:string
+  itemName: string,
+  itemId: string
 }
 
 export interface IInvoicePaymentDto {
@@ -460,7 +463,7 @@ export interface IprescribeMedicine {
   medicationId: number,
   appointmentId: number,
   medName: string,
-  unit:string,
+  unit: string,
   medType: string,
   dose: string,
   frequency: string,
@@ -534,6 +537,7 @@ export interface allInvoice {
   img: string;
   age?: number;
   paymentDate?: string | number;
+  previousAppointmentDate?: string | number; // Added for backend support
 }
 export interface staffList {
   name: string;
@@ -703,7 +707,7 @@ export interface IAbhaProfile {
   address: string,
   pinCode: string,
   stateCode: string,
-  stateName:  string,
+  stateName: string,
   districtCode: string,
   districtName: string,
   transactionId: string,
@@ -729,4 +733,39 @@ export interface IAbhaPatientDetails extends IAbhaPatientInfo {
   abhaNumber: string,
   abhaAddress: string,
   status: string,
+}
+
+export interface SearchCriteriaBase {
+  sortFieldName?: string;
+  sortDirection?: number; // 0 = Ascending, 1 = Descending
+  pageNumber?: number;
+  pageSize?: number;
+}
+
+export interface SearchResponseBase<T> {
+  errorMessage?: string;
+  hasError?: boolean;
+  results: T[];
+  totalCount: number;
+  totalPages: number;
+}
+
+export enum PaymentStatus {
+  All = 0,
+  Paid = 1,
+  Unpaid = 2,
+  PartialPaid = 3
+}
+
+export enum PaymentMode {
+  All = 0,
+  Cash = 1,
+  Online = 2
+}
+
+export interface InvoiceSearch extends SearchCriteriaBase {
+  fromDate?: string;
+  toDate?: string;
+  paymentStatus?: PaymentStatus;
+  paymentMode?: PaymentMode;
 }

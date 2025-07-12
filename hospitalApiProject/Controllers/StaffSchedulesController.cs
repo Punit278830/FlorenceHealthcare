@@ -64,7 +64,7 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
-            staffSchedule.ApplyScheduleDate = DateOnly.FromDateTime(DateTime.Today);
+            staffSchedule.ApplyScheduleDate = DateTime.UtcNow.Date;
             _context.Entry(staffSchedule).State = EntityState.Modified;
 
             try
@@ -93,7 +93,7 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                staffSchedule.ApplyScheduleDate = DateOnly.FromDateTime(DateTime.Today);
+                staffSchedule.ApplyScheduleDate = DateTime.UtcNow.Date;
 
                 _context.StaffSchedules.Add(staffSchedule);
                 await _context.SaveChangesAsync();
@@ -131,7 +131,7 @@ namespace hospitalApiProject.Controllers
         }
 
         [HttpGet("{depId}/{appointmentDate}")]
-        public async Task<ActionResult<List<StaffSchedule>>> GetStaffOnLeave(int depId, DateOnly appointmentDate)
+        public async Task<ActionResult<List<StaffSchedule>>> GetStaffOnLeave(int depId, DateTime appointmentDate)
         {
             try {
                 var staffSchedule = await _context.StaffSchedules.Where(e => e.DepartmentId == depId && e.LeaveStatus == 2 && e.ScheduleDate == appointmentDate && e.Status == "Approved").ToListAsync();
