@@ -64,6 +64,10 @@ export class InvoiceService {
     return this.http.get(this.apiUrl + 'InvoiceInfoes/' + id);
   }
 
+  getInvoiceByInvoiceId(invoiceId: number): Observable<Iinvoice> {
+    return this.http.get(this.apiUrl + 'InvoiceInfoes/by-invoice-id/' + invoiceId);
+  }
+
   updateInvoice(id: number, invoiceData: IInvoicePaymentDto): Observable<any> {
     return this.http.put(this.apiUrl + 'InvoiceInfoes/' + id, invoiceData);
   }

@@ -134,6 +134,7 @@ export class InvoiceViewComponent implements OnInit {
   public ConsultationPaidStatus: string;
   isAllowed: boolean = false; // disable print button incase of unpaid
   public isReferenceLabelVisible = false;
+  public invoiceDate?: Date | string; // Added for InvoiceDate
   formatToTwoDecimalPlaces(value: number): string {
     return value.toFixed(2); // Converts to a string with 2 decimal places
   }
@@ -221,7 +222,7 @@ export class InvoiceViewComponent implements OnInit {
   getInvoiceDetails() {
     this.invoiceId = this.invoiceService.invoiceId;
     if (this.invoiceId > 0) {
-      this.invoiceService.getInvoiceById(this.invoiceId).subscribe(res => {
+      this.invoiceService.getInvoiceByInvoiceId(this.invoiceId).subscribe(res => {
         this.isPaidButtonVisible = res.status != 'Paid'
         this.isAllowed = res.status == 'Paid';
 
@@ -246,7 +247,10 @@ export class InvoiceViewComponent implements OnInit {
     }
   }
 
+  public currentInvoiceDate: Date = new Date(); // Add this property
+
   ngOnInit() {
+    this.currentInvoiceDate = new Date(); // Set current date at runtime
     this.getInvoiceDetails();
     const jss = create(preset());
     this.sheets = new SheetsRegistry();
@@ -352,11 +356,16 @@ export class InvoiceViewComponent implements OnInit {
     const differenceInDays = selectedDate.diff(previousDate, 'day');
     this.IsDoctorSameflag = previous.doctorId === selectedDoctor;
 
-    // Only set flag if within 6 days and doctor is the same
-    if (differenceInDays <= 6 && differenceInDays >= 0 && this.IsDoctorSameflag) {
+    // Only set flag if within 6 days, doctor is the same, and previousDate <= selectedDate
+    if (differenceInDays <= 6 && differenceInDays >= 0 && this.IsDoctorSameflag && (previousDate.isBefore(selectedDate) || previousDate.isSame(selectedDate))) {
       this.flag = true;
       this.totalInvoiceAmount -= this.invoiceDetails.amount;
       this.disc = 100;
+      // Set previousAppointmentDate for display
+      this.invoiceDetails.previousAppointmentDate = previousDate.format('YYYY-MM-DD');
+    } else {
+      this.flag = false;
+      this.invoiceDetails.previousAppointmentDate = undefined;
     }
   } 
   
@@ -558,6 +567,15 @@ export class InvoiceViewComponent implements OnInit {
 
   }
 
+  getLocalInvoiceDate(): string {
+    if (this.invoiceDetails?.InvoiceDate) {
+      // Prefer InvoiceDate if present
+      return dayjs.utc(this.invoiceDetails.InvoiceDate).local().format('DD-MMMM-YYYY');
+    }
+    if (!this.invoiceDetails?.createdDate) return '';
+    // Fallback to createdDate
+    return dayjs.utc(this.invoiceDetails.createdDate).local().format('DD-MMMM-YYYY');
+  }
 }
 
 class ThermalPrinterService {

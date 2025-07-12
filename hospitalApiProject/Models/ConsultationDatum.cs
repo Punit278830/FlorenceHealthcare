@@ -17,5 +17,5 @@ public partial class ConsultationDatum
 
     public string? FinalDiagnosis { get; set; }
 
-    public DateOnly? FollowupDate { get; set; }
+    public DateTime? FollowupDate { get; set; }
 }

@@ -31,13 +31,13 @@ public partial class StaffInfo
 
     public string Password { get; set; } = null!;
 
-    public DateOnly Dob { get; set; }
+    public DateTime Dob { get; set; }
 
     public string Gender { get; set; } = null!;
 
     public string Education { get; set; } = null!;
 
-    public DateOnly Doj { get; set; }
+    public DateTime Doj { get; set; }
 
    public string? RegestrationNumber { get; set; }
 }

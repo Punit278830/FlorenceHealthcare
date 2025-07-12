@@ -43,11 +43,9 @@ namespace hospitalApiProject.Controllers
       // Parse the fromDate and toDate just once at the beginning.
       var fromDateParsed = DateTime.Parse(fromDate).Date;
       var toDateParsed = DateTime.Parse(toDate).Date;
-      var fromDateOnly = DateOnly.FromDateTime(fromDateParsed); // Convert DateTime to DateOnly
-      var toDateOnly = DateOnly.FromDateTime(toDateParsed); // Convert DateTime to DateOnly
 
-      // Apply date filtering for both fromDate and toDate
-      query = query.Where(invoice => invoice.CreatedDate >= fromDateOnly && invoice.CreatedDate <= toDateOnly);
+      // Apply date filtering for both fromDate and toDate (now using DateTime)
+      query = query.Where(invoice => invoice.CreatedDate >= fromDateParsed && invoice.CreatedDate <= toDateParsed);
 
       // Apply paymentStatus filtering
       if (paymentStatus.ToLower() != "all")
@@ -128,12 +126,12 @@ namespace hospitalApiProject.Controllers
     [HttpGet("GetInvoicesForToday")]
     public async Task<IActionResult> GetInvoicesForTodayAsync()
     {
-      // Get today's date
-      var today = DateOnly.FromDateTime(DateTime.Now);
+      // Get today's date as DateTime
+      var today = DateTime.Today;
 
       // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
-          .Where(invoice => invoice.CreatedDate == today)
+          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today)
           .Join(
               _context.PatientInfos,
               invoice => invoice.PatientId,
@@ -158,59 +156,87 @@ namespace hospitalApiProject.Controllers
     }
 
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfo(int id)
+    [HttpGet("by-invoice-id/{invoiceId}")]
+    public async Task<ActionResult<InvoiceInfo>> GetInvoiceInfoByInvoiceId(int invoiceId)
     {
-      //var invoiceInfo = await _context.InvoiceInfos.FindAsync(id);
-
-      InvoiceInfoDetail invoiceInfo = await _context.InvoiceInfos
-    .Where(i => i.InvoiceId == id)
-    .Select(i => new InvoiceInfoDetail
-    {
-      InvoiceId = i.InvoiceId,
-      PatientId = i.PatientId,
-      AppointmentId = i.AppointmentId,
-      CreatedDate = i.CreatedDate,
-      Amount = i.Amount,
-      Status = i.Status,
-      IsConsultationPaid = i.IsConsultationPaid,
-      TransactionId = (bool)i.IsConsultationPaid
-            ? _context.PaymentModeInfo
-                .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
-                .OrderByDescending(p => p.PaymentDate)
-                .Select(p => p.TransactionId)
-                .FirstOrDefault()
-            : null
-    })
-    .FirstOrDefaultAsync();
-
-      if (invoiceInfo.IsConsultationPaid == true)
+      try
       {
-        var tempRes = await this.GetPaymentModeInfoByInvoiceId(id);
-        if (tempRes.Count > 0)
-        {
-          if (tempRes[0].TransactionId != null)
+        var invoiceInfo = await _context.InvoiceInfos
+          .Where(i => i.InvoiceId == invoiceId)
+          .Select(i => new InvoiceInfo
           {
-            invoiceInfo.TransactionId = tempRes[0].TransactionId;
+            InvoiceId = i.InvoiceId,
+            PatientId = i.PatientId,
+            AppointmentId = i.AppointmentId,
+            CreatedDate = i.CreatedDate,
+            Amount = i.Amount,
+            Status = i.Status,
+            IsConsultationPaid = i.IsConsultationPaid,
+            TransactionId = (bool)i.IsConsultationPaid
+              ? _context.PaymentModeInfo
+                  .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
+                  .OrderByDescending(p => p.PaymentDate)
+                  .Select(p => p.TransactionId)
+                  .FirstOrDefault()
+              : null,
+            PreviousAppointmentDate = _context.AppointmentInfos
+                .Where(a => a.PatientId == i.PatientId
+                    && a.DoctorId == _context.AppointmentInfos
+                        .Where(ap => ap.Id == i.AppointmentId)
+                        .Select(ap => ap.DoctorId)
+                        .FirstOrDefault()
+                    && a.Id != i.AppointmentId
+                    && a.Date < _context.AppointmentInfos
+                        .Where(ap => ap.Id == i.AppointmentId)
+                        .Select(ap => ap.Date)
+                        .FirstOrDefault())
+                .OrderByDescending(a => a.Date)
+                .Select(a => (DateTime?)a.Date)
+                .FirstOrDefault(),
+            InvoiceDate = _context.InvoiceInfos
+                .Where(i => i.InvoiceId == invoiceId)
+                .Select(i => (DateTime?)i.CreatedDate)
+                .FirstOrDefault() ?? DateTime.UtcNow.Date, // Default to current date if no date found
+          })
+          .FirstOrDefaultAsync();
+
+        if (invoiceInfo != null && invoiceInfo.IsConsultationPaid == true)
+        {
+          var tempRes = await this.GetPaymentModeInfoByInvoiceId(invoiceId);
+          if (tempRes.Count > 0)
+          {
+            if (tempRes[0].TransactionId != null)
+            {
+              invoiceInfo.TransactionId = tempRes[0].TransactionId;
+            }
+            else
+            {
+              invoiceInfo.TransactionId = "Cash";
+            }
           }
           else
           {
             invoiceInfo.TransactionId = "Cash";
           }
         }
-        else
+
+        if (invoiceInfo == null)
         {
-          invoiceInfo.TransactionId = "Cash";
+          return NotFound();
         }
-      }
 
-      if (invoiceInfo == null)
+        return Ok(invoiceInfo);
+      }
+      catch (Exception ex)
       {
-        return NotFound();
+        // Log the exception (if logging is set up)
+        Console.WriteLine($"Error fetching invoice info: {ex.Message}");
+        return StatusCode(500, "Internal server error while fetching invoice info.");
       }
-
-      return Ok(invoiceInfo);
     }
+    
+ 
+
     private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? Id)
     {
       // Ensure models is not null and contains data
@@ -246,20 +272,39 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<TotalPaymentDetailsResponse>> GetTotalPaymentAmount([FromQuery] string fromDate, [FromQuery] string toDate)
     {
       // If fromDate or toDate is not provided, default to today's date
-      var today = DateOnly.FromDateTime(DateTime.Today);
+      var today = DateTime.Today;
+      DateTime fromDateParsed, toDateParsed;
 
-      var fromDateParsed = !string.IsNullOrEmpty(fromDate)
-          ? DateOnly.Parse(fromDate)
-          : today; // Default to today's date if not provided
+      if (!string.IsNullOrEmpty(fromDate))
+      {
+        if (!DateTime.TryParse(fromDate, out fromDateParsed))
+        {
+          return BadRequest($"Invalid fromDate format. Please use yyyy-MM-dd or ISO 8601 format.");
+        }
+        fromDateParsed = fromDateParsed.Date;
+      }
+      else
+      {
+        fromDateParsed = today;
+      }
 
-      var toDateParsed = !string.IsNullOrEmpty(toDate)
-          ? DateOnly.Parse(toDate)
-          : today; // Default to today's date if not provided
+      if (!string.IsNullOrEmpty(toDate))
+      {
+        if (!DateTime.TryParse(toDate, out toDateParsed))
+        {
+          return BadRequest($"Invalid toDate format. Please use yyyy-MM-dd or ISO 8601 format.");
+        }
+        toDateParsed = toDateParsed.Date;
+      }
+      else
+      {
+        toDateParsed = today;
+      }
 
       var result = await _context.PaymentModeInfo
           .Where(payment => payment.PaymentDate.HasValue &&
-                            DateOnly.FromDateTime(payment.PaymentDate.Value) >= fromDateParsed &&
-                            DateOnly.FromDateTime(payment.PaymentDate.Value) <= toDateParsed)
+                            payment.PaymentDate.Value.Date >= fromDateParsed &&
+                            payment.PaymentDate.Value.Date <= toDateParsed)
           .GroupBy(payment => payment.PaymentMode.ToLower()) // Group by payment mode
           .Select(group => new
           {
@@ -304,10 +349,10 @@ namespace hospitalApiProject.Controllers
       {
         Amount = 0,
         AppointmentId = 0,
-        CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+        CreatedDate = DateTime.UtcNow, // Use UTC for consistency
         PatientId = patientId,
-        Status = "Paid",
-        IsConsultationPaid = true
+        Status = "Unpaid", // Set to Unpaid for new invoices
+        IsConsultationPaid = false // Set to false for new invoices
       };
 
       // Add invoice to the context and save to generate the InvoiceId

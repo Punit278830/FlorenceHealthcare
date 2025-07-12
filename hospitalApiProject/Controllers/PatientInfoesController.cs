@@ -46,7 +46,7 @@ namespace hospitalApiProject.Controllers
     }
 
     [HttpGet("registrationDateRange/{startDate}/{endDate}")]
-    public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateOnly startDate, DateOnly endDate)
+    public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateTime startDate, DateTime endDate)
     {
 
 

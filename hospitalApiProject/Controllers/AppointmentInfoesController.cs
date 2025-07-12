@@ -2,6 +2,7 @@ using hospitalApiProject.Models;
 using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace hospitalApiProject.Controllers
 {
@@ -180,11 +181,12 @@ namespace hospitalApiProject.Controllers
     [HttpGet("TotalEarnings/Doctor/{id}")]
     public async Task<ActionResult<int>> GetTodayEarningDoctor(int id)
     {
-      DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
+      DateTime currentDate = DateTime.UtcNow.Date;
       int? TodayEarning = 0;
       var totalAmount = await _context.InvoiceInfos
         .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
-          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate == currentDate).ToListAsync();
+          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate.HasValue && e.v1.CreatedDate.Value.Date == currentDate)
+          .ToListAsync();
 
       if (totalAmount.Count == 0) // Check if appointments were found
       {
@@ -194,7 +196,6 @@ namespace hospitalApiProject.Controllers
       foreach (var appointment in totalAmount)
       {
         TodayEarning += appointment.v1.Amount;
-
       }
 
       return Ok(TodayEarning);
@@ -349,16 +350,16 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<AppointmentInvoiceResponse>> PostAppointmentInfo(AppointmentInfo appointmentInfo)
     {
       int invoiceId = 0;
-
+      DateTime? previousAppointmentDate = null;
       try
       {
         // Add and save the appointment information
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
 
-        // Check for previous appointment within 6 days for the same patient
+        // Check for previous appointment within 6 days for the same patient and doctor
         var lastAppointment = await _context.AppointmentInfos
-          .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
+          .Where(a => a.PatientId == appointmentInfo.PatientId && a.DoctorId == appointmentInfo.DoctorId && a.Id != appointmentInfo.Id)
           .OrderByDescending(a => a.Date)
           .FirstOrDefaultAsync();
 
@@ -369,6 +370,7 @@ namespace hospitalApiProject.Controllers
           if (daysDiff > 0 && daysDiff <= 6)
           {
             isRepeatWithin6Days = true;
+            previousAppointmentDate = lastAppointment.Date;
           }
         }
 
@@ -377,10 +379,11 @@ namespace hospitalApiProject.Controllers
         {
           Amount = isRepeatWithin6Days ? 0 : appointmentInfo.Fee,
           AppointmentId = appointmentInfo.Id,
-          CreatedDate = DateOnly.FromDateTime(appointmentInfo.Date),
+          CreatedDate = DateTime.UtcNow, // Use UTC for consistency
           PatientId = appointmentInfo.PatientId,
           Status = "Unpaid",
-          IsConsultationPaid = isRepeatWithin6Days ? true : false
+          IsConsultationPaid = isRepeatWithin6Days ? true : false,
+          
         };
 
         _context.InvoiceInfos.Add(invoiceInfo);
@@ -395,11 +398,12 @@ namespace hospitalApiProject.Controllers
         throw;
       }
 
-      // Create the response with appointment info and invoiceId
+      // Create the response with appointment info, invoiceId, and previous appointment date
       var response = new AppointmentInvoiceResponse
       {
         AppointmentInfo = appointmentInfo,
-        InvoiceId = invoiceId
+        InvoiceId = invoiceId,
+        PreviousAppointmentDate = previousAppointmentDate
       };
 
       return CreatedAtAction("GetAppointmentInfo", new { id = appointmentInfo.Id }, response);
