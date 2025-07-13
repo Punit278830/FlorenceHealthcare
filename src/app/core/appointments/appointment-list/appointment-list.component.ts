@@ -119,19 +119,47 @@ export class AppointmentListComponent implements OnInit {
   confirmDelete(idhere: number) {
     this.appointmentService.deleteAppointment(idhere).subscribe(res => {
       if (res == null) {
-        this.toastr.success("Appointment is deleted!")
-        this.fetchCombineData()
+        this.toastr.success("Appointment is deleted!");
+        // Reset pagination and clear data to force refetch
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.combinedData = [];
+        this.fetchCombineData();
       }
-    })
-
+    });
   }
 
 
   onRefresh() {
-    this.appintmentDateForm.reset()
-    this.searchDataValue = ''
+    this.appintmentDateForm.reset();
+    this.searchDataValue = '';
+    // Reset pagination
+    this.skip = 0;
+    this.currentPage = 1;
+    this.pageIndex = 0;
+    this.combinedData = []; // Clear existing data to force refetch
+    this.fetchCombineData();
+  }
 
-    this.fetchCombineData()
+  // Apply pagination to the current data (either combinedData or filtered data)
+  applyPagination(dataToPage?: any[]) {
+    const sourceData = dataToPage || this.combinedData;
+    this.totalData = sourceData.length;
+
+    // Apply pagination to the source data
+    const startIndex = this.skip;
+    const endIndex = this.skip + this.pageSize;
+    this.appointmentList = sourceData.slice(startIndex, endIndex);
+
+    // Generate serial numbers for current page
+    this.serialNumberArray = [];
+    for (let i = 0; i < this.appointmentList.length; i++) {
+      this.serialNumberArray.push(startIndex + i + 1);
+    }
+
+    this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
+    this.calculateTotalPages(this.totalData, this.pageSize);
   }
 
   fetchCombineData() {
@@ -199,25 +227,11 @@ export class AppointmentListComponent implements OnInit {
           };
         });
 
-
-        this.combinedData.map((res: any, index: number) => {
-          const serialNumber = index + 1;
-          if (index >= this.skip && serialNumber <= this.limit) {
-            // this.calculateDateDifference(res.dob);
-            // res.ageinYear=this.age;
-
-            this.appointmentList.push(res);
-            // console.log(res.DOJ)
-            this.serialNumberArray.push(serialNumber);
-          }
-        });
-
+        // Apply pagination to the combined data
+        this.applyPagination();
       }
 
       this.loadingService.hideLoader();
-
-      this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
-      this.calculateTotalPages(this.totalData, this.pageSize);
     },
 
       error => {
@@ -258,49 +272,33 @@ export class AppointmentListComponent implements OnInit {
 
     })
 
-    // this.data.getStaffList().subscribe((data: apiResultFormat) => {
-    //   this.totalData = data.totalData;
-    //   console.log("mock data"+data);
-
-
-    //   // data.data.map((res: staffList, index: number) => {
-    //   //   const serialNumber = index + 1;
-    //   //   if (index >= this.skip && serialNumber <= this.limit) {
-
-    //   //     //this.staffList.push(res);
-    //   //     this.serialNumberArray.push(serialNumber);
-    //   //   }
-    //   // });
-    //   //this.dataSource = new MatTableDataSource<staffList>(this.staffList);
-    //   //this.calculateTotalPages(this.totalData, this.pageSize);
-    // });
   }
 
   public searchData(value: any): void {
-  if (value != '') {
-      console.log("value", value)
-      console.log("datasource", this.dataSource)
-      this.dataSource.filter = value.trim().toLowerCase();
-      this.appointmentList = this.dataSource.filteredData;
-      console.log("value", this.appointmentList)
-      if (this.appointmentList.length > 0) {
-        this.appointmentList.map((item: any, index: number) => {
-          this.serialNumberArray.push(index + 1)
-        })
-        this.totalData = this.appointmentList.length;
-        this.calculateTotalPages(this.totalData, this.pageSize);
+    if (value != '') {
+      // Filter the combined data
+      const filteredData = this.combinedData.filter((item: any) => {
+        return (
+          item.patientFname?.toLowerCase().includes(value.toLowerCase()) ||
+          item.patientLname?.toLowerCase().includes(value.toLowerCase()) ||
+          item.doctorFname?.toLowerCase().includes(value.toLowerCase()) ||
+          item.doctorLname?.toLowerCase().includes(value.toLowerCase()) ||
+          item.departmentName?.toLowerCase().includes(value.toLowerCase()) ||
+          item.appointmentId?.toString().includes(value)
+        );
+      });
 
-      }
-      else {
-        this.serialNumberArray = [];
-        this.totalData = 0;
-      }
-
-    }
-    else {
-    this.searchDataValue = '';
-    this.serialNumberArray = [];
-    this.fetchCombineData();
+      // Reset pagination and apply to filtered data
+      this.skip = 0;
+      this.currentPage = 1;
+      this.pageIndex = 0;
+      this.applyPagination(filteredData);
+    } else {
+      this.searchDataValue = '';
+      this.skip = 0;
+      this.currentPage = 1;
+      this.pageIndex = 0;
+      this.applyPagination();
     }
   }
 
@@ -324,40 +322,29 @@ export class AppointmentListComponent implements OnInit {
     if (event == 'next') {
       this.currentPage++;
       this.pageIndex = this.currentPage - 1;
-      this.limit += this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      //this.getTableData();
-      this.fetchCombineData();
+      this.applyPagination();
     } else if (event == 'previous') {
       this.currentPage--;
       this.pageIndex = this.currentPage - 1;
-      this.limit -= this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      // this.getTableData();
-      this.fetchCombineData();
+      this.applyPagination();
     }
   }
 
   public moveToPage(pageNumber: number): void {
     this.currentPage = pageNumber;
-    this.skip = this.pageSelection[pageNumber - 1].skip;
-    this.limit = this.pageSelection[pageNumber - 1].limit;
-    if (pageNumber > this.currentPage) {
-      this.pageIndex = pageNumber - 1;
-    } else if (pageNumber < this.currentPage) {
-      this.pageIndex = pageNumber + 1;
-    }
-    //this.getTableData();
-    this.fetchCombineData();
+    this.pageIndex = pageNumber - 1;
+    this.skip = this.pageSize * this.pageIndex;
+    this.applyPagination();
   }
 
   public PageSize(): void {
     this.pageSelection = [];
-    this.limit = this.pageSize;
     this.skip = 0;
     this.currentPage = 1;
-    // this.getTableData();
-    this.fetchCombineData();
+    this.pageIndex = 0;
+    this.applyPagination();
   }
 
   private calculateTotalPages(totalData: number, pageSize: number): void {
@@ -412,20 +399,21 @@ export class AppointmentListComponent implements OnInit {
   }
 
   appointmentByDate(event: any, type: string): void {
-    const selectedDateIST = dayjs(event.value).tz('Asia/Kolkata').format('YYYY-MM-DD');
+    // Use the selected date directly without timezone conversion to avoid date shifting
+    const selectedDate = dayjs(event.value).format('YYYY-MM-DD');
 
     if (type === 'from') {
-        this.minToDate = dayjs(event.value).tz('Asia/Kolkata');
-        this.appintmentDateForm.get('appointmentFrom')?.setValue(selectedDateIST);
+        this.minToDate = dayjs(event.value);
+        this.appintmentDateForm.get('appointmentFrom')?.setValue(selectedDate);
         this.appintmentDateForm.get('appointmentTo')?.setValue(null);
     }
     if (type === 'to') {
         const fromDate = this.appintmentDateForm.get('appointmentFrom')?.value;
-        if (dayjs(selectedDateIST).isBefore(dayjs(fromDate))) {
+        if (dayjs(selectedDate).isBefore(dayjs(fromDate))) {
             this.toastr.error('End date cannot be earlier than start date');
             return;
         }
-        this.appintmentDateForm.get('appointmentTo')?.setValue(selectedDateIST);
+        this.appintmentDateForm.get('appointmentTo')?.setValue(selectedDate);
     }
 
     const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
@@ -433,10 +421,16 @@ export class AppointmentListComponent implements OnInit {
 
     if (from !== null && to !== null) {
         this.isAppointmentDateSelected = true;
+        // Reset pagination when dates change
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.combinedData = []; // Clear existing data to force refetch
         this.fetchCombineData();
     }
-}
-    exportAppointmentList()
+  }
+
+  exportAppointmentList()
     {
       if (this.appointmentList.length > 0) 
         {

@@ -44,7 +44,7 @@ namespace hospitalApiProject.Controllers
 
       // Parse the fromDate and toDate just once at the beginning.
       var fromDateParsed = DateTime.Parse(fromDate).Date;
-      var toDateParsed = DateTime.Parse(toDate).Date;
+      var toDateParsed = DateTime.Parse(toDate).Date.AddDays(1);
 
       // Apply date filtering for both fromDate and toDate (now using DateTime)
       query = query.Where(invoice => invoice.CreatedDate >= fromDateParsed && invoice.CreatedDate <= toDateParsed);
@@ -52,7 +52,7 @@ namespace hospitalApiProject.Controllers
       // Apply paymentStatus filtering
       if (paymentStatus.ToLower() != "all")
       {
-        query = query.Where(invoice => invoice.Status.ToLower() == paymentStatus.ToLower());
+        query = query.Where(invoice => invoice.Status != null && invoice.Status.ToLower() == paymentStatus.ToLower());
       }
 
       // Retrieve invoice data and payment details
@@ -94,7 +94,7 @@ namespace hospitalApiProject.Controllers
                       .Any() ? string.Join(", ", _context.PaymentModeInfo
                       .Where(pm => pm.InvoiceId == invoice.InvoiceId)
                       .Select(pm => pm.PaymentMode)
-                      .Distinct()) : null,
+                      .Distinct()) ?? string.Empty : string.Empty,
 
             // Total unpaid amount calculation: Amount - total paid from PaymentDetails
             TotalUnpaidAmount = invoice.Amount + _context.AdditionalInvoiceItems
