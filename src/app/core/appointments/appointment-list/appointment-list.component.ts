@@ -117,15 +117,36 @@ export class AppointmentListComponent implements OnInit {
   }
 
   confirmDelete(idhere: number) {
-    this.appointmentService.deleteAppointment(idhere).subscribe(res => {
-      if (res == null) {
-        this.toastr.success("Appointment is deleted!");
-        // Reset pagination and clear data to force refetch
-        this.skip = 0;
-        this.currentPage = 1;
-        this.pageIndex = 0;
-        this.combinedData = [];
-        this.fetchCombineData();
+    this.appointmentService.deleteAppointment(idhere).subscribe({
+      next: (res: any) => {
+        // Handle the enhanced response from the backend
+        if (res && res.success) {
+          // Show the success message from the backend
+          this.toastr.success(res.message || "Appointment has been successfully deleted!");
+          
+          // Reset pagination and clear data to force refetch
+          this.skip = 0;
+          this.currentPage = 1;
+          this.pageIndex = 0;
+          this.combinedData = [];
+          
+          // Refresh the grid
+          this.fetchCombineData();
+        } else {
+          // Handle case where success is false or undefined
+          this.toastr.error("Failed to delete appointment. Please try again.");
+        }
+      },
+      error: (error: any) => {
+        // Handle errors (network issues, 404, 500, etc.)
+        console.error('Delete appointment error:', error);
+        if (error.error && error.error.message) {
+          this.toastr.error(error.error.message);
+        } else if (error.status === 404) {
+          this.toastr.error("Appointment not found or already deleted.");
+        } else {
+          this.toastr.error("An error occurred while deleting the appointment.");
+        }
       }
     });
   }
