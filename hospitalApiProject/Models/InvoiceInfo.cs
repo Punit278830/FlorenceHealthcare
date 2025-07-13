@@ -28,4 +28,10 @@ public partial class InvoiceInfo
 
   [NotMapped]
   public DateTime? InvoiceDate { get; set; }
+
+  public bool? IsDeleted { get; set; }
+
+  public DateTime? DeletedDate { get; set; }
+
+  public int? DeletedBy { get; set; }
 }

@@ -102,10 +102,24 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   }
   ngOnInit() {
-        this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
 
+    // Set default UTC dates for search
+    const utcNow = dayjs().utc();
+    const fromDate = utcNow.format('YYYY-MM-DD');
+    const toDate = utcNow.add(1, 'day').format('YYYY-MM-DD');
+    this.searchCriteria = {
+      fromDate: fromDate,
+      toDate: toDate,
+      paymentMode: 0,
+      paymentStatus: 0,
+      pageNumber: 1,
+      pageSize: 10,
+      sortFieldName: '',
+      sortDirection: 0
+    };
     this.initSearchForm();  // Initialize the search form
-    this.getTableData();
+    this.getTableData();    // Call search API with default UTC dates
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode

@@ -30,7 +30,9 @@ namespace hospitalApiProject.Controllers
     [FromQuery] int pageSize = 100)
     {
       // Start building the query for invoices
-      var query = _context.InvoiceInfos.AsQueryable();
+      var query = _context.InvoiceInfos
+          .Where(i => i.IsDeleted != true)
+          .AsQueryable();
 
       // Apply filters based on paymentMode parameter
       if (!string.IsNullOrEmpty(paymentMode) && paymentMode.ToLower() != "all")
@@ -44,7 +46,7 @@ namespace hospitalApiProject.Controllers
 
       // Parse the fromDate and toDate just once at the beginning.
       var fromDateParsed = DateTime.Parse(fromDate).Date;
-      var toDateParsed = DateTime.Parse(toDate).Date;
+      var toDateParsed = DateTime.Parse(toDate).Date.AddDays(1);
 
       // Apply date filtering for both fromDate and toDate (now using DateTime)
       query = query.Where(invoice => invoice.CreatedDate >= fromDateParsed && invoice.CreatedDate <= toDateParsed);
@@ -52,7 +54,7 @@ namespace hospitalApiProject.Controllers
       // Apply paymentStatus filtering
       if (paymentStatus.ToLower() != "all")
       {
-        query = query.Where(invoice => invoice.Status.ToLower() == paymentStatus.ToLower());
+        query = query.Where(invoice => invoice.Status != null && invoice.Status.ToLower() == paymentStatus.ToLower());
       }
 
       // Retrieve invoice data and payment details
@@ -94,7 +96,7 @@ namespace hospitalApiProject.Controllers
                       .Any() ? string.Join(", ", _context.PaymentModeInfo
                       .Where(pm => pm.InvoiceId == invoice.InvoiceId)
                       .Select(pm => pm.PaymentMode)
-                      .Distinct()) : null,
+                      .Distinct()) ?? string.Empty : string.Empty,
 
             // Total unpaid amount calculation: Amount - total paid from PaymentDetails
             TotalUnpaidAmount = invoice.Amount + _context.AdditionalInvoiceItems
@@ -136,7 +138,7 @@ namespace hospitalApiProject.Controllers
 
       // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
-          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today)
+          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true)
           .Join(
               _context.PatientInfos,
               invoice => invoice.PatientId,
@@ -167,7 +169,7 @@ namespace hospitalApiProject.Controllers
       try
       {
         var invoiceInfo = await _context.InvoiceInfos
-          .Where(i => i.InvoiceId == invoiceId)
+          .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true)
           .Select(i => new InvoiceInfo
           {
             InvoiceId = i.InvoiceId,
@@ -199,7 +201,7 @@ namespace hospitalApiProject.Controllers
                 .Select(a => (DateTime?)a.Date)
                 .FirstOrDefault(),
             InvoiceDate = _context.InvoiceInfos
-                .Where(i => i.InvoiceId == invoiceId)
+                .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true)
                 .Select(i => (DateTime?)i.CreatedDate)
                 .FirstOrDefault() ?? DateTime.UtcNow.Date, // Default to current date if no date found
           })
@@ -263,7 +265,7 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetInvoiceInfoByPatientId(int patientId)
     {
       var maxInvoiceId = await _context.InvoiceInfos
-        .Where(i => i.PatientId == patientId)
+        .Where(i => i.PatientId == patientId && i.IsDeleted != true)
         .MaxAsync(i => i.InvoiceId); // Cast to nullable int to handle case with no results
       if(maxInvoiceId == 0)
       {
@@ -469,7 +471,7 @@ namespace hospitalApiProject.Controllers
       return CreatedAtAction("GetInvoiceInfo", new { id = invoiceInfo.InvoiceId }, invoiceInfo);
     }
 
-    // DELETE: api/InvoiceInfoes/5
+    // DELETE: api/InvoiceInfoes/5 (Soft Delete)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteInvoiceInfo(int id)
     {
@@ -479,15 +481,21 @@ namespace hospitalApiProject.Controllers
         return NotFound();
       }
 
-      _context.InvoiceInfos.Remove(invoiceInfo);
+      // Soft delete the invoice
+      invoiceInfo.IsDeleted = true;
+      invoiceInfo.DeletedDate = DateTime.UtcNow;
+      // Note: You can add DeletedBy field based on current user context
+      // invoiceInfo.DeletedBy = GetCurrentUserId();
+
+      _context.InvoiceInfos.Update(invoiceInfo);
       await _context.SaveChangesAsync();
 
-      return NoContent();
+      return Ok(new { message = "Invoice has been soft deleted." });
     }
 
     private bool InvoiceInfoExists(int id)
     {
-      return _context.InvoiceInfos.Any(e => e.InvoiceId == id);
+      return _context.InvoiceInfos.Any(e => e.InvoiceId == id && e.IsDeleted != true);
     }
 
     [HttpPost("Search")]
@@ -496,7 +504,9 @@ namespace hospitalApiProject.Controllers
         var response = new SearchResponseBase<InvoiceInfoResponse>();
         try
         {
-            var query = _context.InvoiceInfos.AsQueryable();
+            var query = _context.InvoiceInfos
+                .Where(i => i.IsDeleted != true)
+                .AsQueryable();
 
             // Parse and filter by date range
             DateTime utcNow = DateTime.UtcNow;

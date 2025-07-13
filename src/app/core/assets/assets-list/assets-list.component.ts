@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, assetsList } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 @Component({
   selector: 'app-assets-list',
@@ -125,5 +127,46 @@ export class AssetsListComponent implements OnInit{
       this.pageNumberArray.push(i);
       this.pageSelection.push({ skip: skip, limit: limit });
     }
+  }
+
+  exportAssetsListAsPdf() {
+    // Use all data, not just paginated
+    const allAssets = this.dataSource && this.dataSource.data ? this.dataSource.data : this.assetsList;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+    // Define table columns
+    const columns = [
+      { header: 'S.No', dataKey: 'sno' },
+      { header: 'Asset Name', dataKey: 'assetName' },
+      { header: 'Category', dataKey: 'category' },
+      { header: 'Purchase Date', dataKey: 'purchaseDate' },
+      { header: 'Value', dataKey: 'value' },
+      { header: 'Status', dataKey: 'status' }
+    ];
+
+    // Map all data to rows
+    const rows = allAssets.map((data: any, i: number) => ({
+      sno: i + 1,
+      assetName: data.assetName || '',
+      category: data.category || '',
+      purchaseDate: data.purchaseDate || '',
+      value: data.value || '',
+      status: data.status || ''
+    }));
+
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [22, 160, 133] },
+      margin: { top: 20 },
+      didDrawPage: (data) => {
+        doc.setFontSize(12);
+        doc.text('Assets List', 14, 15);
+      }
+    });
+    doc.save(`AssetsList${formattedDate}.pdf`);
   }
 }
