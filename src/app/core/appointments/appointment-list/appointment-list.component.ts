@@ -24,6 +24,7 @@ import { routes } from 'src/app/shared/routes/routes';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import autoTable from 'jspdf-autotable';
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -467,27 +468,52 @@ export class AppointmentListComponent implements OnInit {
     }
     
 
-    exportAppointmentListAsPdf()
-    {
+    exportAppointmentListAsPdf() {
       this.loadingService.showLoader();
-      const data = document.getElementById('convertToPdf');
-      if (data) {
-        html2canvas(data).then(canvas => {
-          const imgWidth = 208;
-          const pageHeight = 295;
-          const imgHeight = canvas.height * imgWidth / canvas.width;
-          const contentDataURL = canvas.toDataURL('image/png');
-          let pdf = new jsPDF('p', 'mm', 'a4');
-          const position = 0;
-  
-          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          const date = new Date();
-    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-           pdf.save(`Appointment${formattedDate}.pdf`);
-          
-        })
-      }
-  
+      // Use all data, not just paginated
+      const allAppointments = this.combinedData && this.combinedData.length ? this.combinedData : this.appointmentList;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      const date = new Date();
+      const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+      // Define table columns
+      const columns = [
+        { header: 'S.No', dataKey: 'sno' },
+        { header: 'Patient Name', dataKey: 'patient' },
+        { header: 'Consulting Doctor', dataKey: 'doctor' },
+        { header: 'Department', dataKey: 'department' },
+        { header: 'Treatment', dataKey: 'treatment' },
+        { header: 'Status', dataKey: 'status' },
+        { header: 'Fee', dataKey: 'fee' },
+        { header: 'Payment', dataKey: 'payment' },
+        { header: 'Time', dataKey: 'time' }
+      ];
+
+      // Map all data to rows
+      const rows = allAppointments.map((data: any, i: number) => ({
+        sno: i + 1,
+        patient: `${data.patientFname || ''} ${data.patientLname || ''}`.trim(),
+        doctor: `${data.doctorFname || ''} ${data.doctorLname || ''}`.trim(),
+        department: data.departmentName || '',
+        treatment: data.notes || '',
+        status: data.appointmentStatus || '',
+        fee: data.fee || '',
+        payment: data.isConsultationPaid ? 'Paid' : 'Not Paid',
+        time: this.getLocalDateTime ? this.getLocalDateTime(data.date) : (data.date || '')
+      }));
+
+      autoTable(doc, {
+        columns,
+        body: rows,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [22, 160, 133] },
+        margin: { top: 20 },
+        didDrawPage: (data) => {
+          doc.setFontSize(12);
+          doc.text('Appointment List', 14, 15);
+        }
+      });
+      doc.save(`Appointment${formattedDate}.pdf`);
       this.loadingService.hideLoader();
     }
       

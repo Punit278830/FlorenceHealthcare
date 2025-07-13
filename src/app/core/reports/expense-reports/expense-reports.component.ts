@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, exponsesreport } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 interface data {
   value: string ;
 }
@@ -134,4 +136,43 @@ export class ExpenseReportsComponent implements OnInit{
     {value: 'Galaviz Lalema'},
     {value: 'Tarah Williams'},
   ];
+
+  exportExpenseReportsAsPdf() {
+    // Use all data, not just paginated
+    const allExpenses = this.dataSource && this.dataSource.data ? this.dataSource.data : this.expenseReports;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+    // Define table columns
+    const columns = [
+      { header: 'S.No', dataKey: 'sno' },
+      { header: 'Expense Name', dataKey: 'expenseName' },
+      { header: 'Amount', dataKey: 'amount' },
+      { header: 'Date', dataKey: 'date' },
+      { header: 'Status', dataKey: 'status' }
+    ];
+
+    // Map all data to rows
+    const rows = allExpenses.map((data: any, i: number) => ({
+      sno: i + 1,
+      expenseName: data.expenseName || '',
+      amount: data.amount || '',
+      date: data.date || '',
+      status: data.status || ''
+    }));
+
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [22, 160, 133] },
+      margin: { top: 20 },
+      didDrawPage: (data) => {
+        doc.setFontSize(12);
+        doc.text('Expense Reports', 14, 15);
+      }
+    });
+    doc.save(`ExpenseReports${formattedDate}.pdf`);
+  }
 }
