@@ -8,9 +8,10 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 @Component({
-  selector: 'app-assets-list',
-  templateUrl: './assets-list.component.html',
-  styleUrls: ['./assets-list.component.scss']
+    selector: 'app-assets-list',
+    templateUrl: './assets-list.component.html',
+    styleUrls: ['./assets-list.component.scss'],
+    standalone: false
 })
 export class AssetsListComponent implements OnInit{
   public routes = routes;

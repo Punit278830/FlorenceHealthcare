@@ -26,10 +26,11 @@ interface IdownloadFile {
   downloadLink: string;
 }
 @Component({
-  selector: 'app-add-appointment',
-  templateUrl: './add-appointment.component.html',
-  styleUrls: ['./add-appointment.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-add-appointment',
+    templateUrl: './add-appointment.component.html',
+    styleUrls: ['./add-appointment.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AddAppointmentComponent implements OnInit {
   public routes = routes;

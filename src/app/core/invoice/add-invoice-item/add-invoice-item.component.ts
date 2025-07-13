@@ -8,9 +8,10 @@ import { ToastrService } from 'ngx-toastr';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 
 @Component({
-  selector: 'app-add-invoice-item',
-  templateUrl: './add-invoice-item.component.html',
-  styleUrls: ['./add-invoice-item.component.scss']
+    selector: 'app-add-invoice-item',
+    templateUrl: './add-invoice-item.component.html',
+    styleUrls: ['./add-invoice-item.component.scss'],
+    standalone: false
 })
 export class AddInvoiceItemComponent {
 

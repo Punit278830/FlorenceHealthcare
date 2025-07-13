@@ -10,10 +10,11 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-register-by-aadhar-stepper',
-  templateUrl: './register-by-aadhar-stepper.component.html',
-  styleUrls: ['./register-by-aadhar-stepper.component.scss'],
-  providers: [DatePipe]
+    selector: 'app-register-by-aadhar-stepper',
+    templateUrl: './register-by-aadhar-stepper.component.html',
+    styleUrls: ['./register-by-aadhar-stepper.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class RegisterByAadharStepperComponent {
   public routes = routes;

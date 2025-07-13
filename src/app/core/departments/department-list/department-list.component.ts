@@ -12,9 +12,10 @@ import { pageSelection, apiResultFormat, departmentList, Idepartment } from 'src
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
-  selector: 'app-department-list',
-  templateUrl: './department-list.component.html',
-  styleUrls: ['./department-list.component.scss']
+    selector: 'app-department-list',
+    templateUrl: './department-list.component.html',
+    styleUrls: ['./department-list.component.scss'],
+    standalone: false
 })
 export class DepartmentListComponent implements OnInit{
   public routes = routes;

@@ -2,9 +2,10 @@ import { Component } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
-  selector: 'app-abha-dashboard',
-  templateUrl: './abha-dashboard.component.html',
-  styleUrls: ['./abha-dashboard.component.scss']
+    selector: 'app-abha-dashboard',
+    templateUrl: './abha-dashboard.component.html',
+    styleUrls: ['./abha-dashboard.component.scss'],
+    standalone: false
 })
 export class AbhaDashboardComponent {
   public routes = routes;

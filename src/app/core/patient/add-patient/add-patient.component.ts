@@ -15,10 +15,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-add-patient',
-  templateUrl: './add-patient.component.html',
-  styleUrls: ['./add-patient.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-add-patient',
+    templateUrl: './add-patient.component.html',
+    styleUrls: ['./add-patient.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AddPatientComponent implements OnInit {
   public routes = routes;

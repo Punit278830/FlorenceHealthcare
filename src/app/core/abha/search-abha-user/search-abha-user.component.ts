@@ -8,9 +8,10 @@ import { IAbhaPatientInfo, IAbhaProfile } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
-  selector: 'app-search-abha-user',
-  templateUrl: './search-abha-user.component.html',
-  styleUrls: ['./search-abha-user.component.scss']
+    selector: 'app-search-abha-user',
+    templateUrl: './search-abha-user.component.html',
+    styleUrls: ['./search-abha-user.component.scss'],
+    standalone: false
 })
 export class SearchAbhaUserComponent {
   public routes = routes;

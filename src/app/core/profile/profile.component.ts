@@ -28,10 +28,11 @@ import { dE } from '@fullcalendar/core/internal-common';
 // import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
-  selector: 'app-profile',
-  templateUrl: './profile.component.html',
-  styleUrls: ['./profile.component.scss'],
-  providers: [DatePipe]
+    selector: 'app-profile',
+    templateUrl: './profile.component.html',
+    styleUrls: ['./profile.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 
 export class ProfileComponent implements OnInit, OnDestroy {

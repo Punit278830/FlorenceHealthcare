@@ -7,9 +7,10 @@ import { ToastrService } from 'ngx-toastr';
 //import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 @Component({
-  selector: 'app-add-department',
-  templateUrl: './add-department.component.html',
-  styleUrls: ['./add-department.component.scss']
+    selector: 'app-add-department',
+    templateUrl: './add-department.component.html',
+    styleUrls: ['./add-department.component.scss'],
+    standalone: false
 })
 export class AddDepartmentComponent implements OnInit {
   public routes = routes;

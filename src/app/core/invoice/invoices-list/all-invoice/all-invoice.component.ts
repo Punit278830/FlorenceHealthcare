@@ -7,10 +7,11 @@ import { routes } from '../../../../shared/routes/routes';
 import { DatePipe } from '@angular/common';
 
 @Component({
-  selector: 'app-all-invoice',
-  templateUrl: './all-invoice.component.html',
-  styleUrls: ['./all-invoice.component.scss'],
-  providers: [DatePipe]
+    selector: 'app-all-invoice',
+    templateUrl: './all-invoice.component.html',
+    styleUrls: ['./all-invoice.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AllInvoiceComponent implements OnInit{
   public routes = routes;

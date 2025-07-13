@@ -9,10 +9,11 @@ import { IAbhaDetails } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
-  selector: 'app-add-abha-address',
-  templateUrl: './add-abha-address.component.html',
-  styleUrls: ['./add-abha-address.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-add-abha-address',
+    templateUrl: './add-abha-address.component.html',
+    styleUrls: ['./add-abha-address.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AddAbhaAddressComponent {
   public routes = routes;

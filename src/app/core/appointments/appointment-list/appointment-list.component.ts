@@ -29,11 +29,11 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 
 @Component({
-  selector: 'app-appointment-list',
-  templateUrl: './appointment-list.component.html',
-  styleUrls: ['./appointment-list.component.scss'],
-  providers: [DatePipe],
-
+    selector: 'app-appointment-list',
+    templateUrl: './appointment-list.component.html',
+    styleUrls: ['./appointment-list.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AppointmentListComponent implements OnInit {
   public routes = routes;

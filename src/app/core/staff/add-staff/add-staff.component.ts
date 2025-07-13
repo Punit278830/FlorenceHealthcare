@@ -13,10 +13,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-add-staff',
-  templateUrl: './add-staff.component.html',
-  styleUrls: ['./add-staff.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-add-staff',
+    templateUrl: './add-staff.component.html',
+    styleUrls: ['./add-staff.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class AddStaffComponent {
   public routes = routes;

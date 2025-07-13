@@ -7,9 +7,10 @@ import { routes } from 'src/app/shared/routes/routes';
 import { AbhaService } from 'src/app/shared/Services/abha/abha.service';
 
 @Component({
-  selector: 'app-abha-scan-desk',
-  templateUrl: './abha-scan-desk.component.html',
-  styleUrls: ['./abha-scan-desk.component.scss']
+    selector: 'app-abha-scan-desk',
+    templateUrl: './abha-scan-desk.component.html',
+    styleUrls: ['./abha-scan-desk.component.scss'],
+    standalone: false
 })
 export class AbhaScanDeskComponent {
   public routes = routes;

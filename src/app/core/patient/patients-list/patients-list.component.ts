@@ -18,11 +18,11 @@ import html2canvas from 'html2canvas';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
-  selector: 'app-patients-list',
-  templateUrl: './patients-list.component.html',
-  styleUrls: ['./patients-list.component.scss'],
-  providers: [DatePipe],
-
+    selector: 'app-patients-list',
+    templateUrl: './patients-list.component.html',
+    styleUrls: ['./patients-list.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class PatientsListComponent implements OnInit {
   public routes = routes;

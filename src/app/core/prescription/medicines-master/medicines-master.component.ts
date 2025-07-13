@@ -12,9 +12,10 @@ import * as FileSaver from 'file-saver';
 
 
 @Component({
-  selector: 'app-medicines-master',
-  templateUrl: './medicines-master.component.html',
-  styleUrls: ['./medicines-master.component.scss']
+    selector: 'app-medicines-master',
+    templateUrl: './medicines-master.component.html',
+    styleUrls: ['./medicines-master.component.scss'],
+    standalone: false
 })
 export class MedicinesMasterComponent {
   public searchMedForm!: FormGroup;

@@ -12,10 +12,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-edit-patient',
-  templateUrl: './edit-patient.component.html',
-  styleUrls: ['./edit-patient.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-edit-patient',
+    templateUrl: './edit-patient.component.html',
+    styleUrls: ['./edit-patient.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class EditPatientComponent implements OnInit {
   public routes = routes;

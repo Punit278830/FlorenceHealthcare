@@ -9,9 +9,10 @@ import { routes } from 'src/app/shared/routes/routes';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 
 @Component({
-  selector: 'app-prescription-pad',
-  templateUrl: './prescription-pad.component.html',
-  styleUrls: ['./prescription-pad.component.scss'],
+    selector: 'app-prescription-pad',
+    templateUrl: './prescription-pad.component.html',
+    styleUrls: ['./prescription-pad.component.scss'],
+    standalone: false
 })
 export class PrescriptionPadComponent implements AfterViewInit {
   @ViewChild('canvas') canvasEl!: ElementRef<HTMLCanvasElement>;

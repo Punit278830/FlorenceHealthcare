@@ -32,12 +32,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-invoices',
-  templateUrl: './invoices.component.html',
-  styleUrls: ['./invoices.component.scss'],
-  providers: [DatePipe]
-  
-  
+    selector: 'app-invoices',
+    templateUrl: './invoices.component.html',
+    styleUrls: ['./invoices.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 
 

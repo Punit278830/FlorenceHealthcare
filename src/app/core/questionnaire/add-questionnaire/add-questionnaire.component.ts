@@ -11,9 +11,10 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
-  selector: 'app-add-questionnaire',
-  templateUrl: './add-questionnaire.component.html',
-  styleUrls: ['./add-questionnaire.component.scss'],
+    selector: 'app-add-questionnaire',
+    templateUrl: './add-questionnaire.component.html',
+    styleUrls: ['./add-questionnaire.component.scss'],
+    standalone: false
 })
 export class AddQuestionnaireComponent {
   @ViewChild('textInput') textInput!: ElementRef<HTMLInputElement>;

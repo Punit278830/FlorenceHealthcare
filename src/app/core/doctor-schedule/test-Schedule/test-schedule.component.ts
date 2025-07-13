@@ -10,10 +10,11 @@ import { routes } from 'src/app/shared/routes/routes';
 
 
 @Component({
-  selector: 'app-test-schedule',
-  templateUrl: './test-schedule.component.html',
-  styleUrls: ['./test-schedule.component.scss'],
-  providers: [DatePipe],
+    selector: 'app-test-schedule',
+    templateUrl: './test-schedule.component.html',
+    styleUrls: ['./test-schedule.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 
 export class TestScheduleComponent implements OnInit {

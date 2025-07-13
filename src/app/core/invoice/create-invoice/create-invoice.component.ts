@@ -19,10 +19,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-create-invoice',
-  templateUrl: './create-invoice.component.html',
-  styleUrls: ['./create-invoice.component.scss'],
-  providers: [DatePipe]
+    selector: 'app-create-invoice',
+    templateUrl: './create-invoice.component.html',
+    styleUrls: ['./create-invoice.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class CreateInvoiceComponent {
   public routes = routes;

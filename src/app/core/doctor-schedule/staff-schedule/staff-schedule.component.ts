@@ -8,11 +8,12 @@ import { roomData } from '../../../../assets/Data';
 
 
 @Component({
-  selector: 'app-staff-schedule',
-  templateUrl: './staff-schedule.component.html',
-  styleUrls: ['./staff-schedule.component.scss'],
-  encapsulation: ViewEncapsulation.None,
-  providers: [TimelineViewsService, ResizeService, DragAndDropService]
+    selector: 'app-staff-schedule',
+    templateUrl: './staff-schedule.component.html',
+    styleUrls: ['./staff-schedule.component.scss'],
+    encapsulation: ViewEncapsulation.None,
+    providers: [TimelineViewsService, ResizeService, DragAndDropService],
+    standalone: false
 })
 export class StaffScheduleComponent 
 {

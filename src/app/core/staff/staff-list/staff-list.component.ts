@@ -13,9 +13,10 @@ import { Router } from '@angular/router';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
 @Component({
-  selector: 'app-staff-list',
-  templateUrl: './staff-list.component.html',
-  styleUrls: ['./staff-list.component.scss']
+    selector: 'app-staff-list',
+    templateUrl: './staff-list.component.html',
+    styleUrls: ['./staff-list.component.scss'],
+    standalone: false
 })
 export class StaffListComponent implements OnInit {
   public routes = routes;

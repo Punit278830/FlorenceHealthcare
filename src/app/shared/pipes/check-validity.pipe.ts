@@ -1,7 +1,8 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
 @Pipe({
-  name: 'checkValidity'
+    name: 'checkValidity',
+    standalone: false
 })
 export class CheckValidityPipe implements PipeTransform {
 

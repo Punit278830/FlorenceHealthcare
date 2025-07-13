@@ -9,9 +9,10 @@ import { routes } from 'src/app/shared/routes/routes';
 
 
 @Component({
-  selector: 'app-abha-confirm-otp',
-  templateUrl: './abha-confirm-otp.component.html',
-  styleUrls: ['./abha-confirm-otp.component.scss']
+    selector: 'app-abha-confirm-otp',
+    templateUrl: './abha-confirm-otp.component.html',
+    styleUrls: ['./abha-confirm-otp.component.scss'],
+    standalone: false
 })
 export class AbhaConfirmOtpComponent {
   public routes = routes;

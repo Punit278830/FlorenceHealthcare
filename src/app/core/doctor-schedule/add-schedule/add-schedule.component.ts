@@ -14,9 +14,10 @@ interface DepartmentOption {
 }
 
 @Component({
-  selector: 'app-add-schedule',
-  templateUrl: './add-schedule.component.html',
-  styleUrls: ['./add-schedule.component.scss']
+    selector: 'app-add-schedule',
+    templateUrl: './add-schedule.component.html',
+    styleUrls: ['./add-schedule.component.scss'],
+    standalone: false
 })
 export class AddScheduleComponent implements OnInit {
   public routes = routes;

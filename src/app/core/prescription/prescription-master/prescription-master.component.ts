@@ -7,9 +7,10 @@ import { ToastrService } from 'ngx-toastr';
 import { ConsultationTemplateMasterService } from '../../../shared/Services/consultation/consultationTemplateMaster.service';
 
 @Component({
-  selector: 'app-prescription-master',
-  templateUrl: './prescription-master.component.html',
-  styleUrls: ['./prescription-master.component.scss']
+    selector: 'app-prescription-master',
+    templateUrl: './prescription-master.component.html',
+    styleUrls: ['./prescription-master.component.scss'],
+    standalone: false
 })
 export class PrescriptionMasterComponent {
   public consultForm!: FormGroup;

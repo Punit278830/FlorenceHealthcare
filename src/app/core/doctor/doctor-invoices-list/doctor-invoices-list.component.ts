@@ -28,10 +28,11 @@ interface data {
   value: string;
 }
 @Component({
-  selector: 'app-doctor-invoices-list',
-  templateUrl: './doctor-invoices-list.component.html',
-  styleUrls: ['./doctor-invoices-list.component.scss'],
-  providers: [DatePipe]
+    selector: 'app-doctor-invoices-list',
+    templateUrl: './doctor-invoices-list.component.html',
+    styleUrls: ['./doctor-invoices-list.component.scss'],
+    providers: [DatePipe],
+    standalone: false
 })
 export class DoctorInvoicesListComponent implements OnInit {
   public routes = routes;

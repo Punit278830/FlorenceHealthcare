@@ -95,10 +95,12 @@ const styles = {
 
 
 @Component({
-  selector: 'app-invoice-view',
-  templateUrl: './invoice-view.component.html',
-  styleUrls: ['./invoice-view.component.scss'],
-  providers: [DecimalPipe]  // Add DecimalPipe to providers
+    selector: 'app-invoice-view',
+    templateUrl: './invoice-view.component.html',
+    styleUrls: ['./invoice-view.component.scss'],
+    providers: [DecimalPipe] // Add DecimalPipe to providers
+    ,
+    standalone: false
 })
 
 

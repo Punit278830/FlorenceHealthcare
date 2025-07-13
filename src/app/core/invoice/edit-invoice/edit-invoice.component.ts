@@ -12,9 +12,10 @@ interface data {
 }
 
 @Component({
-  selector: 'app-edit-invoice',
-  templateUrl: './edit-invoice.component.html',
-  styleUrls: ['./edit-invoice.component.scss']
+    selector: 'app-edit-invoice',
+    templateUrl: './edit-invoice.component.html',
+    styleUrls: ['./edit-invoice.component.scss'],
+    standalone: false
 })
 export class EditInvoiceComponent implements OnInit {
   public routes = routes;

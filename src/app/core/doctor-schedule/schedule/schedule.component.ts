@@ -14,9 +14,10 @@ import { pageSelection, apiResultFormat, schedule, IstaffInfo, Idepartment, Ista
 import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
-  selector: 'app-schedule',
-  templateUrl: './schedule.component.html',
-  styleUrls: ['./schedule.component.scss']
+    selector: 'app-schedule',
+    templateUrl: './schedule.component.html',
+    styleUrls: ['./schedule.component.scss'],
+    standalone: false
 })
 export class ScheduleComponent implements OnInit {
   public routes = routes;
