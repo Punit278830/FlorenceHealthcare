@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hospitalApiProject.Models;
 
@@ -11,9 +12,11 @@ using hospitalApiProject.Models;
 namespace hospitalApiProject.Migrations
 {
     [DbContext(typeof(FlorenceDbContext))]
-    partial class FlorenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250713013608_RemoveDeletedByColumns")]
+    partial class RemoveDeletedByColumns
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -195,9 +198,6 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("date");
 
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
@@ -213,7 +213,7 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("int")
                         .HasColumnName("fee");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("Notes")
@@ -445,16 +445,13 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("createdDate");
 
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool?>("IsConsultationPaid")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IsDeleted")
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("PatientId")

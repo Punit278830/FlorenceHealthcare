@@ -222,3 +222,44 @@ FodyWeavers.xsd
 # System Files
 .DS_Store
 Thumbs.db
+hospitalApiProject/obj/Debug/net8.0/hospitalApiProject.AssemblyInfo.cs
+hospitalApiProject/obj/Debug/net8.0/hospitalApiProject.AssemblyInfoInputs.cache
+hospitalApiProject/obj/Debug/net8.0/hospitalApiProject.assets.cache
+hospitalApiProject/obj/Debug/net8.0/hospitalApiProject.GeneratedMSBuildEditorConfig.editorconfig
+
+# MSBuild, cache, and assembly info files
+*.binlog
+*.msbuild
+*.msbtmp
+.builds
+.BuildCache/
+.Build.Caches/
+*.AssemblyInfo.cs
+*.AssemblyInfoInputs.cache
+*.assets.cache
+*.cache
+*.db
+*.mdb
+*.pdb
+*.exe
+*.dll
+*.log
+*.vspscc
+*.vssscc
+*.user
+*.suo
+*.sln.iml
+*.sln.docstates
+*.lastcodeanalysissucceeded
+*.nupkg
+*.snupkg
+artifacts/
+project.lock.json
+project.fragment.lock.json
+# IDE and build folders
+.vs/
+.vscode/
+.idea/
+obj/
+bin/
+hospitalApiProject/obj/Debug/net8.0/hospitalApiProject.AssemblyInfo.cs

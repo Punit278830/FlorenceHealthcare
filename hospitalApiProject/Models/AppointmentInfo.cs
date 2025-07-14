@@ -24,4 +24,10 @@ public partial class AppointmentInfo
   public string? AppointmentStatus { get; set; }
 
   public int Fee { get; set; }
+
+  public bool? IsDeleted { get; set; }
+
+  public DateTime? DeletedDate { get; set; }
+
+  public int? DeletedBy { get; set; }
 }

@@ -4,13 +4,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { forkJoin } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 import { LoadingService } from '../../../shared/Services/loader/loader.service';
 import { PatientService } from '../../../shared/Services/patient/patient.service';
 import { DataService } from '../../../shared/data/data.service';
-import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse, IInvoiceSummaryResponse } from '../../../shared/models/models';
+import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse, IInvoiceSummaryResponse, SearchCriteriaBase, SearchResponseBase, InvoiceSearch, PaymentStatus, PaymentMode } from '../../../shared/models/models';
 import { routes } from '../../../shared/routes/routes';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
@@ -57,7 +56,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   public showFilter = false;
   public searchDataValue = '';
   public lastIndex = 0;
-  public pageSize = 30;
+  public pageSize = 100;
   public totalData = 0;
   public skip = 0;
   public limit: number = this.pageSize;
@@ -74,6 +73,23 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   totalPaymentAmount: number = 0;
   public searchForm!: FormGroup;
 
+  public searchCriteria: InvoiceSearch = {
+    sortFieldName: 'InvoiceId',
+    sortDirection: 1, // Descending
+    pageNumber: 1,
+    pageSize: 100,
+    fromDate: '',
+    toDate: '',
+    paymentStatus: PaymentStatus.All,
+    paymentMode: PaymentMode.All
+  };
+
+  public searchResponse: SearchResponseBase<Iinvoice> = {
+    results: [],
+    totalCount: 0,
+    totalPages: 0
+  };
+
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
     private patientService: PatientService,
@@ -86,10 +102,24 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   }
   ngOnInit() {
-        this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
 
+    // Set default UTC dates for search
+    const utcNow = dayjs().utc();
+    const fromDate = utcNow.format('YYYY-MM-DD');
+    const toDate = utcNow.add(1, 'day').format('YYYY-MM-DD');
+    this.searchCriteria = {
+      fromDate: fromDate,
+      toDate: toDate,
+      paymentMode: 0,
+      paymentStatus: 0,
+      pageNumber: 1,
+      pageSize: 10,
+      sortFieldName: '',
+      sortDirection: 0
+    };
     this.initSearchForm();  // Initialize the search form
-    this.getTableData();
+    this.getTableData();    // Call search API with default UTC dates
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode
@@ -109,6 +139,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   // Method to search invoices based on form data
   public searchInvoices(): void {
     // Call getTableData with filtered parameters
+    this.getFormData();
     this.getTableData();
   }
 
@@ -116,92 +147,26 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   private getFormData() {
     const formData = this.searchForm.value;
     const today = dayjs().tz('Asia/Kolkata');
-
-    const fromDate: string = formData.from
-      ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD')
-      : today.format('YYYY-MM-DD');
-
-    const toDate: string = formData.to
-      ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD')
-      : today.format('YYYY-MM-DD');
-
-    const paymentMode: string = formData.paymentMode || 'All';
-    const paymentStatus: string = formData.paymentStatus || 'All';
-
-    return { paymentMode, paymentStatus, fromDate, toDate };
+    this.searchCriteria.fromDate = formData.from ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
+    this.searchCriteria.toDate = formData.to ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
+    this.searchCriteria.paymentMode = Number(formData.paymentMode ?? 0);
+    this.searchCriteria.paymentStatus = Number(formData.paymentStatus ?? 0);
   }
 
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
-  const { paymentMode, paymentStatus, fromDate, toDate } = this.getFormData();
-
   this.loadingService.showLoader();
-
-  const invoicesSummary$ = this.invoiceService.getAllInvoice(paymentMode, paymentStatus, fromDate, toDate);
-  const patients$ = this.patientService.getPatientList();
-
-  
-  combineLatest([invoicesSummary$, patients$]).subscribe(
-    ([invoicesSummary, patients]: [IInvoiceSummaryResponse, IpatientInfo[]]) => {
-      // Set total amount based on payment mode
-      if (paymentMode === "All") {
-        this.totalPaymentAmount = invoicesSummary.totalAmount;
-      } else if (paymentMode === "Cash") {
-        this.totalPaymentAmount = invoicesSummary.totalCashAmount;
-      } else if (paymentMode === "Online") {
-        this.totalPaymentAmount = invoicesSummary.totalOnlineAmount;
-      } else {
-        this.totalPaymentAmount = 0;
-      }
-
-      this.combinedData = invoicesSummary.invoices.map((invoice: Iinvoice) => {
-        const patient = patients.find((p: IpatientInfo) => p.patientId === invoice.patientId);
-        const paymentDetail = invoice.paymentDetails?.[invoice.paymentDetails.length - 1]; // Get the last payment detail
-
-        // Convert dates to IST
-        const createdDate = invoice.createdDate 
-          ? dayjs(invoice.createdDate).tz('Asia/Kolkata').toDate()
-          : null;
-        
-        const paymentTime = paymentDetail?.paymentDate
-          ? dayjs(paymentDetail.paymentDate).tz('Asia/Kolkata').toDate()
-          : null;
-
-        return {
-          ...invoice,
-          patientFname: patient?.firstName ?? 'Unknown Patient',
-          patientLname: patient?.lastName ?? 'Unknown Patient',
-          paymentTime: paymentTime,
-          createdDate: createdDate,
-          appointmentId: invoice.appointmentId ?? 'N/A',
-          amount: invoice.amount ?? 'N/A',
-          totalUnpaidAmount: invoice.totalUnpaidAmount ?? 'N/A',
-          status: invoice.status ?? 'N/A',
-          paymentMode: invoice.paymentMode ?? 'N/A'
-        };
-      });
-
-      this.loadingService.hideLoader();
-
-      // Initialize required arrays
-      this.invoices = [];
-      this.serialNumberArray = [];
-  
-      // Handle pagination and setting the invoices
-      this.totalData = this.combinedData.length;
-      this.combinedData.forEach((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.invoices.push(res);
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-  
+  this.invoiceService.searchInvoices(this.searchCriteria).subscribe(
+    (response) => {
+      this.searchResponse = response;
+      this.invoices = response?.results ?? [];
+      this.serialNumberArray = this.invoices.map((_, idx) => ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + idx + 1);
+      this.totalData = response?.totalCount ?? 0;
+      this.calculateTotalPages(this.totalData, this.searchCriteria.pageSize ?? 100);
       this.dataSource = new MatTableDataSource<any>(this.invoices);
-      this.calculateTotalPages(this.totalData, this.pageSize);
+      this.loadingService.hideLoader();
     },
     (error) => {
-      console.error('Error loading data:', error);
       this.loadingService.hideLoader();
     }
   );
@@ -238,31 +203,17 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   }
 
   public getMoreData(event: string): void {
-    if (event == 'next') {
-      this.currentPage++;
-      this.pageIndex = this.currentPage - 1;
-      this.limit += this.pageSize;
-      this.skip = this.pageSize * this.pageIndex;
+    if (event == 'next' && (this.searchCriteria.pageNumber ?? 1) < (this.searchResponse.totalPages ?? 1)) {
+      this.searchCriteria.pageNumber = (this.searchCriteria.pageNumber ?? 1) + 1;
       this.getTableData();
-    } else if (event == 'previous') {
-      this.currentPage--;
-      this.pageIndex = this.currentPage - 1;
-      this.limit -= this.pageSize;
-      this.skip = this.pageSize * this.pageIndex;
+    } else if (event == 'previous' && (this.searchCriteria.pageNumber ?? 1) > 1) {
+      this.searchCriteria.pageNumber = (this.searchCriteria.pageNumber ?? 1) - 1;
       this.getTableData();
     }
   }
 
-
   public moveToPage(pageNumber: number): void {
-    this.currentPage = pageNumber;
-    this.skip = this.pageSelection[pageNumber - 1].skip;
-    this.limit = this.pageSelection[pageNumber - 1].limit;
-    if (pageNumber > this.currentPage) {
-      this.pageIndex = pageNumber - 1;
-    } else if (pageNumber < this.currentPage) {
-      this.pageIndex = pageNumber + 1;
-    }
+    this.searchCriteria.pageNumber = pageNumber;
     this.getTableData();
   }
 
@@ -274,19 +225,14 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.getTableData();
   }
 
-  private calculateTotalPages(totalData: number, pageSize: number): void {
-    this.pageNumberArray = [];
-    this.totalPages = totalData / pageSize;
-    if (this.totalPages % 1 != 0) {
-      this.totalPages = Math.trunc(this.totalPages + 1);
-    }
-    /* eslint no-var: off */
-    for (var i = 1; i <= this.totalPages; i++) {
-      const limit = pageSize * i;
-      const skip = limit - pageSize;
-      this.pageNumberArray.push(i);
-      this.pageSelection.push({ skip: skip, limit: limit });
-    }
+  // Update calculateTotalPages to use new pageSize
+  public calculateTotalPages(totalData: number, pageSize: number): void {
+    this.totalPages = Math.ceil(totalData / pageSize);
+    this.pageNumberArray = Array.from({ length: this.totalPages }, (_, i) => i + 1);
+    this.pageSelection = this.pageNumberArray.map(page => ({
+      skip: (page - 1) * pageSize,
+      limit: page * pageSize
+    }));
   }
   
   selectedList: data[] = [

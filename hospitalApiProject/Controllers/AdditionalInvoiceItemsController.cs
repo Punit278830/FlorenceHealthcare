@@ -56,7 +56,7 @@ namespace hospitalApiProject.Controllers
     .ToListAsync();
 
       // Check if there's only one unique transaction ID
-      string transactionIdForInvoice = singleTransactionId.Count == 1 ? singleTransactionId.First() : null;
+      string? transactionIdForInvoice = singleTransactionId.Count == 1 ? singleTransactionId.First() : null;
 
       var additionalInvoiceItems = await _context.AdditionalInvoiceItems
          .Where(e => e.InvoiceId == id)

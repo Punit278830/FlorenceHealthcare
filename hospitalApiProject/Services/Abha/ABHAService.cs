@@ -412,10 +412,10 @@ namespace hospitalApiProject.Services.Abha
         IdentityName = "ABHA ID", // todo: add abha address in the identity type options?
         IdentityNumber = patientProfile.AbhaNumber + "/" + patientProfile.AbhaAddress,
         Address = patientProfile.Address,
-        Dob = patientProfile.Dob,
+        Dob = patientProfile.Dob.ToDateTime(TimeOnly.MinValue),
         Mobile = patientProfile.Mobile,
         Gender = patientProfile.Gender,
-        RegstrationDate = patientProfile.RegistrationDate,
+        RegstrationDate = patientProfile.RegistrationDate.HasValue ? patientProfile.RegistrationDate.Value.ToDateTime(TimeOnly.MinValue) : (DateTime?)null,
       };
 
       // Add the new PatientInfo

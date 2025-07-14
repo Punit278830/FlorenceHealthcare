@@ -156,7 +156,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                <tr *ngFor="let data of combinedData; let i = index">
+                <tr *ngFor="let data of invoices; let i = index">
                       <!-- <td>
                                             <div class="form-check check-tables">
                                                 <input class="form-check-input" type="checkbox" value="something">
@@ -167,7 +167,7 @@
                         (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
                           
 
-                        <td> {{data.patientFname}} {{data.patientLname}}</td>
+                        <td> {{data.patientFname}}</td>
 
                     <td>{{data.createdDate | date:'dd-MM-yyyy':'Asia/Kolkata'}}</td>
                     <td>{{data.appointmentId}}</td>

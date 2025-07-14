@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using hospitalApiProject.Models;
 
@@ -11,9 +12,11 @@ using hospitalApiProject.Models;
 namespace hospitalApiProject.Migrations
 {
     [DbContext(typeof(FlorenceDbContext))]
-    partial class FlorenceDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250712030601_ManualDateOnlyToDateTimeMigration")]
+    partial class ManualDateOnlyToDateTimeMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,8 +44,8 @@ namespace hospitalApiProject.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly>("Dob")
-                        .HasColumnType("date");
+                    b.Property<DateTime>("Dob")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
@@ -69,14 +72,14 @@ namespace hospitalApiProject.Migrations
                     b.Property<string>("PatientImage")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("RegistrationDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("RegistrationDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateOnly?>("TokenDate")
-                        .HasColumnType("date");
+                    b.Property<DateTime?>("TokenDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -195,12 +198,6 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("datetime")
                         .HasColumnName("date");
 
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<int?>("Departmentid")
                         .HasColumnType("int")
                         .HasColumnName("departmentid");
@@ -212,9 +209,6 @@ namespace hospitalApiProject.Migrations
                     b.Property<int>("Fee")
                         .HasColumnType("int")
                         .HasColumnName("fee");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("bit");
 
                     b.Property<string>("Notes")
                         .HasMaxLength(500)
@@ -445,16 +439,7 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("createdDate");
 
-                    b.Property<int?>("DeletedBy")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("DeletedDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool?>("IsConsultationPaid")
-                        .HasColumnType("bit");
-
-                    b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<int>("PatientId")
