@@ -90,6 +90,8 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     totalPages: 0
   };
 
+  public userTimeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
     private patientService: PatientService,

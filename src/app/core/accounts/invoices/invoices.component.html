@@ -181,7 +181,7 @@
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
 
                     <td>
-                      {{data.paymentTime | date:'dd-MM-yyyy, h:mm a':'Asia/Kolkata'}}
+                      {{ data.paymentDetails && data.paymentDetails.length > 0 ? (data.paymentDetails[data.paymentDetails.length-1].paymentDate | date:'dd-MM-yyyy, h:mm a':userTimeZone) : '--' }}
                     </td>
                     
                 <td class="text-end"> 
