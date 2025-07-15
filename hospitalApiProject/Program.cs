@@ -5,6 +5,7 @@ using hospitalApiProject.Services.Interfaces;
 using hospitalApiProject.Services.Interfaces.Shared;
 using hospitalApiProject.Services.Shared;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +60,26 @@ app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 
+
+// Enable request logging
+app.Use(async (context, next) =>
+{
+    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("RequestLogger");
+    logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}");
+    try
+    {
+        await next();
+        if (context.Response.StatusCode >= 400)
+        {
+            logger.LogWarning($"Response {context.Response.StatusCode} for {context.Request.Method} {context.Request.Path}");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, $"Exception for {context.Request.Method} {context.Request.Path}");
+        throw;
+    }
+});
 
 // Map controllers and additional endpoints
 app.UseEndpoints(endpoints =>
