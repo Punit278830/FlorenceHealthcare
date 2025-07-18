@@ -16,10 +16,13 @@ public class SearchCriteriaBase
 
     public SortDirection SortDirection { get; set; }
 
+
     [Range(1, int.MaxValue)]
+    [System.Text.Json.Serialization.JsonPropertyName("pageNumber")]
     public int PageNumber { get; set; }
 
     [Range(1, int.MaxValue)]
+    [System.Text.Json.Serialization.JsonPropertyName("pageSize")]
     public int PageSize { get; set; }
 
     public SearchCriteriaBase()
