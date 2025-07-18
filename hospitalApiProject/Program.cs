@@ -9,30 +9,26 @@ using Microsoft.Extensions.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-
+// 1. Register services
 builder.Services.AddControllers();
 builder.Services.AddDbContext<FlorenceDbContext>(options =>
-        options.UseSqlServer("myDb1"));
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+    options.UseSqlServer("myDb1"));
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy(name: "AllowAngularDev",
-  builder => builder
-  .AllowAnyOrigin()
-  .AllowAnyMethod()
-  .AllowAnyHeader());
-
+  options.AddPolicy("AllowFrontendApp", policy =>
+      policy.WithOrigins("https://kulhadchaiwala.in")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
 });
 
-// Add services to the container
 builder.Services.AddMemoryCache();
+
 builder.Services.AddScoped<IAbhaService, ABHAService>();
 builder.Services.AddScoped<IAbhaM2Service, ABHAService>();
-
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
@@ -41,53 +37,60 @@ builder.Services.AddTransient<FideliusEncryption>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// 2. Development-only middleware
 if (app.Environment.IsDevelopment())
 {
-
-  app.UseCors("AllowAngularDev");
+  app.UseDeveloperExceptionPage();
   app.UseSwagger();
-  app.UseSwaggerUI();
-
-}
-else
-{
-  app.UseCors("AllowAngularDev");
+  app.UseSwaggerUI(c =>
+  {
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+  });
 }
 
+// 3. Redirect root ("/") to Swagger
+app.MapGet("/", () => Results.Redirect("/swagger"));
 
+// 4. Middleware pipeline
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontendApp"); // applied to all environments
 app.UseRouting();
 app.UseAuthorization();
 
-
-// Enable request logging
+// 5. Request logging
 app.Use(async (context, next) =>
 {
-    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("RequestLogger");
-    logger.LogInformation($"Request: {context.Request.Method} {context.Request.Path}");
-    try
+  var logger = app.Services
+                  .GetRequiredService<ILoggerFactory>()
+                  .CreateLogger("RequestLogger");
+
+  logger.LogInformation("Request: {Method} {Path}",
+      context.Request.Method,
+      context.Request.Path);
+
+  try
+  {
+    await next();
+
+    if (context.Response.StatusCode >= 400)
     {
-        await next();
-        if (context.Response.StatusCode >= 400)
-        {
-            logger.LogWarning($"Response {context.Response.StatusCode} for {context.Request.Method} {context.Request.Path}");
-        }
+      logger.LogWarning("Response {StatusCode} for {Method} {Path}",
+          context.Response.StatusCode,
+          context.Request.Method,
+          context.Request.Path);
     }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, $"Exception for {context.Request.Method} {context.Request.Path}");
-        throw;
-    }
+  }
+  catch (Exception ex)
+  {
+    logger.LogError(ex,
+        "Exception for {Method} {Path}",
+        context.Request.Method,
+        context.Request.Path);
+    throw;
+  }
 });
 
-// Map controllers and additional endpoints
-app.UseEndpoints(endpoints =>
-{
-  endpoints.MapControllers();
-});
+// 6. Map controllers
+app.MapControllers();
 
-
-
-
-  app.Run();
+app.Run();
