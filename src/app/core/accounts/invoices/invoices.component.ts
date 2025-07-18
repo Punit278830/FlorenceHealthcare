@@ -90,7 +90,6 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     totalPages: 0
   };
 
-  public userTimeZone: string = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
@@ -104,24 +103,25 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   }
   ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
 
-    // Set default UTC dates for search
-    const utcNow = dayjs().utc();
-    const fromDate = utcNow.format('YYYY-MM-DD');
-    const toDate = utcNow.add(1, 'day').format('YYYY-MM-DD');
+    // Set default date range to last 30 days in IST
+    const today = dayjs().tz('Asia/Kolkata');
+    const fromDate = today.subtract(30, 'day').format('YYYY-MM-DD');
+    const toDate = today.format('YYYY-MM-DD');
     this.searchCriteria = {
       fromDate: fromDate,
       toDate: toDate,
-      paymentMode: 0,
-      paymentStatus: 0,
+      paymentMode: PaymentMode.All,
+      paymentStatus: PaymentStatus.All,
       pageNumber: 1,
-      pageSize: 10,
-      sortFieldName: '',
-      sortDirection: 0
+      pageSize: 100,
+      sortFieldName: 'InvoiceId',
+      sortDirection: 1
     };
-    this.initSearchForm();  // Initialize the search form
-    this.getTableData();    // Call search API with default UTC dates
+    this.initSearchForm();
+    this.searchForm.patchValue({ from: fromDate, to: toDate });
+    this.getTableData();
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode
@@ -162,11 +162,32 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     (response) => {
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
-      this.serialNumberArray = this.invoices.map((_, idx) => ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + idx + 1);
+      // Serial number calculation: S.No. should be 1-100 on page 1, 101-200 on page 2, etc.
+      const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
+      this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
       this.totalData = response?.totalCount ?? 0;
       this.calculateTotalPages(this.totalData, this.searchCriteria.pageSize ?? 100);
       this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.loadingService.hideLoader();
+
+      // If no data after filter, fallback to last 30 days
+      if (this.invoices.length === 0 && this.searchCriteria.fromDate && this.searchCriteria.toDate) {
+        const today = dayjs().tz('Asia/Kolkata');
+        const fromDate = today.subtract(30, 'day').format('YYYY-MM-DD');
+        const toDate = today.format('YYYY-MM-DD');
+        this.searchCriteria.fromDate = fromDate;
+        this.searchCriteria.toDate = toDate;
+        this.searchForm.patchValue({ from: fromDate, to: toDate });
+        this.invoiceService.searchInvoices(this.searchCriteria).subscribe((fallbackResponse) => {
+          this.searchResponse = fallbackResponse;
+          this.invoices = fallbackResponse?.results ?? [];
+          const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
+          this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
+          this.totalData = fallbackResponse?.totalCount ?? 0;
+          this.calculateTotalPages(this.totalData, this.searchCriteria.pageSize ?? 100);
+          this.dataSource = new MatTableDataSource<any>(this.invoices);
+        });
+      }
     },
     (error) => {
       this.loadingService.hideLoader();
@@ -313,26 +334,51 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     }
 
     exportInvoiceListAsPdf() {
-      this.loadingService.showLoader();
-      const data = document.getElementById('convertToPdf');
-      if (data) {
-        html2canvas(data).then(canvas => {
-          const imgWidth = 208;
-          const pageHeight = 295;
-          const imgHeight = canvas.height * imgWidth / canvas.width;
-          const contentDataURL = canvas.toDataURL('image/png');
-          let pdf = new jsPDF('p', 'mm', 'a4');
-          const position = 0;
-  
-          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          // Use dayjs for date formatting
-          const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
-          pdf.save(`Invoice${formattedDate}.pdf`);        
-        })
-      }
-  
+
+    this.loadingService.showLoader();
+    const data = document.getElementById('convertToPdf');
+    if (data) {
+      const rowsPerPage = 25;
+      const totalRows = this.invoices.length;
+      const totalPages = Math.ceil(totalRows / rowsPerPage);
+      let pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 208;
+      const pageHeight = 295;
+      let formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
+      const allRows = Array.from(data.querySelectorAll('tbody tr'));
+
+      // Helper to render one page
+      const renderPage = async (page: number) => {
+        // Hide all rows except the current page
+        allRows.forEach((row, idx) => {
+          (row as HTMLElement).style.display = (idx >= page * rowsPerPage && idx < (page + 1) * rowsPerPage) ? '' : 'none';
+        });
+        // Wait for html2canvas to render
+        const canvas = await html2canvas(data);
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        const contentDataURL = canvas.toDataURL('image/png');
+        if (page > 0) pdf.addPage();
+        pdf.addImage(contentDataURL, 'PNG', 0, 0, imgWidth, imgHeight);
+        // Add page number at the bottom
+        pdf.setFontSize(10);
+        pdf.text(`Page ${page + 1} of ${totalPages}`, imgWidth / 2, pageHeight - 10, { align: 'center' });
+      };
+
+      // Sequentially render all pages
+      (async () => {
+        for (let page = 0; page < totalPages; page++) {
+          // eslint-disable-next-line no-await-in-loop
+          await renderPage(page);
+        }
+        // Restore all rows after export
+        allRows.forEach(row => (row as HTMLElement).style.display = '');
+        pdf.save(`Invoice${formattedDate}.pdf`);
+        this.loadingService.hideLoader();
+      })();
+    } else {
       this.loadingService.hideLoader();
     }
+  }
   
   
   }

@@ -7,4 +7,4 @@
 export const api_Url = "http://97.74.84.4/api/";
 
 // export const api_Url="https://florenceApi.kulhadchaiwala.in/api/";
- //export const api_Url = "http://localhost:5020/api/";
+//  export const api_Url = "http://localhost:5020/api/";
