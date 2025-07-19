@@ -161,7 +161,7 @@
                                                     (selectionChange)="loadDoctorData($event)">
                                                     <mat-option *ngFor="let data of departmentList"
                                                         [value]="data.departmentId">
-                                                        {{data.departmentName}}
+                                                        {{data.displayName || data.departmentName}}
                                                     </mat-option>
                                                 </mat-select>
                                                 <div *ngIf="bookappointment.get('departmentid')?.invalid && (bookappointment.get('departmentid')?.dirty || bookappointment.get('departmentid')?.touched)"

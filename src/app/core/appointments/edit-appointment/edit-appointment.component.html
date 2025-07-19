@@ -162,7 +162,7 @@
                                         <mat-select formControlName="departmentId" class="form-control select"
                                             placeholder="Select Department" (selectionChange)="loadDoctorData($event)">
                                             <mat-option *ngFor="let data of departmentList" [value]="data.departmentId">
-                                                {{data.departmentName}}
+                                                {{data.displayName || data.departmentName}}
                                             </mat-option>
                                         </mat-select>
                                     </div>

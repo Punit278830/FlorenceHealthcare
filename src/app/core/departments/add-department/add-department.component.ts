@@ -35,6 +35,7 @@ export class AddDepartmentComponent implements OnInit {
   initlizeDepartmentForm() {
     this.depForm = this.fb.group({
       departmentName: ['',Validators.required],
+      displayName: [''],
       departmentStatus: ['Active', Validators.required]
     })
 
@@ -58,11 +59,11 @@ export class AddDepartmentComponent implements OnInit {
     } else {
       this.depForm.markAllAsTouched()
     }
-
-
   }
 
   resetForm() {
-    this.depForm.reset();
+    this.depForm.reset({
+      departmentStatus: 'Active'
+    });
   }
 }

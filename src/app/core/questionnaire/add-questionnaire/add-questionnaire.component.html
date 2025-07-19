@@ -45,7 +45,7 @@
                                                 class="login-danger">*</span></label>
                                         <mat-select formControlName="questinaryDeptId" class="form-control select">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
-                                                {{data.departmentName}}
+                                                {{data.displayName || data.departmentName}}
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="questForm.get('questinaryDeptId')?.invalid && (questForm.get('questinaryDeptId')?.dirty || questForm.get('questinaryDeptId')?.touched)"

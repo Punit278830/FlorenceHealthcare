@@ -218,7 +218,7 @@
                                         <mat-select formControlName="departmentId" class="form-control select"
                                             placeholder="Select  Department">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
-                                                {{data.departmentName}}
+                                                {{data.displayName || data.departmentName}}
                                       
                                             </mat-option>
                                         </mat-select>

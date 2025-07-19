@@ -9,5 +9,7 @@ public partial class DepartmentInfo
 
     public string DepartmentName { get; set; } = null!;
 
+    public string? DisplayName { get; set; }
+
     public string? DepartmentStatus { get; set; }
 }

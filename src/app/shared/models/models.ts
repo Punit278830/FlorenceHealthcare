@@ -213,6 +213,7 @@ export interface Iappointment {
 export interface Idepartment {
   departmentId: number,
   departmentName: string,
+  displayName?: string,
   departmentStatus: string;
 }
 

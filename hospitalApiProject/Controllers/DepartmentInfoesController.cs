@@ -37,6 +37,10 @@ namespace hospitalApiProject.Controllers
                   .Where(d => d.DepartmentId == g.Key)
                   .Select(d => d.DepartmentName)
                   .FirstOrDefault(),
+            DisplayName = _context.DepartmentInfos
+                  .Where(d => d.DepartmentId == g.Key)
+                  .Select(d => d.DisplayName)
+                  .FirstOrDefault(),
             PatientCount = g.Select(a => a.PatientId).Distinct().Count()
           })
           .ToListAsync();
@@ -83,6 +87,12 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
 
+            // Ensure DisplayName is properly handled (can be null or empty)
+            if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
+            {
+                departmentInfo.DisplayName = null;
+            }
+
             _context.Entry(departmentInfo).State = EntityState.Modified;
 
             try
@@ -109,6 +119,12 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<DepartmentInfo>> PostDepartmentInfo(DepartmentInfo departmentInfo)
         {
+            // Ensure DisplayName is properly handled (can be null or empty)
+            if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
+            {
+                departmentInfo.DisplayName = null;
+            }
+
             _context.DepartmentInfos.Add(departmentInfo);
             await _context.SaveChangesAsync();
 
