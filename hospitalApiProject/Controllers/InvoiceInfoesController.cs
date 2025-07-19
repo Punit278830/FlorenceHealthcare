@@ -48,8 +48,12 @@ namespace hospitalApiProject.Controllers
       var fromDateParsed = DateTime.Parse(fromDate).Date;
       var toDateParsed = DateTime.Parse(toDate).Date.AddDays(1);
 
-      // Apply date filtering for both fromDate and toDate (now using DateTime)
-      query = query.Where(invoice => invoice.CreatedDate >= fromDateParsed && invoice.CreatedDate <= toDateParsed);
+      // Apply date filtering for paymentDate in PaymentModeInfo instead of invoice.CreatedDate
+      query = query.Where(invoice => _context.PaymentModeInfo
+          .Any(pm => pm.InvoiceId == invoice.InvoiceId &&
+                     pm.PaymentDate.HasValue &&
+                     pm.PaymentDate.Value.Date >= fromDateParsed &&
+                     pm.PaymentDate.Value.Date <= toDateParsed));
 
       // Apply paymentStatus filtering
       if (paymentStatus.ToLower() != "all")
@@ -510,14 +514,22 @@ namespace hospitalApiProject.Controllers
 
             // Parse and filter by date range
             DateTime utcNow = DateTime.UtcNow;
-            if (!string.IsNullOrEmpty(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate))
-                query = query.Where(i => i.CreatedDate >= fromDate);
+            if (!string.IsNullOrEmpty(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate) &&
+            !string.IsNullOrEmpty(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
+            {
+                query = query.Where(i => _context.PaymentModeInfo
+                    .Any(pm => pm.InvoiceId == i.InvoiceId &&
+                              pm.PaymentDate.HasValue &&
+                              pm.PaymentDate.Value.Date >= fromDate.Date &&
+                              pm.PaymentDate.Value.Date <= toDate.Date));
+            }
             else
-                query = query.Where(i => i.CreatedDate >= utcNow);
-            if (!string.IsNullOrEmpty(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
-                query = query.Where(i => i.CreatedDate <= toDate);
-            else
-                query = query.Where(i => i.CreatedDate <= utcNow);
+            {
+                query = query.Where(i => _context.PaymentModeInfo
+                    .Any(pm => pm.InvoiceId == i.InvoiceId &&
+                              pm.PaymentDate.HasValue &&
+                              pm.PaymentDate.Value.Date == utcNow.Date));
+            }
 
             // Filter by payment status
             if (criteria.PaymentStatus.HasValue && criteria.PaymentStatus.Value != PaymentStatus.All)

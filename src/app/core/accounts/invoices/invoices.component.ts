@@ -90,6 +90,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     totalPages: 0
   };
 
+
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
     private patientService: PatientService,
@@ -102,32 +103,52 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   }
   ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
 
-    // Set default UTC dates for search
-    const utcNow = dayjs().utc();
-    const fromDate = utcNow.format('YYYY-MM-DD');
-    const toDate = utcNow.add(1, 'day').format('YYYY-MM-DD');
+    const today = new Date();
+    const formattedToday = today.toISOString().slice(0, 10);
+    
+    // Initialize search criteria with today's date
     this.searchCriteria = {
-      fromDate: fromDate,
-      toDate: toDate,
-      paymentMode: 0,
-      paymentStatus: 0,
+      fromDate: formattedToday,
+      toDate: formattedToday,
+      paymentMode: PaymentMode.All,
+      paymentStatus: PaymentStatus.All,
       pageNumber: 1,
-      pageSize: 10,
-      sortFieldName: '',
-      sortDirection: 0
+      pageSize: 100,
+      sortFieldName: 'InvoiceId',
+      sortDirection: 1
     };
-    this.initSearchForm();  // Initialize the search form
-    this.getTableData();    // Call search API with default UTC dates
+    
+    // Initialize form
+    this.initSearchForm();
+    
+    // Set form values and component state
+    this.searchForm.patchValue({ 
+      from: formattedToday, 
+      to: formattedToday, 
+      paymentStatus: 'All', 
+      paymentMode: 'All' 
+    });
+    
+    this.selectedPaymentStatus = 'All';
+    this.selectedPaymentMode = 'All';
+    
+    console.log('Initialized with date:', formattedToday);
+    console.log('Form values:', this.searchForm.value);
+    
+    // Sync form data with search criteria and selected values before calling search
+    this.getFormData();
+    
+    // Call search to load initial data and calculate total
+    this.searchInvoices();
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode
   initSearchForm() {
-    // Use dayjs to get today's date in IST
-    const today = dayjs().tz('Asia/Kolkata');
-    const formattedToday = today.format('YYYY-MM-DD');
-
+    // Use user's local timezone date
+    const today = new Date();
+    const formattedToday = today.toISOString().slice(0, 10);
     this.searchForm = this.fb.group({
       from: [formattedToday, Validators.required],
       to: [formattedToday, Validators.required],
@@ -151,26 +172,123 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.searchCriteria.toDate = formData.to ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
     this.searchCriteria.paymentMode = Number(formData.paymentMode ?? 0);
     this.searchCriteria.paymentStatus = Number(formData.paymentStatus ?? 0);
+    // Update the selected values used in calculation
+    this.selectedPaymentMode = formData.paymentMode || 'All';
+    this.selectedPaymentStatus = formData.paymentStatus || 'All';
   }
 
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
+  console.log('getTableData called with search criteria:', this.searchCriteria);
   this.loadingService.showLoader();
   this.invoiceService.searchInvoices(this.searchCriteria).subscribe(
     (response) => {
+      console.log('API response received:', response);
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
-      this.serialNumberArray = this.invoices.map((_, idx) => ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + idx + 1);
+      console.log('Number of invoices loaded:', this.invoices.length);
+      
+      // Calculate total payment amount for the selected date range, payment mode, and payment status using paymentDate
+      this.calculateTotalPaymentAmount();
+      
+      // Serial number calculation: S.No. should be 1-100 on page 1, 101-200 on page 2, etc.
+      const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
+      this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
       this.totalData = response?.totalCount ?? 0;
       this.calculateTotalPages(this.totalData, this.searchCriteria.pageSize ?? 100);
       this.dataSource = new MatTableDataSource<any>(this.invoices);
       this.loadingService.hideLoader();
+
+      // If no data after filter, fallback to last 30 days
+      if (this.invoices.length === 0 && this.searchCriteria.fromDate && this.searchCriteria.toDate) {
+        console.log('No data found, trying fallback date range');
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const formattedYesterday = yesterday.toISOString().slice(0, 10);
+        const formattedToday = today.toISOString().slice(0, 10);
+        this.searchCriteria.fromDate = formattedYesterday;
+        this.searchCriteria.toDate = formattedToday;
+        this.searchForm.patchValue({ from: formattedYesterday, to: formattedToday });
+        this.invoiceService.searchInvoices(this.searchCriteria).subscribe((fallbackResponse) => {
+          console.log('Fallback API response:', fallbackResponse);
+          this.searchResponse = fallbackResponse;
+          this.invoices = fallbackResponse?.results ?? [];
+          console.log('Fallback: Number of invoices loaded:', this.invoices.length);
+          this.calculateTotalPaymentAmount();
+          const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
+          this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
+          this.totalData = fallbackResponse?.totalCount ?? 0;
+          this.calculateTotalPages(this.totalData, this.searchCriteria.pageSize ?? 100);
+          this.dataSource = new MatTableDataSource<any>(this.invoices);
+        });
+      }
     },
     (error) => {
+      console.error('Error loading invoice data:', error);
       this.loadingService.hideLoader();
     }
   );
 }
+
+private calculateTotalPaymentAmount(): void {
+    const fromDate: string = this.searchCriteria.fromDate || '';
+    const toDate: string = this.searchCriteria.toDate || '';
+    const selectedMode: string = this.selectedPaymentMode;
+    const selectedStatus: string = this.selectedPaymentStatus;
+    let total = 0;
+    
+    console.log('Calculating total with filters:', { fromDate, toDate, selectedMode, selectedStatus });
+    console.log('Number of invoices:', this.invoices.length);
+    
+    this.invoices.forEach((invoice: any) => {
+      if (Array.isArray(invoice.paymentDetails)) {
+        invoice.paymentDetails.forEach((pd: any) => {
+          if (!pd || !pd.paymentDate) return;
+          
+          // Extract date from payment date (handle both date string and datetime string)
+          const paymentDate = pd.paymentDate.includes('T') ? pd.paymentDate.split('T')[0] : pd.paymentDate;
+          
+          // Check date range
+          const isDateMatch = paymentDate >= fromDate && paymentDate <= toDate;
+          
+          // Check payment mode - be more flexible with matching
+          const isModeMatch = selectedMode === 'All' || 
+            (pd.paymentMode && (
+              pd.paymentMode.toLowerCase() === selectedMode.toLowerCase() ||
+              (selectedMode === 'Cash' && pd.paymentMode.toLowerCase() === 'cash') ||
+              (selectedMode === 'Online' && pd.paymentMode.toLowerCase() === 'online')
+            ));
+          
+          // Check payment status - compare with invoice status
+          const isStatusMatch = selectedStatus === 'All' || 
+            (invoice.status && (
+              invoice.status.toLowerCase() === selectedStatus.toLowerCase() ||
+              (selectedStatus === 'Paid' && invoice.status.toLowerCase() === 'paid') ||
+              (selectedStatus === 'Unpaid' && invoice.status.toLowerCase() === 'unpaid') ||
+              (selectedStatus === 'Partially Paid' && (invoice.status.toLowerCase() === 'partially paid' || invoice.status.toLowerCase() === 'partial'))
+            ));
+          
+          console.log('Payment detail check:', {
+            paymentDate,
+            isDateMatch,
+            isModeMatch,
+            isStatusMatch,
+            amount: pd.amount,
+            paymentMode: pd.paymentMode,
+            invoiceStatus: invoice.status
+          });
+          
+          if (isDateMatch && isModeMatch && isStatusMatch) {
+            total += Number(pd.amount) || 0;
+          }
+        });
+      }
+    });
+    
+    console.log('Calculated total payment amount:', total);
+    this.totalPaymentAmount = total;
+  }
 
   // Method to get payment modes for a specific invoice
   private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
@@ -312,23 +430,266 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
     exportInvoiceListAsPdf() {
       this.loadingService.showLoader();
-      const data = document.getElementById('convertToPdf');
-      if (data) {
-        html2canvas(data).then(canvas => {
-          const imgWidth = 208;
-          const pageHeight = 295;
-          const imgHeight = canvas.height * imgWidth / canvas.width;
-          const contentDataURL = canvas.toDataURL('image/png');
-          let pdf = new jsPDF('p', 'mm', 'a4');
-          const position = 0;
-  
-          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-          // Use dayjs for date formatting
-          const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
-          pdf.save(`Invoice${formattedDate}.pdf`);        
-        })
+      
+      // Calculate totals for the PDF
+      let totalPaidAmount = 0;
+      let totalUnpaidAmount = 0;
+      let totalDayAmount = 0;
+      
+      this.invoices.forEach((invoice: any) => {
+        const amount = Number(invoice.amount) || 0;
+        totalDayAmount += amount;
+        
+        if (invoice.status) {
+          if (invoice.status.toLowerCase() === 'paid') {
+            totalPaidAmount += amount;
+          } else if (invoice.status.toLowerCase() === 'unpaid') {
+            totalUnpaidAmount += amount;
+          }
+        }
+      });
+      
+      // Prepare data for PDF export
+      const exportRows = this.invoices.map((invoice: any, idx: number) => {
+        // Invoice #
+        const invoiceNumber = invoice.invoiceNumber || invoice.invoiceId || '';
+        // Patient Name - try multiple possible fields
+        const patientName = invoice.patientName || 
+                           (invoice.patientInfo && invoice.patientInfo.name) || 
+                           (invoice.patientInfo && invoice.patientInfo.patientName) ||
+                           invoice.patient?.name ||
+                           invoice.patient?.patientName ||
+                           'N/A';
+        // Payment Status
+        const paymentStatus = invoice.status || '';
+        // Amount & Status (combine)
+        let amountStatus = '';
+        if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
+          amountStatus = invoice.paymentDetails.map((pd: any) => {
+            return `₹${pd.amount || ''} (${pd.status || paymentStatus})`;
+          }).join(', ');
+        } else {
+          amountStatus = `₹${invoice.amount || ''} (${paymentStatus})`;
+        }
+        // Payment Mode (with reference # if present)
+        let paymentMode = '';
+        if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
+          paymentMode = invoice.paymentDetails.map((pd: any) => {
+            let mode = pd.paymentMode || '';
+            if (pd.referenceNumber) {
+              mode += ` (Ref: ${pd.referenceNumber})`;
+            }
+            return mode;
+          }).join(', ');
+        } else {
+          paymentMode = invoice.paymentMode || '';
+        }
+        // Payment Date (date only)
+        let paymentDate = '';
+        if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
+          paymentDate = invoice.paymentDetails.map((pd: any) => {
+            if (pd.paymentDate) {
+              return pd.paymentDate.split('T')[0];
+            }
+            return '';
+          }).join(', ');
+        } else if (invoice.paymentDate) {
+          paymentDate = invoice.paymentDate.split('T')[0];
+        }
+        return {
+          invoiceNumber,
+          patientName,
+          paymentStatus,
+          amountStatus,
+          paymentMode,
+          paymentDate
+        };
+      });
+
+      // PDF setup
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 15;
+      let y = 20;
+      const lineHeight = 6;
+      const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
+      const fromDate = dayjs(this.searchCriteria.fromDate).format('DD-MM-YYYY');
+      const toDate = dayjs(this.searchCriteria.toDate).format('DD-MM-YYYY');
+
+      // Header - Title with blue background
+      pdf.setFillColor(63, 81, 181); // Material blue
+      pdf.rect(0, 0, pageWidth, 35, 'F');
+      pdf.setTextColor(255, 255, 255); // White text
+      pdf.setFontSize(18);
+      pdf.setFont('helvetica', 'bold');
+      pdf.text('Invoice Report', pageWidth / 2, 15, { align: 'center' });
+      
+      // Date Range in header
+      pdf.setFontSize(12);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(`Date Range: ${fromDate} to ${toDate}`, pageWidth / 2, 25, { align: 'center' });
+      
+      // Export Date in header
+      pdf.setFontSize(10);
+      pdf.text(`Generated on: ${formattedDate}`, pageWidth / 2, 32, { align: 'center' });
+      
+      y = 45;
+      pdf.setTextColor(0, 0, 0); // Reset to black
+
+      // Summary Section with background
+      pdf.setFillColor(248, 249, 250); // Light gray background
+      pdf.rect(margin, y - 5, pageWidth - (margin * 2), 35, 'F');
+      
+      pdf.setFontSize(14);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(33, 37, 41); // Dark text
+      pdf.text('Summary:', margin + 5, y + 5);
+      y += 12;
+      
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(11);
+      
+      // First row: Total Paid and Total Unpaid with proper spacing
+      // Total Paid in green
+      pdf.setTextColor(40, 167, 69); // Green
+      pdf.text(`Total Paid: ₹${totalPaidAmount.toFixed(2)}`, margin + 10, y);
+      
+      // Total Unpaid in red - positioned with proper spacing
+      pdf.setTextColor(220, 53, 69); // Red
+      pdf.text(`Total Unpaid: ₹${totalUnpaidAmount.toFixed(2)}`, margin + 150, y);
+      y += 8;
+      
+      // Second row: Total Amount and Invoice Count with proper spacing
+      // Total Amount in dark blue
+      pdf.setTextColor(0, 123, 255); // Blue
+      pdf.text(`Total Amount: ₹${totalDayAmount.toFixed(2)}`, margin + 10, y);
+      
+      // Total Invoices Count in dark - positioned with proper spacing
+      pdf.setTextColor(33, 37, 41); // Dark
+      pdf.text(`Total Invoices: ${this.invoices.length}`, margin + 150, y);
+      
+      y += 20;
+
+      // Table Headers with better spacing
+      const colHeaders = [
+        'Invoice #',
+        'Patient Name',
+        'Status',
+        'Amount & Status',
+        'Payment Mode',
+        'Payment Date'
+      ];
+      
+      const colWidths = [25, 40, 25, 40, 40, 25]; // Adjusted column widths
+      const totalTableWidth = colWidths.reduce((sum, width) => sum + width, 0);
+      const startX = margin; // Start from margin instead of centering
+      let xPos = startX;
+      
+      pdf.setFontSize(11);
+      pdf.setFont('helvetica', 'bold');
+      pdf.setTextColor(255, 255, 255); // White text
+      
+      // Draw header background
+      pdf.setFillColor(52, 58, 64); // Dark gray
+      pdf.rect(startX, y - 4, totalTableWidth, 10, 'F');
+      
+      // Draw header text
+      colHeaders.forEach((header, i) => {
+        pdf.text(header, xPos + 2, y + 2, { maxWidth: colWidths[i] - 4 });
+        xPos += colWidths[i];
+      });
+      y += 12;
+
+      // Table rows with alternating colors
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(9);
+      
+      exportRows.forEach((row: any, idx: number) => {
+        // Check if we need a new page
+        if (y + 10 > pageHeight - 25) {
+          pdf.addPage();
+          y = 20;
+          
+          // Redraw headers on new page
+          xPos = startX;
+          pdf.setFont('helvetica', 'bold');
+          pdf.setFontSize(11);
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFillColor(52, 58, 64);
+          pdf.rect(startX, y - 4, totalTableWidth, 10, 'F');
+          
+          colHeaders.forEach((header, i) => {
+            pdf.text(header, xPos + 2, y + 2, { maxWidth: colWidths[i] - 4 });
+            xPos += colWidths[i];
+          });
+          y += 12;
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(9);
+        }
+        
+        // Alternating row background
+        if (idx % 2 === 0) {
+          pdf.setFillColor(249, 249, 249); // Very light gray
+          pdf.rect(startX, y - 2, totalTableWidth, 8, 'F');
+        }
+        
+        // Draw row data
+        xPos = startX;
+        const rowData = [
+          row.invoiceNumber,
+          row.patientName,
+          row.paymentStatus,
+          row.amountStatus,
+          row.paymentMode,
+          row.paymentDate
+        ];
+        
+        rowData.forEach((cell, i) => {
+          const cellText = String(cell || '');
+          
+          // Set color based on payment status for status column
+          if (i === 2) { // Status column
+            const status = cellText.toLowerCase();
+            if (status === 'paid') {
+              pdf.setTextColor(40, 167, 69); // Green
+            } else if (status === 'unpaid') {
+              pdf.setTextColor(220, 53, 69); // Red
+            } else if (status.includes('partial')) {
+              pdf.setTextColor(255, 193, 7); // Yellow/Orange
+            } else {
+              pdf.setTextColor(33, 37, 41); // Default dark
+            }
+          } else {
+            pdf.setTextColor(33, 37, 41); // Default dark
+          }
+          
+          // Split text if too long and handle it properly
+          const maxWidth = colWidths[i] - 4;
+          if (cellText.length > 0) {
+            const lines = pdf.splitTextToSize(cellText, maxWidth);
+            if (lines.length > 0) {
+              pdf.text(lines[0], xPos + 2, y + 2);
+            }
+          }
+          
+          xPos += colWidths[i];
+        });
+        y += 8;
+      });
+
+      // Footer with page numbers
+      const totalPages = (pdf as any).internal.getNumberOfPages();
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
+        pdf.setFontSize(9);
+        pdf.setFont('helvetica', 'normal');
+        pdf.setTextColor(108, 117, 125); // Gray text
+        pdf.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
+        pdf.text('Generated by Florence Healthcare System', pageWidth / 2, pageHeight - 5, { align: 'center' });
       }
-  
+
+      pdf.save(`Invoice_Report_${fromDate}_to_${toDate}.pdf`);
       this.loadingService.hideLoader();
     }
   

@@ -52,7 +52,7 @@
                         <div class="top-nav-search">
                          
                           <input class="form-control datetimepicker" (dateChange)="appointmentByDate($event,'to')"
-                            formControlName="appointmentTo" placeholder="to" type="text" matInput [matDatepicker]="appointmentTo"  [min]="minToDate">
+                            formControlName="appointmentTo" placeholder="to" type="text" matInput [matDatepicker]="appointmentTo" [min]="minToDateValue">
                           <mat-datepicker #appointmentTo></mat-datepicker>
                           <mat-datepicker-toggle matIconSuffix [for]="appointmentTo"></mat-datepicker-toggle>
 

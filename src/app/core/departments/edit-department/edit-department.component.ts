@@ -54,6 +54,7 @@ export class EditDepartmentComponent {
   {
     this.depForm=this.fb.group({
       departmentName:['',Validators.required],
+      displayName:[''],
       departmentStatus:['',Validators.required]
     })
 
@@ -61,21 +62,24 @@ export class EditDepartmentComponent {
 
   editDepartment(dep:FormGroup)
   {
-    
-    this.depDto=dep.value;
-    this.depDto.departmentId=this.depId;
-    console.log(this.depId,"depid ", this.depDto,"dto")
-    this.departmentService.updateDepartment(this.depId,this.depDto).subscribe(
-      res=>{
-      console.log(res);
-      res?this.toster.success("Department updated successfully"):null
-      this.route.navigate([routes.departmentList])
-      
-    },
-     error => {
-      this.toster.error(error.statusText,'Error')
+    if (this.depForm.valid) {
+      this.depDto=dep.value;
+      this.depDto.departmentId=this.depId;
+      console.log(this.depId,"depid ", this.depDto,"dto")
+      this.departmentService.updateDepartment(this.depId,this.depDto).subscribe(
+        res=>{
+        console.log(res);
+        res?this.toster.success("Department updated successfully"):null
+        this.route.navigate([routes.departmentList])
         
-      });
+      },
+       error => {
+        this.toster.error(error.statusText,'Error')
+          
+        });
+    } else {
+      this.depForm.markAllAsTouched()
+    }
   }
 cancleUpdate()
 {

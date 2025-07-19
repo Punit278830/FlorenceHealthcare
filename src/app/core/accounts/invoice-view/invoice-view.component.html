@@ -127,10 +127,9 @@
                                             </td>
                                             
                                            <td><button
-                                                    [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
+                                                   [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
                                                     class="custom-badge">{{tempinvoiceDetails.isConsultationPaid ? 'Paid' :
-                                                    'Unpaid'}}</button>
-                                            </td>
+                                                    'Unpaid'}}</button>   </td>
                                             <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
                                                     '--'  }}</td>
                                             
@@ -148,8 +147,7 @@
                                                 <button type="button" (click)="paidinvoice(invoiceDetails)"
                                                     [disabled]="invoiceDetails.isConsultationPaid"
                                                     class="btn btn-primary custom-badge">{{invoiceDetails.isConsultationPaid
-                                                    ? 'Paid' : 'Pay'}}</button>
-                                            </td>
+                                                    ? 'Paid' : 'Pay'}}</button> </td>
                                         </tr>
                                        
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">

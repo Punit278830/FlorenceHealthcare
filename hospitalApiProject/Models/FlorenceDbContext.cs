@@ -272,6 +272,10 @@ public partial class FlorenceDbContext : DbContext
           .HasMaxLength(100)
           .IsUnicode(false)
           .HasColumnName("departmentName");
+      entity.Property(e => e.DisplayName)
+          .HasMaxLength(100)
+          .IsUnicode(false)
+          .HasColumnName("displayName");
       entity.Property(e => e.DepartmentStatus)
           .HasMaxLength(100)
           .IsUnicode(false)

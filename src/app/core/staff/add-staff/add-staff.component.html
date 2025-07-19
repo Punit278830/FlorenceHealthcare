@@ -215,7 +215,7 @@
                                         <mat-select formControlName="departmentId" class="form-control select"
                                             placeholder="Select Department">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
-                                                {{data.departmentName}}
+                                                {{data.displayName || data.departmentName}}
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)"

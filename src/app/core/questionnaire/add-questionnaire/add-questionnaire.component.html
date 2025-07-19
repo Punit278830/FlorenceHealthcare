@@ -45,7 +45,7 @@
                                                 class="login-danger">*</span></label>
                                         <mat-select formControlName="questinaryDeptId" class="form-control select">
                                             <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
-                                                {{data.departmentName}}
+                                                {{data.displayName || data.departmentName}}
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="questForm.get('questinaryDeptId')?.invalid && (questForm.get('questinaryDeptId')?.dirty || questForm.get('questinaryDeptId')?.touched)"
@@ -94,8 +94,12 @@
           <table class="table border-0 custom-table comman-table datatable mb-0">
             <thead>
               <tr>
-                <th>Questionnaire Name</th>
-                <th>Department Name</th>
+                <th>#</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Mobile</th>
+                <th>Email</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -103,13 +107,12 @@
             <tbody>
               <ng-container *ngFor="let data of combineData; let i = index">
                 <tr [class.selectedQuest]="i === selectedRow" (click)="selectRow(i)">
-                  <td class="profile-image">
-                    <a href="javascript:void(0);" (click)="OnQuestionnaireChange(data)">
-                     
-                      {{data.questionnaireName}}
-                    </a>
-                  </td>
-                  <td>{{data.deptName}}</td>
+                  <td>{{i + 1}}</td>
+                  <td>{{data.name || data.questionnaireName}}</td>
+                  <td>{{data.age}}</td>
+                  <td>{{data.gender}}</td>
+                  <td>{{data.mobile}}</td>
+                  <td>{{data.email}}</td>
                   <td>{{data.isActive ? "Active" : "Inactive"}}</td>
                   <td class="text-end">
                     <div class="dropdown dropdown-action">

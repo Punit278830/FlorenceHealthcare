@@ -63,6 +63,7 @@ export class AppointmentListComponent implements OnInit {
   private isAppointmentDateSelected = false;
   private dateOnly: any;
   public minToDate: dayjs.Dayjs | null = dayjs().tz('Asia/Kolkata');
+  public minToDateValue: Date | null = dayjs().tz('Asia/Kolkata').toDate();
   isAllowed: boolean = false; // Patient click Not allowed for receptionist
 
   constructor(public data: DataService, private appointmentService: AppointmentService,
@@ -94,12 +95,12 @@ export class AppointmentListComponent implements OnInit {
   // }
   initializeAppointDateForm() {
     const todayIST = dayjs().tz('Asia/Kolkata');
-    const formattedTodayIST = todayIST.format('YYYY-MM-DD');
     this.appintmentDateForm = this.fb.group({
-      appointmentFrom: [formattedTodayIST, Validators.required],
-      appointmentTo: [formattedTodayIST, Validators.required]
+      appointmentFrom: [todayIST.toDate(), Validators.required],
+      appointmentTo: [todayIST.toDate(), Validators.required]
     });
     this.minToDate = todayIST;
+    this.minToDateValue = todayIST.toDate();
   }
   deleteAppointment(idhere: number) {
     this.modalservice.openModal({
@@ -154,7 +155,13 @@ export class AppointmentListComponent implements OnInit {
 
 
   onRefresh() {
-    this.appintmentDateForm.reset();
+    const todayIST = dayjs().tz('Asia/Kolkata');
+    this.appintmentDateForm.patchValue({
+      appointmentFrom: todayIST.toDate(),
+      appointmentTo: todayIST.toDate()
+    });
+    this.minToDate = todayIST;
+    this.minToDateValue = todayIST.toDate();
     this.searchDataValue = '';
     // Reset pagination
     this.skip = 0;
@@ -190,10 +197,17 @@ export class AppointmentListComponent implements OnInit {
     let from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     let to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
-    // Ensure 'to' date includes the full day
-    if (to) {
+    // Convert Date objects to proper format for API
+    if (from instanceof Date) {
+      from = dayjs(from).format('YYYY-MM-DD');
+    }
+    if (to instanceof Date) {
+      to = dayjs(to).format('YYYY-MM-DD') + 'T23:59:59';
+    } else if (to) {
+      // Ensure 'to' date includes the full day
       to = to + 'T23:59:59';
     }
+    
     let appointmentData$;
     if (from !== null && to !== null) {
       console.log("from to", from, to)
@@ -421,27 +435,36 @@ export class AppointmentListComponent implements OnInit {
   }
 
   appointmentByDate(event: any, type: string): void {
-    // Use the selected date directly without timezone conversion to avoid date shifting
-    const selectedDate = dayjs(event.value).format('YYYY-MM-DD');
-
+    if (!event.value) return;
+    
+    // Use the selected date as-is without timezone conversion to prevent date shifting
+    const selectedDate = new Date(event.value);
+    
     if (type === 'from') {
-        this.minToDate = dayjs(event.value);
         this.appintmentDateForm.get('appointmentFrom')?.setValue(selectedDate);
-        this.appintmentDateForm.get('appointmentTo')?.setValue(null);
+        this.minToDate = dayjs(selectedDate);
+        this.minToDateValue = selectedDate;
+        
+        // Reset 'to' date if it's before the new 'from' date
+        const currentToDate = this.appintmentDateForm.get('appointmentTo')?.value;
+        if (currentToDate && dayjs(selectedDate).isAfter(dayjs(currentToDate))) {
+            this.appintmentDateForm.get('appointmentTo')?.setValue(selectedDate);
+        }
     }
+    
     if (type === 'to') {
         const fromDate = this.appintmentDateForm.get('appointmentFrom')?.value;
-        if (dayjs(selectedDate).isBefore(dayjs(fromDate))) {
+        if (fromDate && dayjs(selectedDate).isBefore(dayjs(fromDate), 'day')) {
             this.toastr.error('End date cannot be earlier than start date');
             return;
         }
         this.appintmentDateForm.get('appointmentTo')?.setValue(selectedDate);
     }
 
-    const from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
-    const to = this.appintmentDateForm.get('appointmentTo')?.value || null;
+    const from = this.appintmentDateForm.get('appointmentFrom')?.value;
+    const to = this.appintmentDateForm.get('appointmentTo')?.value;
 
-    if (from !== null && to !== null) {
+    if (from && to) {
         this.isAppointmentDateSelected = true;
         // Reset pagination when dates change
         this.skip = 0;
