@@ -4,6 +4,8 @@ import { MatTableDataSource } from '@angular/material/table';
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, invoicereport } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 interface data {
   value: string ;
 }
@@ -134,4 +136,47 @@ export class InvoiceReportsComponent implements OnInit {
     {value: 'Galaviz Lalema'},
     {value: 'Tarah Williams'},
   ];
+
+  exportInvoiceReportsAsPdf() {
+    // Use all data, not just paginated
+    const allInvoices = this.dataSource && this.dataSource.data ? this.dataSource.data : this.invoiceReports;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+
+    // Define table columns
+    const columns = [
+      { header: 'S.No', dataKey: 'sno' },
+      { header: 'Invoice Number', dataKey: 'invoiceNumber' },
+      { header: 'Client', dataKey: 'client' },
+      { header: 'Created Date', dataKey: 'createdDate' },
+      { header: 'Due Date', dataKey: 'dueDate' },
+      { header: 'Amount', dataKey: 'amount' },
+      { header: 'Status', dataKey: 'status' }
+    ];
+
+    // Map all data to rows
+    const rows = allInvoices.map((data: any, i: number) => ({
+      sno: i + 1,
+      invoiceNumber: data.invoiceNumber || '',
+      client: data.client || '',
+      createdDate: data.createdDate || '',
+      dueDate: data.dueDate || '',
+      amount: data.amount || '',
+      status: data.status || ''
+    }));
+
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [22, 160, 133] },
+      margin: { top: 20 },
+      didDrawPage: (data) => {
+        doc.setFontSize(12);
+        doc.text('Invoice Reports', 14, 15);
+      }
+    });
+    doc.save(`InvoiceReports${formattedDate}.pdf`);
+  }
 }
