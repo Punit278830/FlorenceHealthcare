@@ -105,13 +105,13 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
 
-    // Set default date range to last 30 days in IST
-    const today = dayjs().tz('Asia/Kolkata');
-    const fromDate = today.subtract(30, 'day').format('YYYY-MM-DD');
-    const toDate = today.format('YYYY-MM-DD');
+    const today = new Date();
+    const formattedToday = today.toISOString().slice(0, 10);
+    
+    // Initialize search criteria with today's date
     this.searchCriteria = {
-      fromDate: fromDate,
-      toDate: toDate,
+      fromDate: formattedToday,
+      toDate: formattedToday,
       paymentMode: PaymentMode.All,
       paymentStatus: PaymentStatus.All,
       pageNumber: 1,
@@ -119,17 +119,36 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
       sortFieldName: 'InvoiceId',
       sortDirection: 1
     };
+    
+    // Initialize form
     this.initSearchForm();
-    this.searchForm.patchValue({ from: fromDate, to: toDate });
-    this.getTableData();
+    
+    // Set form values and component state
+    this.searchForm.patchValue({ 
+      from: formattedToday, 
+      to: formattedToday, 
+      paymentStatus: 'All', 
+      paymentMode: 'All' 
+    });
+    
+    this.selectedPaymentStatus = 'All';
+    this.selectedPaymentMode = 'All';
+    
+    console.log('Initialized with date:', formattedToday);
+    console.log('Form values:', this.searchForm.value);
+    
+    // Sync form data with search criteria and selected values before calling search
+    this.getFormData();
+    
+    // Call search to load initial data and calculate total
+    this.searchInvoices();
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode
   initSearchForm() {
-    // Use dayjs to get today's date in IST
-    const today = dayjs().tz('Asia/Kolkata');
-    const formattedToday = today.format('YYYY-MM-DD');
-
+    // Use user's local timezone date
+    const today = new Date();
+    const formattedToday = today.toISOString().slice(0, 10);
     this.searchForm = this.fb.group({
       from: [formattedToday, Validators.required],
       to: [formattedToday, Validators.required],
@@ -153,15 +172,25 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.searchCriteria.toDate = formData.to ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
     this.searchCriteria.paymentMode = Number(formData.paymentMode ?? 0);
     this.searchCriteria.paymentStatus = Number(formData.paymentStatus ?? 0);
+    // Update the selected values used in calculation
+    this.selectedPaymentMode = formData.paymentMode || 'All';
+    this.selectedPaymentStatus = formData.paymentStatus || 'All';
   }
 
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
+  console.log('getTableData called with search criteria:', this.searchCriteria);
   this.loadingService.showLoader();
   this.invoiceService.searchInvoices(this.searchCriteria).subscribe(
     (response) => {
+      console.log('API response received:', response);
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
+      console.log('Number of invoices loaded:', this.invoices.length);
+      
+      // Calculate total payment amount for the selected date range, payment mode, and payment status using paymentDate
+      this.calculateTotalPaymentAmount();
+      
       // Serial number calculation: S.No. should be 1-100 on page 1, 101-200 on page 2, etc.
       const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
       this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
@@ -172,15 +201,21 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
       // If no data after filter, fallback to last 30 days
       if (this.invoices.length === 0 && this.searchCriteria.fromDate && this.searchCriteria.toDate) {
-        const today = dayjs().tz('Asia/Kolkata');
-        const fromDate = today.subtract(30, 'day').format('YYYY-MM-DD');
-        const toDate = today.format('YYYY-MM-DD');
-        this.searchCriteria.fromDate = fromDate;
-        this.searchCriteria.toDate = toDate;
-        this.searchForm.patchValue({ from: fromDate, to: toDate });
+        console.log('No data found, trying fallback date range');
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(today.getDate() - 1);
+        const formattedYesterday = yesterday.toISOString().slice(0, 10);
+        const formattedToday = today.toISOString().slice(0, 10);
+        this.searchCriteria.fromDate = formattedYesterday;
+        this.searchCriteria.toDate = formattedToday;
+        this.searchForm.patchValue({ from: formattedYesterday, to: formattedToday });
         this.invoiceService.searchInvoices(this.searchCriteria).subscribe((fallbackResponse) => {
+          console.log('Fallback API response:', fallbackResponse);
           this.searchResponse = fallbackResponse;
           this.invoices = fallbackResponse?.results ?? [];
+          console.log('Fallback: Number of invoices loaded:', this.invoices.length);
+          this.calculateTotalPaymentAmount();
           const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
           this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
           this.totalData = fallbackResponse?.totalCount ?? 0;
@@ -190,10 +225,70 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
       }
     },
     (error) => {
+      console.error('Error loading invoice data:', error);
       this.loadingService.hideLoader();
     }
   );
 }
+
+private calculateTotalPaymentAmount(): void {
+    const fromDate: string = this.searchCriteria.fromDate || '';
+    const toDate: string = this.searchCriteria.toDate || '';
+    const selectedMode: string = this.selectedPaymentMode;
+    const selectedStatus: string = this.selectedPaymentStatus;
+    let total = 0;
+    
+    console.log('Calculating total with filters:', { fromDate, toDate, selectedMode, selectedStatus });
+    console.log('Number of invoices:', this.invoices.length);
+    
+    this.invoices.forEach((invoice: any) => {
+      if (Array.isArray(invoice.paymentDetails)) {
+        invoice.paymentDetails.forEach((pd: any) => {
+          if (!pd || !pd.paymentDate) return;
+          
+          // Extract date from payment date (handle both date string and datetime string)
+          const paymentDate = pd.paymentDate.includes('T') ? pd.paymentDate.split('T')[0] : pd.paymentDate;
+          
+          // Check date range
+          const isDateMatch = paymentDate >= fromDate && paymentDate <= toDate;
+          
+          // Check payment mode - be more flexible with matching
+          const isModeMatch = selectedMode === 'All' || 
+            (pd.paymentMode && (
+              pd.paymentMode.toLowerCase() === selectedMode.toLowerCase() ||
+              (selectedMode === 'Cash' && pd.paymentMode.toLowerCase() === 'cash') ||
+              (selectedMode === 'Online' && pd.paymentMode.toLowerCase() === 'online')
+            ));
+          
+          // Check payment status - compare with invoice status
+          const isStatusMatch = selectedStatus === 'All' || 
+            (invoice.status && (
+              invoice.status.toLowerCase() === selectedStatus.toLowerCase() ||
+              (selectedStatus === 'Paid' && invoice.status.toLowerCase() === 'paid') ||
+              (selectedStatus === 'Unpaid' && invoice.status.toLowerCase() === 'unpaid') ||
+              (selectedStatus === 'Partially Paid' && (invoice.status.toLowerCase() === 'partially paid' || invoice.status.toLowerCase() === 'partial'))
+            ));
+          
+          console.log('Payment detail check:', {
+            paymentDate,
+            isDateMatch,
+            isModeMatch,
+            isStatusMatch,
+            amount: pd.amount,
+            paymentMode: pd.paymentMode,
+            invoiceStatus: invoice.status
+          });
+          
+          if (isDateMatch && isModeMatch && isStatusMatch) {
+            total += Number(pd.amount) || 0;
+          }
+        });
+      }
+    });
+    
+    console.log('Calculated total payment amount:', total);
+    this.totalPaymentAmount = total;
+  }
 
   // Method to get payment modes for a specific invoice
   private getPaymentModesForInvoice(invoice: Iinvoice): string[] {
