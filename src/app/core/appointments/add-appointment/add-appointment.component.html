@@ -61,9 +61,10 @@
                                         <th>#</th>
                                         <th mat-sort-header="name">Name</th>
                                         <th mat-sort-header="department">Age</th>
+                                        <th mat-sort-header="mobile">Gender</th>
                                         <th mat-sort-header="specialization">Mobile</th>
                                         <th mat-sort-header="degree">Email</th>
-                                        <th mat-sort-header="mobile">Gender</th>
+                                       
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -76,9 +77,10 @@
                                             </a>
                                         </td>
                                         <td>{{data.ageinYear}}</td>
+                                        <td style="color: black;">{{data.gender}}</td>
                                         <td><a href="javascript:;" style="color: black;">{{data.mobile}}</a></td>
                                         <td style="color: black;">{{data.email}}</td>
-                                        <td style="color: black;">{{data.gender}}</td>
+                                        
                                         <td class="text-end">
                                             <!-- Action buttons if needed -->
                                         </td>
@@ -225,9 +227,9 @@
                                         <th>#</th>
                                         <th mat-sort-header="name">Name</th>
                                         <th mat-sort-header="department">Age</th>
-                                        <th mat-sort-header="specialization">Mobile</th>
-                                        <th mat-sort-header="degree">Email</th>
-                                        <th mat-sort-header="mobile">Gender</th>
+                                        <th mat-sort-header="gender">Gender</th>
+                                        <th mat-sort-header="mobile">Mobile</th>
+                                        <th mat-sort-header="email">Email</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -240,9 +242,9 @@
                                             </a>
                                         </td>
                                         <td>{{data.ageinYear}}</td>
+                                        <td>{{data.gender}}</td>
                                         <td><a href="javascript:;">{{data.mobile}}</a></td>
                                         <td>{{data.email}}</td>
-                                        <td>{{data.gender}}</td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
                                                 <a href="javascript:void(0);" class="action-icon dropdown-toggle"
