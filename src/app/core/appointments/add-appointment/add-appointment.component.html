@@ -1,6 +1,13 @@
 <div class="page-wrapper">
     <div class="content">
 
+        <!-- Loader Overlay -->
+        <div *ngIf="isLoading" class="loader-overlay">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+
         <!-- Page Header -->
         <div class="page-header">
             <div class="row">
@@ -268,45 +275,51 @@
                                 </tbody>
                             </table>
                             <div class="table_footer">
-                                <div class="col-sm-12 col-md-5">
-                                    <div class="dataTables_info">
-                                        Showing {{ serialNumberArray[0] }} to
-                                        {{ serialNumberArray[serialNumberArray.length - 1] }} of
-                                        {{ totalData }} entries
-                                    </div>
-                                </div>
-
-                                <div class="col-sm-12 col-md-7">
-                                    <div class="pagination_section">
-                                        <ul class="pagination">
-    <li class="page-item" [ngClass]="{disabled: currentPage === 1}">
-        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);" tabindex="-1">Previous</a>
-    </li>
-    <ng-container *ngFor="let item of pageNumberArray; let i = index">
-        <ng-container *ngIf="
+  <div class="col-sm-12 col-md-5">
+    <div class="dataTables_info">
+      Showing {{ serialNumberArray[0] }} to
+      {{ serialNumberArray[serialNumberArray.length - 1] }} of
+      {{ totalData }} entries
+    </div>
+  </div>
+  <div class="col-sm-12 col-md-7" style="display: flex; justify-content: flex-end; align-items: center;">
+    <!-- Page size dropdown -->
+    <div style="margin-right: 16px; display: flex; align-items: center;">
+      <label for="pageSizeSelect" style="margin-right: 4px; font-weight: 500;">Page size:</label>
+      <select id="pageSizeSelect" class="form-select" style="width: auto; display: inline-block;" [(ngModel)]="pageSize" (change)="PageSize()">
+        <option *ngFor="let size of [10, 25, 50, 100]" [value]="size">{{ size }}</option>
+      </select>
+    </div>
+    <div class="pagination_section">
+      <ul class="pagination">
+        <li class="page-item" [ngClass]="{disabled: currentPage === 1}">
+          <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);" tabindex="-1">Previous</a>
+        </li>
+        <ng-container *ngFor="let item of pageNumberArray; let i = index">
+          <ng-container *ngIf="
             item === 1 ||
             item === pageNumberArray.length ||
             (item >= currentPage - 4 && item <= currentPage + 4 && pageNumberArray.length > 10) ||
             (pageNumberArray.length <= 10)
-        ">
+          ">
             <li class="page-item" [class.active]="item === currentPage">
-                <a (click)="moveToPage(item)" class="page-link" href="javascript:void(0);">{{ item }}</a>
+              <a (click)="moveToPage(item)" class="page-link" href="javascript:void(0);">{{ item }}</a>
             </li>
-        </ng-container>
-        <ng-container *ngIf="
+          </ng-container>
+          <ng-container *ngIf="
             (i === 1 && currentPage > 6 && pageNumberArray.length > 10) ||
             (i === pageNumberArray.length - 2 && currentPage < pageNumberArray.length - 5 && pageNumberArray.length > 10)
-        ">
+          ">
             <li class="page-item disabled"><span class="page-link">...</span></li>
+          </ng-container>
         </ng-container>
-    </ng-container>
-    <li class="page-item" [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] || patientlist.length === 0}">
-        <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next</a>
-    </li>
-</ul>
-                                    </div>
-                                </div>
-                            </div>
+        <li class="page-item" [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] || patientlist.length === 0}">
+          <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
                         </div>
 
                     </div>

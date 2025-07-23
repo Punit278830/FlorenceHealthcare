@@ -32,6 +32,7 @@ interface IdownloadFile {
   providers: [DatePipe],
 })
 export class AddAppointmentComponent implements OnInit {
+  public isLoading = false;
   public routes = routes;
   public selectedValue!: string;
   public searchResults: IpatientInfo[] = [];

@@ -255,7 +255,8 @@ export class AppointmentListComponent implements OnInit {
             ...appointment,
             doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
             doctorLname: doctor ? doctor.lastName : '',
-            departmentName: department ? department.departmentName : 'Unknown Department',
+            // Use displayName if present, fallback to departmentName
+            departmentName: department ? (department.displayName || department.departmentName) : 'Unknown Department',
             patientFname: patients ? patients.firstName : 'Unknown Patient',
             patientLname: patients ? patients.lastName : '',
             patientId: patients ? patients.patientId : null
