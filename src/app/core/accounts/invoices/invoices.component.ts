@@ -340,6 +340,7 @@ private calculateTotalPaymentAmount(): void {
     this.limit = this.pageSize;
     this.skip = 0;
     this.currentPage = 1;
+    this.searchCriteria.pageSize = this.pageSize; // Ensure API receives new page size
     this.getTableData();
   }
 
@@ -510,7 +511,7 @@ private calculateTotalPaymentAmount(): void {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
+      const margin = 15; // revert to original margin
       let y = 20;
       const lineHeight = 6;
       const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
@@ -538,40 +539,29 @@ private calculateTotalPaymentAmount(): void {
       pdf.setTextColor(0, 0, 0); // Reset to black
 
       // Summary Section with background
-      pdf.setFillColor(248, 249, 250); // Light gray background
+      pdf.setFillColor(247, 250, 251); // Light gray background
       pdf.rect(margin, y - 5, pageWidth - (margin * 2), 35, 'F');
-      
       pdf.setFontSize(14);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(33, 37, 41); // Dark text
-      pdf.text('Summary:', margin + 5, y + 5);
+      pdf.text('Summary:', margin + 14, y + 5);
       y += 12;
-      
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(11);
-      
-      // First row: Total Paid and Total Unpaid with proper spacing
-      // Total Paid in green
+      // First row: Total Paid and Total Unpaid
       pdf.setTextColor(40, 167, 69); // Green
-      pdf.text(`Total Paid: ₹${totalPaidAmount.toFixed(2)}`, margin + 10, y);
-      
-      // Total Unpaid in red - positioned with proper spacing
+      pdf.text(`Total Paid: Rs ${totalPaidAmount.toFixed(2)}`, margin + 20, y);
       pdf.setTextColor(220, 53, 69); // Red
-      pdf.text(`Total Unpaid: ₹${totalUnpaidAmount.toFixed(2)}`, margin + 150, y);
+      pdf.text(`Total Unpaid: Rs ${totalUnpaidAmount.toFixed(2)}`, pageWidth - margin - 70, y);
       y += 8;
-      
-      // Second row: Total Amount and Invoice Count with proper spacing
-      // Total Amount in dark blue
+      // Second row: Total Amount and Invoice Count
       pdf.setTextColor(0, 123, 255); // Blue
-      pdf.text(`Total Amount: ₹${totalDayAmount.toFixed(2)}`, margin + 10, y);
-      
-      // Total Invoices Count in dark - positioned with proper spacing
+      pdf.text(`Total Amount: Rs ${totalDayAmount.toFixed(2)}`, margin + 20, y);
       pdf.setTextColor(33, 37, 41); // Dark
-      pdf.text(`Total Invoices: ${this.invoices.length}`, margin + 150, y);
-      
+      pdf.text(`Total Invoices: ${this.invoices.length}`, pageWidth - margin - 70, y);
       y += 20;
 
-      // Table Headers with better spacing
+      // Table Headers
       const colHeaders = [
         'Invoice #',
         'Patient Name',
@@ -580,37 +570,28 @@ private calculateTotalPaymentAmount(): void {
         'Payment Mode',
         'Payment Date'
       ];
-      
-      const colWidths = [25, 40, 25, 40, 40, 25]; // Adjusted column widths
+      // Balanced column widths for A4
+      const colWidths = [28, 50, 28, 50, 50, 28];
       const totalTableWidth = colWidths.reduce((sum, width) => sum + width, 0);
-      const startX = margin; // Start from margin instead of centering
+      const startX = margin;
       let xPos = startX;
-      
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
       pdf.setTextColor(255, 255, 255); // White text
-      
-      // Draw header background
       pdf.setFillColor(52, 58, 64); // Dark gray
       pdf.rect(startX, y - 4, totalTableWidth, 10, 'F');
-      
-      // Draw header text
       colHeaders.forEach((header, i) => {
         pdf.text(header, xPos + 2, y + 2, { maxWidth: colWidths[i] - 4 });
         xPos += colWidths[i];
       });
       y += 12;
-
       // Table rows with alternating colors
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
-      
       exportRows.forEach((row: any, idx: number) => {
-        // Check if we need a new page
         if (y + 10 > pageHeight - 25) {
           pdf.addPage();
           y = 20;
-          
           // Redraw headers on new page
           xPos = startX;
           pdf.setFont('helvetica', 'bold');
@@ -618,7 +599,6 @@ private calculateTotalPaymentAmount(): void {
           pdf.setTextColor(255, 255, 255);
           pdf.setFillColor(52, 58, 64);
           pdf.rect(startX, y - 4, totalTableWidth, 10, 'F');
-          
           colHeaders.forEach((header, i) => {
             pdf.text(header, xPos + 2, y + 2, { maxWidth: colWidths[i] - 4 });
             xPos += colWidths[i];
@@ -627,28 +607,21 @@ private calculateTotalPaymentAmount(): void {
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(9);
         }
-        
-        // Alternating row background
         if (idx % 2 === 0) {
           pdf.setFillColor(249, 249, 249); // Very light gray
           pdf.rect(startX, y - 2, totalTableWidth, 8, 'F');
         }
-        
-        // Draw row data
         xPos = startX;
         const rowData = [
           row.invoiceNumber,
           row.patientName,
           row.paymentStatus,
-          row.amountStatus,
+          row.amountStatus.replace('₹', 'Rs'), // Always use Rs
           row.paymentMode,
           row.paymentDate
         ];
-        
         rowData.forEach((cell, i) => {
-          const cellText = String(cell || '');
-          
-          // Set color based on payment status for status column
+          let cellText = String(cell || '');
           if (i === 2) { // Status column
             const status = cellText.toLowerCase();
             if (status === 'paid') {
@@ -663,8 +636,6 @@ private calculateTotalPaymentAmount(): void {
           } else {
             pdf.setTextColor(33, 37, 41); // Default dark
           }
-          
-          // Split text if too long and handle it properly
           const maxWidth = colWidths[i] - 4;
           if (cellText.length > 0) {
             const lines = pdf.splitTextToSize(cellText, maxWidth);
@@ -672,12 +643,10 @@ private calculateTotalPaymentAmount(): void {
               pdf.text(lines[0], xPos + 2, y + 2);
             }
           }
-          
           xPos += colWidths[i];
         });
         y += 8;
       });
-
       // Footer with page numbers
       const totalPages = (pdf as any).internal.getNumberOfPages();
       for (let i = 1; i <= totalPages; i++) {
@@ -688,7 +657,6 @@ private calculateTotalPaymentAmount(): void {
         pdf.text(`Page ${i} of ${totalPages}`, pageWidth / 2, pageHeight - 10, { align: 'center' });
         pdf.text('Generated by Florence Healthcare System', pageWidth / 2, pageHeight - 5, { align: 'center' });
       }
-
       pdf.save(`Invoice_Report_${fromDate}_to_${toDate}.pdf`);
       this.loadingService.hideLoader();
     }
