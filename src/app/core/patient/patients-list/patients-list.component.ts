@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { Router } from '@angular/router';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
@@ -402,28 +403,52 @@ export class PatientsListComponent implements OnInit {
     
   }
 
-  downloadPatientListAsPdf(type:string) {
+  downloadPatientListAsPdf(type: string) {
     this.loaderService.showLoader();
-    const data = document.getElementById('convertToPdf');
-    if (data) {
-      html2canvas(data).then(canvas => {
-        const imgWidth = 208;
-        const pageHeight = 295;
-        const imgHeight = canvas.height * imgWidth / canvas.width;
-        const contentDataURL = canvas.toDataURL('image/png');
-        let pdf = new jsPDF('p', 'mm', 'a4');
-        const position = 0;
+    // Use all data, not just paginated
+    const allPatients = this.allpatientList && this.allpatientList.length ? this.allpatientList : this.patientList;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    const date = new Date();
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
 
-        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
-        const date = new Date();
-        const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-        pdf.save(`PatientList${formattedDate}.pdf`);        
-      })
-    }
+    // Define table columns
+    const columns = [
+      { header: 'S.No', dataKey: 'sno' },
+      { header: 'Patient Name', dataKey: 'patient' },
+      { header: 'Gender', dataKey: 'gender' },
+      { header: 'Age', dataKey: 'age' },
+      { header: 'Mobile', dataKey: 'mobile' },
+      { header: 'Email', dataKey: 'email' },
+      { header: 'Status', dataKey: 'status' },
+      { header: 'Created Date', dataKey: 'createdDate' }
+    ];
 
+    // Map all data to rows
+    const rows = allPatients.map((data: any, i: number) => ({
+      sno: i + 1,
+      patient: `${data.patientFname || ''} ${data.patientLname || ''}`.trim(),
+      gender: data.gender || '',
+      age: data.age || '',
+      mobile: data.mobile || '',
+      email: data.email || '',
+      status: data.status || '',
+      createdDate: data.createdDate ? this.datePipe.transform(data.createdDate, 'dd-MM-yyyy') : ''
+    }));
+
+    autoTable(doc, {
+      columns,
+      body: rows,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [22, 160, 133] },
+      margin: { top: 20 },
+      didDrawPage: (data) => {
+        doc.setFontSize(12);
+        doc.text('Patient List', 14, 15);
+      }
+    });
+    doc.save(`PatientList${formattedDate}.pdf`);
     this.loaderService.hideLoader();
   }
-
   
   private saveAsExcelFile(buffer: any, fileName: string): void {
     const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
