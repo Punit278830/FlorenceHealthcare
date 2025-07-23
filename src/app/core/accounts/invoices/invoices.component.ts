@@ -453,24 +453,27 @@ private calculateTotalPaymentAmount(): void {
       const exportRows = this.invoices.map((invoice: any, idx: number) => {
         // Invoice #
         const invoiceNumber = invoice.invoiceNumber || invoice.invoiceId || '';
-        // Patient Name - try multiple possible fields
-        const patientName = invoice.patientName || 
-                           (invoice.patientInfo && invoice.patientInfo.name) || 
-                           (invoice.patientInfo && invoice.patientInfo.patientName) ||
-                           invoice.patient?.name ||
-                           invoice.patient?.patientName ||
-                           'N/A';
-        // Payment Status
-        const paymentStatus = invoice.status || '';
-        // Amount & Status (combine)
-        let amountStatus = '';
-        if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
-          amountStatus = invoice.paymentDetails.map((pd: any) => {
-            return `₹${pd.amount || ''} (${pd.status || paymentStatus})`;
-          }).join(', ');
-        } else {
-          amountStatus = `₹${invoice.amount || ''} (${paymentStatus})`;
+        // Patient Name - prefer patientFname + patientLname, fallback to other fields
+        let patientName = 'N/A';
+        if (invoice.patientFname || invoice.patientLname) {
+          patientName = `${invoice.patientFname || ''} ${invoice.patientLname || ''}`.trim();
+        } else if (invoice.patientName) {
+          patientName = invoice.patientName;
+        } else if (invoice.patientInfo && (invoice.patientInfo.name || invoice.patientInfo.patientName)) {
+          patientName = invoice.patientInfo.name || invoice.patientInfo.patientName;
+        } else if (invoice.patient && (invoice.patient.name || invoice.patient.patientName)) {
+          patientName = invoice.patient.name || invoice.patient.patientName;
         }
+        // Payment Status
+        const paymentStatus = invoice.status || '';      // Amount & Status (combine) - use Rs instead of ₹ symbol
+      let amountStatus = '';
+      if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
+        amountStatus = invoice.paymentDetails.map((pd: any) => {
+          return `Rs ${pd.amount || ''} (${pd.status || paymentStatus})`;
+        }).join(', ');
+      } else {
+        amountStatus = `Rs ${invoice.amount || ''} (${paymentStatus})`;
+      }
         // Payment Mode (with reference # if present)
         let paymentMode = '';
         if (Array.isArray(invoice.paymentDetails) && invoice.paymentDetails.length > 0) {
@@ -510,7 +513,7 @@ private calculateTotalPaymentAmount(): void {
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
-      const margin = 15;
+      const margin = 10; // Reduced margin for more space
       let y = 20;
       const lineHeight = 6;
       const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
@@ -551,19 +554,19 @@ private calculateTotalPaymentAmount(): void {
       pdf.setFontSize(11);
       
       // First row: Total Paid and Total Unpaid with proper spacing
-      // Total Paid in green
+      // Total Paid in green - use Rs instead of ₹
       pdf.setTextColor(40, 167, 69); // Green
-      pdf.text(`Total Paid: ₹${totalPaidAmount.toFixed(2)}`, margin + 10, y);
+      pdf.text(`Total Paid: Rs ${totalPaidAmount.toFixed(2)}`, margin + 10, y);
       
-      // Total Unpaid in red - positioned with proper spacing
+      // Total Unpaid in red - positioned with proper spacing - use Rs instead of ₹
       pdf.setTextColor(220, 53, 69); // Red
-      pdf.text(`Total Unpaid: ₹${totalUnpaidAmount.toFixed(2)}`, margin + 150, y);
+      pdf.text(`Total Unpaid: Rs ${totalUnpaidAmount.toFixed(2)}`, margin + 150, y);
       y += 8;
       
       // Second row: Total Amount and Invoice Count with proper spacing
-      // Total Amount in dark blue
+      // Total Amount in dark blue - use Rs instead of ₹
       pdf.setTextColor(0, 123, 255); // Blue
-      pdf.text(`Total Amount: ₹${totalDayAmount.toFixed(2)}`, margin + 10, y);
+      pdf.text(`Total Amount: Rs ${totalDayAmount.toFixed(2)}`, margin + 10, y);
       
       // Total Invoices Count in dark - positioned with proper spacing
       pdf.setTextColor(33, 37, 41); // Dark
@@ -571,7 +574,7 @@ private calculateTotalPaymentAmount(): void {
       
       y += 20;
 
-      // Table Headers with better spacing
+      // Table Headers with better spacing - reduced column widths for better fit
       const colHeaders = [
         'Invoice #',
         'Patient Name',
@@ -581,9 +584,10 @@ private calculateTotalPaymentAmount(): void {
         'Payment Date'
       ];
       
-      const colWidths = [25, 40, 25, 40, 40, 25]; // Adjusted column widths
+      // Adjusted column widths for better fit within page margins
+      const colWidths = [22, 40, 22, 38, 35, 23]; // Reduced widths to fit better
       const totalTableWidth = colWidths.reduce((sum, width) => sum + width, 0);
-      const startX = margin; // Start from margin instead of centering
+      const startX = margin; // Start from margin
       let xPos = startX;
       
       pdf.setFontSize(11);
