@@ -257,6 +257,7 @@ export class AppointmentListComponent implements OnInit {
             doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
             doctorLname: doctor ? doctor.lastName : '',
             departmentName: department ? (department.displayName || department.departmentName) : 'Unknown Department',
+            displayName: department ? department.displayName : undefined,
             patientFname: patients ? patients.firstName : 'Unknown Patient',
             patientLname: patients ? patients.lastName : '',
             patientId: patients ? patients.patientId : null

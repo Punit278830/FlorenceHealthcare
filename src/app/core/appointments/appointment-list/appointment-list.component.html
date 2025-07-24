@@ -130,7 +130,7 @@
 </td>
 
                     <td>{{data.doctorFname}} {{data.doctorLname}}</td>
-                    <td>{{data.departmentName}}</td>
+                    <td>{{data.displayName}}</td>
                     <td><a href="javascript:;">{{data.notes}}</a></td>
                     <td><button
                         [ngClass]="{'status-green' : data.appointmentStatus === 'Active', 'status-pink' : data.appointmentStatus === 'In Active','status-gray' : data.appointmentStatus === 'Cancel'}"
