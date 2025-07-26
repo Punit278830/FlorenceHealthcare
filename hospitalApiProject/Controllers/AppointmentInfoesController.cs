@@ -367,15 +367,23 @@ namespace hospitalApiProject.Controllers
           .FirstOrDefaultAsync();
 
         bool isRepeatWithin6Days = false;
+        // First, get the staff details using staffId
+        var StaffInfo = await _context.Staffs
+            .Where(s => s.StaffId == appointmentInfo.StaffId)
+            .FirstOrDefaultAsync();
+
+        int prescriptionValidity = StaffInfo?.PrescriptionValidity ?? 6; // Default to 6 if null
+
         if (lastAppointment != null)
         {
           var daysDiff = (appointmentInfo.Date - lastAppointment.Date).TotalDays;
-          if (daysDiff > 0 && daysDiff <= 6)
+          if (daysDiff > 0 && daysDiff <= prescriptionValidity)
           {
             isRepeatWithin6Days = true;
             previousAppointmentDate = lastAppointment.Date;
           }
         }
+
 
         // Create and save the invoice information
         var invoiceInfo = new InvoiceInfo()

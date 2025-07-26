@@ -175,6 +175,7 @@ export interface IstaffInfo {
   IdentityName: string;
   IdentityNumber: string;
   regestrationNumber?: string;
+  PrescriptionValidity?: number;
 }
 
 export interface IpatientInfo {

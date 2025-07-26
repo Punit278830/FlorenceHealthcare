@@ -301,6 +301,15 @@
 
                                     </div>
                                 </div>
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="prescriptionValidity">Prescription Validity</label>
+                                        <input class="form-control" type="number" formControlName="prescriptionValidity" placeholder="Enter validity in days">
+                                        <div *ngIf="staffReg.get('prescriptionValidity')?.value">
+   {{ staffReg.get('prescriptionValidity')?.value }}
+</div>
+                                    </div>
+                                </div>
                                 <div class="col-12 col-md-6 col-xl-4" *ngIf="staffReg.get('designation')?.value === 'Doctor'">
                                     <div class="form-group local-forms">
                                         <label for="lastname">Registration Number</label>
