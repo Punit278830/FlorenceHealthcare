@@ -38,6 +38,7 @@ namespace hospitalApiProject.Controllers
                   .Select(d => d.DepartmentName)
                   .FirstOrDefault(),
             DisplayName = _context.DepartmentInfos
+
                   .Where(d => d.DepartmentId == g.Key)
                   .Select(d => d.DisplayName)
                   .FirstOrDefault(),
