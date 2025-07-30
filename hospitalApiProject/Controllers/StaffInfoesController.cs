@@ -88,8 +88,6 @@ namespace hospitalApiProject.Controllers
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
     public async Task<IActionResult> PutStaffInfo(int id, StaffInfo staffInfo)
-
-
     {
       if (id != staffInfo.StaffId)
       {

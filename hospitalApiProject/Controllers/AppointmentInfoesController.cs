@@ -368,8 +368,8 @@ namespace hospitalApiProject.Controllers
 
         bool isRepeatWithin6Days = false;
         // First, get the staff details using staffId
-        var StaffInfo = await _context.Staffs
-            .Where(s => s.StaffId == appointmentInfo.StaffId)
+        var StaffInfo = await _context.StaffInfos
+            .Where(s => s.StaffId == appointmentInfo.Id)
             .FirstOrDefaultAsync();
 
         int prescriptionValidity = StaffInfo?.PrescriptionValidity ?? 6; // Default to 6 if null

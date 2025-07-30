@@ -303,11 +303,11 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="prescriptionValidity">Prescription Validity</label>
-                                        <input class="form-control" type="number" formControlName="prescriptionValidity" placeholder="Enter validity in days">
-                                        <div *ngIf="staffReg.get('prescriptionValidity')?.value">
-   {{ staffReg.get('prescriptionValidity')?.value }}
-</div>
+                                        <label for="PrescriptionValidity">Prescription Validity <span class="login-danger">*</span></label>
+                                        <input class="form-control" type="number" formControlName="PrescriptionValidity" placeholder="Enter validity in days">
+                                        <div *ngIf="staffReg.get('PrescriptionValidity')?.invalid && (staffReg.get('PrescriptionValidity')?.dirty || staffReg.get('PrescriptionValidity')?.touched)" class="text-danger">
+                                            <div *ngIf="staffReg.get('PrescriptionValidity')?.errors?.['required']">Prescription Validity is required.</div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4" *ngIf="staffReg.get('designation')?.value === 'Doctor'">

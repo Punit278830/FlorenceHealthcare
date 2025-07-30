@@ -39,5 +39,8 @@ public partial class StaffInfo
 
     public DateTime Doj { get; set; }
 
-   public string? RegestrationNumber { get; set; }
+    public string? RegestrationNumber { get; set; }
+   
+    [JsonPropertyName("PrescriptionValidity")]
+    public int? PrescriptionValidity { get; set; }
 }
