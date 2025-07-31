@@ -159,44 +159,29 @@ export class ProfileComponent implements OnInit, OnDestroy {
     private router: Router,
     private activeRoute: ActivatedRoute
   ) {
-    //this.appointmentStatus = this.appointmentService.appoinmentStatus;
-
     this.appointmentId = this.appointmentService.appointmentId;
     this.doctorId = this.doctorService.staffId;
-
     this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');
     const currentYear = new Date().getFullYear();
-
     for (let year = currentYear; year >= currentYear - 5; year--) {
       this.appointmentYears.push(year);
     }
     this.selectedYear = currentYear;
-
-    // Retrieve patientId from the route parameter
     this.activeRoute.queryParams.subscribe(params => {
       const patientId = params['patientId'];
-      this.step=params['step'];
-
+      this.step = params['step'];
       if (patientId) {
-        // If patientId is present in route params, set it
         this.patientId = patientId;
         this.patientService.patientId = patientId;
-
-        // Optionally store in service for later use
-      } 
-      else if (this.patientService.patientId) {
-        // If not in route params, check if it's available in patientService
+        this.loadProfileData();
+      } else if (this.patientService.patientId) {
         this.patientId = this.patientService.patientId;
+        this.loadProfileData();
       } else {
-        // If neither is available, navigate to the patient list
         this.route.navigate([routes.patientsList]);
       }
     });
-
-    // this.patientService.patientId ? this.patientId = this.patientService.patientId : this.route.navigate([routes.patientsList]);
     this.initlizeProfileForm();
-
-    //department id Required here
     this.getQuestionnaireByDepartmentId(this.departmentId);
   }
 
@@ -207,6 +192,13 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    this.loadProfileData();
+    this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
+      this.prescriptionImage = data;
+    });
+  }
+
+  loadProfileData() {
     this.initlizeVitalForm();
     this.loadPatientAppointments();
     this.loadPatientInfo();
@@ -216,7 +208,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     this.getCurrentAppointmentDetils();
     this.getPreDiagnosisTemplate();
     this.checkPenPrescription();
-
     this.loadQuestions();
     this.fetchAllOptions();
     this.getAllTemplates();
@@ -1678,7 +1669,6 @@ printContent(): void {
     this.getUploadedFiles(this.latestId);
     this.stepper.next();
   }
-
   getPreDiagnosisTemplate() {
     this.consultService.GetAllDiagnosis().subscribe(res => {
       this.preDiagnosis = res;
