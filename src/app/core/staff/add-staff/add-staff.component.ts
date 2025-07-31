@@ -152,7 +152,7 @@ export class AddStaffComponent {
       IdentityNumber: ['', Validators.required],
       registrationNumber:[''],
       IdentityName: ['', Validators.required],
-
+      PrescriptionValidity: [null, Validators.required],
 
     });
 

@@ -49,7 +49,8 @@ namespace hospitalApiProject.Controllers
 
             if (vitalInfo == null)
             {
-                return NotFound();
+                // Return an empty VitalInfo object with the AppointmentId set, so frontend can handle gracefully
+                return Ok(new VitalInfo { AppointmentId = id });
             }
 
             return Ok(vitalInfo);

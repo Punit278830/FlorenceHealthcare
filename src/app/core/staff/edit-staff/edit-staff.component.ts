@@ -191,6 +191,7 @@ export class EditStaffComponent implements OnInit {
       identityNumber: ['', Validators.required],
       identityName: ['', Validators.required],
       regestrationNumber: [''],
+      PrescriptionValidity: [null],
 
     });
   }
