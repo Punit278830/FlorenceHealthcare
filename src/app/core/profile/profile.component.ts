@@ -116,7 +116,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentQuestionIndex: number = 1;
   public subQuestionCounter = 0;
   questionList!: Iquestion[];
-  prescriptionService: any;
   prescriptionImage: string | null = null;
   public templates: any[] = [];
   public selectedTemplate!: any;
@@ -193,9 +192,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadProfileData();
-    this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
-      this.prescriptionImage = data;
-    });
   }
 
   loadProfileData() {
@@ -221,10 +217,6 @@ export class ProfileComponent implements OnInit, OnDestroy {
     // Optionally subscribe to status changes to ensure fields are touched or dirty
     this.consultForm.statusChanges.subscribe(() => {
       this.enableAddToTemplateButton();
-    });
-
-    this.prescriptionService.prescriptionData$.subscribe((data: string | null) => {
-      this.prescriptionImage = data;  // Assign the image data to the local variable
     });
   }
 
@@ -1322,26 +1314,29 @@ printContent(): void {
     this.presDocuments = [];
     this.vitalDocuments = [];
     this.previewFile = [];
-    this.fileUpladServie.getUpodedFileByAppointment(id).subscribe(res => {
-      res.forEach(item => {
-        if (item.docName == "prescription" || item.docName == "pen-prescription" || item.docName=='drawing') {
-          this.presDocuments.push(item);
-          this.checkPenPrescription();
-          console.log(this.presDocuments)
-        }
-        if (item.docName == "vital") {
-          this.vitalDocuments.push(item);
-        }
-        if (item.docName == "previewFile") {
-          this.previewFile.push(item);
-        }
-      })
-    },
-    error => {
-      console.error('Error adding consultation data:', error);
-      this.hasPenPrescription=false;
-      // Handle the error as needed
-    },)
+    this.fileUpladServie.getUpodedFileByAppointment(id).subscribe({
+      next: (res) => {
+        res.forEach(item => {
+          if (item.docName == "prescription" || item.docName == "pen-prescription" || item.docName=='drawing') {
+            this.presDocuments.push(item);
+            this.checkPenPrescription();
+            console.log(this.presDocuments)
+          }
+          if (item.docName == "vital") {
+            this.vitalDocuments.push(item);
+          }
+          if (item.docName == "previewFile") {
+            this.previewFile.push(item);
+          }
+        })
+      },
+      error: (error) => {
+        console.log('No uploaded files found for appointment:', id);
+        this.presDocuments = [];
+        this.vitalDocuments = [];
+        this.previewFile = [];
+      }
+    });
   }
 
   submitConsultation(consultData: FormGroup) {
@@ -1656,11 +1651,17 @@ printContent(): void {
     })
   }
   getConsultationFiles() {
-    this.fileUpladServie.getConsultationFileByAppointment(this.latestId).subscribe(res => {
-      //const data:IconsultationFiles[]=res;
-      // const fileData=res.map(data=>data.fileData)
-      // this.displayImage.push(...fileData);
-      this.displayImage = res;
+    this.fileUpladServie.getConsultationFileByAppointment(this.latestId).subscribe({
+      next: (res) => {
+        //const data:IconsultationFiles[]=res;
+        // const fileData=res.map(data=>data.fileData)
+        // this.displayImage.push(...fileData);
+        this.displayImage = res;
+      },
+      error: (error) => {
+        console.log('No consultation files found for appointment:', this.latestId);
+        this.displayImage = [];
+      }
     })
     //this.images=this.displayImage[0];    
 
