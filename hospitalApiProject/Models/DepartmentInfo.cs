@@ -12,6 +12,4 @@ public partial class DepartmentInfo
     public string? DisplayName { get; set; }
 
     public string? DepartmentStatus { get; set; }
-
-    public string DisplayNameOrDepartmentName => !string.IsNullOrWhiteSpace(DisplayName) ? DisplayName : DepartmentName;
 }

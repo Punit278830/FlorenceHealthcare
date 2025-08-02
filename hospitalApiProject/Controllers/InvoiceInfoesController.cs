@@ -509,7 +509,8 @@ namespace hospitalApiProject.Controllers
         try
         {
             var query = _context.InvoiceInfos
-                .Where(i => i.IsDeleted != true)
+                .Where(i => i.IsDeleted != true )
+
                 .AsQueryable();
 
             // Parse and filter by date range
@@ -517,6 +518,8 @@ namespace hospitalApiProject.Controllers
             if (!string.IsNullOrEmpty(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate) &&
             !string.IsNullOrEmpty(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
             {
+              
+
                 query = query.Where(i => _context.PaymentModeInfo
                     .Any(pm => pm.InvoiceId == i.InvoiceId &&
                               pm.PaymentDate.HasValue &&
