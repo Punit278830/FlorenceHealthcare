@@ -59,9 +59,13 @@
 
                             <div class="col-sm-6 col-lg-12 m-b-20">
                                 <div class="invoice-details">
-                                    <h4>Invoice Date : <i
-                                            class="feather icon-calendar me-2"></i><span>{{invoiceDetails?.InvoiceDate ? (invoiceDetails.InvoiceDate | date:'dd-MMMM-yyyy') : (invoiceDetails.createdDate | date:'dd-MMMM-yyyy')}}</span></h4>
-                                    <h4>Appointment Date : <i class="feather icon-calendar me-2"></i><span>{{appointmentDetails?.date | date:'dd-MMMM-yyyy'}}</span></h4>
+                                   <h4>Invoice Date:<i class="feather icon-calendar me-2"></i><span>
+                                  {{ invoiceDetails?.InvoiceDate ? (invoiceDetails.InvoiceDate | date:'dd-MMMM-yyyy') : (invoiceDetails.createdDate | date:'dd-MMMM-yyyy') }}
+                                  </span>
+                                  </h4><h4>Appointment Date:<i class="feather icon-calendar me-2"></i><span>{{    appointmentDetails?.date | date:'dd-MMMM-yyyy' }}</span>
+                                 </h4>
+
+
                                 </div>
                                 <div [ngClass]="classes.singleLine">&nbsp;</div>
                                 <div class="col-sm-6 col-lg-12 m-b-20">
@@ -95,8 +99,7 @@
                         </div>
                         <div *ngIf="invoiceDetails.previousAppointmentDate">
                           <div class="alert alert-info mt-2">
-                            <strong>Discount Reason:</strong> Patient returned within 7 days(including today). Previous appointment date: 
-                            {{ invoiceDetails.previousAppointmentDate | date:'dd-MMMM-yyyy' }}
+                            <strong>Discount Reason:</strong> Previous appointment date: {{ invoiceDetails.previousAppointmentDate | date:'dd-MMMM-yyyy' }}
                           </div>
                         </div>
                         <div class="wrapperClass">
