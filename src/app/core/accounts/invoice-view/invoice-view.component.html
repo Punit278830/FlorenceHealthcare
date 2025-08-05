@@ -99,7 +99,10 @@
                         </div>
                         <div *ngIf="invoiceDetails.previousAppointmentDate">
                           <div class="alert alert-info mt-2">
-                            <strong>Discount Reason:</strong> Previous appointment date: {{ invoiceDetails.previousAppointmentDate | date:'dd-MMMM-yyyy' }}
+
+                            <strong>Discount Reason:</strong> Patient returned within {{doctorDetails.PrescriptionValidity}} days(including today). Previous appointment date: 
+                            {{ invoiceDetails.previousAppointmentDate | date:'dd-MMMM-yyyy' }}
+
                           </div>
                         </div>
                         <div class="wrapperClass">
