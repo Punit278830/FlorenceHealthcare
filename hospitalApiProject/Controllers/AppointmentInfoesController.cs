@@ -354,22 +354,21 @@ namespace hospitalApiProject.Controllers
     {
       int invoiceId = 0;
       DateTime? previousAppointmentDate = null;
+      bool isRepeatWithin6Days = false;
       try
       {
         // Add and save the appointment information
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
 
-        // Check for previous appointment within 6 days for the same patient and doctor
+        // Check for previous appointment within prescription validity window (forward or backward)
         var lastAppointment = await _context.AppointmentInfos
-          .Where(a => a.PatientId == appointmentInfo.PatientId && a.DoctorId == appointmentInfo.DoctorId && a.Id != appointmentInfo.Id)
-          .OrderByDescending(a => a.Date)
-          .FirstOrDefaultAsync();
+            .Where(a => a.PatientId == appointmentInfo.PatientId && a.Id != appointmentInfo.Id)
+            .OrderByDescending(a => a.Date)
+            .FirstOrDefaultAsync();
 
-        bool isRepeatWithin6Days = false;
-        // First, get the staff details using staffId
         var StaffInfo = await _context.StaffInfos
-            .Where(s => s.StaffId == appointmentInfo.Id)
+            .Where(s => s.StaffId == appointmentInfo.DoctorId)
             .FirstOrDefaultAsync();
 
         int prescriptionValidity = StaffInfo?.PrescriptionValidity ?? 6; // Default to 6 if null
@@ -377,13 +376,13 @@ namespace hospitalApiProject.Controllers
         if (lastAppointment != null)
         {
           var daysDiff = (appointmentInfo.Date - lastAppointment.Date).TotalDays;
-          if (daysDiff > 0 && daysDiff <= prescriptionValidity)
+          // If the new appointment is within prescription validity window (forward or backward), do not charge
+          if (Math.Abs(daysDiff) <= prescriptionValidity && daysDiff != 0)
           {
             isRepeatWithin6Days = true;
             previousAppointmentDate = lastAppointment.Date;
           }
         }
-
 
         // Create and save the invoice information
         var invoiceInfo = new InvoiceInfo()
@@ -394,7 +393,6 @@ namespace hospitalApiProject.Controllers
           PatientId = appointmentInfo.PatientId,
           Status = "Unpaid",
           IsConsultationPaid = isRepeatWithin6Days ? true : false,
-          
         };
 
         _context.InvoiceInfos.Add(invoiceInfo);

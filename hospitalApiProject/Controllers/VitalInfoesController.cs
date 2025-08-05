@@ -45,7 +45,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("byAppointment/{id}")]
         public async Task<ActionResult<VitalInfo>> GetVitalInfoByAppointment(int id)
         {
-            var vitalInfo = await _context.VitalInfos.Where(e=>e.AppointmentId == id).FirstOrDefaultAsync();
+            var vitalInfo = await _context.VitalInfos.Where(e => e.AppointmentId == id).FirstOrDefaultAsync();
 
             if (vitalInfo == null)
             {
@@ -61,17 +61,24 @@ namespace hospitalApiProject.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutVitalInfo(int id, VitalInfo vitalInfo)
         {
-                
-            if (id != vitalInfo.VitalId)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(vitalInfo).State = EntityState.Modified;
-
+            var vitalId = 0;
             try
             {
-                await _context.SaveChangesAsync();
+                if (id != vitalInfo.VitalId)
+                {
+                    return BadRequest();
+                }
+                if (id == 0)
+                {
+                    vitalId = _context.VitalInfos.Add(vitalInfo).Entity.VitalId;
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    _context.Entry(vitalInfo).State = EntityState.Modified;
+                    await _context.SaveChangesAsync();
+                    vitalId = id;
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -84,8 +91,7 @@ namespace hospitalApiProject.Controllers
                     throw;
                 }
             }
-
-            return NoContent();
+            return Ok(vitalId);
         }
 
         // POST: api/VitalInfoes

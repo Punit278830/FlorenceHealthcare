@@ -89,13 +89,8 @@ export class AddAppointmentComponent implements OnInit {
     private modalservice: ModalServiceService,
 
   ) {
-
     this.getDepartmentLits();
-    this.getTableData()
-
-
-
-
+    this.getTableData();
   }
 
   onEditPatient(id: number) {
@@ -158,9 +153,6 @@ export class AddAppointmentComponent implements OnInit {
     this.age = yearsDifference;
 
   }
-
-
-
   public sortData(sort: Sort) {
     const data = this.patientlist.slice();
 
@@ -309,11 +301,6 @@ export class AddAppointmentComponent implements OnInit {
       );
     });
   }
-  // ngAfterViewInit()
-  // {
-  //    const inputField:HTMLInputElement=this.searchInput.nativeElement;
-  //    inputField.value=''
-  // }
 
   postDatatoAppointment(id: number) {
     this.flag = true;
@@ -353,11 +340,6 @@ export class AddAppointmentComponent implements OnInit {
 
     // Convert the date to a proper Date object
     this.formattedDateTime = new Date(event.value);
-
-    console.log("formattedDateTime", this.formattedDateTime);
-    this.bookappointment.get('doctorId')?.patchValue('');
-    this.bookappointment.get('departmentid')?.patchValue('');
-    this.bookappointment.get('appointTime')?.patchValue(null);
   }
 
   bookAppointment(appointment: any) {
@@ -418,23 +400,14 @@ export class AddAppointmentComponent implements OnInit {
         this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
         this.invoiceService.invoiceId = result.invoiceId;
+        // If you want to go to profile after booking, pass vitalId and consultationId
+        // this.route.navigate([routes.profile], { queryParams: { patientId: this.patientId, vitalId: result.vitalId, consultationId: result.consultationId } });
         this.route.navigate(['/accounts/invoice-view']);
       });
     } else {
       this.bookappointment.markAllAsTouched();
     }
   }
-
-  // calculateDateDifference(dob:Date) {
-  //   const start = new Date(dob);
-  //   const end = new Date();
-  //   // Calculate the difference in years
-  //   const diffInMilliseconds = Math.abs(end.getTime() - start.getTime());
-  //   const yearsDifference = Math.floor(diffInMilliseconds / (365.25 * 24 * 60 * 60 * 1000));
-
-  //   this.age = yearsDifference;
-
-  // }
 
   getDepartmentLits() {
     this.departmentService.getDepartmentList().subscribe((data: any) => {
@@ -541,134 +514,6 @@ export class AddAppointmentComponent implements OnInit {
     }
 
   }
-
-  //   onUpload()
-  //   {
-  //     if (this.selectedFile) {
-
-  //       const reader = new FileReader();
-  //       reader.onload = () => {
-  //         this.base64String = reader.result as string;
-  //       this.FileUploadDto.FileName=this.selectedFile.name;
-  //       this.FileUploadDto.FileType=this.selectedFile.type;
-  //       this.FileUploadDto.FileData=this.base64String;
-  //       //this.FileUploadDto.FileData= this.base64String;
-  //       this.FileUploadDto.AppointmentId=18;
-  //       this.fileUploadService.uploadFiletoDataBase(this.FileUploadDto).subscribe(result=>{
-  //       console.log(result);
-  //       })
-  //       };
-
-  //       reader.readAsDataURL(this.selectedFile);
-
-
-
-  //   }
-  // }
-
-  //   onFileSelected(event: any): void {
-  //     this.selectedFile = event.target.files[0];
-  //   }
-  //   deleteIconFunc()
-  //   {
-  //     this.deleteIcon = !this.deleteIcon
-  //   }
-
-  //   downloadPatientFile()
-  //   {
-  //     const id=18;
-
-  //     this.base64StringArray=[];
-  //     this.fileUploadService.getUpodedFileByAppointment(id).subscribe((data:any)=>{
-
-  //       JSON.parse(data).map((res:any)=>{
-  //       //   const x=JSON.parse(res).fileData||'';
-  //       //    const fileName=JSON.parse(data).fileName;
-  //       // const type=JSON.parse(data).fileType;
-  //       const addDownloads={fileName:'',downloadLink:''};
-  //       const x=res.fileData||'';
-  //          this.downlodedFileName=res.fileName;
-  //       const type=res.fileType;
-  //       if(x)
-  //       {
-  //         let base64Data
-  //         if(type=='image/jpeg')
-  //         {
-  //           base64Data=(x.split('jpeg;base64,'))[1]
-  //         }
-  //         if(type=='application/pdf')
-  //         {
-  //           base64Data=(x.split('pdf;base64,'))[1]
-  //         }
-
-  //     const byteCharacters = atob(base64Data);
-  //     const byteNumbers = new Array(byteCharacters.length);
-  //     for (let i = 0; i < byteCharacters.length; i++) {
-  //     byteNumbers[i] = byteCharacters.charCodeAt(i);
-  //     }
-  //    const byteArray = new Uint8Array(byteNumbers);
-  //     const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-  //     const objectUrl = URL.createObjectURL(blob);
-  //     addDownloads.fileName=this.downlodedFileName;
-  //     addDownloads.downloadLink=objectUrl;
-  //     this.downLoadList.push(addDownloads);
-  //     console.log("downLoadList"+this.downLoadList);
-
-  //   //   this.downloadLink = document.createElement('a');
-  //   //  this.downloadLink.href = objectUrl;
-  //   //  this.downloadLink.download = fileName;   // Specify the filename here
-
-
-
-  //     // Append the link to the DOM
-
-  //     //document.body.appendChild(this.downloadLink);
-
-
-  //       }
-
-  //       })
-
-  //       // const x=JSON.parse(data).fileData||'';
-  //       // const fileName=JSON.parse(data).fileName;
-  //       // const type=JSON.parse(data).fileType;
-
-  //        //const base64Data=(x.split('jpeg;base64,'))[1]
-  //      // const byteCharacters = atob(base64Data);
-  //     //const byteNumbers = new Array(byteCharacters.length);
-  //     // for (let i = 0; i < byteCharacters.length; i++) {
-  //     //   byteNumbers[i] = byteCharacters.charCodeAt(i);
-  //     // }
-  //    // const byteArray = new Uint8Array(byteNumbers);
-  //     //const blob = new Blob([byteArray], { type: 'application/octet-stream' });
-
-  //     // Create an object URL
-  //    // const objectUrl = URL.createObjectURL(blob);
-
-  //     // Create a link with the object URL
-  //    // this.downloadLink = document.createElement('a');
-  //    // this.downloadLink.href = objectUrl;
-  //    // this.downloadLink.download = fileName; // Specify the filename here
-
-  //     // Append the link to the DOM
-  //     //document.body.appendChild(this.downloadLink);
-
-  //     // Programmatically click on the link to trigger the download
-
-
-
-
-  //      // })
-  //       // this.base64StringArray.map(base64Data=>{
-
-
-  //     })
-
-  //   }
-  //   downloadFile()
-  //   {
-  //     this.downloadLink.click();
-  //   }
 
   OnCancel() {
     this.patientAppointmentData = []

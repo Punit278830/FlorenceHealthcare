@@ -1065,7 +1065,10 @@ printContent(): void {
     this.question.updateVitalInfo(vitalId, this.vitalDto).subscribe(
       (res) => {
         this.toaster.success("Vital Info Successfully Updated", "Vital update");
-
+        // Save the returned vitalId to local state
+        if (res && res.vitalId) {
+          this.vitalDto.vitalId = res.vitalId;
+        }
         // Call getQuestionnaireByDepartmentId and proceed to next step after completion
         this.getQuestionnaireByDepartmentId(this.departmentId).then(() => {
           this.stepper.next();

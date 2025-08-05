@@ -236,6 +236,8 @@ export class AppointmentListComponent implements OnInit {
     const staffData$ = this.staffService.getDoctorsList();
     const patientData$ = this.patientService.getPatientList();
     forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
+      // Debug log to check department data
+      console.log('Departments from API:', departments);
       // Combine data based on departmentId
       this.totalData = appointments.length;
 
