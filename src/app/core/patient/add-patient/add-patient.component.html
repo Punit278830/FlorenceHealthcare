@@ -156,24 +156,30 @@
                                         </div> -->
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-2">
-                                    <div class="form-group local-forms">
-                                        <label for="age">Age</label>
-                                        <input class="form-control" formControlName="age" type="number" 
-                                            (input)="onAgeChange($event)" placeholder="Enter age" min="0">
-                                        <div *ngIf="patientReg.get('age')?.invalid && (patientReg.get('age')?.dirty || patientReg.get('age')?.touched)"
-                                            class="text-danger">
-                                            <div *ngIf="patientReg.get('age')?.errors?.['pattern']">
-                                                Please enter a valid number
-                                            </div>
-                                            <div *ngIf="patientReg.get('age')?.errors?.['min']">
-                                                Age cannot be negative
+                                <div class="col-12 col-md-6 col-xl-3">
+                                    <div class="form-group local-forms d-flex align-items-end">
+                                        <div style="width: 60%;">
+                                            <label for="age">Age</label>
+                                            <input class="form-control" formControlName="age" type="number"
+                                                (input)="onAgeOrUnitChange()" placeholder="Enter age" min="0">
+                                            <div *ngIf="patientReg.get('age')?.invalid && (patientReg.get('age')?.dirty || patientReg.get('age')?.touched)"
+                                                class="text-danger">
+                                                <div *ngIf="patientReg.get('age')?.errors?.['pattern']">
+                                                    Please enter a valid number
+                                                </div>
+                                                <div *ngIf="patientReg.get('age')?.errors?.['min']">
+                                                    Age cannot be negative
+                                                </div>
                                             </div>
                                         </div>
+                                        <div style="width: 40%; padding-left: 8px;">
+                                            <label style="visibility: hidden;">Unit</label>
+                                            <select class="form-select" formControlName="ageUnit" (change)="onAgeOrUnitChange()" style="height: 38px;">
+                                                <option value="year">Year</option>
+                                                <option value="month">Month</option>
+                                            </select>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="col-12 col-md-6 col-xl-2">
-                                    <label><strong>{{ displayAge }}</strong></label>
                                 </div>
 
 
