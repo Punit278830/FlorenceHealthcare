@@ -31,8 +31,9 @@ export class AddPatientComponent implements OnInit {
   public btnLable = 'Capture Image';
   public RegrestationDate = '';
   public maxDate;
-  public months!:number;
+  public months!: number;
   displayAge: string = '';
+  // Remove ageUnit property, use form control instead
 
   constructor(private fb: FormBuilder,
     private patientService: PatientService,
@@ -98,6 +99,7 @@ export class AddPatientComponent implements OnInit {
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
       age: ['', [Validators.pattern(/^\d+$/), Validators.min(0)]],
+      ageUnit: ['year'],
       IdentiyNumber: [''],
       IdentiyName: [''],
     })
@@ -146,40 +148,43 @@ export class AddPatientComponent implements OnInit {
     this.patientReg.reset();
   }
 
-  onAgeChange(event: any): void {
-    const age = parseInt(event.target.value);
+
+  onAgeOrUnitChange(): void {
+    const ageValue = this.patientReg.get('age')?.value;
+    const ageUnit = this.patientReg.get('ageUnit')?.value;
+    const age = parseInt(ageValue, 10);
     if (!isNaN(age) && age >= 0) {
       const today = new Date();
-      let birthYear = today.getFullYear() - age;
-      
-      // If birthday hasn't occurred this year, subtract one year
-      const birthDate = new Date(birthYear, today.getMonth(), today.getDate());
-      if (birthDate > today) {
-        birthYear--;
+      let finalBirthDate: Date;
+      if (ageUnit === 'year') {
+        let birthYear = today.getFullYear() - age;
+        finalBirthDate = new Date(birthYear, today.getMonth(), today.getDate());
+        // If birthday hasn't occurred this year, subtract one year
+        if (finalBirthDate > today) {
+          birthYear--;
+          finalBirthDate = new Date(birthYear, today.getMonth(), today.getDate());
+        }
+        this.months = age * 12;
+      } else if (ageUnit === 'month') {
+        // Subtract months from today
+        const birth = new Date(today);
+        birth.setMonth(today.getMonth() - age);
+        finalBirthDate = birth;
+        this.months = age;
+      } else {
+        // fallback
+        finalBirthDate = today;
       }
-      
-      // Create the birth date with current month and day
-      const finalBirthDate = new Date(birthYear, today.getMonth(), today.getDate());
-      
       // Format the date for the form
       const formattedDate = this.datePipe.transform(finalBirthDate, 'yyyy-MM-dd');
       this.patientReg.get('dob')?.setValue(formattedDate);
-      
-      // Update display age
-      if (age < 12) {
-        this.displayAge = 'Month';
-        this.months = age;
-      } else {
-        this.displayAge = 'Year';
-      }
-
       // Validate the calculated date is not in the future
       if (finalBirthDate > today) {
         this.patientReg.get('dob')?.setErrors({ 'futureDate': true });
         this.toastr.warning('Calculated birth date cannot be in the future', 'Invalid Age');
         return;
       }
-    } else if (event.target.value !== '') {
+    } else if (ageValue !== '') {
       this.toastr.warning('Please enter a valid age', 'Invalid Input');
     }
   }
