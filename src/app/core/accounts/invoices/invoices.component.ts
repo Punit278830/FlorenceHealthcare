@@ -177,6 +177,15 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.selectedPaymentStatus = formData.paymentStatus || 'All';
   }
 
+  // Utility: Get invoice generated time in IST for display
+  public getInvoiceGeneratedTime(invoice: any): string {
+    // Prefer InvoiceDate, fallback to createdDate
+    let dateStr = invoice?.InvoiceDate || invoice?.createdDate;
+    if (!dateStr) return '';
+    // Use dayjs.tz to ensure IST time
+    return dayjs.tz(dateStr, 'Asia/Kolkata').format('HH:mm');
+  }
+
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
   console.log('getTableData called with search criteria:', this.searchCriteria);

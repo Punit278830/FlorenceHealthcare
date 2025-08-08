@@ -12,7 +12,7 @@ public partial class PaymentModeInfo
   public string? itemId { get; set; }
   public string? TransactionId { get; set; }
 
-  public DateTime? PaymentDate { get; set; } = DateTime.Now;
+  public DateTime? PaymentDate { get; set; } = DateTime.UtcNow;
 
   public int? Amount { get; set; }
 

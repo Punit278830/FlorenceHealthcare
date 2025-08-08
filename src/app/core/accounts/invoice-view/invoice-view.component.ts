@@ -467,9 +467,14 @@ export class InvoiceViewComponent implements OnInit {
     this.getMergedTransactionIds();
     this.thermalvisible = true;
 
-    // Use dayjs for current time in IST
-    const now = dayjs().tz('Asia/Kolkata');
-    this.Timenow = now.format('HH:mm');
+    // Use invoice generated time for Timenow
+    let invoiceTime: string | undefined = undefined;
+    if (this.invoiceDetails?.InvoiceDate) {
+      invoiceTime = dayjs.utc(this.invoiceDetails.InvoiceDate).tz('Asia/Kolkata').format('HH:mm');
+    } else if (this.invoiceDetails?.createdDate) {
+      invoiceTime = dayjs.utc(this.invoiceDetails.createdDate).tz('Asia/Kolkata').format('HH:mm');
+    }
+    this.Timenow = invoiceTime || '';
 
     if (this.isTextboxVisible == false) {
       this.ReferenceTextBoxVal = 'NA';
