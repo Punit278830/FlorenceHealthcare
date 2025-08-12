@@ -349,12 +349,12 @@ public getGreetingMsg()
   }
 
 
-  appointmentCount()
-  {
-    this.appointmentService.getAppointmentCount().subscribe(res=>{
-      res>0?this.appCount=res:this.appCount=0;
-    })
-  }
+appointmentCount() {
+  this.appointmentService.getAppointmentCount().subscribe(count => {
+    this.appCount = count > 0 ? count : 0;
+  });
+}
+
 
   consultationCount()
   {

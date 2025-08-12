@@ -132,7 +132,7 @@
                     <td>{{data.ageinYear}}</td>
                     <td><a href="javascript:;">{{data.mobile}}</a></td>
                     <td>{{data.email}}</td>
-                    <td>{{data.regstrationDate}}</td> 
+                    <td>{{ data.regstrationDate | date:'dd/MM/yyyy' }}</td> 
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
