@@ -72,8 +72,10 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   selectedPaymentStatus: string = 'All';
   totalPaymentAmount: number = 0;
   public searchForm!: FormGroup;
+  selectedStatus: string = 'all';
 
-  public searchCriteria: InvoiceSearch = {
+  public searchCriteria: Invoice
+ arch = {
     sortFieldName: 'InvoiceId',
     sortDirection: 1, // Descending
     pageNumber: 1,
@@ -103,12 +105,13 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   }
   ngOnInit() {
+    this.loggedIn = JSngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
 
     const today = new Date();
-    const formattedToday = today.toISOString().slice(0, 10);
-    
-    // Initialize search criteria with today's date
+    const formattedToday = today.toISOString().slice(0, 10);teria this.totalPaymentAmount = this.getGrandTotalAmount();
+   this.updateTotalPaymentAmount();
+with today's date
     this.searchCriteria = {
       fromDate: formattedToday,
       toDate: formattedToday,
@@ -669,6 +672,57 @@ private calculateTotalPaymentAmount(): void {
       pdf.save(`Invoice_Report_${fromDate}_to_${toDate}.pdf`);
       this.loadingService.hideLoader();
     }
-  
-  
+    updateTotalPaymentAmount() {
+
+  let fiupdateTotalPaymentAmount(): void {
+  if (!this.invoices || this.invoices.length === 0) {
+    this.totalFilteredAmount = 0;
+    return;
   }
+
+  const normalizedStatus = (this.selectedStatus || '').toString().trim().toLowerCase();
+
+  if (normalizedStatus === 'all') {
+    this.totalFilteredAmount = 0;
+    return;
+  }
+
+  // ✅ Declare filteredInvoices only once
+  const filteredInvoices = this.invoices.filter(inv => {
+    const status = (inv.status || '').toString().trim().toLowerCase();
+    return status === normalizedStatus;
+  });
+
+  this.totalFilteredAmount = filteredInvoices.reduce((sum, inv) => {
+    const numericAmount = typeof inv.amount === 'number'
+      ? inv.amount
+      : parseFloat((inv.amount || '0').toString().replace(/[^0-9.-]/g, ''));
+    return sum + (isNaN(numericAmount) ? 0 : numericAmount);
+  }, 0);
+}
+getGrandTotalAmount(): number {
+    const total = this.invoices.reduce((sum, inv) => {
+      const numericAmount = typeof inv.amount === 'number'
+        ? inv.amount
+        : parseFloat((inv.amount || '0').toString().replace(/[^0-9.-]/g, ''));
+      return sum + (isNaN(numericAmount) ? 0 : numericAmount);
+    }, 0);
+
+    console.log('Grand Total:', total);
+    return total;
+  }
+
+
+
+  getTotalPaidAmount(): number {
+    return this.invoices
+      .filter(inv => inv.status && inv.status.toLowerCase() === 'paid')
+      .reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+  }
+
+  getTotalUnpaidAmount(): number {
+    return this.invoices
+      .filter(inv => inv.status && inv.status.toLowerCase() === 'unpaid')
+      .reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+  }
+}

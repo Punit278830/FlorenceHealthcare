@@ -108,29 +108,48 @@
                 </div>
               </div>
             
-              <div class="row">
-                <!-- Third Row: Search Button, Total Amount for the Day -->
-                <div class="col-12 col-md-6">
-                  <div class="doctor-submit" style="margin-top: 10px;"> <!-- Adjusted margin -->
-                    <button type="submit" class="btn btn-primary submit-list-form me-2" style="padding: 10px 15px;">Search</button> <!-- Optional padding adjustment -->
-                  </div>
-                </div>
-            
-                <div class="col-12 col-md-6">
-                  <div class="dash-widget" style="margin-bottom: 10px;">
-                    <div class="dash-content dash-count" style="margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between;">
-                      <h4 style="margin-right: 10px; margin-bottom: 5px;">Total Amount for the Day ({{ selectedPaymentMode }})</h4>
-                      <h2 style="margin-bottom: 5px;">
-                        <span  class="counter-up" [countUp]="totalPaymentAmount" [options]="{duration: 10}">{{ totalPaymentAmount | currency: 'INR' }}</span>
-                      </h2>
-                    </div>
-                  </div>
+            <div class="row">
+             <!-- Third Row: Search Button, Total Amount for the Day -->
+              <div class="col-12 col-md-6">
+                <div class="doctor-submit" style="margin-top: 10px;">
+                 <button type="submit" class="btn btn-primary submit-list-form me-2" style="padding: 10px 15px;">Search</button>
                 </div>
               </div>
-            </form>
-            </div>
-            <div class="table-responsive" id="convertToPdf">
-              <table matSort (matSortChange)="sortData($event)"
+                  <div class="col-12 col-md-6">
+                    <div class="dash-widget" style="margin-bottom: 10px;">
+                      <!-- 💰 Grand Total Display -->
+                       <div class="dash-content dash-count" style="margin-bottom: 0; padding-bottom: 0; display: flex; align-items: center; justify-content: space-between;">
+                        <h4 style="margin-right: 10px; margin-bottom: 5px;">
+                          Total Amount for the Day ({{ selectedPaymentMode }})
+                        </h4>
+                        <h2 style="margin-bottom: 5px;">
+                          <span class="counter-up" [countUp]="totalPaymentAmount" [options]="{ duration: 10 }">
+                            {{ totalPaymentAmount | currency: 'INR' }}
+                          </span>
+                        </h2>
+                      </div>
+                      <!-- 🔽 Dropdown Filter -->
+                       <div style="margin-top: 10px; display: flex; align-items: center; gap: 15px;">
+                        <div>
+                          <label for="statusFilter" style="font-weight: 500; margin-right: 10px">
+                            <strong>Filter by Status:</strong>
+                          </label>
+                          <select id="statusFilter" [(ngModel)]="selectedStatus" (change)="updateTotalPaymentAmount()">
+                            <option value="all">All</option>
+                            <option value="paid">Paid</option>
+                            <option value="unpaid">Unpaid</option>
+                          </select>
+                        </div>
+                      </div>
+                      <!-- 📊 Filtered Total Display -->
+                       <div *ngIf="selectedStatus !== 'all'" style="margin-top: 15px; font-weight: bold;background-color: #f9f9f9; border-radius: 6px;">
+                        Filtered {{ selectedStatus | titlecase }} Amount:
+                        {{ totalFilteredAmount | currency:'INR':'symbol' }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="table-responsive" id="convertToPdf">
+                    <table matSort (matSortChange)="sortData($event)"
                 class="table border-0 custom-table comman-table datatable mb-0">
                 <thead>
                   <tr>
@@ -262,9 +281,5 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+         
 </div>
