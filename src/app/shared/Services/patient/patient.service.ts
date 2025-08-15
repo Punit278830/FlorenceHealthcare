@@ -49,6 +49,11 @@ export class PatientService {
 
 
 
+GetNewPatientsToday() {
+  return this._http.get(`${this.apiUrl}PatientInfoes/count/today`);
+}
+
+
 getPatientData(id:number)
 {
   return this._http.get(this.apiUrl+'PatientInfoes/'+id);

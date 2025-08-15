@@ -64,6 +64,7 @@ interface data {
 export class AdminDashboardComponent implements OnInit {
   public routes = routes;
   public selectedValue ! : string  ;
+  
   public currentYear!: number;
   public recentYears: number[] = [];
   @ViewChild('chart') chart!: ChartComponent;
@@ -74,13 +75,15 @@ export class AdminDashboardComponent implements OnInit {
   public CurrentTime=0;
   public greetingMsg='Good Morning';
   public userName='';
-  public appCount=0;
+  public count=0;
   public consultatCount=0;
   public earning=0;
   public totalAmount=0;
   public combinedData:any[]  = [];
   public invoices:any[] =[];
   public patientCountByGender: any[]=[];
+ public appCount = 0; // for dashboard appointments count
+
 
   constructor(public data : DataService,
     private _auth:AuthService,
@@ -181,7 +184,7 @@ private departmentService:DepartmentService,private route : Router)
     const data=JSON.parse(localStorage.getItem('data')||'')
   this.userName=data.fname +" "+data.lname;
   this.appointmentCount();
-  this.consultationCount();
+this.patientCountToday();
   //this.totalEarning();
   this.totalAmounts();
   this.loadRecentPatients();
@@ -189,6 +192,7 @@ private departmentService:DepartmentService,private route : Router)
       this.fetchCombineData()
       this.currentYear = new Date().getFullYear(); // Get the current year
       this.generateRecentYears();
+      
       this.getPatientCountByGender();
       this.getPatientCountByDepartment();
       
@@ -351,18 +355,18 @@ public getGreetingMsg()
 
 appointmentCount() {
   this.appointmentService.getAppointmentCount().subscribe(count => {
-    this.appCount = count > 0 ? count : 0;
+    this.count = count > 0 ? count : 0;
   });
 }
 
 
-  consultationCount()
-  {
-    this.appointmentService.getConsultationCount().subscribe(res=>{
-      res>0?this.consultatCount=res:this.consultatCount=0;
-    })
+patientCountToday() {
+this.patientService.GetNewPatientsToday().subscribe((res: number) => {
+  this.consultatCount = res > 0 ? res : 0;
 
-  }
+});
+
+}
 
   // totalEarning()
   // {
