@@ -94,6 +94,9 @@ namespace hospitalApiProject.Controllers
       return Ok(result);
     }
 
+  
+
+
     //GET: api/PatientInfoes/5
     [HttpGet("{id}")]
     public async Task<ActionResult<PatientInfo>> GetPatientInfo(int id)
@@ -188,6 +191,28 @@ namespace hospitalApiProject.Controllers
 
       return CreatedAtAction("GetPatientInfo", new { id = patientInfo.PatientId }, patientInfo);
     }
+
+    // GET: api/PatientInfoes/count/today
+    [HttpGet("count/today")]
+    public async Task<ActionResult<int>> GetNewPatientsToday()
+    {
+      // If regstrationDate is a DATETIME, use a range [today, tomorrow)
+      var today = DateTime.Today;
+      var tomorrow = today.AddDays(1);
+
+      var count = await _context.PatientInfos
+          .AsNoTracking()
+// NOTE: property name must match your EF model: RegstrationDate (same typo as DB)
+.Where(p => p.RegstrationDate != null &&
+            p.RegstrationDate.Value.Date == DateTime.Today)
+          .Select(p => p.PatientId)
+          .Distinct()
+          .CountAsync();
+
+      return Ok(count); // returns a bare JSON number
+    }
+
+
 
 
     // DELETE: api/PatientInfoes/5

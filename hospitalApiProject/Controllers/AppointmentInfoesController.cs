@@ -38,35 +38,26 @@ namespace hospitalApiProject.Controllers
       return appointmentInfo;
     }
 
-    //Count of Appointments 
+
+
+
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
-      var currentDate = DateTime.Now.Date;        var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.IsDeleted != true) // Exclude soft deleted appointments
-          .CountAsync();
-
-      if (appointmentCount == 0) // Check if appointments were found
-      {
-        return Ok(new { message = "No appointments found for the current date" });
-      }
-
-      return Ok(appointmentCount);
-    }
-
-
-    //Count of Appointments by doctor id
-    [HttpGet("count/{id}")]
-    public async Task<ActionResult<int>> GetAppointmentCount(int id)
-    {
       var currentDate = DateTime.Now.Date;
+
+      var today = DateTime.Now.Date;
+      var tomorrow = today.AddDays(1);
+
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.Date == currentDate && e.IsDeleted != true)
+          .Where(e => e.Date >= today && e.Date < tomorrow)
           .CountAsync();
+
+
 
       if (appointmentCount == 0) // Check if appointments were found
       {
-        return Ok(new { message = "No appointments found for the current date" });
+        return Ok(appointmentCount);
       }
 
       return Ok(appointmentCount);
