@@ -353,19 +353,43 @@ public getGreetingMsg()
   }
 
 
+
+
 appointmentCount() {
-  this.appointmentService.getAppointmentCount().subscribe(count => {
-    this.count = count > 0 ? count : 0;
-  });
+  this.appointmentService.getAppointmentCount().subscribe(
+    count => {
+      console.log('Appointment count:', count);
+      if (typeof count === 'number') {
+        this.count = count > 0 ? count : 0;
+      } else {
+        this.count = 0;
+      }
+    },
+    error => {
+      console.error('Error fetching appointment count:', error);
+      this.count = 0;
+    }
+  );
 }
 
 
+
+
 patientCountToday() {
-this.patientService.GetNewPatientsToday().subscribe((res: number) => {
-  this.consultatCount = res > 0 ? res : 0;
-
-});
-
+  this.patientService.GetNewPatientsToday().subscribe(
+    res => {
+      console.log('Patients visited today:', res);
+      if (typeof res === 'number') {
+        this.consultatCount = res > 0 ? res : 0;
+      } else {
+        this.consultatCount = 0;
+      }
+    },
+    error => {
+      console.error('Error fetching patients visited today:', error);
+      this.consultatCount = 0;
+    }
+  );
 }
 
   // totalEarning()
