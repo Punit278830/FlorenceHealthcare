@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hospital.Services.Interface\Hospital.Services.Interface.csproj" />
+    <ProjectReference Include="..\Hospital.Repositories.Interface\Hospital.Repositories.Interface.csproj" />
+    <ProjectReference Include="..\Hospital.Models.Data\Hospital.Models.Data.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
