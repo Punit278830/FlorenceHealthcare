@@ -38,9 +38,6 @@ namespace hospitalApiProject.Controllers
       return appointmentInfo;
     }
 
-
-
-
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {

@@ -564,4 +564,26 @@ export class AppointmentListComponent implements OnInit {
     return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY');
   }
 
+  // Combine only the date part of `date` with the given appointment time without timezone conversion
+  formatDateWithTime(date: any, appointTime?: any): string {
+    if (!date && !appointTime) return '';
+
+    let datePart = '';
+    if (date) {
+      if (typeof date === 'string') {
+        const tIndex = date.indexOf('T');
+        datePart = tIndex > 0 ? date.substring(0, tIndex) : date;
+      } else {
+        // If it's a Date object or other type, format as YYYY-MM-DD
+        datePart = dayjs(date).format('YYYY-MM-DD');
+      }
+    }
+
+    if (appointTime) {
+      return `${datePart ? datePart + ' ' : ''}${String(appointTime)}`;
+    }
+
+    return datePart;
+  }
+
 }

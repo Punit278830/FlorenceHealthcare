@@ -18,15 +18,8 @@ import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 
-// Extend dayjs with plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
-// Set default timezone to IST
-dayjs.tz.setDefault('Asia/Kolkata');
 
 interface data {
   value: string;
@@ -39,8 +32,6 @@ interface data {
   
   
 })
-
-
 
 export class InvoicesComponent implements OnInit {
   public routes = routes;
@@ -167,9 +158,9 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   // Private method to extract form data and return it
   private getFormData() {
     const formData = this.searchForm.value;
-    const today = dayjs().tz('Asia/Kolkata');
-    this.searchCriteria.fromDate = formData.from ? dayjs(formData.from).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
-    this.searchCriteria.toDate = formData.to ? dayjs(formData.to).tz('Asia/Kolkata').format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
+    const today = dayjs(); // no timezone adjustment
+    this.searchCriteria.fromDate = formData.from ? dayjs(formData.from).format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
+    this.searchCriteria.toDate = formData.to ? dayjs(formData.to).format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
     this.searchCriteria.paymentMode = Number(formData.paymentMode ?? 0);
     this.searchCriteria.paymentStatus = Number(formData.paymentStatus ?? 0);
     // Update the selected values used in calculation
@@ -178,13 +169,13 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   }
 
   // Utility: Get invoice generated time in IST for display
-  public getInvoiceGeneratedTime(invoice: any): string {
-    // Prefer InvoiceDate, fallback to createdDate
-    let dateStr = invoice?.InvoiceDate || invoice?.createdDate;
-    if (!dateStr) return '';
-    // Use dayjs.tz to ensure IST time
-    return dayjs.tz(dateStr, 'Asia/Kolkata').format('HH:mm');
-  }
+  // public getInvoiceGeneratedTime(invoice: any): string {
+  //   // Prefer InvoiceDate, fallback to createdDate
+  //   let dateStr = invoice?.InvoiceDate || invoice?.createdDate;
+  //   if (!dateStr) return '';
+  //   // Use dayjs.tz to ensure IST time
+  //   return dayjs.tz(dateStr, 'Asia/Kolkata').format('HH:mm');
+  // }
 
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
@@ -433,7 +424,7 @@ private calculateTotalPaymentAmount(): void {
         private saveAsExcelFile(buffer: any, fileName: string): void 
         {
           // Use dayjs for date formatting
-          const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
+          const formattedDate = dayjs().format('DD-MM-YYYY');
           const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
           FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
     }
@@ -523,7 +514,7 @@ private calculateTotalPaymentAmount(): void {
       const margin = 15; // revert to original margin
       let y = 20;
       const lineHeight = 6;
-      const formattedDate = dayjs().tz('Asia/Kolkata').format('DD-MM-YYYY');
+      const formattedDate = dayjs().format('DD-MM-YYYY');
       const fromDate = dayjs(this.searchCriteria.fromDate).format('DD-MM-YYYY');
       const toDate = dayjs(this.searchCriteria.toDate).format('DD-MM-YYYY');
 

@@ -506,116 +506,144 @@ namespace hospitalApiProject.Controllers
     public async Task<SearchResponseBase<InvoiceInfoResponse>> SearchInvoices([FromBody] InvoiceSearch criteria)
     {
         var response = new SearchResponseBase<InvoiceInfoResponse>();
-        try
+      try
+      {
+        // Base invoices query (server-side filtering + sorting, then paginate)
+        var invoicesQuery = _context.InvoiceInfos
+            .AsNoTracking()
+            .Where(i => i.IsDeleted != true)
+            .AsQueryable();
+
+        // Date filters:
+        // - If from/to provided: filter by Invoice.CreatedDate (date only)
+        // - If not provided: do NOT apply any date filter (return all)
+        if (!string.IsNullOrWhiteSpace(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate)
+            && !string.IsNullOrWhiteSpace(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
         {
-            var query = _context.InvoiceInfos
-                .Where(i => i.IsDeleted != true )
-
-                .AsQueryable();
-
-            // Parse and filter by date range
-            DateTime utcNow = DateTime.UtcNow;
-            if (!string.IsNullOrEmpty(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate) &&
-            !string.IsNullOrEmpty(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
-            {
-              
-
-                query = query.Where(i => _context.PaymentModeInfo
-                    .Any(pm => pm.InvoiceId == i.InvoiceId &&
-                              pm.PaymentDate.HasValue &&
-                              pm.PaymentDate.Value.Date >= fromDate.Date &&
-                              pm.PaymentDate.Value.Date <= toDate.Date));
-            }
-            else
-            {
-                query = query.Where(i => _context.PaymentModeInfo
-                    .Any(pm => pm.InvoiceId == i.InvoiceId &&
-                              pm.PaymentDate.HasValue &&
-                              pm.PaymentDate.Value.Date == utcNow.Date));
-            }
-
-            // Filter by payment status
-            if (criteria.PaymentStatus.HasValue && criteria.PaymentStatus.Value != PaymentStatus.All)
-            {
-                var statusEnum = criteria.PaymentStatus.Value;
-                query = query.Where(i => i.Status.ToLower() == statusEnum.ToString().ToLower());
-            }
-
-            // Filter by payment mode
-            if (criteria.PaymentMode.HasValue && criteria.PaymentMode.Value != PaymentMode.All)
-            {
-                var modeEnum = criteria.PaymentMode.Value;
-                query = query.Where(i => _context.PaymentModeInfo
-                    .Where(pm => pm.InvoiceId == i.InvoiceId)
-                    .Select(pm => pm.PaymentMode.ToLower())
-                    .Contains(modeEnum.ToString().ToLower()));
-            }
-
-            // Apply sorting
-            if (!string.IsNullOrEmpty(criteria.SortFieldName))
-            {
-                if ((SortDirection)criteria.SortDirection == SortDirection.Descending)
-                    query = query.OrderByDescending(e => EF.Property<object>(e, criteria.SortFieldName));
-                else
-                    query = query.OrderBy(e => EF.Property<object>(e, criteria.SortFieldName));
-            }
-            else
-            {
-                query = query.OrderByDescending(e => e.InvoiceId);
-            }
-
-            // Paging
-            int skip = (criteria.PageNumber - 1) * criteria.PageSize;
-            int totalCount = await query.CountAsync();
-            int totalPages = (int)Math.Ceiling((double)totalCount / criteria.PageSize);
-            var invoices = await query.Skip(skip).Take(criteria.PageSize)
-                .Select(invoice => new InvoiceInfoResponse
-                {
-                    InvoiceId = invoice.InvoiceId,
-                    AppointmentId = invoice.AppointmentId,
-                    PatientId = invoice.PatientId,
-                    CreatedDate = invoice.CreatedDate,
-                    Amount = invoice.Amount + _context.AdditionalInvoiceItems
-                              .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                              .Sum(ai => ai.FinalAmount) ?? 0,
-                    Status = invoice.Status,
-                    PaymentDetails = _context.PaymentModeInfo
-                              .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                              .Select(pm => new PaymentModeInfo
-                              {
-                                PaymentId = pm.PaymentId,
-                                PaymentMode = pm.PaymentMode,
-                                TransactionId = pm.TransactionId,
-                                PaymentDate = pm.PaymentDate,
-                                Amount = pm.Amount
-                              }).ToList(),
-                    PaymentModes = _context.PaymentModeInfo
-                              .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                              .Select(pm => pm.PaymentMode)
-                              .Distinct()
-                              .Any() ? string.Join(", ", _context.PaymentModeInfo
-                              .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                              .Select(pm => pm.PaymentMode)
-                              .Distinct()) : null,
-                    TotalUnpaidAmount = invoice.Amount + _context.AdditionalInvoiceItems
-                              .Where(ai => ai.InvoiceId == invoice.InvoiceId)
-                              .Sum(ai => ai.FinalAmount) - _context.PaymentModeInfo
-                              .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                              .Sum(pm => pm.Amount) ?? 0,
-                    PatientFname = (_context.PatientInfos
-                        .Where(p => p.PatientId == invoice.PatientId)
-                        .Select(p => p.FirstName + (string.IsNullOrEmpty(p.LastName) ? "" : (" " + p.LastName)))
-                        .FirstOrDefault()),
-                })
-                .ToListAsync();
-            response.Results = invoices;
-            response.TotalCount = totalCount;
-            response.TotalPages = totalPages;
+          fromDate = fromDate.Date;
+          toDate = toDate.Date;
+          invoicesQuery = invoicesQuery.Where(i => i.CreatedDate.HasValue
+                                                && i.CreatedDate.Value.Date >= fromDate
+                                                && i.CreatedDate.Value.Date <= toDate);
         }
-        catch (Exception ex)
+
+        // Filter by payment status (enum name vs stored text)
+        if (criteria.PaymentStatus.HasValue && criteria.PaymentStatus.Value != PaymentStatus.All)
         {
-            response.ErrorMessage = ex.Message;
+          var status = criteria.PaymentStatus.Value.ToString().ToLower();
+          invoicesQuery = invoicesQuery.Where(i => i.Status != null && i.Status.ToLower() == status);
         }
+
+        // Filter by payment mode (enum name vs stored text in PaymentModeInfo)
+        if (criteria.PaymentMode.HasValue && criteria.PaymentMode.Value != PaymentMode.All)
+        {
+          var mode = criteria.PaymentMode.Value.ToString().ToLower();
+          invoicesQuery = invoicesQuery.Where(i => _context.PaymentModeInfo
+              .Where(pm => pm.InvoiceId == i.InvoiceId)
+              .Select(pm => pm.PaymentMode.ToLower())
+              .Contains(mode));
+        }
+
+        // Sorting
+        if (!string.IsNullOrEmpty(criteria.SortFieldName))
+        {
+          if ((SortDirection)criteria.SortDirection == SortDirection.Descending)
+            invoicesQuery = invoicesQuery.OrderByDescending(e => EF.Property<object>(e, criteria.SortFieldName));
+          else
+            invoicesQuery = invoicesQuery.OrderBy(e => EF.Property<object>(e, criteria.SortFieldName));
+        }
+        else
+        {
+          invoicesQuery = invoicesQuery.OrderByDescending(e => e.InvoiceId);
+        }
+
+        // Total count BEFORE paging
+        var totalCount = await invoicesQuery.CountAsync();
+
+        // Paging
+        var pageNumber = criteria.PageNumber <= 0 ? 1 : criteria.PageNumber;
+        var pageSize = criteria.PageSize <= 0 ? 100 : criteria.PageSize;
+        var skip = (pageNumber - 1) * pageSize;
+
+        // Select minimal fields for the current page
+        var pageInvoices = await invoicesQuery
+            .Skip(skip)
+            .Take(pageSize)
+            .Select(i => new {
+              i.InvoiceId,
+              i.AppointmentId,
+              i.PatientId,
+              i.CreatedDate,
+              i.Amount,
+              i.Status
+            })
+            .ToListAsync();
+
+        var invoiceIds = pageInvoices.Select(i => i.InvoiceId).ToList();
+        var patientIds = pageInvoices.Select(i => i.PatientId).Distinct().ToList();
+
+        // Load related data for the selected invoices (single round trip per set)
+        var paymentDetails = await _context.PaymentModeInfo
+            .AsNoTracking()
+            .Where(pm => invoiceIds.Contains(pm.InvoiceId))
+            .ToListAsync();
+
+        var additionalItems = await _context.AdditionalInvoiceItems
+            .AsNoTracking()
+            .Where(ai => invoiceIds.Contains(ai.InvoiceId))
+            .ToListAsync();
+
+        var patients = await _context.PatientInfos
+            .AsNoTracking()
+            .Where(p => patientIds.Contains(p.PatientId))
+            .Select(p => new { p.PatientId, p.FirstName, p.LastName })
+            .ToListAsync();
+
+        // In-memory grouping/aggregation for response projection
+        var additionalSumByInvoice = additionalItems
+            .GroupBy(ai => ai.InvoiceId)
+            .ToDictionary(g => g.Key, g => g.Sum(ai => (decimal?)(ai.FinalAmount) ?? 0m));
+
+        var paymentsByInvoice = paymentDetails
+            .GroupBy(pm => pm.InvoiceId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+
+        var patientNameById = patients
+            .ToDictionary(p => p.PatientId, p => p.FirstName + (string.IsNullOrEmpty(p.LastName) ? "" : (" " + p.LastName)));
+
+        var results = pageInvoices.Select(i =>
+        {
+          var addAmount = additionalSumByInvoice.TryGetValue(i.InvoiceId, out var addSum) ? addSum : 0m;
+          var pms = paymentsByInvoice.TryGetValue(i.InvoiceId, out var pmList) ? pmList : new List<PaymentModeInfo>();
+          var totalPaid = pms.Sum(pm => pm.Amount ?? 0);
+          var baseAmount = i.Amount ?? 0;
+          var paymentModesStr = string.Join(", ", pms.Select(pm => pm.PaymentMode).Where(x => !string.IsNullOrEmpty(x)).Distinct());
+          var fullName = patientNameById.TryGetValue(i.PatientId, out var name) ? name : null;
+
+          return new InvoiceInfoResponse
+          {
+            InvoiceId = i.InvoiceId,
+            AppointmentId = i.AppointmentId,
+            PatientId = i.PatientId,
+            CreatedDate = i.CreatedDate,
+            Amount = (int?)((decimal)baseAmount + addAmount),
+            Status = i.Status,
+            PaymentDetails = pms, // includes PaymentDate with time
+            PaymentModes = paymentModesStr ?? string.Empty,
+            TotalUnpaidAmount = (decimal)baseAmount + addAmount - totalPaid,
+            PatientFname = fullName
+          };
+        }).ToList();
+
+        response.Results = results;
+        response.TotalCount = totalCount;
+        response.TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+        }
+      catch (Exception ex)
+      {
+        response.ErrorMessage = ex.Message;
+      }
         return response;
     }
   }
