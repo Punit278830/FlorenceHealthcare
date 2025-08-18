@@ -103,6 +103,9 @@
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('dob')?.errors?.['required']">Date of birth is
                                                 required.</div>
+                                            <div *ngIf="staffReg.get('dob')?.errors?.['minAge']">
+                                                Staff must be at least 21 years old.
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
