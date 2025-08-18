@@ -8,6 +8,7 @@ import { MatSelectChange } from '@angular/material/select';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import * as dayjs from 'dayjs';
 
 interface data {
   value: string;
@@ -18,7 +19,7 @@ interface data {
   styleUrls: ['./add-staff.component.scss'],
   providers: [DatePipe],
 })
-export class AddStaffComponent {
+export class AddStaffComponent implements OnInit {
   public routes = routes;
   //public selectedValue !: string  ;
   staffReg!: FormGroup;
@@ -39,6 +40,9 @@ export class AddStaffComponent {
     this.getDepartmentList();
     this.maxDate = new Date()
 
+  }
+  ngOnInit(): void {
+    throw new Error('Method not implemented.');
   }
 
 
@@ -147,7 +151,7 @@ export class AddStaffComponent {
       cpassword: ['', [Validators.required]],
       education: ['', Validators.required],
       gender: ['', Validators.required],
-      dob: ['', Validators.required],
+      dob: ['', [Validators.required, this.minimumAgeValidator(21)]],
       doj: ['', Validators.required],
       IdentityNumber: ['', Validators.required],
       registrationNumber:[''],
@@ -233,5 +237,16 @@ export class AddStaffComponent {
   }
   onCancel() {
     this.route.navigate([routes.staffList]);
+  }
+
+  // Custom validator function
+  minimumAgeValidator(minAge: number) {
+    return (control: AbstractControl) => {
+      const dob = new Date(control.value);
+      if (!control.value) return null;
+      const today = new Date();
+      const age = today.getFullYear() - dob.getFullYear() - (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate()) ? 1 : 0);
+      return age >= minAge ? null : { minAge: { requiredAge: minAge, actualAge: age } };
+    };
   }
 }
