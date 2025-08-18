@@ -669,6 +669,20 @@ private calculateTotalPaymentAmount(): void {
       pdf.save(`Invoice_Report_${fromDate}_to_${toDate}.pdf`);
       this.loadingService.hideLoader();
     }
-  
-  
-  }
+getTotalInvoiceAmount(): number {
+  return this.invoices.reduce((sum, inv) => sum + (Number(inv.amount) || 0), 0);
+}
+
+getTotalPaidAmount(): number {
+  return this.invoices.reduce((sum, inv) => {
+    const paid = Number(inv.amount) - Number(inv.unpaidAmount || 0);
+    return sum + (paid > 0 ? paid : 0);
+  }, 0);
+}
+
+getTotalUnpaidAmount(): number {
+  return this.invoices.reduce((sum, inv) => sum + (Number(inv.unpaidAmount) || 0), 0);
+}
+
+
+}
