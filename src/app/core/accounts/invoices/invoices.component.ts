@@ -666,13 +666,47 @@ getTotalInvoiceAmount(): number {
 
 getTotalPaidAmount(): number {
   return this.invoices.reduce((sum, inv) => {
-    const paid = Number(inv.amount) - Number(inv.unpaidAmount || 0);
-    return sum + (paid > 0 ? paid : 0);
+    const amount = Number(inv.amount) || 0;
+    let paid: number;
+
+    // Prefer API-provided totalUnpaidAmount if present
+    if (inv.totalUnpaidAmount !== undefined && inv.totalUnpaidAmount !== null) {
+      const unpaid = Number(inv.totalUnpaidAmount) || 0;
+      paid = Math.max(0, amount - unpaid);
+    } else if (Array.isArray(inv.paymentDetails) && inv.paymentDetails.length > 0) {
+      // Fallback: sum paymentDetails amounts
+      paid = inv.paymentDetails.reduce((acc: number, pd: any) => acc + (Number(pd?.amount) || 0), 0);
+    } else if (typeof inv.status === 'string' && inv.status.toLowerCase() === 'paid') {
+      // If status says Paid and no details
+      paid = amount;
+    } else {
+      paid = 0;
+    }
+
+    return sum + (isNaN(paid) ? 0 : paid);
   }, 0);
 }
 
 getTotalUnpaidAmount(): number {
-  return this.invoices.reduce((sum, inv) => sum + (Number(inv.unpaidAmount) || 0), 0);
+  return this.invoices.reduce((sum, inv) => {
+    const amount = Number(inv.amount) || 0;
+    let unpaid: number;
+
+    // Prefer API-provided totalUnpaidAmount if present
+    if (inv.totalUnpaidAmount !== undefined && inv.totalUnpaidAmount !== null) {
+      unpaid = Number(inv.totalUnpaidAmount) || 0;
+    } else if (Array.isArray(inv.paymentDetails) && inv.paymentDetails.length > 0) {
+      // Fallback: amount minus paid
+      const paid = inv.paymentDetails.reduce((acc: number, pd: any) => acc + (Number(pd?.amount) || 0), 0);
+      unpaid = Math.max(0, amount - paid);
+    } else if (typeof inv.status === 'string' && inv.status.toLowerCase() === 'unpaid') {
+      unpaid = amount;
+    } else {
+      unpaid = 0;
+    }
+
+    return sum + (isNaN(unpaid) ? 0 : unpaid);
+  }, 0);
 }
 
 
