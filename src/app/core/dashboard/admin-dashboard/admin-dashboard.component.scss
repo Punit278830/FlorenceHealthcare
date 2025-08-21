@@ -2,3 +2,93 @@
     display: flex;
     justify-content: center;
 }
+.enhanced-dashboard {
+    background: linear-gradient(135deg, #f8fafc 0%, #e3e9f7 100%);
+    min-height: 100vh;
+}
+.shadow-3d {
+    box-shadow: 0 6px 24px 0 rgba(30, 34, 90, 0.13), 0 1.5px 4px 0 rgba(30, 34, 90, 0.08);
+    border-radius: 18px !important;
+    transition: box-shadow 0.3s, transform 0.3s;
+    background: #fff;
+}
+.shadow-3d:hover {
+    box-shadow: 0 12px 32px 0 rgba(30, 34, 90, 0.18), 0 3px 8px 0 rgba(30, 34, 90, 0.12);
+    transform: translateY(-4px) scale(1.02);
+}
+.enhanced-header {
+    background: linear-gradient(90deg, #e3e9f7 0%, #f8fafc 100%);
+    border-bottom: 1px solid #e0e6ed;
+    border-radius: 18px 18px 0 0;
+}
+.enhanced-link {
+    color: #1a73e8 !important;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: color 0.2s;
+}
+.enhanced-link:hover {
+    color: #0d47a1 !important;
+    text-decoration: underline;
+}
+.enhanced-badge {
+    font-size: 1.05em;
+    padding: 0.45em 1.2em;
+    border-radius: 1.2em;
+    box-shadow: 0 2px 8px 0 rgba(30, 34, 90, 0.10);
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.dash-widget.shadow-3d {
+    margin-bottom: 28px;
+    border: none;
+}
+.card.shadow-3d {
+    border: none;
+}
+.rounded-custom {
+    border-radius: 18px !important;
+}
+/* Subtle hover for table rows */
+table.custom-table tbody tr:hover {
+    background: #f0f4fa;
+    transition: background 0.2s;
+}
+
+/* Match status badge shadow and color for all tables */
+.enhanced-badge {
+    background: #e6fcff;
+    box-shadow: 0 4px 16px 0 rgba(0, 204, 255, 0.13), 0 1.5px 4px 0 rgba(30, 34, 90, 0.08);
+    color: #00bcd4;
+    font-weight: 600;
+    border-radius: 2em;
+    padding: 0.45em 1.2em;
+    font-size: 1.05em;
+    letter-spacing: 0.03em;
+    border: none;
+    transition: box-shadow 0.2s, background 0.2s;
+}
+.status-green.enhanced-badge {
+    background: #e6fcff;
+    color: #00bcd4;
+}
+.status-pink.enhanced-badge {
+    background: #ffe6f3;
+    color: #e91e63;
+}
+.status-gray.enhanced-badge {
+    background: #f0f4fa;
+    color: #607d8b;
+}
+.enhanced-thead {
+    background: linear-gradient(90deg, #e3e9f7 0%, #f8fafc 100%) !important;
+}
+.enhanced-thead th {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    font-weight: 600;
+    color: #2d3a4a;
+    font-size: 1.07em;
+    letter-spacing: 0.01em;
+    border-bottom: 1.5px solid #e0e6ed;
+}

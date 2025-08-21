@@ -1,4 +1,4 @@
-<div class="page-wrapper">
+<div class="page-wrapper enhanced-dashboard">
     <div class="content">
 
         <!-- Page Header -->
@@ -33,7 +33,7 @@
 
         <div class="row">
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
-                <div class="dash-widget">
+                <div class="dash-widget shadow-3d">
                     <!-- <div class="dash-boxs comman-flex-center">
                         <img src="assets/img/icons/calendar.svg" alt="">
                     </div> -->
@@ -46,7 +46,7 @@
                 </div>
             </div>
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
-                <div class="dash-widget">
+                <div class="dash-widget shadow-3d">
                     <!-- <div class="dash-boxs comman-flex-center">
                         <img src="assets/img/icons/profile-add.svg" alt="">
                     </div> -->
@@ -62,7 +62,7 @@
                 </div>
             </div>
             <!-- <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
-                <div class="dash-widget">
+                <div class="dash-widget ">
                     <div class="dash-boxs comman-flex-center">
                         <img src="assets/img/icons/scissor.svg" alt="">
                     </div>
@@ -75,7 +75,7 @@
                 </div>
             </div> -->
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
-                <div class="dash-widget">
+                <div class="dash-widget shadow-3d">
                     <!-- <div class="dash-boxs comman-flex-center">
                         <img src="assets/img/icons/empty-wallet.svg" alt="">
                     </div> -->
@@ -100,7 +100,7 @@
         </div>
         <div class="row">
             <div class="col-12 col-md-12 col-lg-6 col-xl-8">
-                <div class="card">
+                <div class="card shadow-3d">
                     <div class="card-body">
                         <div class="chart-title patient-visit">
                             <h4>Patient Visit by Gender</h4>
@@ -139,7 +139,7 @@
                 </div>
             </div>
             <div class="col-12 col-md-12 col-lg-6 col-xl-4 d-flex">
-                <div class="card">
+                <div class="card shadow-3d">
                     <div class="card-body">
                         <div class="chart-title">
                             <h4>Patient by Department</h4>
@@ -161,15 +161,15 @@
         <div class="row">
             <!-- Recent Patients Card (Left Half) -->
             <div class="col-12 col-xl-6 mb-4">
-                <div class="card" style="border-radius: 15px; overflow: hidden;">
-                    <div class="card-header pb-0">
-                        <h4 class="card-title d-inline-block">Recent Patients</h4>
-                        <a [routerLink]="routes.patientsList" class="float-end patient-views">Show all</a>
+                <div class="card shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
+                    <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
+                        <h4 class="card-title mb-0">Recent Patients</h4>
+                        <a [routerLink]="routes.patientsList" class="enhanced-link">Show all</a>
                     </div>
                     <div class="card-body p-0 table-dash">
                         <div class="table-responsive" style="overflow-x: hidden;">
                             <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
-                                <thead>
+                                <thead class="enhanced-thead">
                                     <tr>
                                         <th mat-sort-header="name">Name</th>
                                         <th mat-sort-header="mobile">Mobile</th>
@@ -198,16 +198,16 @@
             <!-- Recent Appointments Card (Right Half) -->
             <!-- Recent Appointments Card (Right Half) -->
 <div class="col-12 col-xl-6 mb-4">
-    <div class="card" style="border-radius: 15px; overflow: hidden;">
-        <div class="card-header pb-0">
-            <h4 class="card-title d-inline-block">Recent Appointments</h4>
-            <a [routerLink]="routes.appointmentList" class="patient-views float-end">Show all</a>
+    <div class="card shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
+        <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
+            <h4 class="card-title mb-0">Recent Appointments</h4>
+            <a [routerLink]="routes.appointmentList" class="enhanced-link">Show all</a>
         </div>
         <div class="card-body p-0 table-dash">
             <!-- Enable horizontal scrollbar -->
             <div class="table-responsive" style="overflow-x: auto;">
                 <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
-                    <thead>
+                    <thead class="enhanced-thead">
                         <tr>
                             <th mat-sort-header="name">Patient Name</th>
                             <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
@@ -225,9 +225,10 @@
                             </td>
                             <td>
                                 <button [ngClass]="{
-                                    'status-green': data.appointmentStatus === 'Active',
-                                    'status-pink': data.appointmentStatus === 'In Active',
-                                    'status-gray': data.appointmentStatus === 'Cancel'
+                                    'status-green enhanced-badge': data.appointmentStatus === 'Active',
+                                    'status-pink enhanced-badge': data.appointmentStatus === 'In Active',
+                                    'status-gray enhanced-badge': data.appointmentStatus === 'Cancel'
+
                                 }" class="custom-badge">
                                     {{ data.appointmentStatus }}
                                 </button>
@@ -248,17 +249,17 @@
 
         <div class="row">
             <div class="col-12">
-                <div class="card rounded-custom" style="border-radius: 15px; overflow: hidden;">
+                <div class="card shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
                     <!-- Updated card-header with consistent padding -->
-                    <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center">
+                    <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
                         <h4 class="card-title mb-0">Recent Invoices</h4>
-                        <a [routerLink]="routes.invoices" style="color: #1a73e8; text-decoration: none;">Show All</a>
+                        <a [routerLink]="routes.invoices" class="enhanced-link">Show All</a>
                     </div>
                     
                     <div class="card-body p-0 table-dash">
                         <div class="table-responsive" style="overflow-x: hidden;">
                             <table class="table mb-0 border-0 custom-table">
-                                <thead>
+                                <thead class="enhanced-thead">
                                     <tr>
                                         <th style="width: 25%;">Invoice ID</th>
                                         <th style="width: 30%;">Patient Name</th>
@@ -280,7 +281,8 @@
                                                 [ngClass]="{
                                                     'status-green': data.status === 'Paid',
                                                     'status-pink': data.status === 'Unpaid',
-                                                    'status-orange': data.status === 'Partially Paid'
+                                                    'status-orange': data.status === 'Partially Paid',
+                                                    'enhanced-badge': true
                                                 }"
                                                 class="custom-badge">
                                                 {{ data.status }}
