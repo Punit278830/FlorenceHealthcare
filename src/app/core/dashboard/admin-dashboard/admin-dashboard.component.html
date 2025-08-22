@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="row">
+    <div class="row dashboard-row-align-bottom">
             <div class="col-md-6 col-sm-6 col-lg-6 col-xl-4">
                 <div class="dash-widget shadow-3d">
                     <!-- <div class="dash-boxs comman-flex-center">
@@ -158,92 +158,86 @@
         
 
 
-        <div class="row">
-            <!-- Recent Patients Card (Left Half) -->
-            <div class="col-12 col-xl-6 mb-4">
-                <div class="card shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
-                    <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
-                        <h4 class="card-title mb-0">Recent Patients</h4>
-                        <a [routerLink]="routes.patientsList" class="enhanced-link">Show all</a>
-                    </div>
-                    <div class="card-body p-0 table-dash">
-                        <div class="table-responsive" style="overflow-x: hidden;">
-                            <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
-                                <thead class="enhanced-thead">
-                                    <tr>
-                                        <th mat-sort-header="name">Name</th>
-                                        <th mat-sort-header="mobile">Mobile</th>
-                                        <th mat-sort-header="email">Email</th>
-                                        <th mat-sort-header="gender">Gender</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr *ngFor="let data of recentPatients">
-                                        <td (click)="movetoPatient(data.patientId)" class="profile-image">
-                                            <a href="javascript:;">
-                                                {{ data.firstName }} {{ data.lastName }}
-                                            </a>
-                                        </td>
-                                        <td><a href="javascript:;">{{ data.mobile }}</a></td>
-                                        <td>{{ data.email }}</td>
-                                        <td>{{ data.gender }}</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+    <div class="row d-flex">
+    <!-- Recent Patients Card (Left Half) -->
+    <div class="col-12 col-xl-6 d-flex">
+        <div class="card flex-fill shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
+            <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
+                <h4 class="card-title mb-0">Recent Patients</h4>
+                <a [routerLink]="routes.patientsList" class="enhanced-link">Show all</a>
+            </div>
+            <div class="card-body p-0 table-dash">
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
+                        <thead class="enhanced-thead">
+                            <tr>
+                                <th mat-sort-header="name">Name</th>
+                                <th mat-sort-header="mobile">Mobile</th>
+                                <th mat-sort-header="email">Email</th>
+                                <th mat-sort-header="gender">Gender</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of recentPatients">
+                                <td (click)="movetoPatient(data.patientId)" class="profile-image">
+                                    <a href="javascript:;">{{ data.firstName }} {{ data.lastName }}</a>
+                                </td>
+                                <td><a href="javascript:;">{{ data.mobile }}</a></td>
+                                <td>{{ data.email }}</td>
+                                <td>{{ data.gender }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-        
-            <!-- Recent Appointments Card (Right Half) -->
-            <!-- Recent Appointments Card (Right Half) -->
-<div class="col-12 col-xl-6 mb-4">
-    <div class="card shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
-        <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
-            <h4 class="card-title mb-0">Recent Appointments</h4>
-            <a [routerLink]="routes.appointmentList" class="enhanced-link">Show all</a>
         </div>
-        <div class="card-body p-0 table-dash">
-            <!-- Enable horizontal scrollbar -->
-            <div class="table-responsive" style="overflow-x: auto;">
-                <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
-                    <thead class="enhanced-thead">
-                        <tr>
-                            <th mat-sort-header="name">Patient Name</th>
-                            <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
-                            <th mat-sort-header="status">Status</th>
-                            <th mat-sort-header="time">Time</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let data of upcomingAppointments">
-                            <td (click)="movetoPatient(data.patientId)" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {{ data.patientFname }} {{ data.patientLname }}
-                            </td>
-                            <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                                {{ data.doctorFname }} {{ data.doctorLname }}
-                            </td>
-                            <td>
-                                <button [ngClass]="{
-                                    'status-green enhanced-badge': data.appointmentStatus === 'Active',
-                                    'status-pink enhanced-badge': data.appointmentStatus === 'In Active',
-                                    'status-gray enhanced-badge': data.appointmentStatus === 'Cancel'
+    </div>
 
-                                }" class="custom-badge">
-                                    {{ data.appointmentStatus }}
-                                </button>
-                            </td>
-                            <td style="white-space: nowrap;">{{ data.appointTime || 0 }}</td>
-                        </tr>
-                    </tbody>
-                </table>
+    <!-- Recent Appointments Card (Right Half) -->
+    <div class="col-12 col-xl-6 d-flex">
+        <div class="card flex-fill shadow-3d rounded-custom" style="border-radius: 18px; overflow: hidden;">
+            <div class="card-header pb-0 pt-3 px-4 d-flex justify-content-between align-items-center enhanced-header">
+                <h4 class="card-title mb-0">Recent Appointments</h4>
+                <a [routerLink]="routes.appointmentList" class="enhanced-link">Show all</a>
+            </div>
+            <div class="card-body p-0 table-dash">
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table matSort (matSortChange)="sortData($event)" class="table mb-0 border-0 datatable custom-table">
+                        <thead class="enhanced-thead">
+                            <tr>
+                                <th mat-sort-header="name">Patient Name</th>
+                                <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
+                                <th mat-sort-header="status">Status</th>
+                                <th mat-sort-header="time">Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let data of upcomingAppointments">
+                                <td (click)="movetoPatient(data.patientId)" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ data.patientFname }} {{ data.patientLname }}
+                                </td>
+                                <td style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                    {{ data.doctorFname }} {{ data.doctorLname }}
+                                </td>
+                                <td>
+                                    <button [ngClass]="{
+                                        'status-green enhanced-badge': data.appointmentStatus === 'Active',
+                                        'status-pink enhanced-badge': data.appointmentStatus === 'In Active',
+                                        'status-gray enhanced-badge': data.appointmentStatus === 'Cancel'
+                                    }" class="custom-badge">
+                                        {{ data.appointmentStatus }}
+                                    </button>
+                                </td>
+                                <td style="white-space: nowrap;">{{ data.appointTime || 0 }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-        </div>
-        
                
   
 

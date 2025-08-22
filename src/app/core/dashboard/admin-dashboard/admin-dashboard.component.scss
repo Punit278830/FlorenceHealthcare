@@ -1,3 +1,36 @@
+.dashboard-row-align-bottom .custom-table th,
+.dashboard-row-align-bottom .custom-table td {
+    font-size: 1.07em;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 18px;
+    padding-right: 18px;
+}
+.dashboard-row-align-bottom .custom-table th {
+    font-weight: 600;
+}
+.dashboard-row-align-bottom .custom-table td {
+    font-weight: 500;
+}
+
+/* Align Recent Patients and Recent Appointments cards from the bottom */
+.dashboard-row-align-bottom {
+    display: flex;
+    align-items: flex-end;
+}
+/* Ensure Recent Patients and Appointments cards have equal height */
+.dashboard-row-align-bottom > .col-12,
+.dashboard-row-align-bottom > .col-12.col-xl-6 {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-row-align-bottom .card.shadow-3d {
+  flex: 1 1 auto;
+  min-height: 370px; // Adjust this value as needed for your design
+  display: flex;
+  flex-direction: column;
+}
 .donut-chart-custom {
     display: flex;
     justify-content: center;
