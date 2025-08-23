@@ -1,0 +1,106 @@
+// Button styles for prescription-master form
+.doctor-submit .btn-primary {
+	border-radius: 12px;
+	box-shadow: 0 6px 24px 0 rgba(80, 143, 244, 0.13), 0 1.5px 4px 0 rgba(80, 143, 244, 0.08);
+	font-weight: 400;
+	font-size: 1.08em;
+	padding: 10px 28px;
+	margin-left: 8px;
+	background: #1c427f;
+	color: #fff;
+	border: none;
+	transition: box-shadow 0.22s, background 0.22s, color 0.22s, transform 0.22s;
+}
+.doctor-submit .btn-primary:hover {
+	box-shadow: 0 12px 32px 0 rgba(80, 143, 244, 0.18), 0 3px 8px 0 rgba(80, 143, 244, 0.12);
+	background: #16325e;
+	color: #fff;
+	transform: translateY(-2px) scale(1.04);
+}
+
+.doctor-submit .cancel-form {
+	border-radius: 12px;
+	box-shadow: 0 6px 24px 0 rgba(80, 143, 244, 0.13), 0 1.5px 4px 0 rgba(80, 143, 244, 0.08);
+	font-weight: 400;
+	font-size: 1.08em;
+	padding: 10px 28px;
+	margin-left: 8px;
+	background: #fff;
+	color: #1c427f;
+	border: 1.5px solid #1c427f;
+	transition: box-shadow 0.22s, background 0.22s, color 0.22s, transform 0.22s;
+}
+.doctor-submit .cancel-form:hover {
+	box-shadow: 0 12px 32px 0 rgba(80, 143, 244, 0.18), 0 3px 8px 0 rgba(80, 143, 244, 0.12);
+	background: #e3e9f7;
+	color: #1c427f;
+	transform: translateY(-2px) scale(1.04);
+}
+// Modern add patient page styling
+.page-wrapper {
+	background: linear-gradient(135deg, #f8fafc 0%, #e3e9f7 100%);
+	min-height: 100vh;
+}
+
+
+.card {
+	border-radius: 18px;
+	box-shadow: 0 8px 32px 0 rgba(80, 143, 244, 0.10), 0 1.5px 4px 0 rgba(80, 143, 244, 0.08);
+	background: #fff;
+	overflow: hidden;
+}
+
+.card-body {
+	padding: 32px 24px 24px 24px;
+}
+
+.form-heading {
+	background: linear-gradient(90deg, #e3e9f7 0%, #f8fafc 100%);
+	border-radius: 18px 18px 0 0;
+	padding: 18px 24px 12px 24px;
+	margin-bottom: 24px;
+	box-shadow: 0 2px 8px 0 rgba(80, 143, 244, 0.04);
+}
+.form-heading h4 {
+	font-size: 1.4rem;
+	font-weight: 700;
+	color: #3a3a3a;
+	margin-bottom: 0;
+}
+
+.form-group.local-forms label {
+	font-weight: 600;
+	color: #2d3a4a;
+}
+.form-control, .form-select, .mat-select {
+	border-radius: 10px !important;
+	box-shadow: 0 1.5px 4px 0 rgba(80, 143, 244, 0.08);
+	border: 1px solid #e0e6ed;
+	transition: border 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .form-select:focus, .mat-select:focus {
+	border-color: #508ff4;
+	box-shadow: 0 0 0 2px #e3e9f7;
+}
+
+.btn-primary {
+	border-radius: 10px;
+	box-shadow: 0 2px 8px 0 rgba(80, 143, 244, 0.08);
+	transition: box-shadow 0.2s, background 0.2s;
+}
+.btn-primary:hover {
+	background: #e3e9f7;
+	box-shadow: 0 4px 16px 0 rgba(80, 143, 244, 0.13);
+}
+
+.doctor-submit {
+	margin-top: 24px;
+}
+.doctor-submit .btn {
+	margin-left: 8px;
+}
+
+.text-danger {
+	font-size: 0.98em;
+	margin-top: 2px;
+}

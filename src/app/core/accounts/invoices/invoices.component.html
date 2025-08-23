@@ -176,7 +176,7 @@
                     <th mat-sort-header="totalUnpaidAmount">Unpaid Amount</th>
                     <th mat-sort-header="status">Status</th>
                     <th mat-sort-header="paymentMode">Payment Mode</th>
-                    <th mat-sort-header="paymentTime">Payment Date</th>
+                    <th mat-sort-header="paymentTime">Payment Date/Time</th>
                     <th></th>
                   </tr>
                 </thead>
@@ -194,9 +194,11 @@
                     <td><button
                         [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
-                    <td>
-                      {{ data.paymentDetails?.[0]?.paymentDate | date:'dd-MM-yyyy, h:mm a' }}
-                    </td>
+                  <td>
+  {{ (data.paymentDetails?.[0]?.paymentDate + 'Z') | date:'dd-MM-yyyy, h:mm a':'Asia/Kolkata' }}
+</td>
+
+
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"

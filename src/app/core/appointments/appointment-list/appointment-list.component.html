@@ -99,7 +99,7 @@
                     <th mat-sort-header="email">Status</th>
                     <th mat-sort-header="email">Fee</th>
                     <th mat-sort-header="email">Payment</th>
-                    <th mat-sort-header="email">Time</th>
+                    <th mat-sort-header="email">Date & Time</th>
 
                     <th></th>
                   </tr>
@@ -131,7 +131,7 @@
 
                     <td>{{data.doctorFname}} {{data.doctorLname}}</td>
                     <td>{{data.displayName}}</td>
-                    <td><a href="javascript:;">{{data.notes}}</a></td>
+                    <td>{{data.notes}}</td>
                     <td><button
                         [ngClass]="{'status-green' : data.appointmentStatus === 'Active', 'status-pink' : data.appointmentStatus === 'In Active','status-gray' : data.appointmentStatus === 'Cancel'}"
                         class="custom-badge">{{data.appointmentStatus}}</button></td>
