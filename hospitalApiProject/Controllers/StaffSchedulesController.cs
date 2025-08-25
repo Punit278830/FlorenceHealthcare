@@ -6,34 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class StaffSchedulesController : ControllerBase
+    public class StaffSchedulesController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public StaffSchedulesController(FlorenceDbContext context)
+        public StaffSchedulesController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/StaffSchedules
         [HttpGet]
         public async Task<ActionResult<IEnumerable<StaffSchedule>>> GetStaffSchedules()
         {
-            return await _context.StaffSchedules.OrderByDescending(p=>p.ScheduleId).ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.StaffSchedules.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(p => p.HospitalId == hospitalId);
+            }
+            return await query.OrderByDescending(p=>p.ScheduleId).ToListAsync();
         }
 
         // GET: api/StaffSchedules/5
         [HttpGet("StaffId/{StaffId}")]
         public async Task<ActionResult<List<StaffSchedule>>> GetStaffSchedule(int StaffId)
         {
-            var staffSchedule = await _context.StaffSchedules.Where(e => e.StaffId == StaffId).ToListAsync();
-            //var staffSchedule = await _context.StaffSchedules.FindAsync(id);
-
+            var hospitalId = GetHospitalIdFromHeader();
+            var staffSchedule = await _context.StaffSchedules.Where(e => e.StaffId == StaffId && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
             if (staffSchedule == null)
             {
                 return NotFound();
@@ -44,8 +47,8 @@ namespace hospitalApiProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<StaffSchedule>> GetStaffScheduleById(int id)
         {
-            
-            var staffSchedule = await _context.StaffSchedules.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var staffSchedule = await _context.StaffSchedules.FirstOrDefaultAsync(e => e.ScheduleId == id && (hospitalId == null || e.HospitalId == hospitalId));
 
             if (staffSchedule == null)
             {
@@ -65,6 +68,11 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
             staffSchedule.ApplyScheduleDate = DateTime.UtcNow.Date;
+
+            // Tag with HospitalId for safety if provided
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) staffSchedule.HospitalId = hospitalId;
+
             _context.Entry(staffSchedule).State = EntityState.Modified;
 
             try
@@ -95,6 +103,10 @@ namespace hospitalApiProject.Controllers
             {
                 staffSchedule.ApplyScheduleDate = DateTime.UtcNow.Date;
 
+                // Tag with HospitalId if header provided
+                var hospitalId = GetHospitalIdFromHeader();
+                staffSchedule.HospitalId = hospitalId;
+
                 _context.StaffSchedules.Add(staffSchedule);
                 await _context.SaveChangesAsync();
 
@@ -113,7 +125,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteStaffSchedule(int id)
         {
-            var staffSchedule = await _context.StaffSchedules.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var staffSchedule = await _context.StaffSchedules.FirstOrDefaultAsync(e => e.ScheduleId == id && (hospitalId == null || e.HospitalId == hospitalId));
             if (staffSchedule == null)
             {
                 return NotFound();
@@ -134,8 +147,8 @@ namespace hospitalApiProject.Controllers
         public async Task<ActionResult<List<StaffSchedule>>> GetStaffOnLeave(int depId, DateTime appointmentDate)
         {
             try {
-                var staffSchedule = await _context.StaffSchedules.Where(e => e.DepartmentId == depId && e.LeaveStatus == 2 && e.ScheduleDate == appointmentDate && e.Status == "Approved").ToListAsync();
-                //var staffSchedule = await _context.StaffSchedules.FindAsync(id);
+                var hospitalId = GetHospitalIdFromHeader();
+                var staffSchedule = await _context.StaffSchedules.Where(e => e.DepartmentId == depId && e.LeaveStatus == 2 && e.ScheduleDate == appointmentDate && e.Status == "Approved" && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
                 if (staffSchedule == null)
                 {

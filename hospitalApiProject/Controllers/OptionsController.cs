@@ -7,32 +7,37 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using Microsoft.Extensions.Hosting;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class OptionsController : ControllerBase
+    public class OptionsController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public OptionsController(FlorenceDbContext context)
+        public OptionsController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/Options
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Option>>> GetOptions()
         {
-            return await _context.Options.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.Options.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(o => o.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/Options/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Option>> GetOption(int id)
         {
-            var option = await _context.Options.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var option = await _context.Options.FirstOrDefaultAsync(o => o.OptionId == id && (hospitalId == null || o.HospitalId == hospitalId));
 
             if (option == null)
             {
@@ -51,6 +56,10 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            // Tag with HospitalId if provided
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) option.HospitalId = hospitalId;
 
             _context.Entry(option).State = EntityState.Modified;
 
@@ -82,8 +91,10 @@ namespace hospitalApiProject.Controllers
             {
                 return NoContent();
             }
+            var hospitalId = GetHospitalIdFromHeader();
             foreach (var option in options)
             {
+                option.HospitalId = hospitalId; // tag if provided
                 _context.Options.Add(option);
             }
             await _context.SaveChangesAsync();
@@ -95,7 +106,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteOption(int id)
         {
-            var option = await _context.Options.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var option = await _context.Options.FirstOrDefaultAsync(o => o.OptionId == id && (hospitalId == null || o.HospitalId == hospitalId));
             if (option == null)
             {
                 return NotFound();

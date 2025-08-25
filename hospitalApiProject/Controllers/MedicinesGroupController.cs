@@ -1,33 +1,38 @@
 using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class MedicinesGroupController : ControllerBase
+  public class MedicinesGroupController : WithHospitalController
   {
 
-    private readonly FlorenceDbContext _context;
-
-    public MedicinesGroupController(FlorenceDbContext context)
+    public MedicinesGroupController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/MedicinesGroup
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MedicinesGroup>>> GetMedicinesGroup()
     {
-      return await _context.MedicinesGroups.OrderByDescending(x => x.Id).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.MedicinesGroups.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(m => m.HospitalId == hospitalId);
+      }
+      return await query.OrderByDescending(x => x.Id).ToListAsync();
     }
 
     // GET: api/MedicinesGroup/5
     [HttpGet("{id}")]
     public async Task<ActionResult<MedicinesGroup>> GetMedicinesGroup(int id)
     {
-      var medicinesGroup = await _context.MedicinesGroups.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var medicinesGroup = await _context.MedicinesGroups.FirstOrDefaultAsync(m => m.Id == id && (hospitalId == null || m.HospitalId == hospitalId));
 
       if (medicinesGroup == null)
       {
@@ -46,6 +51,9 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest();
       }
+
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) medicinesGroup.HospitalId = hospitalId;
 
       _context.Entry(medicinesGroup).State = EntityState.Modified;
 
@@ -73,6 +81,8 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<MedicinesGroup>> PostMedicinesGroup(MedicinesGroup medicinesGroup)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      medicinesGroup.HospitalId = hospitalId;
       _context.MedicinesGroups.Add(medicinesGroup);
       await _context.SaveChangesAsync();
 
@@ -83,7 +93,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMedicinesGroup(int id)
     {
-      var medicinesGroup = await _context.MedicinesGroups.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var medicinesGroup = await _context.MedicinesGroups.FirstOrDefaultAsync(m => m.Id == id && (hospitalId == null || m.HospitalId == hospitalId));
       if (medicinesGroup == null)
       {
         return NotFound();

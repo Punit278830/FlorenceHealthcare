@@ -7,32 +7,37 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using System.Collections.Generic;
 using System.Linq;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class AdditionalInvoiceItemsController : ControllerBase
+  public class AdditionalInvoiceItemsController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public AdditionalInvoiceItemsController(FlorenceDbContext context)
+    public AdditionalInvoiceItemsController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/AdditionalInvoiceItems
     [HttpGet]
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAdditionalInvoiceItems()
     {
-      return await _context.AdditionalInvoiceItems.ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.AdditionalInvoiceItems.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(x => x.HospitalId == hospitalId);
+      }
+      return await query.ToListAsync();
     }
 
     // GET: api/AdditionalInvoiceItems/5  
     [HttpGet("{id}")]
     public async Task<ActionResult<AdditionalInvoiceItem>> GetAdditionalInvoiceItem(int id)
     {
-      var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FirstOrDefaultAsync(a => a.Id == id && (hospitalId == null || a.HospitalId == hospitalId));
 
       if (additionalInvoiceItem == null)
       {
@@ -48,9 +53,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<AdditionalInvoiceItem>>> GetAllAdditionalInvoiceItem(int id)
     {
 
+      var hospitalId = GetHospitalIdFromHeader();
 
       var singleTransactionId = await _context.PaymentModeInfo
-    .Where(p => p.InvoiceId == id)
+    .Where(p => p.InvoiceId == id && (hospitalId == null || p.HospitalId == hospitalId))
     .Select(p => p.TransactionId)
     .Distinct()
     .ToListAsync();
@@ -59,9 +65,9 @@ namespace hospitalApiProject.Controllers
       string? transactionIdForInvoice = singleTransactionId.Count == 1 ? singleTransactionId.First() : null;
 
       var additionalInvoiceItems = await _context.AdditionalInvoiceItems
-         .Where(e => e.InvoiceId == id)
+         .Where(e => e.InvoiceId == id && (hospitalId == null || e.HospitalId == hospitalId))
          .Join(
-             _context.InvoiceItemMasters,  // Joining InvoiceItemMaster to get ItemId
+             _context.InvoiceItemMasters.Where(im => hospitalId == null || im.HospitalId == hospitalId),  // Joining InvoiceItemMaster to get ItemId
              e => e.ItemName,             // Matching ItemName from AdditionalInvoiceItems
              im => im.ItemName,          // Matching ItemName from InvoiceItemMaster
              (e, im) => new              // Resulting projection
@@ -77,7 +83,7 @@ namespace hospitalApiProject.Controllers
                e.Status,
                // Assign the single TransactionId if it exists; otherwise fetch based on conditions
                TransactionId = transactionIdForInvoice ?? _context.PaymentModeInfo
-                     .Where(p => p.InvoiceId == e.InvoiceId && p.itemName == e.ItemName)
+                     .Where(p => p.InvoiceId == e.InvoiceId && p.itemName == e.ItemName && (hospitalId == null || p.HospitalId == hospitalId))
                      .OrderByDescending(p => p.PaymentDate)
                      .Select(p => p.TransactionId)
                      .FirstOrDefault(),
@@ -163,9 +169,11 @@ namespace hospitalApiProject.Controllers
         return null; // Or handle as appropriate
       }
 
+      var hospitalId = GetHospitalIdFromHeader();
+
       // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
       var results = await _context.PaymentModeInfo
-          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online")
+          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && (hospitalId == null || e.HospitalId == hospitalId))
           .ToListAsync();
 
       return results;
@@ -183,6 +191,16 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null)
+      {
+        request.additionalInvoiceItem.HospitalId = hospitalId;
+        if (request.PaymentModeInfo != null)
+        {
+          request.PaymentModeInfo.HospitalId = hospitalId;
+        }
+      }
+
       _context.Entry(request.additionalInvoiceItem).State = EntityState.Modified;
 
       try
@@ -194,9 +212,9 @@ namespace hospitalApiProject.Controllers
 
         // update the overall payment status of invoice
         var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
-                                  .AnyAsync(e => e.InvoiceId == request.additionalInvoiceItem.InvoiceId && e.Status != "Paid");
+                                  .AnyAsync(e => e.InvoiceId == request.additionalInvoiceItem.InvoiceId && e.Status != "Paid" && (hospitalId == null || e.HospitalId == hospitalId));
 
-        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == request.additionalInvoiceItem.InvoiceId);
+        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == request.additionalInvoiceItem.InvoiceId && (hospitalId == null || i.HospitalId == hospitalId));
 
         if (invoiceInfo != null)
         {
@@ -236,11 +254,13 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
+      var hospitalId = GetHospitalIdFromHeader();
+
       try
       {
         // update the overall payment status of invoice
         var unpaidInvoiceItems = await _context.AdditionalInvoiceItems
-                                        .Where(item => item.Status != "Paid" && item.InvoiceId == paymentModeInfo.InvoiceId)
+                                        .Where(item => item.Status != "Paid" && item.InvoiceId == paymentModeInfo.InvoiceId && (hospitalId == null || item.HospitalId == hospitalId))
                                         .ToListAsync();
 
         // Calculate the sum of unpaid items' amounts
@@ -255,7 +275,7 @@ namespace hospitalApiProject.Controllers
         // Save the changes to the database
         await _context.SaveChangesAsync();
 
-        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == paymentModeInfo.InvoiceId);
+        var invoiceInfo = await _context.InvoiceInfos.FirstOrDefaultAsync(i => i.InvoiceId == paymentModeInfo.InvoiceId && (hospitalId == null || i.HospitalId == hospitalId));
 
         if (invoiceInfo != null)
         {
@@ -293,10 +313,12 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<AdditionalInvoiceItem>> PostAdditionalInvoiceItem(AdditionalInvoiceItem additionalInvoiceItem)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      additionalInvoiceItem.HospitalId = hospitalId;
       _context.AdditionalInvoiceItems.Add(additionalInvoiceItem);
       await _context.SaveChangesAsync();
 
-      var invoiceData = _context.InvoiceInfos.FirstOrDefault(e => e.InvoiceId == additionalInvoiceItem.InvoiceId);
+      var invoiceData = _context.InvoiceInfos.FirstOrDefault(e => e.InvoiceId == additionalInvoiceItem.InvoiceId && (hospitalId == null || e.HospitalId == hospitalId));
       if (invoiceData != null && !string.IsNullOrEmpty(invoiceData.Status) && invoiceData.Status != "unPaid")
       {
         if (invoiceData.Status == "Paid")
@@ -314,7 +336,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAdditionalInvoiceItem(int id)
     {
-      var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FirstOrDefaultAsync(a => a.Id == id && (hospitalId == null || a.HospitalId == hospitalId));
       if (additionalInvoiceItem == null)
       {
         return NotFound();
@@ -332,9 +355,10 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         // Find the additional item to delete by invoiceId and itemName
         var additionalInvoiceItem = await _context.AdditionalInvoiceItems
-            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && i.ItemName == itemName);
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && i.ItemName == itemName && (hospitalId == null || i.HospitalId == hospitalId));
 
         if (additionalInvoiceItem == null)
         {
@@ -349,11 +373,11 @@ namespace hospitalApiProject.Controllers
 
         // Check if any unpaid items remain for the invoice
         var hasUnpaidInvoiceItems = await _context.AdditionalInvoiceItems
-            .AnyAsync(e => e.InvoiceId == invoiceId && e.Status != "Paid");
+            .AnyAsync(e => e.InvoiceId == invoiceId && e.Status != "Paid" && (hospitalId == null || e.HospitalId == hospitalId));
 
         // Update the overall payment status of the invoice
         var invoiceInfo = await _context.InvoiceInfos
-            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId);
+            .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && (hospitalId == null || i.HospitalId == hospitalId));
 
         if (invoiceInfo != null)
         {
@@ -382,6 +406,13 @@ namespace hospitalApiProject.Controllers
 
     private async Task AddPaymentModeInfo(PaymentModeInfo paymentModeInfo)
     {
+      // Tag with HospitalId if provided
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null)
+      {
+        paymentModeInfo.HospitalId = hospitalId;
+      }
+
       // Add the object to the database
       _context.PaymentModeInfo.Add(paymentModeInfo);
 

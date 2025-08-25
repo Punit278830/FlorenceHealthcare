@@ -8,38 +8,37 @@ using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http.HttpResults;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     
     [ApiController]
-    public class DepartmentInfoesController : ControllerBase
+    public class DepartmentInfoesController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public DepartmentInfoesController(FlorenceDbContext context)
+        public DepartmentInfoesController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
     [HttpGet("PatientCountByDepartment")]
     public async Task<ActionResult<DepartmentInfo>> GetpatientCountByDepartment()
     {
       var today = DateTime.Today;
+      var hospitalId = GetHospitalIdFromHeader();
 
       var result = await _context.AppointmentInfos
-          .Where(a => a.Date.Date == today)
+          .Where(a => a.Date.Date == today && (hospitalId == null || a.HospitalId == hospitalId))
           .GroupBy(a => a.Departmentid)
           .Select(g => new
           {
             DepartmentName = _context.DepartmentInfos
-                  .Where(d => d.DepartmentId == g.Key)
+                  .Where(d => d.DepartmentId == g.Key && (hospitalId == null || d.HospitalId == hospitalId))
                   .Select(d => d.DepartmentName)
                   .FirstOrDefault(),
             DisplayName = _context.DepartmentInfos
 
-                  .Where(d => d.DepartmentId == g.Key)
+                  .Where(d => d.DepartmentId == g.Key && (hospitalId == null || d.HospitalId == hospitalId))
                   .Select(d => d.DisplayName)
                   .FirstOrDefault(),
             PatientCount = g.Select(a => a.PatientId).Distinct().Count()
@@ -61,14 +60,21 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentInfo>>> GetDepartmentInfos()
         {
-            return await _context.DepartmentInfos.OrderByDescending(p=>p.DepartmentId).ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.DepartmentInfos.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(p => p.HospitalId == hospitalId);
+            }
+            return await query.OrderByDescending(p=>p.DepartmentId).ToListAsync();
         }
 
         // GET: api/DepartmentInfoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartmentInfo>> GetDepartmentInfo(int id)
         {
-            var departmentInfo = await _context.DepartmentInfos.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId));
 
             if (departmentInfo == null)
             {
@@ -93,6 +99,10 @@ namespace hospitalApiProject.Controllers
             {
                 departmentInfo.DisplayName = null;
             }
+
+            // Tag with HospitalId if provided in header
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) departmentInfo.HospitalId = hospitalId;
 
             _context.Entry(departmentInfo).State = EntityState.Modified;
 
@@ -126,6 +136,10 @@ namespace hospitalApiProject.Controllers
                 departmentInfo.DisplayName = null;
             }
 
+            // Tag with HospitalId if provided in header
+            var hospitalId = GetHospitalIdFromHeader();
+            departmentInfo.HospitalId = hospitalId;
+
             _context.DepartmentInfos.Add(departmentInfo);
             await _context.SaveChangesAsync();
 
@@ -137,7 +151,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartmentInfo(int id)
         {
-            var departmentInfo = await _context.DepartmentInfos.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId));
             if (departmentInfo == null)
             {
                 return NotFound();

@@ -6,33 +6,38 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class ConsultationFilesController : ControllerBase
+  public class ConsultationFilesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public ConsultationFilesController(FlorenceDbContext context)
+    public ConsultationFilesController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/ConsultationFiles
     [HttpGet]
     public async Task<ActionResult<IEnumerable<ConsultationFile>>> GetConsultationFiles()
     {
-      return await _context.ConsultationFiles.ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.ConsultationFiles.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(f => f.HospitalId == hospitalId);
+      }
+      return await query.ToListAsync();
     }
 
     // GET: api/ConsultationFiles/file/1
     [HttpGet("file/{id}")]
     public async Task<ActionResult<ConsultationFile>> GetFileByFileId(int id)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var filesUpload = await _context.ConsultationFiles
-                         .FirstOrDefaultAsync(e => e.FileId == id);
+                         .FirstOrDefaultAsync(e => e.FileId == id && (hospitalId == null || e.HospitalId == hospitalId));
 
       if (filesUpload == null)
       {
@@ -47,8 +52,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{AppointmentId}")]
     public async Task<ActionResult<List<ConsultationFile>>> GetConsultationFile(int AppointmentId)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var consultationFiles = await _context.ConsultationFiles
-                                          .Where(e => e.AppointmentId == AppointmentId)
+                                          .Where(e => e.AppointmentId == AppointmentId && (hospitalId == null || e.HospitalId == hospitalId))
                                           .ToListAsync();
 
       if (consultationFiles.Count == 0) // Check if the list is empty
@@ -69,7 +75,9 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
-      var existingFile = await _context.ConsultationFiles.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+
+      var existingFile = await _context.ConsultationFiles.FirstOrDefaultAsync(f => f.FileId == id && (hospitalId == null || f.HospitalId == hospitalId));
 
       if (existingFile == null)
       {
@@ -107,6 +115,8 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<ConsultationFile>> PostConsultationFile(ConsultationFile consultationFile)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      consultationFile.HospitalId = hospitalId;
       _context.ConsultationFiles.Add(consultationFile);
       await _context.SaveChangesAsync();
 
@@ -117,7 +127,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteConsultationFile(int id)
     {
-      var consultationFile = await _context.ConsultationFiles.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var consultationFile = await _context.ConsultationFiles.FirstOrDefaultAsync(f => f.FileId == id && (hospitalId == null || f.HospitalId == hospitalId));
       if (consultationFile == null)
       {
         return NotFound();

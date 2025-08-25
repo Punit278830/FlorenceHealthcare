@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FilesUploadsController : ControllerBase
+    public class FilesUploadsController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public FilesUploadsController(FlorenceDbContext context)
+        public FilesUploadsController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/FilesUploads
         [HttpGet]
         public async Task<ActionResult<IEnumerable<FilesUpload>>> GetFilesUploads()
         {
-            return await _context.FilesUploads.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.FilesUploads.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(f => f.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/FilesUploads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<FilesUpload>> GetFilesUpload(int id)
         {
-            var filesUpload = await _context.FilesUploads.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var filesUpload = await _context.FilesUploads.FirstOrDefaultAsync(f => f.FileId == id && (hospitalId == null || f.HospitalId == hospitalId));
             
             if (filesUpload == null)
             {
@@ -44,7 +49,8 @@ namespace hospitalApiProject.Controllers
         [HttpGet("appointmentId/{appointmentId}")]
         public async Task<ActionResult<List<FilesUpload>>> GetFilesUploadByAppointment(int appointmentId)
         {
-            List<FilesUpload> fileUpload = await _context.FilesUploads.Where(e=>e.AppointmentId==appointmentId).ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            List<FilesUpload> fileUpload = await _context.FilesUploads.Where(e=>e.AppointmentId==appointmentId && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
             if (fileUpload == null || fileUpload.Count == 0)
             {
@@ -65,6 +71,9 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) filesUpload.HospitalId = hospitalId;
 
             _context.Entry(filesUpload).State = EntityState.Modified;
 
@@ -92,6 +101,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<FilesUpload>> PostFilesUpload(FilesUpload filesUpload)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            filesUpload.HospitalId = hospitalId;
             _context.FilesUploads.Add(filesUpload);
             await _context.SaveChangesAsync();
 
@@ -102,8 +113,9 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteFilesUpload(int id)
         {
+            var hospitalId = GetHospitalIdFromHeader();
             
-            var filesUpload = await _context.FilesUploads.FindAsync(id);
+            var filesUpload = await _context.FilesUploads.FirstOrDefaultAsync(f => f.FileId == id && (hospitalId == null || f.HospitalId == hospitalId));
             if (filesUpload == null)
             {
                 return NotFound();

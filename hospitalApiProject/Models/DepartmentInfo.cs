@@ -12,4 +12,7 @@ public partial class DepartmentInfo
     public string? DisplayName { get; set; }
 
     public string? DepartmentStatus { get; set; }
+
+    // Nullable HospitalId for multi-tenant support (backward compatible)
+    public int? HospitalId { get; set; }
 }

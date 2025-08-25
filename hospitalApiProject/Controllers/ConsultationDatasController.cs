@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ConsultationDatasController : ControllerBase
+    public class ConsultationDatasController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public ConsultationDatasController(FlorenceDbContext context)
+        public ConsultationDatasController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/ConsultationDatas
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ConsultationDatum>>> GetConsultationData()
         {
-            return await _context.ConsultationData.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.ConsultationData.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(c => c.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/ConsultationDatas/5
         [HttpGet("{id}")]
         public async Task<ActionResult<ConsultationDatum>> GetConsultationDatum(int id)
         {
-            var consultationDatum = await _context.ConsultationData.Where(e => e.AppointmentId == id).ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var consultationDatum = await _context.ConsultationData.Where(e => e.AppointmentId == id && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
             if (consultationDatum.Count == 0)
             {
@@ -50,6 +55,10 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            // Tag with HospitalId if provided
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) consultationDatum.HospitalId = hospitalId;
 
             _context.Entry(consultationDatum).State = EntityState.Modified;
 
@@ -77,6 +86,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<ConsultationDatum>> PostConsultationDatum(ConsultationDatum consultationDatum)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            consultationDatum.HospitalId = hospitalId;
             _context.ConsultationData.Add(consultationDatum);
             await _context.SaveChangesAsync();
             var appointment=await _context.AppointmentInfos.FindAsync(consultationDatum.AppointmentId);
@@ -95,7 +106,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteConsultationDatum(int id)
         {
-            var consultationDatum = await _context.ConsultationData.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var consultationDatum = await _context.ConsultationData.FirstOrDefaultAsync(c => c.Id == id && (hospitalId == null || c.HospitalId == hospitalId));
             if (consultationDatum == null)
             {
                 return NotFound();

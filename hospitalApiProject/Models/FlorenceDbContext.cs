@@ -67,6 +67,8 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<CareContext> CareContexts { get; set; }
 
+  public virtual DbSet<Hospital> Hospitals { get; set; }
+
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
@@ -622,6 +624,30 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.Alcohol).HasColumnName("Alcohol");
       entity.Property(e => e.Smoking).HasColumnName("Smoking");
       entity.Property(e => e.Tobacco).HasColumnName("Tobacco");
+    });
+
+    modelBuilder.Entity<Hospital>(entity =>
+    {
+      entity.ToTable("Hospital");
+      entity.HasKey(e => e.HospitalId);
+      entity.Property(e => e.HospitalId).HasColumnName("HospitalId");
+      entity.Property(e => e.Name).HasMaxLength(200);
+      entity.Property(e => e.Code).HasMaxLength(50);
+      entity.Property(e => e.ContactPerson).HasMaxLength(200);
+      entity.Property(e => e.ContactNumber).HasMaxLength(20);
+      entity.Property(e => e.Email).HasMaxLength(200);
+      entity.Property(e => e.AddressLine1).HasMaxLength(400);
+      entity.Property(e => e.AddressLine2).HasMaxLength(400);
+      entity.Property(e => e.City).HasMaxLength(100);
+      entity.Property(e => e.State).HasMaxLength(100);
+      entity.Property(e => e.Pincode).HasMaxLength(20);
+      entity.Property(e => e.Country).HasMaxLength(100);
+      entity.Property(e => e.RegistrationNumber).HasMaxLength(100);
+      entity.Property(e => e.GSTIN).HasMaxLength(30);
+      entity.Property(e => e.WebsiteUrl).HasMaxLength(400);
+      entity.Property(e => e.LogoUrl).HasMaxLength(400);
+      entity.Property(e => e.IsActive);
+      entity.Property(e => e.CreatedOn);
     });
 
     OnModelCreatingPartial(modelBuilder);

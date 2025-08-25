@@ -19,4 +19,7 @@ public partial class VitalInfo
   public bool? Alcohol { get; set; }
   public bool? Smoking { get; set; }
   public bool? Tobacco { get; set; }
+
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
 }

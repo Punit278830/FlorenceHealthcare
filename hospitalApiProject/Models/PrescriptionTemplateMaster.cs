@@ -15,5 +15,8 @@ namespace hospitalApiProject.Models
     public string? FinalDiagnosis { get; set; }
 
     public int? DiagnosisId { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
   }
 }

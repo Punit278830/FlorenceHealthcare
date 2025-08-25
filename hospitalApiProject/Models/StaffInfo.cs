@@ -43,4 +43,6 @@ public partial class StaffInfo
    
     [JsonPropertyName("PrescriptionValidity")]
     public int? PrescriptionValidity { get; set; }
+
+    public int? HospitalId { get; set; }
 }

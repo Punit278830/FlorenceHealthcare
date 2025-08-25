@@ -6,16 +6,17 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using System;
 using DateTime = System.DateTime;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class InvoiceInfoesController : ControllerBase
+  public class InvoiceInfoesController : WithHospitalController
   {
     private readonly FlorenceDbContext _context;
 
-    public InvoiceInfoesController(FlorenceDbContext context)
+    public InvoiceInfoesController(FlorenceDbContext context) : base(context)
     {
       _context = context;
     }
@@ -30,8 +31,9 @@ namespace hospitalApiProject.Controllers
     [FromQuery] int pageSize = 100)
     {
       // Start building the query for invoices
+      var hospitalId = GetHospitalIdFromHeader();
       var query = _context.InvoiceInfos
-          .Where(i => i.IsDeleted != true)
+          .Where(i => i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
           .AsQueryable();
 
       // Apply filters based on paymentMode parameter
@@ -139,10 +141,10 @@ namespace hospitalApiProject.Controllers
     {
       // Get today's date as DateTime
       var today = DateTime.Today;
-
+      var hospitalId = GetHospitalIdFromHeader();
       // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
-          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true)
+          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true && (hospitalId == null || invoice.HospitalId == hospitalId))
           .Join(
               _context.PatientInfos,
               invoice => invoice.PatientId,
@@ -172,8 +174,9 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         var invoiceInfo = await _context.InvoiceInfos
-          .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true)
+          .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
           .Select(i => new InvoiceInfo
           {
             InvoiceId = i.InvoiceId,
@@ -268,8 +271,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("GetInvoiceinfoByPatientId")]
     public async Task<ActionResult<int>> GetInvoiceInfoByPatientId(int patientId)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var maxInvoiceId = await _context.InvoiceInfos
-        .Where(i => i.PatientId == patientId && i.IsDeleted != true)
+        .Where(i => i.PatientId == patientId && i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
         .MaxAsync(i => i.InvoiceId); // Cast to nullable int to handle case with no results
       if(maxInvoiceId == 0)
       {
@@ -311,11 +315,12 @@ namespace hospitalApiProject.Controllers
       {
         toDateParsed = today;
       }
-
+      var hospitalId = GetHospitalIdFromHeader();
       var result = await _context.PaymentModeInfo
           .Where(payment => payment.PaymentDate.HasValue &&
                             payment.PaymentDate.Value.Date >= fromDateParsed &&
-                            payment.PaymentDate.Value.Date <= toDateParsed)
+                            payment.PaymentDate.Value.Date <= toDateParsed &&
+                            (hospitalId == null || _context.InvoiceInfos.Where(i => i.InvoiceId == payment.InvoiceId).Any(i => i.HospitalId == hospitalId)))
           .GroupBy(payment => payment.PaymentMode.ToLower()) // Group by payment mode
           .Select(group => new
           {
@@ -340,8 +345,9 @@ namespace hospitalApiProject.Controllers
 
     public async Task<ActionResult<int>> GetTotalAmount()
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var result = _context.PaymentModeInfo
-       .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0)
+       .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0 && (hospitalId == null || _context.InvoiceInfos.Where(i => i.InvoiceId == all.InvoiceId).Any(i => i.HospitalId == hospitalId)))
        .Sum(all => (decimal?)all.Amount) ?? 0;
       return Ok(result);
     }
@@ -354,7 +360,7 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest("No invoice items provided.");
       }
-
+      var hospitalId = GetHospitalIdFromHeader();
       // Create Invoice
       var invoiceInfo = new InvoiceInfo()
       {
@@ -363,7 +369,8 @@ namespace hospitalApiProject.Controllers
         CreatedDate = DateTime.UtcNow, // Use UTC for consistency
         PatientId = patientId,
         Status = "Unpaid", // Set to Unpaid for new invoices
-        IsConsultationPaid = false // Set to false for new invoices
+        IsConsultationPaid = false, // Set to false for new invoices
+        HospitalId = hospitalId
       };
 
       // Add invoice to the context and save to generate the InvoiceId
@@ -469,6 +476,8 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<InvoiceInfo>> PostInvoiceInfo(InvoiceInfo invoiceInfo)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      invoiceInfo.HospitalId = hospitalId;
       _context.InvoiceInfos.Add(invoiceInfo);
       await _context.SaveChangesAsync();
 
@@ -508,10 +517,11 @@ namespace hospitalApiProject.Controllers
         var response = new SearchResponseBase<InvoiceInfoResponse>();
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         // Base invoices query (server-side filtering + sorting, then paginate)
         var invoicesQuery = _context.InvoiceInfos
             .AsNoTracking()
-            .Where(i => i.IsDeleted != true)
+            .Where(i => i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
             .AsQueryable();
 
         // Date filters:

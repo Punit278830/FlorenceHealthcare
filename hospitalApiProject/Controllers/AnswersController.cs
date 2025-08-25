@@ -7,32 +7,37 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using Microsoft.Extensions.Options;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AnswersController : ControllerBase
+    public class AnswersController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public AnswersController(FlorenceDbContext context)
+        public AnswersController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/Answers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Answer>>> GetAnswers()
         {
-            return await _context.Answers.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.Answers.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(a => a.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/Answers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Answer>> GetAnswer(int id)
         {
-            var answer = await _context.Answers.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var answer = await _context.Answers.FirstOrDefaultAsync(a => a.AnswerId == id && (hospitalId == null || a.HospitalId == hospitalId));
 
             if (answer == null)
             {
@@ -49,14 +54,20 @@ namespace hospitalApiProject.Controllers
         return BadRequest("No answers provided.");
       }
 
+      var hospitalId = GetHospitalIdFromHeader();
+
       // Find and remove existing answers that match the AppointmentId and QuestionnaireId
       var existingAnswers = _context.Answers
-          .Where(a => a.AppointmentId == appId && a.Question.QuestionnaireId == qId)
+          .Where(a => a.AppointmentId == appId && a.Question.QuestionnaireId == qId && (hospitalId == null || a.HospitalId == hospitalId))
           .ToList();
 
       _context.Answers.RemoveRange(existingAnswers);
 
       // Add the new list of answers
+      foreach (var ans in answers)
+      {
+        ans.HospitalId = hospitalId; // tag hospital if provided
+      }
       _context.Answers.AddRange(answers);
 
       // Save the changes
@@ -78,6 +89,9 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) answer.HospitalId = hospitalId;
 
             _context.Entry(answer).State = EntityState.Modified;
 
@@ -110,8 +124,10 @@ namespace hospitalApiProject.Controllers
             {
                 return NoContent();
             }
+            var hospitalId = GetHospitalIdFromHeader();
             foreach (var answer in answers)
             {
+                answer.HospitalId = hospitalId;
                 _context.Answers.Add(answer);
             }
 
@@ -124,7 +140,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteAnswer(int id)
         {
-            var answer = await _context.Answers.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var answer = await _context.Answers.FirstOrDefaultAsync(a => a.AnswerId == id && (hospitalId == null || a.HospitalId == hospitalId));
             if (answer == null)
             {
                 return NotFound();

@@ -7,18 +7,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using Microsoft.Extensions.Options;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
 
-    public class InvoiceItemMasterController : ControllerBase{
-        private readonly FlorenceDbContext _context;
-
-        public InvoiceItemMasterController(FlorenceDbContext context)
+    public class InvoiceItemMasterController : WithHospitalController{
+        public InvoiceItemMasterController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
     [HttpOptions]
@@ -28,7 +26,13 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<InvoiceItemMaster>>> GetInvoiceItemInfo()
     {
 
-      var appointmentInfo = await _context.InvoiceItemMasters.ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.InvoiceItemMasters.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(i => i.HospitalId == hospitalId);
+      }
+      var appointmentInfo = await query.ToListAsync();
 
       return appointmentInfo;
     }
@@ -40,6 +44,9 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest();
       }
+
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) invoiceItemMaster.HospitalId = hospitalId;
 
       _context.Entry(invoiceItemMaster).State = EntityState.Modified;
 
@@ -71,6 +78,8 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<InvoiceItemMaster>> PostInvoiceItem(InvoiceItemMaster InvoiceItemInfo)
     {
 
+      var hospitalId = GetHospitalIdFromHeader();
+      InvoiceItemInfo.HospitalId = hospitalId;
       _context.InvoiceItemMasters.Add(InvoiceItemInfo);
       await _context.SaveChangesAsync();
 

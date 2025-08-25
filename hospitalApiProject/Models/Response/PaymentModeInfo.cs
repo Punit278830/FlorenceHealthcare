@@ -16,4 +16,7 @@ public partial class PaymentModeInfo
 
   public int? Amount { get; set; }
 
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
+
 }

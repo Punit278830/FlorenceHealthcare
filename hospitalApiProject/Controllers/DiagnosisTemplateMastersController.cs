@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DiagnosisTemplateMastersController : ControllerBase
+    public class DiagnosisTemplateMastersController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public DiagnosisTemplateMastersController(FlorenceDbContext context)
+        public DiagnosisTemplateMastersController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/DiagnosisTemplateMasters
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DiagnosisTemplateMaster>>> GetDiagnosisTemplateMasters()
         {
-            return await _context.DiagnosisTemplateMasters.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.DiagnosisTemplateMasters.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(d => d.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/DiagnosisTemplateMasters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DiagnosisTemplateMaster>> GetDiagnosisTemplateMaster(int id)
         {
-            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FirstOrDefaultAsync(d => d.DiagnosId == id && (hospitalId == null || d.HospitalId == hospitalId));
 
             if (diagnosisTemplateMaster == null)
             {
@@ -50,6 +55,9 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) diagnosisTemplateMaster.HospitalId = hospitalId;
 
             _context.Entry(diagnosisTemplateMaster).State = EntityState.Modified;
 
@@ -77,6 +85,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<DiagnosisTemplateMaster>> PostDiagnosisTemplateMaster(DiagnosisTemplateMaster diagnosisTemplateMaster)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            diagnosisTemplateMaster.HospitalId = hospitalId;
             _context.DiagnosisTemplateMasters.Add(diagnosisTemplateMaster);
             await _context.SaveChangesAsync();
 
@@ -87,7 +97,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDiagnosisTemplateMaster(int id)
         {
-            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var diagnosisTemplateMaster = await _context.DiagnosisTemplateMasters.FirstOrDefaultAsync(d => d.DiagnosId == id && (hospitalId == null || d.HospitalId == hospitalId));
             if (diagnosisTemplateMaster == null)
             {
                 return NotFound();

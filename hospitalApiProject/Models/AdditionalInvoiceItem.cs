@@ -22,6 +22,9 @@ public partial class AdditionalInvoiceItem
     public int FinalAmount { get; set; }
 
     public string Status { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }
 
 

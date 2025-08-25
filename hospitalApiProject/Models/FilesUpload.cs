@@ -16,4 +16,7 @@ public partial class FilesUpload
     public string FileData { get; set; } = null!;
 
     public DateTime? UploadDate { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }

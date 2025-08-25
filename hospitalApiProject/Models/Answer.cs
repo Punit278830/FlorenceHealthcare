@@ -20,4 +20,7 @@ public partial class Answer
     public virtual Question? Question { get; set; }
 
     public virtual Option? SelectedOption { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }
