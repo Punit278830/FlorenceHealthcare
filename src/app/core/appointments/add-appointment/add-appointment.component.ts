@@ -3,7 +3,6 @@ import { OnInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { Router } from '@angular/router';
-import { DateTime } from 'luxon';
 import { ToastrService } from 'ngx-toastr';
 import { AppointmentService } from '../../../shared/Services/appointment/appointment.service';
 import { StaffScheduleService } from '../../../shared/Services/appointment/staff-schedule.service';
@@ -377,16 +376,11 @@ export class AddAppointmentComponent implements OnInit {
       const day = dateObj.getDate();
 
       // Only set hour/minute if appointTime is present, else default to 0
-      let combinedDateTimeIST = DateTime.fromObject({
-        year,
-        month,
-        day,
-        hour,
-        minute,
-      });
+      // Create UTC date directly without timezone conversion
+      let combinedDateTimeUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
 
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = combinedDateTimeIST.toJSDate();
+      this.appointmentDto.date = combinedDateTimeUTC;
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
