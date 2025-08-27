@@ -13,9 +13,8 @@ export class ApiHttpService {
   ) { }
 
   private withHospitalHeader(options?: any): any {
-    const hospitalId = localStorage.getItem('currentHospitalId');
-    if (!hospitalId) return options || {};
-
+    const hospitalId = localStorage.getItem('currentHospitalId') || '1'; // Default to hospital ID 1
+    
     const headers = new HttpHeaders(options?.headers || {}).set('X-Hospital-Id', hospitalId);
     return { ...(options || {}), headers };
   }

@@ -26,6 +26,11 @@ export class HospitalService {
 
   getCurrentHospitalId(): number | null {
     const val = localStorage.getItem('currentHospitalId');
+    if (!val) {
+      // Default to hospital ID 1 if not set
+      this.setCurrentHospitalId(1);
+      return 1;
+    }
     return val ? Number(val) : null;
   }
 }

@@ -16,10 +16,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE } from '@angular/material/core';
 import { CustomDateAdapter } from 'src/app/shared/utility/CustomDateAdapter';
 import { MY_DATE_FORMATS } from 'src/app/shared/utility/MY_DATE_FORMATS';
+import { HospitalStatusComponent } from './components/hospital-status.component';
 
 
 
-@NgModule({ declarations: [],
+@NgModule({ 
+    declarations: [
+        HospitalStatusComponent
+    ],
     exports: [
         CommonModule,
         NgxBootstrapModule,
@@ -33,7 +37,8 @@ import { MY_DATE_FORMATS } from 'src/app/shared/utility/MY_DATE_FORMATS';
         HttpClientModule,
         MatSortModule,
         FormsModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        HospitalStatusComponent
     ], imports: [CommonModule,
         NgxBootstrapModule,
         CountUpModule,

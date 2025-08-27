@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/shared/auth/auth.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
+import { HospitalModel } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
 
@@ -17,9 +19,17 @@ export class HeaderComponent {
   public addClass = false;
   public userRole='';
   public userName='';
+  public hospitals: HospitalModel[] = [];
+  public currentHospitalId: number | null = null;
+  public currentHospitalName: string = '';
   
 
-  constructor(public router: Router,private sideBar: SideBarService,private _auth:AuthService) {
+  constructor(
+    public router: Router,
+    private sideBar: SideBarService,
+    private _auth: AuthService,
+    private hospitalService: HospitalService
+  ) {
     
     this.sideBar.toggleSideBar.subscribe((res: string) => {
       if (res == 'true') {
@@ -40,7 +50,17 @@ export class HeaderComponent {
      const data=JSON.parse(localStorage.getItem('data')||'')
 this.userName=data.fname +" "+data.lname;
 this.userRole=data.userRole;
+
+    // Load hospitals and current hospital
+    this.loadHospitals();
+    this.currentHospitalId = this.hospitalService.getCurrentHospitalId();
+    this.updateCurrentHospitalName();
     
+    // Subscribe to hospital changes
+    this.hospitalService.currentHospitalId$.subscribe(id => {
+      this.currentHospitalId = id;
+      this.updateCurrentHospitalName();
+    });
   }
   openBoxFunc() {
     this.openBox = !this.openBox;
@@ -59,20 +79,49 @@ this.userRole=data.userRole;
   public toggleMobileSideBar(): void {
     this.sideBar.switchMobileSideBarPosition();
     
-      this.addClass = !this.addClass;
-      /* eslint no-var: off */
-      var root = document.getElementsByTagName( 'html' )[0];
-      /* eslint no-var: off */
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      var sidebar:any = document.getElementById('sidebar')
-  
-      if (this.addClass) {
-        root.classList.add('menu-opened');
-        sidebar.classList.add('opened');
-      }
-      else {
-        root.classList.remove('menu-opened');
-        sidebar.classList.remove('opened');
-      }
+    this.addClass = !this.addClass;
+    /* eslint no-var: off */
+    var root = document.getElementsByTagName( 'html' )[0];
+    /* eslint no-var: off */
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    var sidebar:any = document.getElementById('sidebar')
+
+    if (this.addClass) {
+      root.classList.add('menu-opened');
+      sidebar.classList.add('opened');
+    }
+    else {
+      root.classList.remove('menu-opened');
+      sidebar.classList.remove('opened');
     }
   }
+
+  private loadHospitals(): void {
+    this.hospitalService.getHospitals().subscribe({
+      next: (hospitals: HospitalModel[]) => {
+        this.hospitals = hospitals;
+        this.updateCurrentHospitalName();
+      },
+      error: (error: any) => {
+        console.error('Failed to load hospitals:', error);
+      }
+    });
+  }
+
+  private updateCurrentHospitalName(): void {
+    if (this.currentHospitalId && this.hospitals.length > 0) {
+      const hospital = this.hospitals.find((h: HospitalModel) => h.hospitalId === this.currentHospitalId);
+      this.currentHospitalName = hospital?.name || 'Unknown Hospital';
+    } else {
+      this.currentHospitalName = 'No Hospital Selected';
+    }
+  }
+
+  public selectHospital(hospital: HospitalModel): void {
+    if (hospital.hospitalId) {
+      this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
+      // Optionally refresh the page to reload data with new hospital
+      window.location.reload();
+    }
+  }
+}

@@ -41,6 +41,9 @@ export class AuthService {
         // Store hospital ID from user's profile for multi-tenant support
         if (data.hospitalId) {
           localStorage.setItem('currentHospitalId', data.hospitalId.toString());
+        } else {
+          // Default to hospital ID 1 if not provided
+          localStorage.setItem('currentHospitalId', '1');
         }
         
         const logingData=JSON.stringify(this.authentication)
