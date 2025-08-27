@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../apiService/apiHttpService';
-import { IstaffInfo, Ilogin } from '../models/models';
+import { IstaffInfo, Ilogin, HospitalModel } from '../models/models';
 import { catchError, map, Observable, throwError } from 'rxjs';
 import { api_Url } from 'src/environment/environment';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -37,6 +37,12 @@ export class AuthService {
         data.activeStatus==1?this.authentication.loginStatus=true:this.authentication.loginStatus=false;
         this.authentication.loginId=data.staffId;
         this.authentication.departmentId=data.departmentId;
+        
+        // Store hospital ID from user's profile for multi-tenant support
+        if (data.hospitalId) {
+          localStorage.setItem('currentHospitalId', data.hospitalId.toString());
+        }
+        
         const logingData=JSON.stringify(this.authentication)
         this.userRole=data.designation;
 
@@ -45,6 +51,12 @@ export class AuthService {
 
         return staffInfo;
       }),
+      catchError(this.handleError)
+    );
+  }
+
+  getHospitals(): Observable<HospitalModel[]> {
+    return this.http.get(`${this.apiUrl}Hospitals`).pipe(
       catchError(this.handleError)
     );
   }

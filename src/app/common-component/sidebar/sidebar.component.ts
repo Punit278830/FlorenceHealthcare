@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { DataService } from 'src/app/shared/data/data.service';
-import { MenuItem, SideBarData, Ilogin, HospitalModel } from 'src/app/shared/models/models';
+import { MenuItem, SideBarData, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
-import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -23,16 +22,11 @@ export class SidebarComponent {
   public sidebarData: Array<SideBarData> = [];
   public userRole='';
   public userData:Ilogin={}as Ilogin;
-  
-  // Hospital switcher state
-  public hospitals: HospitalModel[] = [];
-  public selectedHospitalId: number | null = null;
 
   constructor(
     private data: DataService,
     private router: Router,
-    private sideBar: SideBarService,
-    private hospitalService: HospitalService
+    private sideBar: SideBarService
 
     
   ) {
@@ -44,13 +38,6 @@ export class SidebarComponent {
       }
     });
     this.getRoutes(this.router);
-
-    // Initialize hospital state
-    this.selectedHospitalId = this.hospitalService.getCurrentHospitalId();
-    this.hospitalService.currentHospitalId$.subscribe(id => {
-      this.selectedHospitalId = id;
-    });
-    this.loadHospitals();
   }
   // public ngOnInit()
   // {
@@ -100,22 +87,6 @@ export class SidebarComponent {
     } else {
       this.sideBar.expandSideBar.next("false");
     }
-  }
-
-  private loadHospitals(): void {
-    this.hospitalService.getHospitals().subscribe({
-      next: (list) => {
-        this.hospitals = list || [];
-      },
-      error: () => {
-        this.hospitals = [];
-      }
-    });
-  }
-
-  public onHospitalChange(val: number | null): void {
-    // val can be number or null because we use [ngValue]
-    this.hospitalService.setCurrentHospitalId(val);
   }
 
 }

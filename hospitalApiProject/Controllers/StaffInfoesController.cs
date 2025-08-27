@@ -70,10 +70,11 @@ namespace hospitalApiProject.Controllers
     //GET: api/StaffInfoes/
     public async Task<ActionResult<StaffInfo>> GetloginInfo(string email, string password)
     {
-      var hospitalId = GetHospitalIdFromHeader();
+      // For login, we don't filter by hospital since we need to find the user first
+      // The user's hospital will be determined by their StaffInfo record
       if (email != null && password != null)
       {
-        List<StaffInfo> login = await _context.StaffInfos.Where(e => e.Email.Contains(email) && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync<StaffInfo>();
+        List<StaffInfo> login = await _context.StaffInfos.Where(e => e.Email.Contains(email)).ToListAsync<StaffInfo>();
 
         if (login != null && login.Count > 0)
         {
@@ -85,8 +86,6 @@ namespace hospitalApiProject.Controllers
       }
 
       return NotFound();
-
-
     }
     // PUT: api/StaffInfoes/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754

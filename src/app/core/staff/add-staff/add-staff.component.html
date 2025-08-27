@@ -29,6 +29,24 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
+                                        <label for="hospitalId">Hospital <span class="login-danger">*</span></label>
+                                        <mat-select formControlName="hospitalId" class="form-control select" placeholder="Select Hospital">
+                                            <mat-option *ngFor="let hospital of hospitals" [value]="hospital.hospitalId">
+                                                {{ hospital.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="staffReg.get('hospitalId')?.invalid && (staffReg.get('hospitalId')?.dirty || staffReg.get('hospitalId')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('hospitalId')?.errors?.['required']">Hospital selection is required.</div>
+                                        </div>
+                                        <div *ngIf="isLoadingHospitals" class="text-muted mt-1">
+                                            <small>Loading hospitals...</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
                                         <label for="name">First Name <span class="login-danger">*</span></label>
                                         <input class="form-control" type="text" formControlName="firstName">
                                         <div *ngIf="staffReg.get('firstName')?.invalid && (staffReg.get('firstName')?.dirty || staffReg.get('firstName')?.touched)"

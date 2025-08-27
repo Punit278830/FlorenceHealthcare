@@ -42,8 +42,8 @@ export class LoginComponent implements OnInit {
   loginFormSubmit(): void {
     this.loadingService.showLoader();
     if (this.form.valid) {
-      const email=this.form.controls.email.value as string;
-      const password=this.form.controls.password.value as string;
+      const email = this.form.controls.email.value as string;
+      const password = this.form.controls.password.value as string;
 
       this.auth.login(email, password).subscribe(
         (staffInfo: IstaffInfo) => {

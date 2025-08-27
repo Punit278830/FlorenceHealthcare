@@ -19,8 +19,15 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Hospital>>> GetHospitals()
     {
-      var hospitals = await _context.Hospitals.OrderBy(h => h.Name).ToListAsync();
-      return Ok(hospitals);
+      try
+      {
+        var hospitals = await _context.Hospitals.OrderBy(h => h.Name).ToListAsync();
+        return Ok(hospitals);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
     }
 
     // GET: api/Hospitals/5

@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
-import { Idepartment, IstaffInfo } from 'src/app/shared/models/models';
+import { Idepartment, IstaffInfo, HospitalModel } from 'src/app/shared/models/models';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DatePipe } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from 'src/app/shared/auth/auth.service';
 import * as dayjs from 'dayjs';
 
 interface data {
@@ -27,6 +28,8 @@ export class AddStaffComponent implements OnInit {
   public passwordClass = false;
   public passwordClass1 = false;
   public _depDto: Idepartment[] = [];
+  public hospitals: HospitalModel[] = [];
+  public isLoadingHospitals = false;
   public maxDate: Date | null = null;
 
 
@@ -35,14 +38,31 @@ export class AddStaffComponent implements OnInit {
     private datePipe: DatePipe,
     private route: Router,
     private toster: ToastrService,
-    private departmentService: DepartmentService) {
+    private departmentService: DepartmentService,
+    private authService: AuthService) {
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
+    this.loadHospitals();
     this.maxDate = new Date()
 
   }
   ngOnInit(): void {
-    throw new Error('Method not implemented.');
+    // Removed the error throw
+  }
+
+  loadHospitals(): void {
+    this.isLoadingHospitals = true;
+    this.authService.getHospitals().subscribe(
+      (hospitals: HospitalModel[]) => {
+        this.hospitals = hospitals.filter(h => h.isActive !== false);
+        this.isLoadingHospitals = false;
+      },
+      (error) => {
+        console.error('Error loading hospitals:', error);
+        this.isLoadingHospitals = false;
+        this.toster.error('Failed to load hospitals');
+      }
+    );
   }
 
 
@@ -138,6 +158,7 @@ export class AddStaffComponent implements OnInit {
 
   createStaffRegrestrationForm() {
     this.staffReg = this.fb.group({
+      hospitalId: ['', [Validators.required]],
       firstName: ['', [Validators.required]],
       lastName: ['', Validators.required],
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -196,6 +217,7 @@ export class AddStaffComponent implements OnInit {
 
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
+      staffData.hospitalId = parseInt(staffData.hospitalId);
       this.staffService.CreateStaff(staffData).subscribe((res:any) => {
         console.log(res);
         if (!res.message) {

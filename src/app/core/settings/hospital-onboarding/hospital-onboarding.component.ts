@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { api_Url } from 'src/environment/environment';
+import { routes } from 'src/app/shared/routes/routes';
 
 @Component({
   selector: 'app-hospital-onboarding',
@@ -15,6 +16,7 @@ export class HospitalOnboardingComponent implements OnInit {
   loading = false;
   error?: string;
   success?: string;
+  public routes = routes;
 
   constructor(private fb: FormBuilder, private http: HttpClient) {}
 
@@ -32,6 +34,7 @@ export class HospitalOnboardingComponent implements OnInit {
       pincode: ['', [Validators.maxLength(20)]],
       country: ['', [Validators.maxLength(100)]],
       registrationNumber: ['', [Validators.maxLength(100)]],
+      licenseNumber: ['', [Validators.maxLength(100)]],
       gstin: ['', [Validators.maxLength(30)]],
       websiteUrl: ['', [Validators.maxLength(400)]],
       logoUrl: ['', [Validators.maxLength(400)]],

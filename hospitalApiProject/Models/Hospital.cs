@@ -46,6 +46,9 @@ public class Hospital
   [MaxLength(100)]
   public string? RegistrationNumber { get; set; }
 
+  [MaxLength(100)]
+  public string? LicenseNumber { get; set; }
+
   [MaxLength(30)]
   public string? GSTIN { get; set; }
 

@@ -2,15 +2,6 @@
   (focus)="miniSideBarMouseHover('over')" (blur)="miniSideBarMouseHover('out')" tabindex="0">
   <ng-scrollbar>
     <div id="sidebar-menu" class="sidebar-menu">
-      <!-- Hospital switcher -->
-      <div class="hospital-switcher" style="padding: 12px 16px;">
-        <label for="hospitalSelect" style="display:block; font-size:12px; color:#888; margin-bottom:6px;">Hospital</label>
-        <select id="hospitalSelect" class="form-control" [ngModel]="selectedHospitalId" (ngModelChange)="onHospitalChange($event)"
-          [compareWith]="(a,b) => a===b">
-          <option [ngValue]="null">All hospitals</option>
-          <option *ngFor="let h of hospitals" [ngValue]="h.hospitalId">{{ h.name }}</option>
-        </select>
-      </div>
       <ul>
         <ng-container *ngFor="let mainTittle of sidebarData">
 

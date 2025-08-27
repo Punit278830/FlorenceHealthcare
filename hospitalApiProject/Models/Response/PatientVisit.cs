@@ -14,6 +14,9 @@ public partial class PatientVisit
 
   public DateTime VisitDate { get; set; }
 
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
+
   // Navigation property for related CareContexts
   public ICollection<CareContext> CareContexts { get; set; }
 }

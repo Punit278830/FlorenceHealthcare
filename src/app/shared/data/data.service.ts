@@ -563,6 +563,17 @@ export class DataService {
             }
           ],
         },
+        {
+          menuValue: 'Hospital Registration',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'hospital-registration',
+          route: routes.hospitalOnboarding,
+          img: 'assets/img/icons/menu-icon-16.svg',
+          subMenus: [
+
+          ],
+        },
 
         // {
         //   menuValue: 'Invoice',
