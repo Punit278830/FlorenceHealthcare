@@ -374,9 +374,12 @@
 
                                 <div class="col-12">
                                     <div class="doctor-submit text-end">
-                                        <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
-                                        <button type="submit" class="btn btn-primary cancel-form"
-                                            (click)="onCancel()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary submit-form me-2" [disabled]="isSubmitting">
+                                            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                                        </button>
+                                        <button type="button" class="btn btn-secondary cancel-form"
+                                            (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
                                     </div>
                                 </div>
                             </div>

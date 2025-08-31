@@ -33,6 +33,7 @@ export class AddStaffComponent implements OnInit {
   public roles: any[] = [];
   public isLoadingRoles = false;
   public isLoadingHospitals = false;
+  public isSubmitting = false;
   public maxDate: Date | null = null;
 
 
@@ -243,12 +244,26 @@ export class AddStaffComponent implements OnInit {
 
 
   addStaff(formValues: FormGroup) {
+    console.log("Add Staff method called");
+    console.log("Form valid:", this.staffReg.valid);
+    console.log("Form values:", formValues.value);
+    console.log("Form errors:", this.staffReg.errors);
+    
+    if (this.isSubmitting) {
+      console.log("Already submitting, ignoring duplicate submission");
+      return;
+    }
+    
     if (this.staffReg.valid) {
-      console.log("values", formValues.value);
+      console.log("Form is valid, proceeding with submission");
+      
       if (formValues.value.password !== formValues.value.cpassword) {
         this.toster.error("Password do not match");
         return; // Exit the method if passwords don't match
       }
+      
+      this.isSubmitting = true;
+      
       // Create a copy of the form values and remove cpassword
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
@@ -256,8 +271,12 @@ export class AddStaffComponent implements OnInit {
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
       staffData.hospitalId = parseInt(staffData.hospitalId);
+      
+      console.log("Sending staff data:", staffData);
+      
       this.staffService.CreateStaff(staffData).subscribe((res:any) => {
-        console.log(res);
+        console.log("API Response:", res);
+        this.isSubmitting = false;
         if (!res.message) {
           this.toster.success("Staff Added Successfully", 'Staff');
           this.route.navigate([routes.staffList])
@@ -266,14 +285,33 @@ export class AddStaffComponent implements OnInit {
         }
       },
       (err)=>{
-        this.toster.error(err.message,"Error Err")
-
+        console.error("API Error:", err);
+        this.isSubmitting = false;
+        this.toster.error(err.message || "An error occurred","Error")
       }
     );
 
     } else {
+      console.log("Form is invalid");
+      console.log("Invalid controls:", this.getInvalidControls());
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
+      this.toster.error("Please fill all required fields correctly", "Form Validation Error");
     }
+  }
+
+  // Helper method to identify invalid form controls
+  getInvalidControls() {
+    const invalid = [];
+    const controls = this.staffReg.controls;
+    for (const name in controls) {
+      if (controls[name].invalid) {
+        invalid.push({
+          name: name,
+          errors: controls[name].errors
+        });
+      }
+    }
+    return invalid;
   }
 
 

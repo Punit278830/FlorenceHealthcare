@@ -62,10 +62,10 @@ namespace hospitalApiProject.Controllers
         {
             var hospitalId = GetHospitalIdFromHeader();
             var query = _context.DepartmentInfos.AsQueryable();
-            if (hospitalId != null)
-            {
-                query = query.Where(p => p.HospitalId == hospitalId);
-            }
+            // if (hospitalId != null)
+            // {
+            //     query = query.Where(p => p.HospitalId == hospitalId);
+            // }
             return await query.OrderByDescending(p=>p.DepartmentId).ToListAsync();
         }
 
