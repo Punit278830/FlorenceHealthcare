@@ -138,6 +138,8 @@ public partial class FlorenceDbContext : DbContext
     {
       entity.HasKey(e => e.PaymentId);  // Define primary key
       entity.Property(e => e.PaymentMode).HasMaxLength(100);  // Define column properties
+      entity.Property(e => e.ItemName).HasColumnName("itemName");  // Map to camelCase database column
+      entity.Property(e => e.ItemId).HasColumnName("itemId");      // Map to camelCase database column
       entity.Property(e => e.TransactionId).HasMaxLength(100);
       entity.Property(e => e.PaymentDate).HasDefaultValueSql("GETDATE()");  // Default value for PaymentDate
       entity.Property(e => e.Amount);

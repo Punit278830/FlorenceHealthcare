@@ -17,7 +17,7 @@ public partial class PaymentModeInfo
     public string PaymentMode { get; set; }
 
     [Required]
-    public string ItemName { get; set; }
+    public string ItemName { get; set; } = string.Empty;
 
     public string? ItemId { get; set; }
 

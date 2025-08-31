@@ -192,7 +192,7 @@
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
                     <td><button
-                        [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
+                        [ngClass]="{'nstatus-orage':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
                         class="custom-badge">{{data.status}}</button></td>
                     <td><button
                         [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"

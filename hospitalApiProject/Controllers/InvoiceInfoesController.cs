@@ -14,7 +14,7 @@ namespace hospitalApiProject.Controllers
   [ApiController]
   public class InvoiceInfoesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
+    private new readonly FlorenceDbContext _context;
 
     public InvoiceInfoesController(FlorenceDbContext context) : base(context)
     {
@@ -188,7 +188,7 @@ namespace hospitalApiProject.Controllers
             IsConsultationPaid = i.IsConsultationPaid,
             TransactionId = (bool)i.IsConsultationPaid
               ? _context.PaymentModeInfo
-                  .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
+                  .Where(p => p.InvoiceId == i.InvoiceId && p.ItemName == "Consultation")
                   .OrderByDescending(p => p.PaymentDate)
                   .Select(p => p.TransactionId)
                   .FirstOrDefault()

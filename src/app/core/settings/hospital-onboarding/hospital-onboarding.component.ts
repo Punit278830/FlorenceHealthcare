@@ -176,11 +176,11 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   getHospitalStatusClass(hospital: any): string {
-    // Temporarily handle hospitals without IsDeleted column
+    // Use consistent styling with invoice page status badges
     const isDeleted = hospital.isDeleted || false;
-    if (isDeleted) return 'badge bg-danger';
-    if (!hospital.isActive) return 'badge bg-warning';
-    return 'badge bg-success';
+    if (isDeleted) return 'custom-badge status-pink';
+    if (!hospital.isActive) return 'custom-badge status-orange';
+    return 'custom-badge status-green';
   }
 
   getHospitalStatusIcon(hospital: any): string {
