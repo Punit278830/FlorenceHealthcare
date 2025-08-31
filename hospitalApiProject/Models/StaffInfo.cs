@@ -45,4 +45,9 @@ public partial class StaffInfo
     public int? PrescriptionValidity { get; set; }
 
     public int? HospitalId { get; set; }
+
+    public int? RoleId { get; set; }
+
+    // Navigation properties
+    public virtual RoleMaster? Role { get; set; }
 }

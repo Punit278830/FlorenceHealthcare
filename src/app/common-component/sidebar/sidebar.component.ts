@@ -4,6 +4,7 @@ import { DataService } from 'src/app/shared/data/data.service';
 import { MenuItem, SideBarData, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
+import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 
 @Component({
   selector: 'app-sidebar',
@@ -26,12 +27,11 @@ export class SidebarComponent {
   constructor(
     private data: DataService,
     private router: Router,
-    private sideBar: SideBarService
-
-    
+    private sideBar: SideBarService,
+    private roleService: RoleAuthorizationService
   ) {
     this.getUserRole();
-    this.sidebarData = this.data.sideBar;
+    this.sidebarData = this.getFilteredSidebarData();
     router.events.subscribe((event: object) => {
       if (event instanceof NavigationEnd) {
         this.getRoutes(event);
@@ -46,16 +46,32 @@ export class SidebarComponent {
 
  public getUserRole()
  {
-  this.userData=JSON.parse(localStorage.getItem('data')||'')
-  this.userRole=this.userData.userRole;
-    
+  // First try to get role from new role service
+  const currentRole = this.roleService.getCurrentRole();
+  if (currentRole) {
+    this.userRole = currentRole.roleName.toLowerCase();
+  } else {
+    // Fallback to old system
+    this.userData = JSON.parse(localStorage.getItem('data') || '{}');
+    this.userRole = this.userData.userRole || '';
+  }
  }
   public expandSubMenus(menu: MenuItem): void {
     sessionStorage.setItem('menuValue', menu.menuValue);
-    const userRole=JSON.parse(localStorage.getItem('data')||'').userRole;
-    console.log(userRole)
+    
+    // Get user role from new role service or fallback to old system
+    let userRole = '';
+    const currentRole = this.roleService.getCurrentRole();
+    if (currentRole) {
+      userRole = currentRole.roleName.toLowerCase();
+    } else {
+      userRole = JSON.parse(localStorage.getItem('data') || '{}').userRole || '';
+    }
+    
+    console.log('Current user role:', userRole);
+    
     this.sidebarData.map((mainMenus: SideBarData) => {
-     if(mainMenus.tittle==userRole)
+     if(mainMenus.tittle === userRole)
      {
       mainMenus.menu.map((resMenu: MenuItem) => {
         if (resMenu.menuValue == menu.menuValue) {
@@ -87,6 +103,25 @@ export class SidebarComponent {
     } else {
       this.sideBar.expandSideBar.next("false");
     }
+  }
+  private getFilteredSidebarData(): Array<SideBarData> {
+    const isSuperAdmin = this.roleService.isSuperAdmin();
+    const originalData = this.data.sideBar;
+    
+    if (isSuperAdmin) {
+      return originalData; // Super admins see all menu items
+    }
+    
+    // Filter out Hospital Registration for non-super admins
+    return originalData.map(sidebarSection => ({
+      ...sidebarSection,
+      menu: sidebarSection.menu.filter(menuItem => {
+        if (menuItem.menuValue === 'Hospital Registration') {
+          return false; // Hide hospital registration for non-super admins
+        }
+        return true;
+      })
+    }));
   }
 
 }

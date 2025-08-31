@@ -69,6 +69,8 @@ public partial class FlorenceDbContext : DbContext
 
   public virtual DbSet<Hospital> Hospitals { get; set; }
 
+  public virtual DbSet<RoleMaster> RoleMasters { get; set; }
+
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
   //=> optionsBuilder.UseSqlServer("Server=LAPTOP-PVS2FCEU\\SQLEXPRESS;Database=florenceDb;Integrated Security=True;TrustServerCertificate=True;");
@@ -558,6 +560,15 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.IdentityNumber)
           .HasMaxLength(100)
           .IsUnicode(false);
+      entity.Property(e => e.RoleId)
+          .HasColumnName("RoleId");
+
+      // Configure relationship with RoleMaster
+      entity.HasOne(s => s.Role)
+          .WithMany()
+          .HasForeignKey(s => s.RoleId)
+          .HasConstraintName("FK_StaffInfo_RoleMaster")
+          .OnDelete(DeleteBehavior.SetNull);
     });
 
     modelBuilder.Entity<StaffSchedule>(entity =>
@@ -647,7 +658,10 @@ public partial class FlorenceDbContext : DbContext
       entity.Property(e => e.WebsiteUrl).HasMaxLength(400).HasColumnName("WebsiteUrl");
       entity.Property(e => e.LogoUrl).HasMaxLength(400).HasColumnName("LogoUrl");
       entity.Property(e => e.IsActive).HasColumnName("IsActive");
+      entity.Property(e => e.IsDeleted).HasColumnName("IsDeleted");
       entity.Property(e => e.CreatedOn).HasColumnName("CreatedOn");
+      entity.Property(e => e.ModifiedOn).HasColumnName("ModifiedOn");
+      entity.Property(e => e.ModifiedBy).HasMaxLength(100).HasColumnName("ModifiedBy");
     });
 
     OnModelCreatingPartial(modelBuilder);

@@ -27,7 +27,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-12 col-md-6 col-xl-4">
+                                <div class="col-12 col-md-6 col-xl-4" *ngIf="shouldShowHospitalDropdown">
                                     <div class="form-group local-forms">
                                         <label for="hospitalId">Hospital <span class="login-danger">*</span></label>
                                         <mat-select formControlName="hospitalId" class="form-control select" placeholder="Select Hospital">
@@ -202,6 +202,24 @@
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('designation')?.errors?.['required']">Designation
                                                 is required.</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="roleId">Role (Optional)</label>
+                                        <mat-select formControlName="roleId" class="form-control select" placeholder="Select Role">
+                                            <mat-option value="">-- No Role Assigned --</mat-option>
+                                            <mat-option *ngFor="let role of roles" [value]="role.roleId">
+                                                {{ role.roleDisplayName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="isLoadingRoles" class="text-muted mt-1">
+                                            <small>Loading roles...</small>
+                                        </div>
+                                        <div class="text-muted mt-1">
+                                            <small>Role assignment is optional. If not selected, role will be based on designation.</small>
                                         </div>
                                     </div>
                                 </div>

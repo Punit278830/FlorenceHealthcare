@@ -85,7 +85,7 @@ namespace hospitalApiProject.Controllers
             // Payment details for the invoice
             PaymentDetails = _context.PaymentModeInfo
                       .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                      .Select(pm => new PaymentModeInfo
+                      .Select(pm => new PaymentModeInfoResponse
                       {
                         PaymentId = pm.PaymentId,
                         PaymentMode = pm.PaymentMode,
@@ -115,11 +115,11 @@ namespace hospitalApiProject.Controllers
 
       // Aggregating totals for online, cash, and all payments across all invoices
       var totalOnlineAmount = invoices.Sum(inv => inv.PaymentDetails
-          .Where(pm => pm.PaymentMode.ToLower() == "online")
+          .Where(pm => pm.PaymentMode?.ToLower() == "online")
           .Sum(pm => pm.Amount)) ?? 0;
 
       var totalCashAmount = invoices.Sum(inv => inv.PaymentDetails
-          .Where(pm => pm.PaymentMode.ToLower() == "cash")
+          .Where(pm => pm.PaymentMode?.ToLower() == "cash")
           .Sum(pm => pm.Amount)) ?? 0;
 
       var totalAmount = invoices.Sum(inv => inv.PaymentDetails
@@ -251,17 +251,29 @@ namespace hospitalApiProject.Controllers
     
  
 
-    private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? Id)
+    private async Task<List<PaymentModeInfoResponse>> GetPaymentModeInfoByInvoiceId(int? Id)
     {
       // Ensure models is not null and contains data
       if (Id == 0)
       {
-        return null; // Or handle as appropriate
+        return new List<PaymentModeInfoResponse>(); // Return empty list instead of null
       }
 
       // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
       var results = await _context.PaymentModeInfo
-          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && e.itemId.Contains("Consultation"))
+          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && e.ItemId != null && e.ItemId.Contains("Consultation"))
+          .Select(pm => new PaymentModeInfoResponse
+          {
+            PaymentId = pm.PaymentId,
+            InvoiceId = pm.InvoiceId,
+            PaymentMode = pm.PaymentMode,
+            itemName = pm.ItemName,
+            itemId = pm.ItemId,
+            TransactionId = pm.TransactionId,
+            PaymentDate = pm.PaymentDate,
+            Amount = pm.Amount,
+            HospitalId = pm.HospitalId
+          })
           .ToListAsync();
 
       return results;
@@ -408,7 +420,7 @@ namespace hospitalApiProject.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutInvoiceInfo(int id, InvoicePaymentDto invoicePaymentDto)
     {
-      if (id != invoicePaymentDto.InvoiceInfo.InvoiceId)
+      if (id != invoicePaymentDto.InvoiceInfo?.InvoiceId)
       {
         return BadRequest();
       }
@@ -638,7 +650,18 @@ namespace hospitalApiProject.Controllers
             CreatedDate = i.CreatedDate,
             Amount = (int?)((decimal)baseAmount + addAmount),
             Status = i.Status,
-            PaymentDetails = pms, // includes PaymentDate with time
+            PaymentDetails = pms.Select(pm => new PaymentModeInfoResponse
+            {
+              PaymentId = pm.PaymentId,
+              InvoiceId = pm.InvoiceId,
+              PaymentMode = pm.PaymentMode,
+              itemName = pm.ItemName,
+              itemId = pm.ItemId,
+              TransactionId = pm.TransactionId,
+              PaymentDate = pm.PaymentDate,
+              Amount = pm.Amount,
+              HospitalId = pm.HospitalId
+            }).ToList(), // includes PaymentDate with time
             PaymentModes = paymentModesStr ?? string.Empty,
             TotalUnpaidAmount = (decimal)baseAmount + addAmount - totalPaid,
             PatientFname = fullName

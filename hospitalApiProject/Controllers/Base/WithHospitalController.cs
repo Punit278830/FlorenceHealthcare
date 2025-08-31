@@ -21,5 +21,14 @@ namespace hospitalApiProject.Controllers.Base
       }
       return null; // null for backward compatibility
     }
+
+    protected string GetTimeZoneFromHeader()
+    {
+      if (Request.Headers.TryGetValue("X-Time-Zone", out var values))
+      {
+        return values.FirstOrDefault() ?? "UTC";
+      }
+      return "UTC"; // Default to UTC if header is not present
+    }
   }
 }

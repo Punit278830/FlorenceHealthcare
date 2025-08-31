@@ -21,7 +21,10 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitals = await _context.Hospitals.OrderBy(h => h.Name).ToListAsync();
+        // Return all hospitals (including inactive and deleted for Super Admin view)
+        var hospitals = await _context.Hospitals
+          .OrderBy(h => h.Name)
+          .ToListAsync();
         return Ok(hospitals);
       }
       catch (Exception ex)
@@ -34,7 +37,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<Hospital>> GetHospital(int id)
     {
-      var hospital = await _context.Hospitals.FindAsync(id);
+      var hospital = await _context.Hospitals
+        .Where(h => h.HospitalId == id && h.IsDeleted != true)
+        .FirstOrDefaultAsync();
       if (hospital == null) return NotFound();
       return Ok(hospital);
     }
@@ -72,15 +77,91 @@ namespace hospitalApiProject.Controllers
       return NoContent();
     }
 
-    // DELETE: api/Hospitals/5
+    // DELETE: api/Hospitals/5 (Soft Delete)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteHospital(int id)
     {
-      var hospital = await _context.Hospitals.FindAsync(id);
-      if (hospital == null) return NotFound();
-      _context.Hospitals.Remove(hospital);
-      await _context.SaveChangesAsync();
-      return NoContent();
+      var hospital = await _context.Hospitals
+        .Where(h => h.HospitalId == id)
+        .FirstOrDefaultAsync();
+      
+      if (hospital == null) 
+        return NotFound("Hospital not found");
+
+      try
+      {
+        // For now, just set IsActive to false until DB columns are added
+        hospital.IsActive = false;
+        // TODO: Uncomment after DB migration
+        // hospital.IsDeleted = true;
+        // hospital.ModifiedOn = DateTime.UtcNow;
+        // hospital.ModifiedBy = "SuperAdmin";
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Hospital deleted successfully", hospitalId = id });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Error deleting hospital: {ex.Message}");
+      }
+    }
+
+    // PUT: api/Hospitals/5/deactivate
+    [HttpPut("{id}/deactivate")]
+    public async Task<IActionResult> DeactivateHospital(int id)
+    {
+      var hospital = await _context.Hospitals
+        .Where(h => h.HospitalId == id)
+        .FirstOrDefaultAsync();
+      
+      if (hospital == null) 
+        return NotFound("Hospital not found");
+
+      try
+      {
+        // Deactivate: IsActive = false
+        hospital.IsActive = false;
+        // TODO: Uncomment after DB migration
+        // hospital.IsDeleted = false;
+        // hospital.ModifiedOn = DateTime.UtcNow;
+        // hospital.ModifiedBy = "SuperAdmin";
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Hospital deactivated successfully", hospitalId = id });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Error deactivating hospital: {ex.Message}");
+      }
+    }
+
+    // PUT: api/Hospitals/5/activate
+    [HttpPut("{id}/activate")]
+    public async Task<IActionResult> ActivateHospital(int id)
+    {
+      var hospital = await _context.Hospitals
+        .Where(h => h.HospitalId == id)
+        .FirstOrDefaultAsync();
+      
+      if (hospital == null) 
+        return NotFound("Hospital not found");
+
+      try
+      {
+        // Activate: IsActive = true
+        hospital.IsActive = true;
+        // TODO: Uncomment after DB migration
+        // hospital.IsDeleted = false;
+        // hospital.ModifiedOn = DateTime.UtcNow;
+        // hospital.ModifiedBy = "SuperAdmin";
+
+        await _context.SaveChangesAsync();
+        return Ok(new { message = "Hospital activated successfully", hospitalId = id });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Error activating hospital: {ex.Message}");
+      }
     }
   }
 }

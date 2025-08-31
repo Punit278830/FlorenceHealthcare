@@ -9,6 +9,7 @@ import { DepartmentService } from 'src/app/shared/Services/department/department
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/shared/auth/auth.service';
+import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 import * as dayjs from 'dayjs';
 
 interface data {
@@ -29,6 +30,8 @@ export class AddStaffComponent implements OnInit {
   public passwordClass1 = false;
   public _depDto: Idepartment[] = [];
   public hospitals: HospitalModel[] = [];
+  public roles: any[] = [];
+  public isLoadingRoles = false;
   public isLoadingHospitals = false;
   public maxDate: Date | null = null;
 
@@ -39,10 +42,12 @@ export class AddStaffComponent implements OnInit {
     private route: Router,
     private toster: ToastrService,
     private departmentService: DepartmentService,
-    private authService: AuthService) {
+    private authService: AuthService,
+    private roleService: RoleAuthorizationService) {
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
     this.loadHospitals();
+    this.loadRoles();
     this.maxDate = new Date()
 
   }
@@ -65,6 +70,32 @@ export class AddStaffComponent implements OnInit {
     );
   }
 
+  loadRoles(): void {
+    const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
+    this.isLoadingRoles = true;
+    
+    this.authService.getHospitals().subscribe({
+      next: () => {
+        // Use the role service to get roles for the current hospital
+        this.roleService.getAllRolesByHospital(parseInt(currentHospitalId)).subscribe({
+          next: (roles) => {
+            this.roles = roles;
+            this.isLoadingRoles = false;
+          },
+          error: (error) => {
+            console.error('Error loading roles:', error);
+            this.isLoadingRoles = false;
+            this.toster.error('Failed to load roles');
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.isLoadingRoles = false;
+        this.toster.error('Failed to load roles');
+      }
+    });
+  }
 
   togglePassword() {
     this.passwordClass = !this.passwordClass;
@@ -157,8 +188,14 @@ export class AddStaffComponent implements OnInit {
   ]
 
   createStaffRegrestrationForm() {
+    const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
+    const isSuperAdmin = this.roleService.isSuperAdmin();
+    
     this.staffReg = this.fb.group({
-      hospitalId: ['', [Validators.required]],
+      hospitalId: [
+        isSuperAdmin ? '' : currentHospitalId, 
+        isSuperAdmin ? [Validators.required] : []
+      ],
       firstName: ['', [Validators.required]],
       lastName: ['', Validators.required],
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -178,6 +215,7 @@ export class AddStaffComponent implements OnInit {
       registrationNumber:[''],
       IdentityName: ['', Validators.required],
       PrescriptionValidity: [null, Validators.required],
+      roleId: [''] // Role assignment (optional)
 
     });
 
@@ -271,4 +309,13 @@ export class AddStaffComponent implements OnInit {
       return age >= minAge ? null : { minAge: { requiredAge: minAge, actualAge: age } };
     };
   }
+
+  get isSuperAdmin(): boolean {
+    return this.roleService.isSuperAdmin();
+  }
+
+  get shouldShowHospitalDropdown(): boolean {
+    return this.isSuperAdmin;
+  }
+
 }
