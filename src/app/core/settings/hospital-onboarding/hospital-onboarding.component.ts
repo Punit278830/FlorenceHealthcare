@@ -20,6 +20,9 @@ export class HospitalOnboardingComponent implements OnInit {
   error?: string;
   success?: string;
   public routes = routes;
+  // Edit mode properties
+  isEditMode = false;
+  editingHospitalId?: number;
 
   constructor(
     private fb: FormBuilder, 
@@ -79,20 +82,38 @@ export class HospitalOnboardingComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+    
     this.loading = true;
     this.error = undefined;
     this.success = undefined;
-    this.http.post(this.apiBase + 'Hospitals', this.form.value).subscribe({
-      next: () => {
-        this.success = 'Hospital created';
-        this.form.reset({ isActive: true });
-        this.loadHospitals();
-      },
-      error: (err) => {
-        this.error = err?.error || 'Failed to create hospital';
-        this.loading = false;
-      }
-    });
+
+    if (this.isEditMode && this.editingHospitalId) {
+      // Update existing hospital
+      this.http.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, this.form.value).subscribe({
+        next: () => {
+          this.success = 'Hospital updated successfully';
+          this.resetForm();
+          this.loadHospitals();
+        },
+        error: (err) => {
+          this.error = err?.error || 'Failed to update hospital';
+          this.loading = false;
+        }
+      });
+    } else {
+      // Create new hospital
+      this.http.post(this.apiBase + 'Hospitals', this.form.value).subscribe({
+        next: () => {
+          this.success = 'Hospital created successfully';
+          this.resetForm();
+          this.loadHospitals();
+        },
+        error: (err) => {
+          this.error = err?.error || 'Failed to create hospital';
+          this.loading = false;
+        }
+      });
+    }
   }
 
   selectHospital(h: any): void {
@@ -217,5 +238,48 @@ export class HospitalOnboardingComponent implements OnInit {
 
   getTotalHospitalCount(): number {
     return this.hospitals.length;
+  }
+
+  // Edit functionality methods
+  editHospital(hospital: any): void {
+    this.isEditMode = true;
+    this.editingHospitalId = hospital.hospitalId;
+    
+    // Fill the form with hospital data
+    this.form.patchValue({
+      name: hospital.name || '',
+      code: hospital.code || '',
+      contactPerson: hospital.contactPerson || '',
+      contactNumber: hospital.contactNumber || '',
+      email: hospital.email || '',
+      addressLine1: hospital.addressLine1 || '',
+      addressLine2: hospital.addressLine2 || '',
+      city: hospital.city || '',
+      state: hospital.state || '',
+      pincode: hospital.pincode || '',
+      country: hospital.country || '',
+      registrationNumber: hospital.registrationNumber || '',
+      licenseNumber: hospital.licenseNumber || '',
+      gstin: hospital.gstin || '',
+      websiteUrl: hospital.websiteUrl || '',
+      logoUrl: hospital.logoUrl || '',
+      isActive: hospital.isActive
+    });
+    
+    this.error = undefined;
+    this.success = undefined;
+  }
+
+  cancelEdit(): void {
+    this.resetForm();
+  }
+
+  resetForm(): void {
+    this.isEditMode = false;
+    this.editingHospitalId = undefined;
+    this.form.reset({ isActive: true });
+    this.error = undefined;
+    this.success = undefined;
+    this.loading = false;
   }
 }

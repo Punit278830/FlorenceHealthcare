@@ -1,7 +1,7 @@
 # Multi-Tenant Hospital Management System Implementation
 
 ## Overview
-This document outlines the complete implementation of multi-tenant functionality for the Florence Healthcare Management System. The system now supports multiple hospitals with complete data isolation while maintaining a single codebase.
+This document outlines the complete implementation of multi-tenant functionality for the Medisyncro Management System. The system now supports multiple hospitals with complete data isolation while maintaining a single codebase.
 
 ## ✅ Completed Implementation
 

@@ -26,7 +26,7 @@ export class AbhaDashboardComponent {
     if (this.CurrentTime >= 12 && this.CurrentTime < 17) { this.greetingMsg = 'Good AfterNoon' }
 
     if (this.CurrentTime >= 17 && this.CurrentTime < 20) { this.greetingMsg = 'Good Evening' }
-    if (this.CurrentTime >= 20 && this.CurrentTime < 24) { this.greetingMsg = 'Good Night' }
+    if (this.CurrentTime >= 20 && this.CurrentTime < 24) { this.greetingMsg = 'Good Evening' }
 
   }
 

@@ -1,5 +1,5 @@
 {
-  "name": "preclinic-angular",
+  "name": "medisyncro",
   "version": "0.0.0",
   "scripts": {
     "start": "node --max-old-space-size=4096 node_modules/@angular/cli/bin/ng serve",

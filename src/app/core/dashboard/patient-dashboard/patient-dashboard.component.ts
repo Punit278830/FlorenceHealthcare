@@ -370,7 +370,7 @@ export class PatientDashboardComponent implements OnInit {
       if(this.CurrentTime>=17 && this.CurrentTime<20)
       {this.greetingMsg='Good Evening'}
       if(this.CurrentTime>=20 && this.CurrentTime<24)
-      {this.greetingMsg='Good Night'}
+      {this.greetingMsg='Good Evening'}
     
   }
   private getTableData(): void {
