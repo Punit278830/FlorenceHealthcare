@@ -7,27 +7,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
 using System.Drawing.Text;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class StaffInfoesController : ControllerBase
+  public class StaffInfoesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public StaffInfoesController(FlorenceDbContext context)
+    public StaffInfoesController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/GetDoctorsInfo
     [HttpGet("doctors")]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetDoctorsInfo()
     {
-
+      var hospitalId = GetHospitalIdFromHeader();
       var result = await _context.StaffInfos
-        .Where(e => e.Designation.ToLower() == "doctor")
+        .Where(e => e.Designation.ToLower() == "doctor" && (hospitalId == null || e.HospitalId == hospitalId))
         .OrderBy(e => e.FirstName)
         .ToListAsync();
       return Ok(result);
@@ -37,8 +35,8 @@ namespace hospitalApiProject.Controllers
     [HttpGet("doctorsByDepartment")]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetDoctorsByDepartmentInfo(int id)
     {
-
-      var result = await _context.StaffInfos.Where(e => e.DepartmentId == id && e.ActiveStatus == 1).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var result = await _context.StaffInfos.Where(e => e.DepartmentId == id && e.ActiveStatus == 1 && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
       return Ok(result);
     }
 
@@ -46,14 +44,19 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetStaffInfos()
     {
-      return await _context.StaffInfos.OrderBy(p => p.FirstName).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      return await _context.StaffInfos
+        .Where(p => hospitalId == null || p.HospitalId == hospitalId)
+        .OrderBy(p => p.FirstName)
+        .ToListAsync();
     }
 
     // GET: api/StaffInfoes/5
     [HttpGet("{id}")]
     public async Task<ActionResult<StaffInfo>> GetStaffInfo(int id)
     {
-      var staffInfo = await _context.StaffInfos.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var staffInfo = await _context.StaffInfos.Where(s => s.StaffId == id && (hospitalId == null || s.HospitalId == hospitalId)).FirstOrDefaultAsync();
 
       if (staffInfo == null)
       {
@@ -67,6 +70,8 @@ namespace hospitalApiProject.Controllers
     //GET: api/StaffInfoes/
     public async Task<ActionResult<StaffInfo>> GetloginInfo(string email, string password)
     {
+      // For login, we don't filter by hospital since we need to find the user first
+      // The user's hospital will be determined by their StaffInfo record
       if (email != null && password != null)
       {
         List<StaffInfo> login = await _context.StaffInfos.Where(e => e.Email.Contains(email)).ToListAsync<StaffInfo>();
@@ -81,8 +86,6 @@ namespace hospitalApiProject.Controllers
       }
 
       return NotFound();
-
-
     }
     // PUT: api/StaffInfoes/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -120,7 +123,10 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<StaffInfo>> PostStaffInfo(StaffInfo staffInfo)
     {
-      var existingStaff = await _context.StaffInfos.FirstOrDefaultAsync(p => p.IdentityNumber == staffInfo.IdentityNumber);
+      var hospitalId = GetHospitalIdFromHeader();
+      staffInfo.HospitalId = hospitalId; // tag staff with hospital if provided
+
+      var existingStaff = await _context.StaffInfos.FirstOrDefaultAsync(p => p.IdentityNumber == staffInfo.IdentityNumber && (hospitalId == null || p.HospitalId == hospitalId));
 
       if (existingStaff != null)
       {
@@ -137,7 +143,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteStaffInfo(int id)
     {
-      var staffInfo = await _context.StaffInfos.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var staffInfo = await _context.StaffInfos.Where(s => s.StaffId == id && (hospitalId == null || s.HospitalId == hospitalId)).FirstOrDefaultAsync();
       if (staffInfo == null)
       {
         return NotFound();

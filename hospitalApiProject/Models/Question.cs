@@ -16,6 +16,9 @@ public partial class Question
   public virtual ICollection<Answer> Answers { get; set; } = new List<Answer>();
 
   public virtual ICollection<Option> Options { get; set; } = new List<Option>();
+
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
 }
 public class QuestionView
 {

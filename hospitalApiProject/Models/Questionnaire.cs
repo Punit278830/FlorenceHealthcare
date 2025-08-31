@@ -9,4 +9,7 @@ public partial class Questionnaire
   public int QuestinaryDeptId { get; set; }
   public bool IsActive { get; set; }
 
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
+
 }

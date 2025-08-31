@@ -28,4 +28,7 @@ public partial class PatientInfo
   public string? IdentityName { get; set; }
 
   public string? IdentityNumber { get; set; }
+
+  // New nullable HospitalId for multi-tenant separation
+  public int? HospitalId { get; set; }
 }

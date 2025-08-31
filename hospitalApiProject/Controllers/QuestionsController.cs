@@ -1,32 +1,37 @@
 using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class QuestionsController : ControllerBase
+  public class QuestionsController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public QuestionsController(FlorenceDbContext context)
+    public QuestionsController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/Questions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Question>>> GetQuestions()
     {
-      return await _context.Questions.ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.Questions.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(q => q.HospitalId == hospitalId);
+      }
+      return await query.ToListAsync();
     }
 
     // GET: api/Questions/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Question>> GetQuestion(int id)
     {
-      var question = await _context.Questions.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var question = await _context.Questions.FirstOrDefaultAsync(q => q.QuestionId == id && (hospitalId == null || q.HospitalId == hospitalId));
 
       if (question == null)
       {
@@ -41,7 +46,13 @@ namespace hospitalApiProject.Controllers
     [HttpGet("questionnareId/{id}")]
     public async Task<ActionResult<IEnumerable<Question>>> GetQuestionByQuestionniareId(int id)
     {
-      var question = await _context.Questions.Where(e => e.QuestionnaireId == id).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.Questions.Where(e => e.QuestionnaireId == id);
+      if (hospitalId != null)
+      {
+        query = query.Where(q => q.HospitalId == hospitalId);
+      }
+      var question = await query.ToListAsync();
 
       if (question == null)
       {
@@ -60,6 +71,10 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest();
       }
+
+      // Tag with HospitalId if provided
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) question.HospitalId = hospitalId;
 
       _context.Entry(question).State = EntityState.Modified;
 
@@ -87,6 +102,8 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<Question>> PostQuestion(Question question)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      question.HospitalId = hospitalId;
       _context.Questions.Add(question);
       await _context.SaveChangesAsync();
 
@@ -98,12 +115,13 @@ namespace hospitalApiProject.Controllers
     [HttpGet("appointmentId/{appointmentId}")]
     public async Task<List<QuestionView>> GetQuestionAnswerPairsByAppointmentId(int appointmentId)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var query = from q in _context.Questions
                   join a in _context.Answers on q.QuestionId equals a.QuestionId
                   join qr in _context.Questionnaires on q.QuestionnaireId equals qr.QuestionnaireId
                   join o in _context.Options on a.SelectedOptionId equals o.OptionId into optionGroup // Group join with Options table
                   from o in optionGroup.DefaultIfEmpty() // Perform left join
-                  where a.AppointmentId == appointmentId
+                  where a.AppointmentId == appointmentId && (hospitalId == null || q.HospitalId == hospitalId)
                   select new QuestionView
                   {
                     QuestionId = q.QuestionId,
@@ -129,7 +147,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteQuestion(int id)
     {
-      var question = await _context.Questions.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var question = await _context.Questions.FirstOrDefaultAsync(q => q.QuestionId == id && (hospitalId == null || q.HospitalId == hospitalId));
       if (question == null)
       {
         return NotFound();

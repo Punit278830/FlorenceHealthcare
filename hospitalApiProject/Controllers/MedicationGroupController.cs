@@ -1,32 +1,37 @@
 using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class MedicationGroupController : Controller
+  public class MedicationGroupController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public MedicationGroupController(FlorenceDbContext context)
+    public MedicationGroupController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/MedicationGroup
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MedicationGroup>>> GetMedicationGroups()
     {
-      return await _context.MedicationGroups.ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.MedicationGroups.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(m => m.HospitalId == hospitalId);
+      }
+      return await query.ToListAsync();
     }
 
     // GET: api/MedicationGroup/5
     [HttpGet("{id}")]
     public async Task<ActionResult<List<MedicationGroup>>> GetMedicationGroup(int id)
     {
-      var medicationGroup = await _context.MedicationGroups.Where(e => e.GroupId == id).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var medicationGroup = await _context.MedicationGroups.Where(e => e.GroupId == id && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
       if (medicationGroup == null)
       {
@@ -45,6 +50,9 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest();
       }
+
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) medicationGroup.HospitalId = hospitalId;
 
       _context.Entry(medicationGroup).State = EntityState.Modified;
 
@@ -74,10 +82,14 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         if (medicationGroups.Count > 0)
         {
           foreach (var patientMedication in medicationGroups)
+          {
+            patientMedication.HospitalId = hospitalId;
             _context.MedicationGroups.Add(patientMedication);
+          }
         }
 
         await _context.SaveChangesAsync();
@@ -101,16 +113,22 @@ namespace hospitalApiProject.Controllers
           return BadRequest("Medication groups cannot be empty.");
         }
 
+        var hospitalId = GetHospitalIdFromHeader();
+
         // Get distinct GroupIds from the incoming list
         var groupIds = medicationGroups.Select(m => m.GroupId).Distinct().ToList();
 
         // Delete existing records matching these GroupIds
         var existingGroups = _context.MedicationGroups
-            .Where(m => groupIds.Contains(m.GroupId));
+            .Where(m => groupIds.Contains(m.GroupId) && (hospitalId == null || m.HospitalId == hospitalId));
 
         _context.MedicationGroups.RemoveRange(existingGroups);
 
-        // Add new medication groups
+        // Add new medication groups and tag hospital
+        foreach (var mg in medicationGroups)
+        {
+          mg.HospitalId = hospitalId;
+        }
         _context.MedicationGroups.AddRange(medicationGroups);
 
         await _context.SaveChangesAsync();
@@ -128,7 +146,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMedicationGroup(int id)
     {
-      var medicationGroup = await _context.MedicationGroups.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var medicationGroup = await _context.MedicationGroups.FirstOrDefaultAsync(m => m.Id == id && (hospitalId == null || m.HospitalId == hospitalId));
       if (medicationGroup == null)
       {
         return NotFound();

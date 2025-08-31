@@ -43,4 +43,11 @@ public partial class StaffInfo
    
     [JsonPropertyName("PrescriptionValidity")]
     public int? PrescriptionValidity { get; set; }
+
+    public int? HospitalId { get; set; }
+
+    public int? RoleId { get; set; }
+
+    // Navigation properties
+    public virtual RoleMaster? Role { get; set; }
 }

@@ -2,19 +2,18 @@ using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class PatientInfoesController : ControllerBase
+  public class PatientInfoesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
     private readonly IPatientInfoService _patientInfoService;
 
-    public PatientInfoesController(FlorenceDbContext context, IPatientInfoService patientInfoService)
+    public PatientInfoesController(FlorenceDbContext context, IPatientInfoService patientInfoService) : base(context)
     {
-      _context = context;
       _patientInfoService = patientInfoService;
     }
 
@@ -22,8 +21,21 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PatientWithPaymentStatusDto>>> GetPatientInfos()
     {
-        var patients = await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
-        var invoices = await _context.InvoiceInfos.ToListAsync();
+        var hospitalId = GetHospitalIdFromHeader();
+
+        var patientsQuery = _context.PatientInfos.AsQueryable();
+        if (hospitalId != null)
+        {
+          patientsQuery = patientsQuery.Where(p => p.HospitalId == hospitalId);
+        }
+        var patients = await patientsQuery.OrderByDescending(p => p.PatientId).ToListAsync();
+
+        var invoicesQuery = _context.InvoiceInfos.AsQueryable();
+        if (hospitalId != null)
+        {
+          invoicesQuery = invoicesQuery.Where(i => i.HospitalId == hospitalId);
+        }
+        var invoices = await invoicesQuery.ToListAsync();
 
         var result = patients.Select(p => new PatientWithPaymentStatusDto
         {
@@ -48,12 +60,11 @@ namespace hospitalApiProject.Controllers
     [HttpGet("registrationDateRange/{startDate}/{endDate}")]
     public async Task<ActionResult<PatientInfo[]>> GetPatientInfosByDateRange(DateTime startDate, DateTime endDate)
     {
-
+      var hospitalId = GetHospitalIdFromHeader();
 
       List<PatientInfo> patientData = await _context.PatientInfos
-          .Where(e => e.RegstrationDate >= startDate && e.RegstrationDate <= endDate)
+          .Where(e => e.RegstrationDate >= startDate && e.RegstrationDate <= endDate && (hospitalId == null || e.HospitalId == hospitalId))
           .ToListAsync();
-
 
       if (patientData != null)
       {
@@ -66,14 +77,16 @@ namespace hospitalApiProject.Controllers
     [HttpGet("PatientCountByGender")]
     public async Task<ActionResult<PatientInfo>> GetPatientCountByGender()
     {
+      var hospitalId = GetHospitalIdFromHeader();
+
       var maleCount = await _context.PatientInfos
-                                .Where(p => p.Gender == "male")
+                                .Where(p => p.Gender == "male" && (hospitalId == null || p.HospitalId == hospitalId))
                                 .CountAsync();
       var femaleCount = await _context.PatientInfos
-                                       .Where(p => p.Gender == "female")
+                                       .Where(p => p.Gender == "female" && (hospitalId == null || p.HospitalId == hospitalId))
                                        .CountAsync();
       var transgenderCount = await _context.PatientInfos
-                                            .Where(p => p.Gender == "transgender")
+                                            .Where(p => p.Gender == "transgender" && (hospitalId == null || p.HospitalId == hospitalId))
                                             .CountAsync();
 
       // Calculate total count
@@ -101,8 +114,10 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<PatientInfo>> GetPatientInfo(int id)
     {
-      var patientInfo = await _context.PatientInfos.FindAsync(id);
-
+      var hospitalId = GetHospitalIdFromHeader();
+      var patientInfo = await _context.PatientInfos
+                        .Where(p => p.PatientId == id && (hospitalId == null || p.HospitalId == hospitalId))
+                        .FirstOrDefaultAsync();
 
       if (patientInfo == null)
       {
@@ -117,11 +132,11 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-
+        var hospitalId = GetHospitalIdFromHeader();
         IQueryable<PatientInfo> query = _context.PatientInfos;
         if (!string.IsNullOrEmpty(data))
         {
-          query = query.Where(e => EF.Functions.Like(e.Mobile, $"%{data}%"));
+          query = query.Where(e => EF.Functions.Like(e.Mobile, $"%{data}%") && (hospitalId == null || e.HospitalId == hospitalId));
           List<PatientInfo> result = await query.ToListAsync();
           return Ok(result);
         }
@@ -175,6 +190,11 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest("Invalid input request provided.");
       }
+
+      // Tag with HospitalId if provided (nullable for backward compatibility)
+      var hospitalId = GetHospitalIdFromHeader();
+      patientInfo.HospitalId = hospitalId;
+
       // Check if a patient with the same IdentityNumber already exists
       await _patientInfoService.AddPatient(patientInfo);
 
@@ -196,15 +216,10 @@ namespace hospitalApiProject.Controllers
     [HttpGet("count/today")]
     public async Task<ActionResult<int>> GetNewPatientsToday()
     {
-      // If regstrationDate is a DATETIME, use a range [today, tomorrow)
-      var today = DateTime.Today;
-      var tomorrow = today.AddDays(1);
-
+      var hospitalId = GetHospitalIdFromHeader();
       var count = await _context.PatientInfos
           .AsNoTracking()
-// NOTE: property name must match your EF model: RegstrationDate (same typo as DB)
-.Where(p => p.RegstrationDate != null &&
-            p.RegstrationDate.Value.Date == DateTime.Today)
+          .Where(p => p.RegstrationDate != null && p.RegstrationDate.Value.Date == DateTime.Today && (hospitalId == null || p.HospitalId == hospitalId))
           .Select(p => p.PatientId)
           .Distinct()
           .CountAsync();
@@ -219,7 +234,10 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePatientInfo(int id)
     {
-      var patientInfo = await _context.PatientInfos.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var patientInfo = await _context.PatientInfos
+                        .Where(p => p.PatientId == id && (hospitalId == null || p.HospitalId == hospitalId))
+                        .FirstOrDefaultAsync();
       if (patientInfo == null)
       {
         return NotFound();

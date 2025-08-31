@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class QuestionnairesController : ControllerBase
+  public class QuestionnairesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public QuestionnairesController(FlorenceDbContext context)
+    public QuestionnairesController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/Questionnaires
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Questionnaire>>> GetQuestionnaires()
     {
-      return await _context.Questionnaires.OrderByDescending(q => q.QuestionnaireId).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.Questionnaires.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(q => q.HospitalId == hospitalId);
+      }
+      return await query.OrderByDescending(q => q.QuestionnaireId).ToListAsync();
     }
 
     // GET: api/Questionnaires/5
     [HttpGet("{id}")]
     public async Task<ActionResult<Questionnaire>> GetQuestionnaire(int id)
     {
-      var questionnaire = await _context.Questionnaires.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var questionnaire = await _context.Questionnaires.FirstOrDefaultAsync(q => q.QuestionnaireId == id && (hospitalId == null || q.HospitalId == hospitalId));
 
       if (questionnaire == null)
       {
@@ -47,7 +52,13 @@ namespace hospitalApiProject.Controllers
     [HttpGet("departmentId/{id}")]
     public async Task<ActionResult<IEnumerable<Questionnaire>>> GetQuestionnaireByDepartmentId(int id)
     {
-      var questionnaire = await _context.Questionnaires.Where(e => e.QuestinaryDeptId == id).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.Questionnaires.Where(e => e.QuestinaryDeptId == id);
+      if (hospitalId != null)
+      {
+        query = query.Where(q => q.HospitalId == hospitalId);
+      }
+      var questionnaire = await query.ToListAsync();
 
       if (questionnaire == null)
       {
@@ -68,6 +79,10 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest();
       }
+
+      // Tag with HospitalId if header provided
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) questionnaire.HospitalId = hospitalId;
 
       questionnaire.IsActive = !questionnaire.IsActive;
       _context.Entry(questionnaire).State = EntityState.Modified;
@@ -97,6 +112,8 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<Questionnaire>> PostQuestionnaire(Questionnaire questionnaire)
     {
       questionnaire.IsActive = true;
+      var hospitalId = GetHospitalIdFromHeader();
+      questionnaire.HospitalId = hospitalId;
       _context.Questionnaires.Add(questionnaire);
       await _context.SaveChangesAsync();
 
@@ -107,7 +124,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteQuestionnaire(int id)
     {
-      var questionnaire = await _context.Questionnaires.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var questionnaire = await _context.Questionnaires.FirstOrDefaultAsync(q => q.QuestionnaireId == id && (hospitalId == null || q.HospitalId == hospitalId));
       if (questionnaire == null)
       {
         return NotFound();

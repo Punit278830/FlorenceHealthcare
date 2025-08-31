@@ -22,4 +22,7 @@ public partial class PatientMedication
     public string? Duration { get; set; }
 
     public string? Instruction { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }

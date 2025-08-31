@@ -195,6 +195,236 @@ export class DataService {
   }
   public sideBar = [
     {
+      tittle: 'superadmin',
+      showAsTab: false,
+      separateRoute: false,
+      menu: [
+        {
+          menuValue: 'Dashboard',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: routes.adminDashboard,
+          route: routes.adminDashboard,
+          img: 'assets/img/icons/menu-icon-01.svg',
+          subMenus: [
+            {
+              menuValue: 'Admin Dashboard',
+              route: routes.adminDashboard,
+              base: routes.adminDashboard,
+            },
+            {
+              menuValue: 'Doctor Dashboard',
+              route: routes.doctorDashboard,
+              base: routes.doctorDashboard,
+            },
+            {
+              menuValue: 'Patient Dashboard',
+              route: routes.patientDashboard,
+              base: routes.patientDashboard,
+            },
+          ],
+        },
+
+        {
+          menuValue: 'Patients',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'patient',
+          img: 'assets/img/icons/menu-icon-03.svg',
+          subMenus: [
+            {
+              menuValue: 'Patients List',
+              route: routes.patientsList,
+              base: routes.patientsList,
+            },
+            {
+              menuValue: 'Add Patients',
+              route: routes.addPatient,
+              base: routes.addPatient,
+            },
+          ],
+        },
+        {
+          menuValue: 'Staff',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'staff',
+          img: 'assets/img/icons/menu-icon-08.svg',
+          subMenus: [
+            {
+              menuValue: 'Staff List',
+              route: routes.staffList,
+              base: routes.staffList,
+            },
+            {
+              menuValue: 'Add Staff',
+              route: routes.addStaff,
+              base: routes.addStaff,
+            },
+          ],
+        },
+        {
+          menuValue: 'Appointments',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'appointments',
+          img: 'assets/img/icons/menu-icon-04.svg',
+          subMenus: [
+            {
+              menuValue: 'Appointment List',
+              route: routes.appointmentList,
+              base: routes.appointmentList,
+            },
+            {
+              menuValue: 'Book Appointment',
+              route: routes.addAppointment,
+              base: routes.addAppointment,
+            },
+          ],
+        },
+        {
+          menuValue: 'Doctor Schedule',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'doctor-schedule',
+          img: 'assets/img/icons/menu-icon-05.svg',
+          subMenus: [
+            {
+              menuValue: 'Schedule List',
+              route: routes.schedule,
+              base: routes.schedule,
+            },
+            {
+              menuValue: 'Add Schedule',
+              route: routes.addTestSchedule,
+              base: routes.addTestSchedule,
+            },
+          ],
+        },
+        {
+          menuValue: 'Departments',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'departments',
+          img: 'assets/img/icons/menu-icon-06.svg',
+          subMenus: [
+            {
+              menuValue: 'Department List',
+              route: routes.departmentList,
+              base: routes.departmentList,
+            },
+            {
+              menuValue: 'Add Department',
+              route: routes.addDepartment,
+              base: routes.addDepartment,
+            },
+          ],
+        },
+        {
+          menuValue: 'questionnaire',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'questionnaire',
+          img: 'assets/img/icons/menu-icon-15.svg',
+          subMenus: [
+            {
+              menuValue: 'add-questionnaire',
+              route: routes.addquestionnaire,
+              base: routes.addquestionnaire,
+            },
+          ],
+        },
+        {
+          menuValue: 'Invoices List',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.invoices,
+          img: 'assets/img/icons/menu-icon-13.svg',
+          subMenus: [],
+        },
+        {
+          menuValue: 'Create Invoice',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.createInvoice,
+          img: 'assets/img/icons/edit.svg',
+          subMenus: [],
+        },
+        {
+          menuValue: 'Prescription Master',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.prescriptionMaster,
+          img: 'assets/img/icons/plus.svg',
+          subMenus: [],
+        },
+        {
+          menuValue: 'Medicines Master',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.medicinesMaster,
+          img: 'assets/img/icons/plus.svg',
+          subMenus: [],
+        },
+        {
+          menuValue: 'Add Invoice Item',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'components',
+          route: routes.addInvoiceItem,
+          img: 'assets/img/icons/plus.svg',
+          subMenus: [],
+        },
+        {
+          menuValue: 'ABHA',
+          hasSubRoute: true,
+          showSubRoute: false,
+          base: 'ABHA',
+          img: 'assets/img/icons/menu-icon-15.svg',
+          subMenus: [
+            {
+              menuValue: 'Dashboard',
+              route: routes.abhaDashboard,
+              base: routes.abhaDashboard,
+            },
+            {
+              menuValue: 'Register By Aadhar',
+              route: routes.abhaRegisterByAadhar,
+              base: routes.abhaRegisterByAadhar,
+            },
+            {
+              menuValue: 'Create Abha Address',
+              route: routes.abhaAddress,
+              base: routes.abhaAddress,
+            },
+            {
+              menuValue: 'Search Abha User',
+              route: routes.searchAbhaUser,
+              base: routes.searchAbhaUser,
+            },
+            {
+              menuValue: 'Scan Desk',
+              route: routes.abhaScanDesk,
+              base: routes.abhaScanDesk,
+            }
+          ],
+        },
+        {
+          menuValue: 'Hospital Registration',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'hospital-registration',
+          route: routes.hospitalOnboarding,
+          img: 'assets/img/icons/menu-icon-16.svg',
+          subMenus: [],
+        },
+      ],
+    },
+    {
       tittle: 'admin',
       showAsTab: false,
       separateRoute: false,
@@ -561,6 +791,17 @@ export class DataService {
               route: routes.abhaScanDesk,
               base: routes.abhaScanDesk,
             }
+          ],
+        },
+        {
+          menuValue: 'Hospital Registration',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: 'hospital-registration',
+          route: routes.hospitalOnboarding,
+          img: 'assets/img/icons/menu-icon-16.svg',
+          subMenus: [
+
           ],
         },
 

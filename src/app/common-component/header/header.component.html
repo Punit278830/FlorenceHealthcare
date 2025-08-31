@@ -105,6 +105,29 @@
             <a (click)="openBoxFunc()" (keyup.enter)="openBoxFunc()" id="open_msg_box" class="hasnotifications nav-link"
                 tabindex="0"><img src="assets/img/icons/note-icon-01.svg" alt=""><span class="pulse"></span> </a>
         </li>
+        
+        <!-- Hospital Selector -->
+        <li class="nav-item dropdown d-none d-sm-block">
+            <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown">
+                <img src="assets/img/icons/hospital-icon.svg" alt="" style="width: 16px; height: 16px; margin-right: 5px;">
+                {{ currentHospitalName || 'Select Hospital' }}
+            </a>
+            <div class="dropdown-menu">
+                <div class="dropdown-header">
+                    <span>Switch Hospital</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a *ngFor="let hospital of hospitals" 
+                   class="dropdown-item" 
+                   (click)="selectHospital(hospital)"
+                   [class.active]="hospital.hospitalId === currentHospitalId">
+                    <i class="fa fa-hospital-o" style="margin-right: 8px;"></i>
+                    {{ hospital.name }}
+                    <i *ngIf="hospital.hospitalId === currentHospitalId" class="fa fa-check float-end text-success"></i>
+                </a>
+            </div>
+        </li>
+        
         <li class="nav-item dropdown has-arrow user-profile-list">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link user-link" data-bs-toggle="dropdown">
                 <div class="user-names">

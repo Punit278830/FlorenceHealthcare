@@ -65,7 +65,7 @@
             <div class="row">
               <!-- Left Column: Filters & Search -->
               <div class="col-md-6">
-                <form [formGroup]="searchForm" (submit)="searchInvoices()">
+                <form [formGroup]="searchForm" (ngSubmit)="searchInvoices()" novalidate>
 
                   <!-- Row for From and To -->
                   <div class="row">
@@ -113,7 +113,10 @@
 
 
                   <div class="doctor-submit mt-3">
-                    <button type="submit" class="btn btn-primary submit-list-form">Search</button>
+                    <button type="submit" class="btn btn-primary submit-list-form" 
+                            (click)="searchInvoices($event)">
+                      Search
+                    </button>
                   </div>
                 </form>
               </div>
@@ -189,14 +192,14 @@
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
                     <td><button
-                        [ngClass]="{'status-orange':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
+                        [ngClass]="{'nstatus-orage':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
                         class="custom-badge">{{data.status}}</button></td>
                     <td><button
                         [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
                   <td>
-  {{ (data.paymentDetails?.[0]?.paymentDate + 'Z') | date:'dd-MM-yyyy, h:mm a':'Asia/Kolkata' }}
-</td>
+                    {{ formatPaymentDate(data.paymentDetails) }}
+                  </td>
 
 
                     <td class="text-end">

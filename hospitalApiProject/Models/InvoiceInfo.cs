@@ -34,4 +34,7 @@ public partial class InvoiceInfo
   public DateTime? DeletedDate { get; set; }
 
   public int? DeletedBy { get; set; }
+
+  // New nullable HospitalId for multi-tenant separation
+  public int? HospitalId { get; set; }
 }

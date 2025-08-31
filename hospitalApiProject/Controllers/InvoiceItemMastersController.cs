@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class InvoiceItemMastersController : ControllerBase
+    public class InvoiceItemMastersController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public InvoiceItemMastersController(FlorenceDbContext context)
+        public InvoiceItemMastersController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/InvoiceItemMasters
         [HttpGet]
         public async Task<ActionResult<IEnumerable<InvoiceItemMaster>>> GetInvoiceItemMasters()
         {
-            return await _context.InvoiceItemMasters.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.InvoiceItemMasters.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(i => i.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/InvoiceItemMasters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<InvoiceItemMaster>> GetInvoiceItemMaster(int id)
         {
-            var invoiceItemMaster = await _context.InvoiceItemMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var invoiceItemMaster = await _context.InvoiceItemMasters.FirstOrDefaultAsync(i => i.ItemId == id && (hospitalId == null || i.HospitalId == hospitalId));
 
             if (invoiceItemMaster == null)
             {
@@ -50,6 +55,9 @@ namespace hospitalApiProject.Controllers
             {
                 return BadRequest();
             }
+
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) invoiceItemMaster.HospitalId = hospitalId;
 
             _context.Entry(invoiceItemMaster).State = EntityState.Modified;
 
@@ -77,6 +85,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<InvoiceItemMaster>> PostInvoiceItemMaster(InvoiceItemMaster invoiceItemMaster)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            invoiceItemMaster.HospitalId = hospitalId;
             _context.InvoiceItemMasters.Add(invoiceItemMaster);
             await _context.SaveChangesAsync();
 
@@ -87,7 +97,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteInvoiceItemMaster(int id)
         {
-            var invoiceItemMaster = await _context.InvoiceItemMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var invoiceItemMaster = await _context.InvoiceItemMasters.FirstOrDefaultAsync(i => i.ItemId == id && (hospitalId == null || i.HospitalId == hospitalId));
             if (invoiceItemMaster == null)
             {
                 return NotFound();
@@ -108,8 +119,10 @@ namespace hospitalApiProject.Controllers
                 return BadRequest("Search term cannot be null or empty.");
             }
 
+            var hospitalId = GetHospitalIdFromHeader();
+
             var results = await _context.InvoiceItemMasters
-                .Where(item => item.ItemName != null && item.ItemName.Contains(name))
+                .Where(item => item.ItemName != null && item.ItemName.Contains(name) && (hospitalId == null || item.HospitalId == hospitalId))
                 .ToListAsync();
 
             if (results == null || !results.Any())

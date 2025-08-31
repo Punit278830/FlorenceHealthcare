@@ -3,16 +3,17 @@ using hospitalApiProject.Models.Response;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class AppointmentInfoesController : ControllerBase
+  public class AppointmentInfoesController : WithHospitalController
   {
     private readonly FlorenceDbContext _context;
 
-    public AppointmentInfoesController(FlorenceDbContext context)
+    public AppointmentInfoesController(FlorenceDbContext context) : base(context)
     {
       _context = context;
     }
@@ -23,9 +24,9 @@ namespace hospitalApiProject.Controllers
     {
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
-      //var appointmentInfo = await _context.AppointmentInfos.Where(e => e.Date == currentDate).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
-          .Where(a => a.IsDeleted != true) // Exclude soft deleted appointments
+          .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .OrderByDescending(p => p.Id)
           .ToListAsync();
 
@@ -42,12 +43,12 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
       var currentDate = DateTime.Now.Date;
-
+      var hospitalId = GetHospitalIdFromHeader();
       var today = DateTime.Now.Date;
       var tomorrow = today.AddDays(1);
 
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date >= today && e.Date < tomorrow)
+          .Where(e => e.Date >= today && e.Date < tomorrow && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
 
@@ -66,8 +67,9 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetConsultationCount()
     {
       var currentDate = DateTime.Now.Date;
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active" && e.IsDeleted != true)
+          .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active" && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -85,8 +87,9 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetConsultationCount(int id)
     {
       var currentDate = DateTime.Now.Date;
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate && e.IsDeleted != true)
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -102,9 +105,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetEarning(int id)
     {
       var currentDate = DateTime.Now.Date;
+      var hospitalId = GetHospitalIdFromHeader();
       var Earning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.IsDeleted != true).ToListAsync();
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -125,9 +129,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetEarning()
     {
      // var currentDate = DateTime.Now.Date;
+      var hospitalId = GetHospitalIdFromHeader();
       var Earning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(a => a.IsDeleted != true)
+          .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
@@ -149,9 +154,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetTodayEarning()
     {
       var currentDate = DateTime.Now.Date;
+      var hospitalId = GetHospitalIdFromHeader();
       var TodayEarning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.IsDeleted != true).ToListAsync();
+          .Where(e => e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -172,9 +178,10 @@ namespace hospitalApiProject.Controllers
     {
       DateTime currentDate = DateTime.UtcNow.Date;
       int? TodayEarning = 0;
+      var hospitalId = GetHospitalIdFromHeader();
       var totalAmount = await _context.InvoiceInfos
         .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
-          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate.HasValue && e.v1.CreatedDate.Value.Date == currentDate)
+          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate.HasValue && e.v1.CreatedDate.Value.Date == currentDate && (hospitalId == null || e.v1.HospitalId == hospitalId))
           .ToListAsync();
 
       if (totalAmount.Count == 0) // Check if appointments were found
@@ -196,8 +203,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<AppointmentInfo>> GetAppointmentInfo(int id)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
-          .Where(a => a.Id == id && a.IsDeleted != true)
+          .Where(a => a.Id == id && a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .FirstOrDefaultAsync();
 
       if (appointmentInfo == null)
@@ -215,8 +223,9 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentByDoctorId(int id)
     {
       var currentDate = DateTime.Now.Date; // Get current date without time component
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.Date == currentDate && e.IsDeleted != true)
+          .Where(e => e.DoctorId == id && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .ToListAsync();
 
       if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found
@@ -232,8 +241,9 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult> GetAppointmentByDoctorId(int id, DateTime from, DateTime to)
     {
 
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.Date >= from && e.Date <= to && e.IsDeleted != true)
+          .Where(e => e.DoctorId == id && e.Date >= from && e.Date <= to && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .Join(
               _context.InvoiceInfos,
               appointment => appointment.Id,      // AppointmentInfos.Id
@@ -269,8 +279,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("date/{from}/{to}")]
     public async Task<ActionResult> GetAppointmentByDate(DateTime from, DateTime to)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentWithInvoices = await _context.AppointmentInfos
-          .Where(e => e.Date >= from && e.Date <= to && e.IsDeleted != true)
+          .Where(e => e.Date >= from && e.Date <= to && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .Join(
               _context.InvoiceInfos,
               appointment => appointment.Id,      // AppointmentInfos.Id
@@ -345,6 +356,8 @@ namespace hospitalApiProject.Controllers
       bool isRepeatWithin6Days = false;
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
+        appointmentInfo.HospitalId = hospitalId; // tag appointment
         // Add and save the appointment information
         _context.AppointmentInfos.Add(appointmentInfo);
         await _context.SaveChangesAsync();
@@ -381,6 +394,7 @@ namespace hospitalApiProject.Controllers
           PatientId = appointmentInfo.PatientId,
           Status = "Unpaid",
           IsConsultationPaid = isRepeatWithin6Days ? true : false,
+          HospitalId = hospitalId
         };
 
         _context.InvoiceInfos.Add(invoiceInfo);
@@ -479,8 +493,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("appointmentList/{patientId}/{year}")]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> AppointmentListByPatientId(int patientId, int year)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
-     .Where(e => e.PatientId == patientId && e.Date.Year == year && e.IsDeleted != true)
+     .Where(e => e.PatientId == patientId && e.Date.Year == year && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
      .ToListAsync();
 
       if (appointmentInfo == null)

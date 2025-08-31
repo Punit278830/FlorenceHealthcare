@@ -16,4 +16,7 @@ public partial class MedicineMaster
     public string MedType { get; set; } = null!;
 
     public string? Unit { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }

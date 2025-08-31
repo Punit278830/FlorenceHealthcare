@@ -14,4 +14,7 @@ public partial class InvoiceItemMaster
     public int? Discount { get; set; }
 
     public decimal? Fee { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }

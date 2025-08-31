@@ -16,4 +16,7 @@ public partial class ConsultationFile
     public string? FileData { get; set; }
 
   public string? docName { get; set; } 
+
+    // Multi-hospital support
+    public int? HospitalId { get; set; }
 }

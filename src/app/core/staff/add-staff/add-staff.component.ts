@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
-import { Idepartment, IstaffInfo } from 'src/app/shared/models/models';
+import { Idepartment, IstaffInfo, HospitalModel } from 'src/app/shared/models/models';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DatePipe } from '@angular/common';
 import { MatSelectChange } from '@angular/material/select';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { AuthService } from 'src/app/shared/auth/auth.service';
+import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 import * as dayjs from 'dayjs';
 
 interface data {
@@ -27,6 +29,11 @@ export class AddStaffComponent implements OnInit {
   public passwordClass = false;
   public passwordClass1 = false;
   public _depDto: Idepartment[] = [];
+  public hospitals: HospitalModel[] = [];
+  public roles: any[] = [];
+  public isLoadingRoles = false;
+  public isLoadingHospitals = false;
+  public isSubmitting = false;
   public maxDate: Date | null = null;
 
 
@@ -35,16 +42,61 @@ export class AddStaffComponent implements OnInit {
     private datePipe: DatePipe,
     private route: Router,
     private toster: ToastrService,
-    private departmentService: DepartmentService) {
+    private departmentService: DepartmentService,
+    private authService: AuthService,
+    private roleService: RoleAuthorizationService) {
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
+    this.loadHospitals();
+    this.loadRoles();
     this.maxDate = new Date()
 
   }
   ngOnInit(): void {
-    throw new Error('Method not implemented.');
+    // Removed the error throw
   }
 
+  loadHospitals(): void {
+    this.isLoadingHospitals = true;
+    this.authService.getHospitals().subscribe(
+      (hospitals: HospitalModel[]) => {
+        this.hospitals = hospitals.filter(h => h.isActive !== false);
+        this.isLoadingHospitals = false;
+      },
+      (error) => {
+        console.error('Error loading hospitals:', error);
+        this.isLoadingHospitals = false;
+        this.toster.error('Failed to load hospitals');
+      }
+    );
+  }
+
+  loadRoles(): void {
+    const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
+    this.isLoadingRoles = true;
+    
+    this.authService.getHospitals().subscribe({
+      next: () => {
+        // Use the role service to get roles for the current hospital
+        this.roleService.getAllRolesByHospital(parseInt(currentHospitalId)).subscribe({
+          next: (roles) => {
+            this.roles = roles;
+            this.isLoadingRoles = false;
+          },
+          error: (error) => {
+            console.error('Error loading roles:', error);
+            this.isLoadingRoles = false;
+            this.toster.error('Failed to load roles');
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.isLoadingRoles = false;
+        this.toster.error('Failed to load roles');
+      }
+    });
+  }
 
   togglePassword() {
     this.passwordClass = !this.passwordClass;
@@ -137,7 +189,14 @@ export class AddStaffComponent implements OnInit {
   ]
 
   createStaffRegrestrationForm() {
+    const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
+    const isSuperAdmin = this.roleService.isSuperAdmin();
+    
     this.staffReg = this.fb.group({
+      hospitalId: [
+        isSuperAdmin ? '' : currentHospitalId, 
+        isSuperAdmin ? [Validators.required] : []
+      ],
       firstName: ['', [Validators.required]],
       lastName: ['', Validators.required],
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
@@ -157,6 +216,7 @@ export class AddStaffComponent implements OnInit {
       registrationNumber:[''],
       IdentityName: ['', Validators.required],
       PrescriptionValidity: [null, Validators.required],
+      roleId: [''] // Role assignment (optional)
 
     });
 
@@ -184,20 +244,39 @@ export class AddStaffComponent implements OnInit {
 
 
   addStaff(formValues: FormGroup) {
+    console.log("Add Staff method called");
+    console.log("Form valid:", this.staffReg.valid);
+    console.log("Form values:", formValues.value);
+    console.log("Form errors:", this.staffReg.errors);
+    
+    if (this.isSubmitting) {
+      console.log("Already submitting, ignoring duplicate submission");
+      return;
+    }
+    
     if (this.staffReg.valid) {
-      console.log("values", formValues.value);
+      console.log("Form is valid, proceeding with submission");
+      
       if (formValues.value.password !== formValues.value.cpassword) {
         this.toster.error("Password do not match");
         return; // Exit the method if passwords don't match
       }
+      
+      this.isSubmitting = true;
+      
       // Create a copy of the form values and remove cpassword
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
 
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
+      staffData.hospitalId = parseInt(staffData.hospitalId);
+      
+      console.log("Sending staff data:", staffData);
+      
       this.staffService.CreateStaff(staffData).subscribe((res:any) => {
-        console.log(res);
+        console.log("API Response:", res);
+        this.isSubmitting = false;
         if (!res.message) {
           this.toster.success("Staff Added Successfully", 'Staff');
           this.route.navigate([routes.staffList])
@@ -206,14 +285,33 @@ export class AddStaffComponent implements OnInit {
         }
       },
       (err)=>{
-        this.toster.error(err.message,"Error Err")
-
+        console.error("API Error:", err);
+        this.isSubmitting = false;
+        this.toster.error(err.message || "An error occurred","Error")
       }
     );
 
     } else {
+      console.log("Form is invalid");
+      console.log("Invalid controls:", this.getInvalidControls());
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
+      this.toster.error("Please fill all required fields correctly", "Form Validation Error");
     }
+  }
+
+  // Helper method to identify invalid form controls
+  getInvalidControls() {
+    const invalid = [];
+    const controls = this.staffReg.controls;
+    for (const name in controls) {
+      if (controls[name].invalid) {
+        invalid.push({
+          name: name,
+          errors: controls[name].errors
+        });
+      }
+    }
+    return invalid;
   }
 
 
@@ -249,4 +347,13 @@ export class AddStaffComponent implements OnInit {
       return age >= minAge ? null : { minAge: { requiredAge: minAge, actualAge: age } };
     };
   }
+
+  get isSuperAdmin(): boolean {
+    return this.roleService.isSuperAdmin();
+  }
+
+  get shouldShowHospitalDropdown(): boolean {
+    return this.isSuperAdmin;
+  }
+
 }

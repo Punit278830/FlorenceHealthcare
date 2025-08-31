@@ -18,4 +18,7 @@ public partial class ConsultationDatum
     public string? FinalDiagnosis { get; set; }
 
     public DateTime? FollowupDate { get; set; }
+
+    // Multi-hospital support
+    public int? HospitalId { get; set; }
 }

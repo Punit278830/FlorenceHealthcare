@@ -176,6 +176,7 @@ export interface IstaffInfo {
   IdentityNumber: string;
   regestrationNumber?: string;
   PrescriptionValidity?: number;
+  hospitalId?: number;
 }
 
 export interface IpatientInfo {
@@ -735,6 +736,27 @@ export interface IAbhaPatientDetails extends IAbhaPatientInfo {
   abhaNumber: string,
   abhaAddress: string,
   status: string,
+}
+
+export interface HospitalModel {
+  hospitalId?: number;
+  name: string;
+  code?: string;
+  contactPerson?: string;
+  contactNumber?: string;
+  email?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+  country?: string;
+  registrationNumber?: string;
+  gstin?: string;
+  websiteUrl?: string;
+  logoUrl?: string;
+  isActive?: boolean;
+  createdOn?: string;
 }
 
 export interface SearchCriteriaBase {

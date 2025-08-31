@@ -6,16 +6,17 @@ using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
 using System;
 using DateTime = System.DateTime;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class InvoiceInfoesController : ControllerBase
+  public class InvoiceInfoesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
+    private new readonly FlorenceDbContext _context;
 
-    public InvoiceInfoesController(FlorenceDbContext context)
+    public InvoiceInfoesController(FlorenceDbContext context) : base(context)
     {
       _context = context;
     }
@@ -30,8 +31,9 @@ namespace hospitalApiProject.Controllers
     [FromQuery] int pageSize = 100)
     {
       // Start building the query for invoices
+      var hospitalId = GetHospitalIdFromHeader();
       var query = _context.InvoiceInfos
-          .Where(i => i.IsDeleted != true)
+          .Where(i => i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
           .AsQueryable();
 
       // Apply filters based on paymentMode parameter
@@ -83,7 +85,7 @@ namespace hospitalApiProject.Controllers
             // Payment details for the invoice
             PaymentDetails = _context.PaymentModeInfo
                       .Where(pm => pm.InvoiceId == invoice.InvoiceId)
-                      .Select(pm => new PaymentModeInfo
+                      .Select(pm => new PaymentModeInfoResponse
                       {
                         PaymentId = pm.PaymentId,
                         PaymentMode = pm.PaymentMode,
@@ -113,11 +115,11 @@ namespace hospitalApiProject.Controllers
 
       // Aggregating totals for online, cash, and all payments across all invoices
       var totalOnlineAmount = invoices.Sum(inv => inv.PaymentDetails
-          .Where(pm => pm.PaymentMode.ToLower() == "online")
+          .Where(pm => pm.PaymentMode?.ToLower() == "online")
           .Sum(pm => pm.Amount)) ?? 0;
 
       var totalCashAmount = invoices.Sum(inv => inv.PaymentDetails
-          .Where(pm => pm.PaymentMode.ToLower() == "cash")
+          .Where(pm => pm.PaymentMode?.ToLower() == "cash")
           .Sum(pm => pm.Amount)) ?? 0;
 
       var totalAmount = invoices.Sum(inv => inv.PaymentDetails
@@ -139,10 +141,10 @@ namespace hospitalApiProject.Controllers
     {
       // Get today's date as DateTime
       var today = DateTime.Today;
-
+      var hospitalId = GetHospitalIdFromHeader();
       // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
-          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true)
+          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true && (hospitalId == null || invoice.HospitalId == hospitalId))
           .Join(
               _context.PatientInfos,
               invoice => invoice.PatientId,
@@ -172,8 +174,9 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         var invoiceInfo = await _context.InvoiceInfos
-          .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true)
+          .Where(i => i.InvoiceId == invoiceId && i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
           .Select(i => new InvoiceInfo
           {
             InvoiceId = i.InvoiceId,
@@ -185,7 +188,7 @@ namespace hospitalApiProject.Controllers
             IsConsultationPaid = i.IsConsultationPaid,
             TransactionId = (bool)i.IsConsultationPaid
               ? _context.PaymentModeInfo
-                  .Where(p => p.InvoiceId == i.InvoiceId && p.itemName == "Consultation")
+                  .Where(p => p.InvoiceId == i.InvoiceId && p.ItemName == "Consultation")
                   .OrderByDescending(p => p.PaymentDate)
                   .Select(p => p.TransactionId)
                   .FirstOrDefault()
@@ -248,17 +251,29 @@ namespace hospitalApiProject.Controllers
     
  
 
-    private async Task<List<PaymentModeInfo>> GetPaymentModeInfoByInvoiceId(int? Id)
+    private async Task<List<PaymentModeInfoResponse>> GetPaymentModeInfoByInvoiceId(int? Id)
     {
       // Ensure models is not null and contains data
       if (Id == 0)
       {
-        return null; // Or handle as appropriate
+        return new List<PaymentModeInfoResponse>(); // Return empty list instead of null
       }
 
       // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
       var results = await _context.PaymentModeInfo
-          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && e.itemId.Contains("Consultation"))
+          .Where(e => e.InvoiceId == Id && e.PaymentMode == "Online" && e.ItemId != null && e.ItemId.Contains("Consultation"))
+          .Select(pm => new PaymentModeInfoResponse
+          {
+            PaymentId = pm.PaymentId,
+            InvoiceId = pm.InvoiceId,
+            PaymentMode = pm.PaymentMode,
+            itemName = pm.ItemName,
+            itemId = pm.ItemId,
+            TransactionId = pm.TransactionId,
+            PaymentDate = pm.PaymentDate,
+            Amount = pm.Amount,
+            HospitalId = pm.HospitalId
+          })
           .ToListAsync();
 
       return results;
@@ -268,8 +283,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("GetInvoiceinfoByPatientId")]
     public async Task<ActionResult<int>> GetInvoiceInfoByPatientId(int patientId)
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var maxInvoiceId = await _context.InvoiceInfos
-        .Where(i => i.PatientId == patientId && i.IsDeleted != true)
+        .Where(i => i.PatientId == patientId && i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
         .MaxAsync(i => i.InvoiceId); // Cast to nullable int to handle case with no results
       if(maxInvoiceId == 0)
       {
@@ -311,11 +327,12 @@ namespace hospitalApiProject.Controllers
       {
         toDateParsed = today;
       }
-
+      var hospitalId = GetHospitalIdFromHeader();
       var result = await _context.PaymentModeInfo
           .Where(payment => payment.PaymentDate.HasValue &&
                             payment.PaymentDate.Value.Date >= fromDateParsed &&
-                            payment.PaymentDate.Value.Date <= toDateParsed)
+                            payment.PaymentDate.Value.Date <= toDateParsed &&
+                            (hospitalId == null || _context.InvoiceInfos.Where(i => i.InvoiceId == payment.InvoiceId).Any(i => i.HospitalId == hospitalId)))
           .GroupBy(payment => payment.PaymentMode.ToLower()) // Group by payment mode
           .Select(group => new
           {
@@ -340,8 +357,9 @@ namespace hospitalApiProject.Controllers
 
     public async Task<ActionResult<int>> GetTotalAmount()
     {
+      var hospitalId = GetHospitalIdFromHeader();
       var result = _context.PaymentModeInfo
-       .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0)
+       .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0 && (hospitalId == null || _context.InvoiceInfos.Where(i => i.InvoiceId == all.InvoiceId).Any(i => i.HospitalId == hospitalId)))
        .Sum(all => (decimal?)all.Amount) ?? 0;
       return Ok(result);
     }
@@ -354,7 +372,7 @@ namespace hospitalApiProject.Controllers
       {
         return BadRequest("No invoice items provided.");
       }
-
+      var hospitalId = GetHospitalIdFromHeader();
       // Create Invoice
       var invoiceInfo = new InvoiceInfo()
       {
@@ -363,7 +381,8 @@ namespace hospitalApiProject.Controllers
         CreatedDate = DateTime.UtcNow, // Use UTC for consistency
         PatientId = patientId,
         Status = "Unpaid", // Set to Unpaid for new invoices
-        IsConsultationPaid = false // Set to false for new invoices
+        IsConsultationPaid = false, // Set to false for new invoices
+        HospitalId = hospitalId
       };
 
       // Add invoice to the context and save to generate the InvoiceId
@@ -401,7 +420,7 @@ namespace hospitalApiProject.Controllers
     [HttpPut("{id}")]
     public async Task<IActionResult> PutInvoiceInfo(int id, InvoicePaymentDto invoicePaymentDto)
     {
-      if (id != invoicePaymentDto.InvoiceInfo.InvoiceId)
+      if (id != invoicePaymentDto.InvoiceInfo?.InvoiceId)
       {
         return BadRequest();
       }
@@ -469,6 +488,8 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<InvoiceInfo>> PostInvoiceInfo(InvoiceInfo invoiceInfo)
     {
+      var hospitalId = GetHospitalIdFromHeader();
+      invoiceInfo.HospitalId = hospitalId;
       _context.InvoiceInfos.Add(invoiceInfo);
       await _context.SaveChangesAsync();
 
@@ -508,10 +529,11 @@ namespace hospitalApiProject.Controllers
         var response = new SearchResponseBase<InvoiceInfoResponse>();
       try
       {
+        var hospitalId = GetHospitalIdFromHeader();
         // Base invoices query (server-side filtering + sorting, then paginate)
         var invoicesQuery = _context.InvoiceInfos
             .AsNoTracking()
-            .Where(i => i.IsDeleted != true)
+            .Where(i => i.IsDeleted != true && (hospitalId == null || i.HospitalId == hospitalId))
             .AsQueryable();
 
         // Date filters:
@@ -628,7 +650,18 @@ namespace hospitalApiProject.Controllers
             CreatedDate = i.CreatedDate,
             Amount = (int?)((decimal)baseAmount + addAmount),
             Status = i.Status,
-            PaymentDetails = pms, // includes PaymentDate with time
+            PaymentDetails = pms.Select(pm => new PaymentModeInfoResponse
+            {
+              PaymentId = pm.PaymentId,
+              InvoiceId = pm.InvoiceId,
+              PaymentMode = pm.PaymentMode,
+              itemName = pm.ItemName,
+              itemId = pm.ItemId,
+              TransactionId = pm.TransactionId,
+              PaymentDate = pm.PaymentDate,
+              Amount = pm.Amount,
+              HospitalId = pm.HospitalId
+            }).ToList(), // includes PaymentDate with time
             PaymentModes = paymentModesStr ?? string.Empty,
             TotalUnpaidAmount = (decimal)baseAmount + addAmount - totalPaid,
             PatientFname = fullName

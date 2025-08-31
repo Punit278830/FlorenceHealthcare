@@ -1,0 +1,328 @@
+<div class="page-wrapper">
+    <!-- Page Content -->
+    <div class="content container-fluid">
+
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="row">
+                <div class="col-sm-12">
+                    <ul class="breadcrumb">
+                        <li class="breadcrumb-item"><a [routerLink]="routes.adminDashboard">Dashboard </a></li>
+                        <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
+                        <li class="breadcrumb-item active">Settings</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- /Page Header -->
+
+        <div class="settings-menu-links">
+            <ul class="nav nav-tabs menu-tabs">
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.settings">General Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.localizationDetails">Localization</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.paymentSettings">Payment Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.emailSettings">Email Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.socialSettings">Social Media Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.socialLinks">Social Links</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.seoSettings">SEO Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.themeSettings">Theme Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.changePassword">Change Password</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" [routerLink]="routes.othersSettings">Others</a>
+                </li>
+                <li class="nav-item active">
+                    <a class="nav-link" [routerLink]="routes.hospitalOnboarding">Hospital Registration</a>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6" *ngIf="isSuperAdmin">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title">Hospital Registration</h5>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form [formGroup]="form" (ngSubmit)="submit()">
+                            <div class="settings-form">
+                                <div class="form-group local-forms">
+                                    <label for="name">Hospital Name <span class="star-red">*</span></label>
+                                    <input type="text" class="form-control" placeholder="Enter Hospital Name" formControlName="name" />
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="code">Hospital Code</label>
+                                            <input type="text" class="form-control" placeholder="Enter Hospital Code" formControlName="code" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="registrationNumber">Registration Number</label>
+                                            <input type="text" class="form-control" placeholder="Enter Registration Number" formControlName="registrationNumber" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="licenseNumber">License Number</label>
+                                            <input type="text" class="form-control" placeholder="Enter License Number" formControlName="licenseNumber" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="gstin">GSTIN</label>
+                                            <input type="text" class="form-control" placeholder="Enter GSTIN" formControlName="gstin" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="websiteUrl">Website URL</label>
+                                            <input type="text" class="form-control" placeholder="Enter Website URL" formControlName="websiteUrl" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="contactPerson">Contact Person</label>
+                                            <input type="text" class="form-control" placeholder="Enter Contact Person" formControlName="contactPerson" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="contactNumber">Contact Number</label>
+                                            <input type="text" class="form-control" placeholder="Enter Contact Number" formControlName="contactNumber" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="email">Email Address</label>
+                                            <input type="email" class="form-control" placeholder="Enter Email Address" formControlName="email" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group local-forms">
+                                    <label for="addressLine1">Address Line 1</label>
+                                    <input type="text" class="form-control" placeholder="Enter Address Line 1" formControlName="addressLine1" />
+                                </div>
+                                <div class="form-group local-forms">
+                                    <label for="addressLine2">Address Line 2</label>
+                                    <input type="text" class="form-control" placeholder="Enter Address Line 2" formControlName="addressLine2" />
+                                </div>
+                                <div class="row">
+                                    <div class="col-4">
+                                        <div class="form-group local-forms">
+                                            <label for="city">City</label>
+                                            <input type="text" class="form-control" placeholder="Enter City" formControlName="city" />
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group local-forms">
+                                            <label for="state">State</label>
+                                            <input type="text" class="form-control" placeholder="Enter State" formControlName="state" />
+                                        </div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="form-group local-forms">
+                                            <label for="pincode">Pincode</label>
+                                            <input type="text" class="form-control" placeholder="Enter Pincode" formControlName="pincode" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="country">Country</label>
+                                            <input type="text" class="form-control" placeholder="Enter Country" formControlName="country" />
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group local-forms">
+                                            <label for="logoUrl">Logo URL</label>
+                                            <input type="text" class="form-control" placeholder="Enter Logo URL" formControlName="logoUrl" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" formControlName="isActive" id="isActive" />
+                                        <label class="form-check-label" for="isActive">
+                                            Active Hospital
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button class="btn btn-primary submit-btn" [disabled]="loading" type="submit">
+                                        <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        Register Hospital
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+
+                        <div *ngIf="error" class="alert alert-danger mt-3">{{ error }}</div>
+                        <div *ngIf="success" class="alert alert-success mt-3">{{ success }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6" *ngIf="isSuperAdmin">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Registered Hospitals</h5>
+                        <div class="hospital-stats">
+                            <small class="text-muted">
+                                Total: {{ getTotalHospitalCount() }} |
+                                Active: {{ getActiveHospitalCount() }} |
+                                Inactive: {{ getInactiveHospitalCount() }} |
+                                Deleted: {{ getDeletedHospitalCount() }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-center mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Hospital Name</th>
+                                        <th>Location</th>
+                                        <th>Contact</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let h of hospitals" class="clickable-row">
+                                        <td (click)="selectHospital(h)">
+                                            <h6 class="mb-0">{{ h.name }}</h6>
+                                            <small class="text-muted">ID: {{ h.hospitalId }}</small>
+                                        </td>
+                                        <td (click)="selectHospital(h)">
+                                            <span>{{ h.city || 'N/A' }}, {{ h.state || '' }}</span>
+                                        </td>
+                                        <td (click)="selectHospital(h)">
+                                            <span>{{ h.email || 'N/A' }}</span>
+                                        </td>
+                                        <td (click)="selectHospital(h)">
+                                            <span class="status-badge {{ getHospitalStatusClass(h) }}">
+                                                <i class="fa {{ getHospitalStatusIcon(h) }} me-1"></i>
+                                                {{ getHospitalStatusText(h) }}
+                                            </span>
+                                        </td>
+                                        <td class="action-column">
+                                            <div class="dropdown">
+                                                <button 
+                                                    class="btn btn-sm btn-light dropdown-toggle-dots" 
+                                                    type="button" 
+                                                    [id]="'dropdownMenuButton' + h.hospitalId"
+                                                    data-bs-toggle="dropdown" 
+                                                    aria-expanded="false"
+                                                    [disabled]="loading"
+                                                    title="Hospital Actions">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" [attr.aria-labelledby]="'dropdownMenuButton' + h.hospitalId">
+                                                    <!-- For Active Hospitals: Show Deactivate and Delete -->
+                                                    <ng-container *ngIf="h.isActive && !(h.isDeleted || false)">
+                                                        <li>
+                                                            <a class="dropdown-item" 
+                                                               href="javascript:void(0)" 
+                                                               (click)="deactivateHospital(h)"
+                                                               [class.disabled]="loading">
+                                                                <i class="fa fa-pause text-warning me-2"></i>
+                                                                Deactivate Hospital
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-danger" 
+                                                               href="javascript:void(0)" 
+                                                               (click)="deleteHospital(h)"
+                                                               [class.disabled]="loading">
+                                                                <i class="fa fa-trash me-2"></i>
+                                                                Delete Hospital
+                                                            </a>
+                                                        </li>
+                                                    </ng-container>
+
+                                                    <!-- For Inactive Hospitals: Show Activate and Delete -->
+                                                    <ng-container *ngIf="!h.isActive && !(h.isDeleted || false)">
+                                                        <li>
+                                                            <a class="dropdown-item" 
+                                                               href="javascript:void(0)" 
+                                                               (click)="activateHospital(h)"
+                                                               [class.disabled]="loading">
+                                                                <i class="fa fa-play text-success me-2"></i>
+                                                                Activate Hospital
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item text-danger" 
+                                                               href="javascript:void(0)" 
+                                                               (click)="deleteHospital(h)"
+                                                               [class.disabled]="loading">
+                                                                <i class="fa fa-trash me-2"></i>
+                                                                Delete Hospital
+                                                            </a>
+                                                        </li>
+                                                    </ng-container>
+
+                                                    <!-- For Deleted Hospitals: Only Show Activate (Delete is disabled) -->
+                                                    <ng-container *ngIf="h.isDeleted || false">
+                                                        <li>
+                                                            <a class="dropdown-item" 
+                                                               href="javascript:void(0)" 
+                                                               (click)="activateHospital(h)"
+                                                               [class.disabled]="loading">
+                                                                <i class="fa fa-play text-success me-2"></i>
+                                                                Activate Hospital
+                                                            </a>
+                                                        </li>
+                                                        <li>
+                                                            <a class="dropdown-item disabled text-muted" 
+                                                               href="javascript:void(0)">
+                                                                <i class="fa fa-trash me-2"></i>
+                                                                Delete Hospital (Already Deleted)
+                                                            </a>
+                                                        </li>
+                                                    </ng-container>
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr *ngIf="hospitals.length === 0">
+                                        <td colspan="5" class="text-center text-muted py-4">
+                                            <i class="fa fa-hospital-o fa-2x mb-2 d-block"></i>
+                                            No hospitals registered yet
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

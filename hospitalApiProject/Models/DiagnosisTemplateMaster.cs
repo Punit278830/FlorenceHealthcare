@@ -12,4 +12,7 @@ public partial class DiagnosisTemplateMaster
     public string DiagnosText { get; set; } = null!;
 
     public int DiagnosStatus { get; set; }
+
+    // Nullable HospitalId for multi-tenant support
+    public int? HospitalId { get; set; }
 }

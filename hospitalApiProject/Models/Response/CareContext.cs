@@ -10,6 +10,9 @@ public partial class CareContext
 
   public string Display { get; set; }
 
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
+
   // Navigation property for the related PatientVisit
   public PatientVisit PatientVisit { get; set; }
 }

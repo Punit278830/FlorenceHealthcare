@@ -1,32 +1,37 @@
 using hospitalApiProject.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
   [Route("api/[controller]")]
   [ApiController]
-  public class PrescriptionTemplateMasterController : ControllerBase
+  public class PrescriptionTemplateMasterController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
-    public PrescriptionTemplateMasterController(FlorenceDbContext context)
+    public PrescriptionTemplateMasterController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
 
     // GET: api/PrescriptionTemplateMaster
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PrescriptionTemplateMaster>>> GetAllPrescriptionTemplates()
     {
-      return await _context.PrescriptionTemplateMaster.OrderBy(x => x.TemplateName).ToListAsync();
+      var hospitalId = GetHospitalIdFromHeader();
+      var query = _context.PrescriptionTemplateMaster.AsQueryable();
+      if (hospitalId != null)
+      {
+        query = query.Where(p => p.HospitalId == hospitalId);
+      }
+      return await query.OrderBy(x => x.TemplateName).ToListAsync();
     }
 
     // GET: api/PrescriptionTemplateMaster/5
     [HttpGet("{id}")]
     public async Task<ActionResult<PrescriptionTemplateMaster>> GetPrescriptionTemplate(int id)
     {
-      var prescriptionTemplateMaster = await _context.PrescriptionTemplateMaster.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var prescriptionTemplateMaster = await _context.PrescriptionTemplateMaster.FirstOrDefaultAsync(p => p.Id == id && (hospitalId == null || p.HospitalId == hospitalId));
 
       if (prescriptionTemplateMaster == null)
       {
@@ -46,8 +51,11 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
+      var hospitalId = GetHospitalIdFromHeader();
+      if (hospitalId != null) prescriptionTemplateMaster.HospitalId = hospitalId;
+
       var existingTemplate = await _context.PrescriptionTemplateMaster
-          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName && pt.Id != id);
+          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName && pt.Id != id && (hospitalId == null || pt.HospitalId == hospitalId));
 
       if (existingTemplate != null)
       {
@@ -80,9 +88,11 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<PrescriptionTemplateMaster>> PostPrescriptionTemplate(PrescriptionTemplateMaster prescriptionTemplateMaster)
     {
-      // Check if a template with the same name already exists
+      var hospitalId = GetHospitalIdFromHeader();
+
+      // Check if a template with the same name already exists within hospital scope
       var existingTemplate = await _context.PrescriptionTemplateMaster
-          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName);
+          .FirstOrDefaultAsync(pt => pt.TemplateName == prescriptionTemplateMaster.TemplateName && (hospitalId == null || pt.HospitalId == hospitalId));
 
       if (existingTemplate != null)
       {
@@ -90,7 +100,8 @@ namespace hospitalApiProject.Controllers
         return Conflict(new { message = "A template with this name already exists." });
       }
 
-      // If no duplicate is found, save the new template
+      // If no duplicate is found, save the new template and tag HospitalId
+      prescriptionTemplateMaster.HospitalId = hospitalId;
       _context.PrescriptionTemplateMaster.Add(prescriptionTemplateMaster);
       await _context.SaveChangesAsync();
 
@@ -102,7 +113,8 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePrescriptionTemplate(int id)
     {
-      var prescriptionTemplate = await _context.PrescriptionTemplateMaster.FindAsync(id);
+      var hospitalId = GetHospitalIdFromHeader();
+      var prescriptionTemplate = await _context.PrescriptionTemplateMaster.FirstOrDefaultAsync(p => p.Id == id && (hospitalId == null || p.HospitalId == hospitalId));
       if (prescriptionTemplate == null)
       {
         return NotFound();

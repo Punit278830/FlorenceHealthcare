@@ -75,7 +75,8 @@ const routes: Routes = [
           (m) => m.ChangePasswordModule
         ),
     },
-  { path: 'general-settings', loadChildren: () => import('./general-settings/general-settings.module').then(m => m.GeneralSettingsModule) }
+    { path: 'general-settings', loadChildren: () => import('./general-settings/general-settings.module').then(m => m.GeneralSettingsModule) },
+    { path: 'hospital-onboarding', loadChildren: () => import('./hospital-onboarding/hospital-onboarding.module').then(m => m.HospitalOnboardingModule) }
 
   ]},
 ];

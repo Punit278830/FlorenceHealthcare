@@ -113,6 +113,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("int")
                         .HasColumnName("FinalAmount");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<int>("InvoiceId")
                         .HasColumnType("int")
                         .HasColumnName("invoiceId");
@@ -149,6 +152,9 @@ namespace hospitalApiProject.Migrations
                     b.Property<int>("AppointmentId")
                         .HasColumnType("int")
                         .HasColumnName("appointmentId");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("ParticipantId")
                         .HasColumnType("int")
@@ -212,6 +218,9 @@ namespace hospitalApiProject.Migrations
                     b.Property<int>("Fee")
                         .HasColumnType("int")
                         .HasColumnName("fee");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("IsDeleted")
                         .HasColumnType("bit");
@@ -277,6 +286,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("followupDate");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id")
                         .HasName("PK__consulta__3213E83FF94E34E0");
 
@@ -313,6 +325,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("varchar(50)")
                         .HasColumnName("fileType");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("docName")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("docName");
@@ -343,6 +358,15 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("departmentStatus");
+
+                    b.Property<string>("DisplayName")
+                        .HasMaxLength(100)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(100)")
+                        .HasColumnName("displayName");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.HasKey("DepartmentId")
                         .HasName("PK__departme__3213E83F62AE26B1");
@@ -376,6 +400,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)")
                         .HasColumnName("diagnosText");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.HasKey("DiagnosId")
                         .HasName("PK__diagnosi__330F5D69B0F1B8E9");
@@ -413,6 +440,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("UploadDate")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2")
@@ -422,6 +452,121 @@ namespace hospitalApiProject.Migrations
                         .HasName("PK__Files__6F0F989FE714CBA2");
 
                     b.ToTable("FilesUpload", (string)null);
+                });
+
+            modelBuilder.Entity("hospitalApiProject.Models.Hospital", b =>
+                {
+                    b.Property<int>("HospitalId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("HospitalId");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HospitalId"));
+
+                    b.Property<string>("AddressLine1")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("AddressLine1");
+
+                    b.Property<string>("AddressLine2")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("AddressLine2");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("City");
+
+                    b.Property<string>("Code")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("Code");
+
+                    b.Property<string>("ContactNumber")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("ContactNumber");
+
+                    b.Property<string>("ContactPerson")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("ContactPerson");
+
+                    b.Property<string>("Country")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Country");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("CreatedOn");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("Email");
+
+                    b.Property<string>("GSTIN")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)")
+                        .HasColumnName("GSTIN");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsActive");
+
+                    b.Property<bool?>("IsDeleted")
+                        .HasColumnType("bit")
+                        .HasColumnName("IsDeleted");
+
+                    b.Property<string>("LicenseNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("LogoUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("LogoUrl");
+
+                    b.Property<string>("ModifiedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("ModifiedBy");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("ModifiedOn");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)")
+                        .HasColumnName("Name");
+
+                    b.Property<string>("Pincode")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)")
+                        .HasColumnName("Pincode");
+
+                    b.Property<string>("RegistrationNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("RegistrationNumber");
+
+                    b.Property<string>("State")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("State");
+
+                    b.Property<string>("WebsiteUrl")
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)")
+                        .HasColumnName("WebsiteUrl");
+
+                    b.HasKey("HospitalId");
+
+                    b.ToTable("Hospital", (string)null);
                 });
 
             modelBuilder.Entity("hospitalApiProject.Models.InvoiceInfo", b =>
@@ -450,6 +595,9 @@ namespace hospitalApiProject.Migrations
 
                     b.Property<DateTime?>("DeletedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("IsConsultationPaid")
                         .HasColumnType("bit");
@@ -491,6 +639,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("decimal(18,2)")
                         .HasColumnName("fee");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ItemName")
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("itemName");
@@ -528,6 +679,9 @@ namespace hospitalApiProject.Migrations
                     b.Property<int>("GroupId")
                         .HasColumnType("int")
                         .HasColumnName("GroupId");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Instruction")
                         .HasMaxLength(200)
@@ -567,6 +721,9 @@ namespace hospitalApiProject.Migrations
                         .HasMaxLength(255)
                         .IsUnicode(false)
                         .HasColumnType("varchar(255)");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<string>("ManufactureName")
                         .IsRequired()
@@ -612,6 +769,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -630,6 +790,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnName("OptionID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("OptionId"));
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<int>("MapQuestionId")
                         .HasColumnType("int")
@@ -689,6 +852,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(15)")
                         .HasColumnName("gender");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<string>("IdentityName")
                         .HasMaxLength(100)
@@ -753,6 +919,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Instruction")
                         .HasMaxLength(200)
                         .IsUnicode(false)
@@ -816,6 +985,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("varchar(255)")
                         .HasColumnName("finalDiagnosis");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("TemplateName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
@@ -834,6 +1006,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnName("QuestionID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionId"));
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<string>("QuestionText")
                         .IsRequired()
@@ -862,6 +1037,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnName("QuestionnaireID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("QuestionnaireId"));
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit")
@@ -895,6 +1073,9 @@ namespace hospitalApiProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PatientVisitId")
                         .HasColumnType("int");
 
@@ -925,6 +1106,9 @@ namespace hospitalApiProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<int>("PatientId")
                         .HasColumnType("int");
 
@@ -949,6 +1133,9 @@ namespace hospitalApiProject.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("PaymentId"));
 
                     b.Property<int?>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HospitalId")
                         .HasColumnType("int");
 
                     b.Property<int>("InvoiceId")
@@ -978,6 +1165,53 @@ namespace hospitalApiProject.Migrations
                     b.HasKey("PaymentId");
 
                     b.ToTable("PaymentModeInfo");
+                });
+
+            modelBuilder.Entity("hospitalApiProject.Models.RoleMaster", b =>
+                {
+                    b.Property<int>("RoleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RoleId"));
+
+                    b.Property<int?>("CreatedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("HospitalId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ModifiedBy")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("RoleDescription")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("RoleDisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("RoleName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("RoleId");
+
+                    b.HasIndex("HospitalId");
+
+                    b.ToTable("RoleMaster");
                 });
 
             modelBuilder.Entity("hospitalApiProject.Models.StaffInfo", b =>
@@ -1049,6 +1283,9 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("varchar(15)")
                         .HasColumnName("gender");
 
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
                     b.Property<string>("IdentityName")
                         .HasMaxLength(100)
                         .IsUnicode(false)
@@ -1079,14 +1316,24 @@ namespace hospitalApiProject.Migrations
                         .HasColumnType("varchar(20)")
                         .HasColumnName("password");
 
+                    b.Property<int?>("PrescriptionValidity")
+                        .HasColumnType("int")
+                        .HasAnnotation("Relational:JsonPropertyName", "PrescriptionValidity");
+
                     b.Property<string>("RegestrationNumber")
                         .HasMaxLength(100)
                         .IsUnicode(false)
                         .HasColumnType("varchar(100)")
                         .HasColumnName("regestrationNumber");
 
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int")
+                        .HasColumnName("RoleId");
+
                     b.HasKey("StaffId")
                         .HasName("PK__staffInf__DDDFDD369429D882");
+
+                    b.HasIndex("RoleId");
 
                     b.HasIndex(new[] { "Email" }, "UQ_StaffInfo_Email")
                         .IsUnique();
@@ -1121,6 +1368,9 @@ namespace hospitalApiProject.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)")
                         .HasColumnName("fromTime");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<int>("LeaveStatus")
                         .HasColumnType("int")
@@ -1190,6 +1440,9 @@ namespace hospitalApiProject.Migrations
                         .HasMaxLength(50)
                         .IsUnicode(false)
                         .HasColumnType("varchar(50)");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
 
                     b.Property<bool?>("Hypertension")
                         .HasColumnType("bit")
@@ -1270,6 +1523,28 @@ namespace hospitalApiProject.Migrations
                         .IsRequired();
 
                     b.Navigation("PatientVisit");
+                });
+
+            modelBuilder.Entity("hospitalApiProject.Models.RoleMaster", b =>
+                {
+                    b.HasOne("hospitalApiProject.Models.Hospital", "Hospital")
+                        .WithMany()
+                        .HasForeignKey("HospitalId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Hospital");
+                });
+
+            modelBuilder.Entity("hospitalApiProject.Models.StaffInfo", b =>
+                {
+                    b.HasOne("hospitalApiProject.Models.RoleMaster", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("FK_StaffInfo_RoleMaster");
+
+                    b.Navigation("Role");
                 });
 
             modelBuilder.Entity("hospitalApiProject.Models.Option", b =>

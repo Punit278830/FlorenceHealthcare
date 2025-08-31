@@ -28,4 +28,7 @@ public partial class StaffSchedule
   public string? Status { get; set; }
 
   public string? Notes { get; set; }
+
+  // Nullable HospitalId for multi-tenant support
+  public int? HospitalId { get; set; }
 }

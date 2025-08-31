@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class VitalInfoesController : ControllerBase
+    public class VitalInfoesController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public VitalInfoesController(FlorenceDbContext context)
+        public VitalInfoesController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/VitalInfoes
         [HttpGet]
         public async Task<ActionResult<IEnumerable<VitalInfo>>> GetVitalInfos()
         {
-            return await _context.VitalInfos.ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.VitalInfos.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(v => v.HospitalId == hospitalId);
+            }
+            return await query.ToListAsync();
         }
 
         // GET: api/VitalInfoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<VitalInfo>> GetVitalInfo(int id)
         {
-            var vitalInfo = await _context.VitalInfos.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var vitalInfo = await _context.VitalInfos.FirstOrDefaultAsync(v => v.VitalId == id && (hospitalId == null || v.HospitalId == hospitalId));
 
             if (vitalInfo == null)
             {
@@ -45,7 +50,8 @@ namespace hospitalApiProject.Controllers
         [HttpGet("byAppointment/{id}")]
         public async Task<ActionResult<VitalInfo>> GetVitalInfoByAppointment(int id)
         {
-            var vitalInfo = await _context.VitalInfos.Where(e => e.AppointmentId == id).FirstOrDefaultAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var vitalInfo = await _context.VitalInfos.Where(e => e.AppointmentId == id && (hospitalId == null || e.HospitalId == hospitalId)).FirstOrDefaultAsync();
 
             if (vitalInfo == null)
             {
@@ -68,6 +74,8 @@ namespace hospitalApiProject.Controllers
                 {
                     return BadRequest();
                 }
+                var hospitalId = GetHospitalIdFromHeader();
+                if (hospitalId != null) vitalInfo.HospitalId = hospitalId;
                 if (id == 0)
                 {
                     vitalId = _context.VitalInfos.Add(vitalInfo).Entity.VitalId;
@@ -99,6 +107,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<VitalInfo>> PostVitalInfo(VitalInfo vitalInfo)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            vitalInfo.HospitalId = hospitalId;
             _context.VitalInfos.Add(vitalInfo);
             await _context.SaveChangesAsync();
 
@@ -109,7 +119,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteVitalInfo(int id)
         {
-            var vitalInfo = await _context.VitalInfos.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var vitalInfo = await _context.VitalInfos.FirstOrDefaultAsync(v => v.VitalId == id && (hospitalId == null || v.HospitalId == hospitalId));
             if (vitalInfo == null)
             {
                 return NotFound();

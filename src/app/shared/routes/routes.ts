@@ -335,6 +335,9 @@ export class routes {
   public static get themeSettings(): string {
     return this.baseUrl + '/settings/theme-settings';
   }
+  public static get hospitalOnboarding(): string {
+    return this.baseUrl + '/settings/hospital-onboarding';
+  }
   public static get addLeave(): string {
     return this.baseUrl + '/staff/add-leave';
   }

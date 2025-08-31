@@ -149,9 +149,25 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   }
 
   // Method to search invoices based on form data
-  public searchInvoices(): void {
+  public searchInvoices(event?: Event): void {
+    if (event) {
+      event.preventDefault();
+    }
+    console.log('Search button clicked - searchInvoices method called');
+    console.log('Form valid:', this.searchForm.valid);
+    console.log('Form value:', this.searchForm.value);
+    console.log('Form errors:', this.searchForm.errors);
+    
+    // Temporarily remove form validation to test
+    // if (!this.searchForm.valid) {
+    //   console.log('Form is invalid, marking all fields as touched');
+    //   this.searchForm.markAllAsTouched();
+    //   return;
+    // }
+    
     // Call getTableData with filtered parameters
     this.getFormData();
+    console.log('Search criteria after getFormData:', this.searchCriteria);
     this.getTableData();
   }
 
@@ -181,6 +197,8 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
  public getTableData(): void {
   console.log('getTableData called with search criteria:', this.searchCriteria);
   this.loadingService.showLoader();
+  
+  console.log('Making API call to searchInvoices...');
   this.invoiceService.searchInvoices(this.searchCriteria).subscribe(
     (response) => {
       console.log('API response received:', response);
@@ -709,5 +727,76 @@ getTotalUnpaidAmount(): number {
   }, 0);
 }
 
+// Helper method to safely format any date field
+  public formatDate(dateValue: any, format: string = 'dd-MM-yyyy'): string {
+    if (!dateValue || dateValue === 'null' || dateValue === null || dateValue === undefined) {
+      return 'N/A';
+    }
+    
+    try {
+      // Handle different date formats
+      let dateToFormat = dateValue;
+      
+      // If it's already a Date object
+      if (dateValue instanceof Date) {
+        dateToFormat = dateValue;
+      }
+      // If it's a string that needs timezone
+      else if (typeof dateValue === 'string' && !dateValue.includes('Z') && !dateValue.includes('+')) {
+        dateToFormat = dateValue + 'Z';
+      }
+      
+      const formatted = this.datePipe.transform(dateToFormat, format, 'Asia/Kolkata');
+      return formatted || 'Invalid Date';
+    } catch (error) {
+      console.error('Error formatting date:', error, 'Input:', dateValue);
+      return 'Invalid Date';
+    }
+  }
 
+  formatPaymentDate(paymentDetails: any[]): string {
+    if (!paymentDetails || paymentDetails.length === 0) {
+      return 'N/A';
+    }
+
+    // Find the most recent payment date
+    const validDates = paymentDetails
+      .map(payment => payment?.paymentDate)
+      .filter(date => {
+        // Filter out null, undefined, empty strings, and problematic values
+        if (!date || date === null || date === undefined || date === '' || 
+            date === 'null' || date === 'nullZ' || date === 'undefined') {
+          return false;
+        }
+        // Additional check for invalid date strings
+        if (typeof date === 'string' && (date.toLowerCase().includes('null') || date.toLowerCase().includes('undefined'))) {
+          return false;
+        }
+        return true;
+      })
+      .map(date => {
+        try {
+          const parsedDate = new Date(date);
+          return isNaN(parsedDate.getTime()) ? null : parsedDate;
+        } catch {
+          return null;
+        }
+      })
+      .filter(date => date !== null) as Date[];
+
+    if (validDates.length === 0) {
+      return 'N/A';
+    }
+
+    // Get the most recent date
+    const latestDate = new Date(Math.max(...validDates.map(d => d.getTime())));
+    
+    try {
+      const formatted = this.formatDate(latestDate, 'dd/MM/yyyy HH:mm');
+      return formatted || 'N/A';
+    } catch (error) {
+      console.error('Error formatting payment date:', error);
+      return 'N/A';
+    }
+  }
 }

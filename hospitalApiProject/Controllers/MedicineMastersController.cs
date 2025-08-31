@@ -6,32 +6,37 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Models;
+using hospitalApiProject.Controllers.Base;
 
 namespace hospitalApiProject.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class MedicineMastersController : ControllerBase
+    public class MedicineMastersController : WithHospitalController
     {
-        private readonly FlorenceDbContext _context;
-
-        public MedicineMastersController(FlorenceDbContext context)
+        public MedicineMastersController(FlorenceDbContext context) : base(context)
         {
-            _context = context;
         }
 
         // GET: api/MedicineMasters
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MedicineMaster>>> GetMedicineMasters()
         {
-            return await _context.MedicineMasters.OrderByDescending(x => x.MedId).ToListAsync();
+            var hospitalId = GetHospitalIdFromHeader();
+            var query = _context.MedicineMasters.AsQueryable();
+            if (hospitalId != null)
+            {
+                query = query.Where(m => m.HospitalId == hospitalId);
+            }
+            return await query.OrderByDescending(x => x.MedId).ToListAsync();
         }
 
         // GET: api/MedicineMasters/5
         [HttpGet("{id}")]
         public async Task<ActionResult<MedicineMaster>> GetMedicineMaster(int id)
         {
-            var medicineMaster = await _context.MedicineMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var medicineMaster = await _context.MedicineMasters.FirstOrDefaultAsync(m => m.MedId == id && (hospitalId == null || m.HospitalId == hospitalId));
 
             if (medicineMaster == null)
             {
@@ -47,7 +52,8 @@ namespace hospitalApiProject.Controllers
         {
             if (!string.IsNullOrEmpty(medName))
             {
-                var medExists = await _context.MedicineMasters.AnyAsync(e => e.MedName == medName);
+                var hospitalId = GetHospitalIdFromHeader();
+                var medExists = await _context.MedicineMasters.AnyAsync(e => e.MedName == medName && (hospitalId == null || e.HospitalId == hospitalId));
                 return Ok(medExists);
             }
             else
@@ -61,8 +67,9 @@ namespace hospitalApiProject.Controllers
         {
             if (!string.IsNullOrEmpty(medName))
             {
+                var hospitalId = GetHospitalIdFromHeader();
                 var medExists = await _context.MedicineMasters
-            .Where(e => e.MedName.Contains(medName))
+            .Where(e => e.MedName.Contains(medName) && (hospitalId == null || e.HospitalId == hospitalId))
             .ToListAsync();
                 if(medExists.Any())
                 {
@@ -93,6 +100,9 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
 
+            var hospitalId = GetHospitalIdFromHeader();
+            if (hospitalId != null) medicineMaster.HospitalId = hospitalId;
+
             _context.Entry(medicineMaster).State = EntityState.Modified;
 
             try
@@ -119,6 +129,8 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<MedicineMaster>> PostMedicineMaster(MedicineMaster medicineMaster)
         {
+            var hospitalId = GetHospitalIdFromHeader();
+            medicineMaster.HospitalId = hospitalId;
             _context.MedicineMasters.Add(medicineMaster);
             await _context.SaveChangesAsync();
 
@@ -129,7 +141,8 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMedicineMaster(int id)
         {
-            var medicineMaster = await _context.MedicineMasters.FindAsync(id);
+            var hospitalId = GetHospitalIdFromHeader();
+            var medicineMaster = await _context.MedicineMasters.FirstOrDefaultAsync(m => m.MedId == id && (hospitalId == null || m.HospitalId == hospitalId));
             if (medicineMaster == null)
             {
                 return NotFound();

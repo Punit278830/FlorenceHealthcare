@@ -143,12 +143,14 @@ export class InvoiceService {
   }
 
   searchInvoices(criteria: SearchCriteriaBase): Observable<SearchResponseBase<Iinvoice>> {
-    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    // Send criteria directly, not wrapped in { criteria: ... }
+    // Debug logging
+    console.log('InvoiceService.searchInvoices called with criteria:', criteria);
+    console.log('API URL:', `${this.apiUrl}InvoiceInfoes/Search`);
+    
+    // Don't pass additional headers, let ApiHttpService handle all headers
     return this.http.post(
       `${this.apiUrl}InvoiceInfoes/Search`,
-      criteria,
-      { headers }
+      criteria
     ) as unknown as Observable<SearchResponseBase<Iinvoice>>;
   }
 }

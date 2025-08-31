@@ -27,6 +27,24 @@
                                     </div>
                                 </div>
 
+                                <div class="col-12 col-md-6 col-xl-4" *ngIf="shouldShowHospitalDropdown">
+                                    <div class="form-group local-forms">
+                                        <label for="hospitalId">Hospital <span class="login-danger">*</span></label>
+                                        <mat-select formControlName="hospitalId" class="form-control select" placeholder="Select Hospital">
+                                            <mat-option *ngFor="let hospital of hospitals" [value]="hospital.hospitalId">
+                                                {{ hospital.name }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="staffReg.get('hospitalId')?.invalid && (staffReg.get('hospitalId')?.dirty || staffReg.get('hospitalId')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('hospitalId')?.errors?.['required']">Hospital selection is required.</div>
+                                        </div>
+                                        <div *ngIf="isLoadingHospitals" class="text-muted mt-1">
+                                            <small>Loading hospitals...</small>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="name">First Name <span class="login-danger">*</span></label>
@@ -189,6 +207,24 @@
                                 </div>
 
                                 <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="roleId">Role (Optional)</label>
+                                        <mat-select formControlName="roleId" class="form-control select" placeholder="Select Role">
+                                            <mat-option value="">-- No Role Assigned --</mat-option>
+                                            <mat-option *ngFor="let role of roles" [value]="role.roleId">
+                                                {{ role.roleDisplayName }}
+                                            </mat-option>
+                                        </mat-select>
+                                        <div *ngIf="isLoadingRoles" class="text-muted mt-1">
+                                            <small>Loading roles...</small>
+                                        </div>
+                                        <div class="text-muted mt-1">
+                                            <small>Role assignment is optional. If not selected, role will be based on designation.</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group select-gender">
                                         <label for="Status" class="gen-label">Status <span
                                                 class="login-danger">*</span></label>
@@ -338,9 +374,12 @@
 
                                 <div class="col-12">
                                     <div class="doctor-submit text-end">
-                                        <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
-                                        <button type="submit" class="btn btn-primary cancel-form"
-                                            (click)="onCancel()">Cancel</button>
+                                        <button type="submit" class="btn btn-primary submit-form me-2" [disabled]="isSubmitting">
+                                            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                            {{ isSubmitting ? 'Submitting...' : 'Submit' }}
+                                        </button>
+                                        <button type="button" class="btn btn-secondary cancel-form"
+                                            (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
                                     </div>
                                 </div>
                             </div>
