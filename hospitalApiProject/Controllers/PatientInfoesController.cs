@@ -22,27 +22,37 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<PatientWithPaymentStatusDto>>> GetPatientInfos()
     {
+      try
+      {
         var patients = await _context.PatientInfos.OrderByDescending(p => p.PatientId).ToListAsync();
         var invoices = await _context.InvoiceInfos.ToListAsync();
 
         var result = patients.Select(p => new PatientWithPaymentStatusDto
         {
-            PatientId = p.PatientId,
-            FirstName = p.FirstName,
-            LastName = p.LastName,
-            Mobile = p.Mobile,
-            Email = p.Email,
-            Address = p.Address,
-            Gender = p.Gender,
-            Dob = p.Dob,
-            PatientImage = p.PatientImage,
-            RegstrationDate = p.RegstrationDate,
-            IdentityName = p.IdentityName,
-            IdentityNumber = p.IdentityNumber,
-            IsConsultationPaid = invoices.Any(i => i.PatientId == p.PatientId && i.IsConsultationPaid == true)
+          PatientId = p.PatientId,
+          FirstName = p.FirstName,
+          LastName = p.LastName,
+          Mobile = p.Mobile,
+          Email = p.Email,
+          Address = p.Address,
+          Gender = p.Gender,
+          Dob = p.Dob,
+          PatientImage = p.PatientImage,
+          RegstrationDate = p.RegstrationDate,
+          IdentityName = p.IdentityName,
+          IdentityNumber = p.IdentityNumber,
+          IsConsultationPaid = invoices.Any(i => i.PatientId == p.PatientId && i.IsConsultationPaid == true)
         }).ToList();
 
         return Ok(result);
+      }
+
+      catch (Exception ex)
+      {
+        return BadRequest(ex.Message);
+      }
+      // Fetch patients and invoices from the database
+
     }
 
     [HttpGet("registrationDateRange/{startDate}/{endDate}")]
@@ -87,14 +97,14 @@ namespace hospitalApiProject.Controllers
       var result = new
       {
         Male = malePercentage,
-        Female= femalePercentage,
+        Female = femalePercentage,
         Transgender = transgenderPercentage
       };
 
       return Ok(result);
     }
 
-  
+
 
 
     //GET: api/PatientInfoes/5
