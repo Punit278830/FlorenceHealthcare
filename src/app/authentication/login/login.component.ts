@@ -49,7 +49,10 @@ export class LoginComponent implements OnInit {
         (staffInfo: IstaffInfo) => {
           // Login successful, navigate based on user role and status
           this.loadingService.hideLoader();
-          if (staffInfo.designation.toLowerCase() === 'admin' && staffInfo.activeStatus === 1) {
+          if (staffInfo.designation.toLowerCase() === 'global super administrator' && staffInfo.activeStatus === 1) {
+            // Super Admin - redirect to admin dashboard with full access to all modules
+            this.router.navigate([routes.adminDashboard]);
+          } else if (staffInfo.designation.toLowerCase() === 'admin' && staffInfo.activeStatus === 1) {
             this.router.navigate([routes.adminDashboard]);
           } else if (staffInfo.designation.toLowerCase() === 'doctor' && staffInfo.activeStatus === 1) {
             this.router.navigate([routes.doctorDashboard]);
@@ -57,6 +60,9 @@ export class LoginComponent implements OnInit {
             this.router.navigate([routes.appointmentList]);
           } else if (staffInfo.designation.toLowerCase() === 'nursing' && staffInfo.activeStatus === 1) {
             this.router.navigate([routes.addPatient]);
+          } else {
+            // If no specific navigation found, show error
+            this.toaster.warning('User role not recognized or inactive. Please contact administrator.');
           }
         },
         (error: string) => {

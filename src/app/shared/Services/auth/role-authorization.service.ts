@@ -65,13 +65,14 @@ export class RoleAuthorizationService {
 
   private calculatePermissions(role: UserRole): UserPermissions {
     const roleName = role.roleName.toLowerCase();
+    const isSuperAdmin = roleName === 'superadmin' || roleName === 'globalsuperadmin';
     
     return {
-      canAccessHospitalManagement: roleName === 'superadmin',
-      canAccessAllHospitals: roleName === 'superadmin',
-      canManageStaff: roleName === 'superadmin' || roleName === 'admin',
-      canViewReports: roleName === 'superadmin' || roleName === 'admin',
-      isSuperAdmin: roleName === 'superadmin',
+      canAccessHospitalManagement: isSuperAdmin,
+      canAccessAllHospitals: isSuperAdmin,
+      canManageStaff: isSuperAdmin || roleName === 'admin',
+      canViewReports: isSuperAdmin || roleName === 'admin',
+      isSuperAdmin: isSuperAdmin,
       isAdmin: roleName === 'admin',
       isReceptionist: roleName === 'receptionist',
       isNurse: roleName === 'nurse',
@@ -113,6 +114,10 @@ export class RoleAuthorizationService {
 
   getAllRolesByHospital(hospitalId: number): Observable<UserRole[]> {
     return this.http.get(`${api_Url}RoleMaster/GetRolesByHospital/${hospitalId}`);
+  }
+
+  getAllRoles(): Observable<UserRole[]> {
+    return this.http.get(`${api_Url}RoleMaster`);
   }
 
   clearRole(): void {

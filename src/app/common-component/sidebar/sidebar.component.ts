@@ -50,6 +50,10 @@ export class SidebarComponent {
   const currentRole = this.roleService.getCurrentRole();
   if (currentRole) {
     this.userRole = currentRole.roleName.toLowerCase();
+    // Map GlobalSuperAdmin to superadmin for sidebar menu matching
+    if (this.userRole === 'globalsuperadmin') {
+      this.userRole = 'superadmin';
+    }
   } else {
     // Fallback to old system
     this.userData = JSON.parse(localStorage.getItem('data') || '{}');
@@ -64,6 +68,10 @@ export class SidebarComponent {
     const currentRole = this.roleService.getCurrentRole();
     if (currentRole) {
       userRole = currentRole.roleName.toLowerCase();
+      // Map GlobalSuperAdmin to superadmin for sidebar menu matching
+      if (userRole === 'globalsuperadmin') {
+        userRole = 'superadmin';
+      }
     } else {
       userRole = JSON.parse(localStorage.getItem('data') || '{}').userRole || '';
     }

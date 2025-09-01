@@ -22,7 +22,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ConsultationDatum>>> GetConsultationData()
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var query = _context.ConsultationData.AsQueryable();
             if (hospitalId != null)
             {
@@ -35,7 +35,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ConsultationDatum>> GetConsultationDatum(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var consultationDatum = await _context.ConsultationData.Where(e => e.AppointmentId == id && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
             if (consultationDatum.Count == 0)
@@ -57,7 +57,7 @@ namespace hospitalApiProject.Controllers
             }
 
             // Tag with HospitalId if provided
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             if (hospitalId != null) consultationDatum.HospitalId = hospitalId;
 
             _context.Entry(consultationDatum).State = EntityState.Modified;
@@ -86,7 +86,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<ConsultationDatum>> PostConsultationDatum(ConsultationDatum consultationDatum)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             consultationDatum.HospitalId = hospitalId;
             _context.ConsultationData.Add(consultationDatum);
             await _context.SaveChangesAsync();
@@ -106,7 +106,7 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteConsultationDatum(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var consultationDatum = await _context.ConsultationData.FirstOrDefaultAsync(c => c.Id == id && (hospitalId == null || c.HospitalId == hospitalId));
             if (consultationDatum == null)
             {

@@ -17,30 +17,21 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoleMaster>>> GetRoles()
         {
-            var hospitalId = GetHospitalIdFromHeader();
-            var query = _context.RoleMasters.AsQueryable();
+            // Load all active roles regardless of hospital for simplicity
+            var roles = await _context.RoleMasters
+                .Where(r => r.IsActive)
+                .OrderBy(r => r.HospitalId)
+                .ThenBy(r => r.RoleName)
+                .ToListAsync();
             
-            if (hospitalId != null)
-            {
-                query = query.Where(r => r.HospitalId == hospitalId);
-            }
-            
-            return await query.Where(r => r.IsActive).OrderBy(r => r.RoleName).ToListAsync();
+            return Ok(roles);
         }
 
         // GET: api/RoleMaster/GetRolesByHospital/1
         [HttpGet("GetRolesByHospital/{hospitalId}")]
         public async Task<ActionResult<IEnumerable<RoleMaster>>> GetRolesByHospital(int hospitalId)
         {
-            var currentHospitalId = GetHospitalIdFromHeader();
-            
-            // Only super admins can view roles for different hospitals
-            var userRole = await GetCurrentUserRole();
-            if (userRole?.RoleName.ToLower() != "superadmin" && hospitalId != currentHospitalId)
-            {
-                return Forbid("Access denied. Only Super Admins can view roles for other hospitals.");
-            }
-
+            // Allow loading roles for any hospital without authentication checks
             var roles = await _context.RoleMasters
                 .Where(r => r.HospitalId == hospitalId && r.IsActive)
                 .OrderBy(r => r.RoleName)
@@ -53,7 +44,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("GetUserRole/{staffId}")]
         public async Task<ActionResult<RoleMaster>> GetUserRole(int staffId)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             
             var staff = await _context.StaffInfos
                 .Include(s => s.Role)
@@ -90,7 +81,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("CheckSuperAdmin/{staffId}")]
         public async Task<ActionResult<bool>> CheckSuperAdmin(int staffId)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             
             var staff = await _context.StaffInfos
                 .Where(s => s.StaffId == staffId && (hospitalId == null || s.HospitalId == hospitalId))
@@ -109,7 +100,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<RoleMaster>> GetRole(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var role = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -126,7 +117,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<RoleMaster>> CreateRole(RoleMaster role)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             if (hospitalId != null)
             {
                 role.HospitalId = hospitalId.Value;
@@ -150,7 +141,7 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
 
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var existingRole = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -190,7 +181,7 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             var role = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -213,7 +204,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost("AssignRoleToStaff")]
         public async Task<ActionResult> AssignRoleToStaff([FromBody] AssignRoleRequest request)
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             
             // Get staff member
             var staff = await _context.StaffInfos
@@ -253,7 +244,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("GetStaffWithRoles")]
         public async Task<ActionResult<IEnumerable<object>>> GetStaffWithRoles()
         {
-            var hospitalId = GetHospitalIdFromHeader();
+            var hospitalId = await GetHospitalIdForFilteringAsync();
             
             var staffWithRoles = await _context.StaffInfos
                 .Include(s => s.Role)
@@ -278,16 +269,76 @@ namespace hospitalApiProject.Controllers
             return Ok(staffWithRoles);
         }
 
+        // POST: api/RoleMaster/SeedDefaultRoles
+        [HttpPost("SeedDefaultRoles")]
+        public async Task<ActionResult> SeedDefaultRoles()
+        {
+            try
+            {
+                // Get all hospitals
+                var hospitals = await _context.Hospitals.Where(h => h.IsActive == true).ToListAsync();
+                
+                if (!hospitals.Any())
+                {
+                    // Add a default hospital if none exists
+                    var defaultHospital = new Hospital
+                    {
+                        Name = "Default Hospital",
+                        AddressLine1 = "Default Address",
+                        ContactNumber = "1234567890",
+                        Email = "default@hospital.com",
+                        IsActive = true,
+                        CreatedOn = DateTime.UtcNow
+                    };
+                    _context.Hospitals.Add(defaultHospital);
+                    await _context.SaveChangesAsync();
+                    hospitals.Add(defaultHospital);
+                }
+
+                var roleTemplates = new[]
+                {
+                    new { Name = "SuperAdmin", DisplayName = "Super Administrator", Description = "Full system access with all permissions" },
+                    new { Name = "Admin", DisplayName = "Administrator", Description = "Hospital administrator with management permissions" },
+                    new { Name = "Doctor", DisplayName = "Doctor", Description = "Medical practitioner with patient consultation permissions" },
+                    new { Name = "Nurse", DisplayName = "Nurse", Description = "Nursing staff with patient care access" },
+                    new { Name = "Receptionist", DisplayName = "Receptionist", Description = "Front desk operations and appointment scheduling" }
+                };
+
+                foreach (var hospital in hospitals)
+                {
+                    foreach (var template in roleTemplates)
+                    {
+                        var existingRole = await _context.RoleMasters
+                            .FirstOrDefaultAsync(r => r.HospitalId == hospital.HospitalId && r.RoleName == template.Name);
+
+                        if (existingRole == null)
+                        {
+                            var role = new RoleMaster
+                            {
+                                RoleName = template.Name,
+                                RoleDisplayName = template.DisplayName,
+                                RoleDescription = template.Description,
+                                HospitalId = hospital.HospitalId,
+                                IsActive = true,
+                                CreatedDate = DateTime.UtcNow
+                            };
+                            _context.RoleMasters.Add(role);
+                        }
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                return Ok(new { message = "Default roles seeded successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = $"Error seeding roles: {ex.Message}" });
+            }
+        }
+
         private bool RoleExists(int id)
         {
             return _context.RoleMasters.Any(e => e.RoleId == id);
-        }
-
-        private Task<RoleMaster?> GetCurrentUserRole()
-        {
-            // This would need to be implemented based on your authentication system
-            // For now, returning null - you'll need to implement this based on your auth token/session
-            return Task.FromResult<RoleMaster?>(null);
         }
     }
 

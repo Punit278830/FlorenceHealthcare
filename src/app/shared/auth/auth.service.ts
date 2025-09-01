@@ -47,6 +47,9 @@ export class AuthService {
           localStorage.setItem('currentHospitalId', '1');
         }
         
+        // Store staff ID for Super Admin detection in API calls
+        localStorage.setItem('currentStaffId', data.staffId.toString());
+        
         const logingData=JSON.stringify(this.authentication)
         this.userRole=data.designation;
 

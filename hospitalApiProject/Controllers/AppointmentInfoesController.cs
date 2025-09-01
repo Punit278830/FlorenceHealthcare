@@ -24,7 +24,7 @@ namespace hospitalApiProject.Controllers
     {
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
-      var hospitalId = GetHospitalIdFromHeader();
+      var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
       var appointmentInfo = await _context.AppointmentInfos
           .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .OrderByDescending(p => p.Id)

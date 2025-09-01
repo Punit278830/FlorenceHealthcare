@@ -14,7 +14,9 @@ export class ApiHttpService {
 
   private withHospitalHeader(options?: any): any {
     const hospitalId = localStorage.getItem('currentHospitalId') || '1'; // Default to hospital ID 1
+    const staffId = localStorage.getItem('currentStaffId'); // Get current staff ID
     console.log('ApiHttpService: Using hospital ID:', hospitalId);
+    console.log('ApiHttpService: Using staff ID:', staffId);
     console.log('ApiHttpService: Original options:', options);
     
     // Create a new HttpHeaders object properly
@@ -24,13 +26,22 @@ export class ApiHttpService {
       // If headers are already HttpHeaders, clone them
       if (options.headers instanceof HttpHeaders) {
         headers = options.headers.set('X-Hospital-Id', hospitalId);
+        if (staffId) {
+          headers = headers.set('X-Staff-Id', staffId);
+        }
       } else {
         // If headers are a plain object, create new HttpHeaders
         headers = new HttpHeaders(options.headers).set('X-Hospital-Id', hospitalId);
+        if (staffId) {
+          headers = headers.set('X-Staff-Id', staffId);
+        }
       }
     } else {
       // No existing headers, create new ones
       headers = new HttpHeaders().set('X-Hospital-Id', hospitalId);
+      if (staffId) {
+        headers = headers.set('X-Staff-Id', staffId);
+      }
     }
     
     console.log('ApiHttpService: Final headers:', headers);
@@ -48,11 +59,13 @@ export class ApiHttpService {
 
   public post(url: string, data: any, options?: any) {
     const hospitalId = localStorage.getItem('currentHospitalId') || '1';
+    const staffId = localStorage.getItem('currentStaffId');
     
     // Create headers directly without merging conflicts
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'X-Hospital-Id': hospitalId
+      'X-Hospital-Id': hospitalId,
+      ...(staffId && { 'X-Staff-Id': staffId })
     });
     
     console.log('ApiHttpService POST: URL:', url);

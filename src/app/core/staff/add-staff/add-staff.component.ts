@@ -45,12 +45,16 @@ export class AddStaffComponent implements OnInit {
     private departmentService: DepartmentService,
     private authService: AuthService,
     private roleService: RoleAuthorizationService) {
+    
+    console.log("AddStaffComponent constructor called");
     this.createStaffRegrestrationForm();
     this.getDepartmentList();
     this.loadHospitals();
+    
+    console.log("About to call loadRoles()");
     this.loadRoles();
+    
     this.maxDate = new Date()
-
   }
   ngOnInit(): void {
     // Removed the error throw
@@ -72,23 +76,15 @@ export class AddStaffComponent implements OnInit {
   }
 
   loadRoles(): void {
-    const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
+    // Load all roles from master table - not filtered by hospital
     this.isLoadingRoles = true;
+    console.log("Loading all roles from master table...");
     
-    this.authService.getHospitals().subscribe({
-      next: () => {
-        // Use the role service to get roles for the current hospital
-        this.roleService.getAllRolesByHospital(parseInt(currentHospitalId)).subscribe({
-          next: (roles) => {
-            this.roles = roles;
-            this.isLoadingRoles = false;
-          },
-          error: (error) => {
-            console.error('Error loading roles:', error);
-            this.isLoadingRoles = false;
-            this.toster.error('Failed to load roles');
-          }
-        });
+    this.roleService.getAllRoles().subscribe({
+      next: (roles) => {
+        this.roles = roles;
+        this.isLoadingRoles = false;
+        console.log("All roles loaded:", roles);
       },
       error: (error) => {
         console.error('Error loading roles:', error);
@@ -192,10 +188,18 @@ export class AddStaffComponent implements OnInit {
     const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
     const isSuperAdmin = this.roleService.isSuperAdmin();
     
+    console.log("Creating form - isSuperAdmin:", isSuperAdmin);
+    console.log("Creating form - currentHospitalId:", currentHospitalId);
+    
+    // Always parse hospital ID as number
+    const defaultHospitalId = isSuperAdmin ? null : parseInt(currentHospitalId);
+    
+    console.log("Default hospital ID for form:", defaultHospitalId);
+    
     this.staffReg = this.fb.group({
       hospitalId: [
-        isSuperAdmin ? '' : currentHospitalId, 
-        isSuperAdmin ? [Validators.required] : []
+        defaultHospitalId, 
+        [Validators.required] // Always require hospital ID
       ],
       firstName: ['', [Validators.required]],
       lastName: ['', Validators.required],
@@ -217,9 +221,11 @@ export class AddStaffComponent implements OnInit {
       IdentityName: ['', Validators.required],
       PrescriptionValidity: [null, Validators.required],
       roleId: [''] // Role assignment (optional)
-
     });
 
+    // Log the initial form value
+    console.log("Initial form hospitalId value:", this.staffReg.get('hospitalId')?.value);
+    console.log("Initial form hospitalId type:", typeof this.staffReg.get('hospitalId')?.value);
   }
 
   resetStaffRegForm() {
@@ -247,6 +253,9 @@ export class AddStaffComponent implements OnInit {
     console.log("Add Staff method called");
     console.log("Form valid:", this.staffReg.valid);
     console.log("Form values:", formValues.value);
+    console.log("Raw form values:", formValues.getRawValue());
+    console.log("Hospital ID from form:", formValues.value.hospitalId);
+    console.log("Hospital ID type:", typeof formValues.value.hospitalId);
     console.log("Form errors:", this.staffReg.errors);
     
     if (this.isSubmitting) {
@@ -270,7 +279,33 @@ export class AddStaffComponent implements OnInit {
 
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
-      staffData.hospitalId = parseInt(staffData.hospitalId);
+      
+      // Handle hospitalId validation and conversion
+      console.log("Original hospitalId value:", staffData.hospitalId);
+      console.log("Original hospitalId type:", typeof staffData.hospitalId);
+      
+      // For Super Admin, hospitalId must be selected
+      if (this.isSuperAdmin && (staffData.hospitalId === null || staffData.hospitalId === undefined || staffData.hospitalId === '')) {
+        console.error("Super Admin must select a hospital");
+        this.toster.error("Please select a hospital");
+        this.isSubmitting = false;
+        return;
+      }
+      
+      // Ensure hospitalId is a number
+      if (staffData.hospitalId !== null && staffData.hospitalId !== undefined) {
+        const parsedHospitalId = typeof staffData.hospitalId === 'number' ? staffData.hospitalId : parseInt(staffData.hospitalId.toString());
+        if (isNaN(parsedHospitalId)) {
+          console.error("Hospital ID is not a valid number:", staffData.hospitalId);
+          this.toster.error("Invalid hospital selection");
+          this.isSubmitting = false;
+          return;
+        }
+        staffData.hospitalId = parsedHospitalId;
+      }
+      
+      console.log("Final hospitalId value:", staffData.hospitalId);
+      console.log("Final hospitalId type:", typeof staffData.hospitalId);
       
       console.log("Sending staff data:", staffData);
       
@@ -315,6 +350,33 @@ export class AddStaffComponent implements OnInit {
   }
 
 
+  onHospitalSelectionChange(event: MatSelectChange) {
+    console.log("Hospital selection changed:", event.value);
+    console.log("Selected hospital type:", typeof event.value);
+    
+    // Ensure the value is a number
+    const hospitalId = typeof event.value === 'string' ? parseInt(event.value) : event.value;
+    console.log("Converted hospital ID:", hospitalId, typeof hospitalId);
+    
+    // Set the value in the form control
+    this.staffReg.get('hospitalId')?.setValue(hospitalId);
+    this.staffReg.get('hospitalId')?.markAsTouched();
+    
+    console.log("Form hospitalId after setting:", this.staffReg.get('hospitalId')?.value);
+    console.log("Form hospitalId type after setting:", typeof this.staffReg.get('hospitalId')?.value);
+    
+    // Update roles based on selected hospital
+    if (hospitalId && !isNaN(hospitalId)) {
+      this.loadRolesForHospital(hospitalId);
+    }
+  }
+
+  loadRolesForHospital(hospitalId: number): void {
+    // Do NOT reload roles when hospital changes - roles are master data
+    console.log("Hospital selection changed to:", hospitalId, "but keeping same roles dropdown");
+    // Roles dropdown remains unchanged since it's master data
+  }
+
   onSelectionChange(event: MatSelectChange) {
     if ((event.value).toLowerCase() != 'doctor') {
       this.staffReg.get('consultationFee')?.patchValue(0);
@@ -346,6 +408,20 @@ export class AddStaffComponent implements OnInit {
       const age = today.getFullYear() - dob.getFullYear() - (today.getMonth() < dob.getMonth() || (today.getMonth() === dob.getMonth() && today.getDate() < dob.getDate()) ? 1 : 0);
       return age >= minAge ? null : { minAge: { requiredAge: minAge, actualAge: age } };
     };
+  }
+
+  // Debug method to check form state
+  debugFormState() {
+    console.log("=== FORM DEBUG ===");
+    console.log("Is SuperAdmin:", this.isSuperAdmin);
+    console.log("Should show dropdown:", this.shouldShowHospitalDropdown);
+    console.log("Current hospitalId value:", this.staffReg.get('hospitalId')?.value);
+    console.log("Current hospitalId type:", typeof this.staffReg.get('hospitalId')?.value);
+    console.log("Form valid:", this.staffReg.valid);
+    console.log("HospitalId control errors:", this.staffReg.get('hospitalId')?.errors);
+    console.log("Available hospitals:", this.hospitals);
+    console.log("Raw form value:", this.staffReg.getRawValue());
+    console.log("================");
   }
 
   get isSuperAdmin(): boolean {
