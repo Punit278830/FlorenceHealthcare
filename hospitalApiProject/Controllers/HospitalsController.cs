@@ -77,6 +77,43 @@ namespace hospitalApiProject.Controllers
       return NoContent();
     }
 
+    // GET: api/Hospitals/invoice-info/5
+    [HttpGet("invoice-info/{hospitalId}")]
+    public async Task<ActionResult<object>> GetHospitalInvoiceInfo(int hospitalId)
+    {
+      try
+      {
+        var hospital = await _context.Hospitals
+          .Where(h => h.HospitalId == hospitalId && h.IsDeleted != true && h.IsActive == true)
+          .Select(h => new {
+            h.HospitalId,
+            h.Name,
+            h.Email,
+            h.ContactNumber,
+            h.LicenseNumber,
+            h.GSTIN,
+            h.AddressLine1,
+            h.AddressLine2,
+            h.City,
+            h.State,
+            h.Pincode,
+            h.Country
+          })
+          .FirstOrDefaultAsync();
+
+        if (hospital == null)
+        {
+          return NotFound("Hospital not found or inactive");
+        }
+
+        return Ok(hospital);
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
     // DELETE: api/Hospitals/5 (Soft Delete)
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteHospital(int id)

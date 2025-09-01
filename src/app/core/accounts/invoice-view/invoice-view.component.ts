@@ -2,6 +2,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
 import { AppointmentService } from '../../../shared/Services/appointment/appointment.service';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 import { PatientService } from '../../../shared/Services/patient/patient.service';
@@ -12,6 +13,7 @@ import { DecimalPipe } from '@angular/common';
 import { create, SheetsRegistry } from "jss";
 import preset from "jss-preset-default";
 import { IInvoicePaymentDto, IPaymentMode, ISubItemInvoicePaymentDto } from '../../../shared/models/models';
+import { api_Url } from 'src/environment/environment';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -118,6 +120,9 @@ export class InvoiceViewComponent implements OnInit {
   public patientDetails!: IpatientInfo;
   public appointmentDetails!: Iappointment;
   public doctorDetails!: IstaffInfo;
+  
+  // Hospital details for invoice
+  public hospitalDetails: any = null;
   public addtionalInoiveItem: any[] = [];
   public totalInvoiceAmount = 0;
   public balanceAmount = 0;
@@ -183,6 +188,7 @@ export class InvoiceViewComponent implements OnInit {
     private patientService: PatientService,
     private appointmentService: AppointmentService,
     private staffService: StaffService,
+    private http: HttpClient,
     private toastr: ToastrService,
     private decimalPipe: DecimalPipe,
     private route: Router) {
@@ -232,6 +238,11 @@ export class InvoiceViewComponent implements OnInit {
           tempItemName: 'Consultation'   // Add the missing tempItemName property
         };
 
+        // Load hospital details if hospitalId is available
+        if (res.hospitalId) {
+          this.getHospitalDetails(res.hospitalId);
+        }
+
         if (!res.isConsultationPaid && (res.status == 'Unpaid' || res.status == "Partially Paid")) {
           this.balanceAmount = this.balanceAmount + res.amount;
         }
@@ -248,6 +259,19 @@ export class InvoiceViewComponent implements OnInit {
   }
 
   public currentInvoiceDate: Date = new Date(); // Add this property
+
+  // Method to get hospital details for invoice
+  getHospitalDetails(hospitalId: number) {
+    this.http.get(`${api_Url}Hospitals/invoice-info/${hospitalId}`).subscribe({
+      next: (res: any) => {
+        this.hospitalDetails = res;
+      },
+      error: (error) => {
+        console.error('Error fetching hospital details:', error);
+        this.hospitalDetails = null;
+      }
+    });
+  }
 
   ngOnInit() {
     this.currentInvoiceDate = new Date(); // Set current date at runtime

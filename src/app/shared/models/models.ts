@@ -352,6 +352,7 @@ export interface Iinvoice {
   itemName: string;
   previousAppointmentDate?: string | number; // Add this property for discount reason
   InvoiceDate?: Date | string; // Added InvoiceDate property
+  hospitalId?: number; // Hospital ID for multi-tenant support
 }
 
 export interface IinvoiceTemp extends Iinvoice {

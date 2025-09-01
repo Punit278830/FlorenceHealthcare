@@ -186,7 +186,8 @@ namespace hospitalApiProject.Controllers
             Amount = i.Amount,
             Status = i.Status,
             IsConsultationPaid = i.IsConsultationPaid,
-            TransactionId = (bool)i.IsConsultationPaid
+            HospitalId = i.HospitalId, // Include HospitalId in the response
+            TransactionId = (i.IsConsultationPaid == true)
               ? _context.PaymentModeInfo
                   .Where(p => p.InvoiceId == i.InvoiceId && p.ItemName == "Consultation")
                   .OrderByDescending(p => p.PaymentDate)
