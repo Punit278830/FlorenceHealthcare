@@ -67,6 +67,7 @@ export class AuthService {
             // Update localStorage with the correct role
             const updatedLoginData = JSON.stringify(this.authentication);
             localStorage.setItem('data', updatedLoginData);
+            localStorage.setItem('authenticated', 'true');
           },
           error: (error) => {
             console.warn('Could not fetch user role, using default permissions:', error);
@@ -80,6 +81,7 @@ export class AuthService {
               isActive: true
             };
             this.roleService.setUserRole(defaultRole);
+            localStorage.setItem('authenticated', 'true');
           }
         });
 

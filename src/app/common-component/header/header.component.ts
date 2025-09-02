@@ -5,6 +5,7 @@ import { HospitalService } from 'src/app/shared/Services/hospital/hospital.servi
 import { HospitalModel } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
+import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 
 @Component({
   selector: 'app-header',
@@ -28,7 +29,8 @@ export class HeaderComponent {
     public router: Router,
     private sideBar: SideBarService,
     private _auth: AuthService,
-    private hospitalService: HospitalService
+    private hospitalService: HospitalService,
+    private roleAuthService: RoleAuthorizationService
   ) {
     
     this.sideBar.toggleSideBar.subscribe((res: string) => {
@@ -51,15 +53,26 @@ export class HeaderComponent {
 this.userName=data.fname +" "+data.lname;
 this.userRole=data.userRole;
 
-    // Load hospitals and current hospital
-    this.loadHospitals();
-    this.currentHospitalId = this.hospitalService.getCurrentHospitalId();
-    this.updateCurrentHospitalName();
-    
-    // Subscribe to hospital changes
-    this.hospitalService.currentHospitalId$.subscribe(id => {
-      this.currentHospitalId = id;
+    // Load hospitals and current hospital only if user is super admin
+    if (this.isSuperAdmin()) {
+      this.loadHospitals();
+      this.currentHospitalId = this.hospitalService.getCurrentHospitalId();
       this.updateCurrentHospitalName();
+      
+      // Subscribe to hospital changes
+      this.hospitalService.currentHospitalId$.subscribe(id => {
+        this.currentHospitalId = id;
+        this.updateCurrentHospitalName();
+      });
+    }
+    
+    // Subscribe to role changes to update hospital visibility
+    this.roleAuthService.currentPermissions$.subscribe(permissions => {
+      if (permissions?.isSuperAdmin && this.hospitals.length === 0) {
+        this.loadHospitals();
+        this.currentHospitalId = this.hospitalService.getCurrentHospitalId();
+        this.updateCurrentHospitalName();
+      }
     });
   }
   openBoxFunc() {
@@ -123,5 +136,9 @@ this.userRole=data.userRole;
       // Optionally refresh the page to reload data with new hospital
       window.location.reload();
     }
+  }
+
+  public isSuperAdmin(): boolean {
+    return this.roleAuthService.isSuperAdmin();
   }
 }

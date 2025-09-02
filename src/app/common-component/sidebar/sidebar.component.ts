@@ -1,17 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { DataService } from 'src/app/shared/data/data.service';
 import { MenuItem, SideBarData, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit, OnDestroy {
   base = '';
   page = '';
   currentUrl = '';
@@ -23,6 +24,7 @@ export class SidebarComponent {
   public sidebarData: Array<SideBarData> = [];
   public userRole='';
   public userData:Ilogin={}as Ilogin;
+  private roleSubscription: Subscription = new Subscription();
 
   constructor(
     private data: DataService,
@@ -30,8 +32,7 @@ export class SidebarComponent {
     private sideBar: SideBarService,
     private roleService: RoleAuthorizationService
   ) {
-    this.getUserRole();
-    this.sidebarData = this.getFilteredSidebarData();
+    this.initializeSidebar();
     router.events.subscribe((event: object) => {
       if (event instanceof NavigationEnd) {
         this.getRoutes(event);
@@ -39,6 +40,26 @@ export class SidebarComponent {
     });
     this.getRoutes(this.router);
   }
+
+  ngOnInit(): void {
+    // Subscribe to role changes for real-time updates
+    this.roleSubscription = this.roleService.currentUserRole$.subscribe(role => {
+      this.getUserRole();
+      this.sidebarData = this.getFilteredSidebarData();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.roleSubscription) {
+      this.roleSubscription.unsubscribe();
+    }
+  }
+
+  private initializeSidebar(): void {
+    this.getUserRole();
+    this.sidebarData = this.getFilteredSidebarData();
+  }
+  
   // public ngOnInit()
   // {
   //   this.getUserRole();
@@ -51,13 +72,17 @@ export class SidebarComponent {
   if (currentRole) {
     this.userRole = currentRole.roleName.toLowerCase();
     // Map GlobalSuperAdmin to superadmin for sidebar menu matching
-    if (this.userRole === 'globalsuperadmin') {
+    if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
       this.userRole = 'superadmin';
     }
   } else {
     // Fallback to old system
     this.userData = JSON.parse(localStorage.getItem('data') || '{}');
     this.userRole = this.userData.userRole || '';
+    // Also handle the mapping in the fallback
+    if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
+      this.userRole = 'superadmin';
+    }
   }
  }
   public expandSubMenus(menu: MenuItem): void {
@@ -69,11 +94,15 @@ export class SidebarComponent {
     if (currentRole) {
       userRole = currentRole.roleName.toLowerCase();
       // Map GlobalSuperAdmin to superadmin for sidebar menu matching
-      if (userRole === 'globalsuperadmin') {
+      if (userRole === 'globalsuperadmin' || userRole === 'global super administrator') {
         userRole = 'superadmin';
       }
     } else {
       userRole = JSON.parse(localStorage.getItem('data') || '{}').userRole || '';
+      // Also handle the mapping in the fallback
+      if (userRole === 'globalsuperadmin' || userRole === 'global super administrator') {
+        userRole = 'superadmin';
+      }
     }
     
     console.log('Current user role:', userRole);
@@ -130,6 +159,11 @@ export class SidebarComponent {
         return true;
       })
     }));
+  }
+
+  public refreshSidebar(): void {
+    this.getUserRole();
+    this.sidebarData = this.getFilteredSidebarData();
   }
 
 }
