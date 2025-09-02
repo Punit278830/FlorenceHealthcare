@@ -115,6 +115,10 @@ export class RoleAuthorizationService {
     return this.http.get(`${api_Url}RoleMaster/GetRolesByHospital/${hospitalId}`);
   }
 
+  getAllRoles(): Observable<UserRole[]> {
+    return this.http.get(`${api_Url}RoleMaster`);
+  }
+
   clearRole(): void {
     this.currentUserRoleSubject.next(null);
     this.currentPermissionsSubject.next(null);

@@ -81,12 +81,12 @@ export class AddStaffComponent implements OnInit {
     console.log("Loading all roles from master table...");
     
     this.roleService.getAllRoles().subscribe({
-      next: (roles) => {
+      next: (roles: any[]) => {
         this.roles = roles;
         this.isLoadingRoles = false;
         console.log("All roles loaded:", roles);
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading roles:', error);
         this.isLoadingRoles = false;
         this.toster.error('Failed to load roles');
