@@ -18,6 +18,7 @@ import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 import dayjs from 'dayjs';
+import { TimezoneService } from 'src/app/timezone.service';
 
 
 
@@ -34,15 +35,17 @@ interface data {
 })
 
 export class InvoicesComponent implements OnInit {
+  userTimeZone = 'UTC';
   public routes = routes;
   public selectedValue !: string;
   public invoices: any[] = [];
     public loggedIn: any;
 
+
   dataSource!: MatTableDataSource<Iinvoice>;
   
   invoiceId: InvoiceInfoResponse[] = [];           // Full list from API
-filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
+ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   public showFilter = false;
   public searchDataValue = '';
@@ -90,10 +93,14 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private modalservice: ModalServiceService,
-    private toaster: ToastrService  ) {
+    private toaster: ToastrService ,
+   private tzService: TimezoneService) {
 
   }
+  
   ngOnInit() {
+    this.userTimeZone = this.tzService.getUserTimeZone();
+    console.log('Detected time zone:', this.userTimeZone);
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
 
     const today = new Date();

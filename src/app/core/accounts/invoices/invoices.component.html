@@ -41,9 +41,11 @@
                       </div>
                       <div class="d-flex align-items-center ms-2">
                         <a href="javascript:;" (click)="exportInvoiceList()" class=" me-2"><img
-                            src="assets/img/icons/pdf-icon-03.svg" alt="" style="height: 24px;width: 24px;object-fit: contain;vertical-align: middle;"></a>
+                            src="assets/img/icons/pdf-icon-03.svg" alt=""
+                            style="height: 24px;width: 24px;object-fit: contain;vertical-align: middle;"></a>
                         <a href="javascript:;" (click)="exportInvoiceListAsPdf()" class=" me-2"><img
-                            src="assets/img/icons/pdf-icon-01.svg" alt="" style="height: 24px;width: 24px;object-fit: contain;vertical-align: middle;"></a>
+                            src="assets/img/icons/pdf-icon-01.svg" alt=""
+                            style="height: 24px;width: 24px;object-fit: contain;vertical-align: middle;"></a>
                       </div>
                     </div>
                   </div>
@@ -113,8 +115,7 @@
 
 
                   <div class="doctor-submit mt-3">
-                    <button type="submit" class="btn btn-primary submit-list-form" 
-                            (click)="searchInvoices($event)">
+                    <button type="submit" class="btn btn-primary submit-list-form" (click)="searchInvoices($event)">
                       Search
                     </button>
                   </div>
@@ -141,7 +142,7 @@
                   <div class="row">
                     <!-- Paid Amount Tile -->
                     <div class="col-md-6 mb-3">
-                      <div class="card border-0 shadow-lg "style="background-color: #E0F8F8;">
+                      <div class="card border-0 shadow-lg " style="background-color: #E0F8F8;">
                         <div class="card-body py-2 px-3">
                           <h6 class="mb-1" style="font-weight: bold;">Total Paid Amount</h6>
                           <p class="mb-0 fw-semibold" style="font-size: 1rem bold;">
@@ -153,7 +154,7 @@
 
                     <!-- Unpaid Amount Tile -->
                     <div class="col-md-6 mb-3">
-                      <div class="card border-0 shadow-lg "style="background-color:#FFD9E6;">
+                      <div class="card border-0 shadow-lg " style="background-color:#FFD9E6;">
                         <div class="card-body py-2 px-3">
                           <h6 class="mb-1" style="font-weight: bold;">Total Unpaid Amount</h6>
                           <p class="mb-0 fw-semibold" style="font-size: 1rem bold;">
@@ -197,9 +198,9 @@
                     <td><button
                         [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>
-                  <td>
-                    {{ formatPaymentDate(data.paymentDetails) }}
-                  </td>
+                    <td>
+                      {{ (data.paymentDetails?.[0]?.paymentDate + 'Z') | date:'dd-MM-yyyy, h:mm a':userTimeZone }}
+                    </td>
 
 
                     <td class="text-end">
