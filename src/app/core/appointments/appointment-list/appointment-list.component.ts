@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
@@ -11,12 +11,13 @@ import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin, AppointmentSearchCriteria, AppointmentInfoResponse, AppointmentStatus, SortDirection } from 'src/app/shared/models/models';
@@ -35,7 +36,7 @@ dayjs.extend(timezone);
   providers: [DatePipe],
 
 })
-export class AppointmentListComponent implements OnInit {
+export class AppointmentListComponent implements OnInit, OnDestroy {
   public routes = routes;
   public patientsList: Array<Iappointment> = [];
   dataSource!: MatTableDataSource<Iappointment>;
@@ -73,6 +74,7 @@ export class AppointmentListComponent implements OnInit {
   };
   public searchResults: AppointmentInfoResponse[] = [];
   public usePaginatedSearch = true; // Toggle between old and new search
+  private hospitalSubscription: Subscription = new Subscription();
 
   constructor(public data: DataService, private appointmentService: AppointmentService,
     private departmentService: DepartmentService,
@@ -84,13 +86,36 @@ export class AppointmentListComponent implements OnInit {
     private fb: FormBuilder,
     private toastr: ToastrService,
     private modalservice: ModalServiceService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private hospitalService: HospitalService
   ) {
 
   }
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initializeAppointDateForm();
+    
+    // Load initial data
+    this.loadAppointmentData();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        console.log('Hospital changed to:', hospitalId);
+        // Reset pagination and reload data
+        this.searchCriteria.pageNumber = 1;
+        this.pageIndex = 0;
+        this.currentPage = 1;
+        this.loadAppointmentData();
+      }
+    });
+  }
+  
+  ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
+  }
+  
+  private loadAppointmentData() {
     // Use new paginated search instead of fetchCombineData
     if (this.usePaginatedSearch) {
       this.fetchPaginatedAppointments();

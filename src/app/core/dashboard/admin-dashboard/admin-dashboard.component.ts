@@ -1,4 +1,4 @@
-import { Component, ViewChild,OnInit } from '@angular/core';
+import { Component, ViewChild,OnInit, OnDestroy } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import {
   ApexAxisChartSeries,
@@ -21,9 +21,10 @@ import { AuthService } from 'src/app/shared/auth/auth.service';
 import { InvoiceService } from 'src/app/shared/Services/invoice/invoice.service';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { Router } from '@angular/router';
 export type ChartOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -61,7 +62,7 @@ interface data {
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue ! : string  ;
   
@@ -83,6 +84,7 @@ export class AdminDashboardComponent implements OnInit {
   public invoices:any[] =[];
   public patientCountByGender: any[]=[];
  public appCount = 0; // for dashboard appointments count
+ private hospitalSubscription: Subscription = new Subscription();
 
 
   constructor(public data : DataService,
@@ -91,7 +93,9 @@ export class AdminDashboardComponent implements OnInit {
   private patientService:PatientService,
   private invoiceService:InvoiceService,
 private staffService:StaffService,
-private departmentService:DepartmentService,private route : Router) 
+private departmentService:DepartmentService,
+private hospitalService: HospitalService,
+private route : Router) 
 {
     this.chartOptionsOne = {
       chart: {
@@ -183,19 +187,34 @@ private departmentService:DepartmentService,private route : Router)
     this.getGreetingMsg();
     const data=JSON.parse(localStorage.getItem('data')||'')
   this.userName=data.fname +" "+data.lname;
-  this.appointmentCount();
-this.patientCountToday();
-  //this.totalEarning();
-  this.totalAmounts();
-  this.loadRecentPatients();
-      // this.loadUpcomingAppointments();
-      this.fetchCombineData()
-      this.currentYear = new Date().getFullYear(); // Get the current year
-      this.generateRecentYears();
-      
-      this.getPatientCountByGender();
-      this.getPatientCountByDepartment();
-      
+  
+  // Load initial data
+  this.loadDashboardData();
+  
+  // Subscribe to hospital changes
+  this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+    if (hospitalId) {
+      console.log('Hospital changed to:', hospitalId);
+      this.loadDashboardData();
+    }
+  });
+  
+  this.currentYear = new Date().getFullYear(); // Get the current year
+  this.generateRecentYears();
+  }
+  
+  public ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
+  }
+  
+  private loadDashboardData() {
+    this.appointmentCount();
+    this.patientCountToday();
+    this.totalAmounts();
+    this.loadRecentPatients();
+    this.fetchCombineData();
+    this.getPatientCountByGender();
+    this.getPatientCountByDepartment();
   }
   
   
