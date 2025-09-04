@@ -106,30 +106,25 @@
                 tabindex="0"><img src="assets/img/icons/note-icon-01.svg" alt=""><span class="pulse"></span> </a>
         </li>
         
-        <!-- Hospital Selector - Enhanced with proper styling -->
-        <li class="nav-item dropdown d-none d-sm-block" *ngIf="canAccessAllHospitals()">
+        <!-- Hospital Selector -->
+        <li class="nav-item dropdown d-none d-sm-block">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link hospital-switcher" data-bs-toggle="dropdown">
-                <i class="fas fa-hospital me-2"></i>
+                <img src="assets/img/icons/hospital-icon.svg" alt="" style="width: 16px; height: 16px; margin-right: 5px;">
                 <span class="hospital-name">{{ currentHospitalName || 'Select Hospital' }}</span>
-                <i class="fas fa-chevron-down ms-2"></i>
             </a>
             <div class="dropdown-menu hospital-dropdown">
                 <div class="dropdown-header">
-                    <i class="fas fa-exchange-alt me-2"></i>
-                    <span>Switch Hospital ({{ hospitals.length }} available)</span>
+                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
+                    <span>Switch Hospital</span>
                 </div>
                 <div class="dropdown-divider"></div>
-                <div *ngIf="hospitals.length === 0" class="dropdown-item-text text-muted">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    No hospitals available or loading...
-                </div>
                 <a *ngFor="let hospital of hospitals" 
                    class="dropdown-item hospital-item" 
                    (click)="selectHospital(hospital)"
                    [class.active]="hospital.hospitalId === currentHospitalId">
-                    <i class="fas fa-hospital me-2"></i>
+                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
                     <span class="hospital-text">{{ hospital.name }}</span>
-                    <i *ngIf="hospital.hospitalId === currentHospitalId" class="fas fa-check ms-auto text-success"></i>
+                    <i *ngIf="hospital.hospitalId === currentHospitalId" class="fas fa-check"></i>
                 </a>
             </div>
         </li>

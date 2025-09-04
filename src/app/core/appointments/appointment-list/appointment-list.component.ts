@@ -19,7 +19,7 @@ import { PatientService } from 'src/app/shared/Services/patient/patient.service'
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
-import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin } from 'src/app/shared/models/models';
+import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin, AppointmentSearchCriteria, AppointmentInfoResponse, AppointmentStatus, SortDirection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
@@ -66,6 +66,14 @@ export class AppointmentListComponent implements OnInit {
   public minToDateValue: Date | null = dayjs().tz('Asia/Kolkata').toDate();
   isAllowed: boolean = false; // Patient click Not allowed for receptionist
 
+  // Search properties
+  public searchCriteria: AppointmentSearchCriteria = {
+    pageNumber: 1,
+    pageSize: 50
+  };
+  public searchResults: AppointmentInfoResponse[] = [];
+  public usePaginatedSearch = true; // Toggle between old and new search
+
   constructor(public data: DataService, private appointmentService: AppointmentService,
     private departmentService: DepartmentService,
     private staffService: StaffService,
@@ -83,8 +91,12 @@ export class AppointmentListComponent implements OnInit {
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initializeAppointDateForm();
-    // this.getTableData();
-    this.fetchCombineData();
+    // Use new paginated search instead of fetchCombineData
+    if (this.usePaginatedSearch) {
+      this.fetchPaginatedAppointments();
+    } else {
+      this.fetchCombineData();
+    }
   }
 
   // initilizeAppointDateForm() {
@@ -168,7 +180,13 @@ export class AppointmentListComponent implements OnInit {
     this.currentPage = 1;
     this.pageIndex = 0;
     this.combinedData = []; // Clear existing data to force refetch
-    this.fetchCombineData();
+    
+    // Use appropriate method based on settings
+    if (this.usePaginatedSearch) {
+      this.fetchPaginatedAppointments();
+    } else {
+      this.fetchCombineData();
+    }
   }
 
   // Apply pagination to the current data (either combinedData or filtered data)
@@ -375,7 +393,14 @@ export class AppointmentListComponent implements OnInit {
     this.currentPage = pageNumber;
     this.pageIndex = pageNumber - 1;
     this.skip = this.pageSize * this.pageIndex;
-    this.applyPagination();
+    
+    if (this.usePaginatedSearch) {
+      // For paginated search, fetch new data from server
+      this.fetchPaginatedAppointments();
+    } else {
+      // For old method, apply client-side pagination
+      this.applyPagination();
+    }
   }
 
   public PageSize(): void {
@@ -383,7 +408,14 @@ export class AppointmentListComponent implements OnInit {
     this.skip = 0;
     this.currentPage = 1;
     this.pageIndex = 0;
-    this.applyPagination();
+    
+    if (this.usePaginatedSearch) {
+      // For paginated search, fetch new data from server
+      this.fetchPaginatedAppointments();
+    } else {
+      // For old method, apply client-side pagination
+      this.applyPagination();
+    }
   }
 
   private calculateTotalPages(totalData: number, pageSize: number): void {
@@ -474,7 +506,13 @@ export class AppointmentListComponent implements OnInit {
         this.currentPage = 1;
         this.pageIndex = 0;
         this.combinedData = []; // Clear existing data to force refetch
-        this.fetchCombineData();
+        
+        // Use appropriate method based on settings
+        if (this.usePaginatedSearch) {
+          this.fetchPaginatedAppointments();
+        } else {
+          this.fetchCombineData();
+        }
     }
   }
 
@@ -586,4 +624,93 @@ export class AppointmentListComponent implements OnInit {
     return datePart;
   }
 
+  // New paginated search method
+  fetchPaginatedAppointments() {
+    this.loadingService.showLoader();
+    
+    // Set date filters from form
+    let from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
+    let to = this.appintmentDateForm.get('appointmentTo')?.value || null;
+
+    // Convert Date objects to proper format for API
+    if (from instanceof Date) {
+      from = dayjs(from).format('YYYY-MM-DD');
+    }
+    if (to instanceof Date) {
+      to = dayjs(to).format('YYYY-MM-DD');
+    }
+
+    // Update search criteria
+    this.searchCriteria.fromDate = from;
+    this.searchCriteria.toDate = to;
+    this.searchCriteria.pageNumber = this.currentPage;
+    this.searchCriteria.pageSize = this.pageSize;
+
+    // Remove automatic doctor filtering - only use date range
+    // this.searchCriteria.doctorId will remain undefined/null
+
+    console.log('Fetching paginated appointments with criteria:', this.searchCriteria);
+
+    this.appointmentService.searchAppointments(this.searchCriteria).subscribe({
+      next: (response) => {
+        console.log('Paginated search response:', response);
+        this.loadingService.hideLoader();
+        
+        if (response.hasError) {
+          this.toastr.error(response.errorMessage || 'Error fetching appointments');
+          this.searchResults = [];
+          this.totalData = 0;
+        } else {
+          this.searchResults = response.results || [];
+          this.totalData = response.totalCount || 0;
+          this.totalPages = response.totalPages || 0;
+          
+          // Transform the search results to match the existing template format
+          this.appointmentList = this.searchResults.map(appointment => ({
+            id: appointment.id,
+            patientId: appointment.patientId,
+            doctorId: appointment.doctorId,
+            date: appointment.date,
+            notes: appointment.notes,
+            appointmentStatus: appointment.appointmentStatus,
+            fee: 0, // Fee not available in new response
+            appointTime: appointment.time,
+            patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
+            patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
+            doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
+            doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
+            displayName: appointment.hospitalName,
+            departmentName: 'General', // Default department for now
+            departmentid: 1, // Default department ID
+            isConsultationPaid: false // Default to false for now
+          }));
+          
+          if (this.appointmentList.length === 0) {
+            this.toastr.info('No appointments found for the selected criteria');
+          }
+        }
+        
+        // Update pagination
+        this.calculateTotalPages(this.totalData, this.pageSize);
+        this.serialNumberArray = [];
+        
+        // Generate serial numbers for current page
+        const startIndex = (this.currentPage - 1) * this.pageSize;
+        for (let i = 0; i < this.appointmentList.length; i++) {
+          this.serialNumberArray.push(startIndex + i + 1);
+        }
+        
+        // Update data source for the table
+        this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
+      },
+      error: (error) => {
+        console.error('Error fetching paginated appointments:', error);
+        this.loadingService.hideLoader();
+        this.toastr.error('Error fetching appointments');
+        this.searchResults = [];
+        this.totalData = 0;
+        this.calculateTotalPages(this.totalData, this.pageSize);
+      }
+    });
+  }
 }

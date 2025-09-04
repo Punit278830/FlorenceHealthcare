@@ -794,3 +794,49 @@ export interface InvoiceSearch extends SearchCriteriaBase {
   paymentStatus?: PaymentStatus;
   paymentMode?: PaymentMode;
 }
+
+export interface AppointmentSearchCriteria {
+  fromDate?: string;
+  toDate?: string;
+  appointmentStatus?: AppointmentStatus;
+  doctorId?: number;
+  patientName?: string;
+  searchTerm?: string;
+  sortFieldName?: string;
+  sortDirection?: SortDirection;
+  pageNumber: number;
+  pageSize: number;
+}
+
+export interface AppointmentInfoResponse {
+  id: number;
+  patientId: number;
+  patientName: string;
+  patientMobile: string;
+  doctorId: number;
+  doctorName: string;
+  date: Date;
+  time: string;
+  appointmentStatus: string;
+  reason?: string;
+  notes?: string;
+  hospitalId: number;
+  hospitalName: string;
+  createdDate?: Date;
+  gender: string;
+  dob?: Date;
+  age?: number;
+}
+
+export enum AppointmentStatus {
+  All = 0,
+  Active = 1,
+  Completed = 2,
+  Cancelled = 3,
+  NoShow = 4
+}
+
+export enum SortDirection {
+  Ascending = 0,
+  Descending = 1
+}
