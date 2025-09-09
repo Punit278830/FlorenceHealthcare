@@ -24,29 +24,37 @@ namespace hospitalApiProject.Controllers
     [HttpGet("PatientCountByDepartment")]
     public async Task<ActionResult<DepartmentInfo>> GetpatientCountByDepartment()
     {
-      var today = DateTime.Today;
-      var hospitalId = GetHospitalIdFromHeader();
+        try
+        {
+            var today = DateTime.Today;
+            var hospitalId = await GetHospitalIdForFilteringAsync();
 
-      var result = await _context.AppointmentInfos
-          .Where(a => a.Date.Date == today && (hospitalId == null || a.HospitalId == hospitalId))
-          .GroupBy(a => a.Departmentid)
-          .Select(g => new
-          {
-            DepartmentName = _context.DepartmentInfos
-                  .Where(d => d.DepartmentId == g.Key && (hospitalId == null || d.HospitalId == hospitalId))
-                  .Select(d => d.DepartmentName)
-                  .FirstOrDefault(),
-            DisplayName = _context.DepartmentInfos
+            var result = await _context.AppointmentInfos
+                .Where(a => a.Date.Date == today && (hospitalId == null || a.HospitalId == hospitalId))
+                .GroupBy(a => a.Departmentid)
+                .Select(g => new
+                {
+                    DepartmentName = _context.DepartmentInfos
+                        .Where(d => d.DepartmentId == g.Key)
+                        .Select(d => d.DepartmentName)
+                        .FirstOrDefault(),
+                    DisplayName = _context.DepartmentInfos
+                        .Where(d => d.DepartmentId == g.Key)
+                        .Select(d => d.DisplayName)
+                        .FirstOrDefault(),
+                    PatientCount = g.Select(a => a.PatientId).Distinct().Count()
+                })
+                .ToListAsync();
 
-                  .Where(d => d.DepartmentId == g.Key && (hospitalId == null || d.HospitalId == hospitalId))
-                  .Select(d => d.DisplayName)
-                  .FirstOrDefault(),
-            PatientCount = g.Select(a => a.PatientId).Distinct().Count()
-          })
-          .ToListAsync();
-
-      return Ok(result);
-
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in GetpatientCountByDepartment: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            
+            return StatusCode(500, new { message = "Error retrieving patient count by department", error = ex.Message });
+        }
     }
 
 
@@ -60,28 +68,48 @@ namespace hospitalApiProject.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<DepartmentInfo>>> GetDepartmentInfos()
         {
-            var hospitalId = GetHospitalIdFromHeader();
-            var query = _context.DepartmentInfos.AsQueryable();
-            // if (hospitalId != null)
-            // {
-            //     query = query.Where(p => p.HospitalId == hospitalId);
-            // }
-            return await query.OrderByDescending(p=>p.DepartmentId).ToListAsync();
+            try
+            {
+                // Return all departments - not filtered by hospital
+                var departments = await _context.DepartmentInfos
+                    .OrderByDescending(p => p.DepartmentId)
+                    .ToListAsync();
+                
+                return Ok(departments);
+            }
+            catch (Exception ex)
+            {
+                // Log the specific error for debugging
+                Console.WriteLine($"Error in GetDepartmentInfos: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new { message = "Error retrieving departments", error = ex.Message });
+            }
         }
 
         // GET: api/DepartmentInfoes/5
         [HttpGet("{id}")]
         public async Task<ActionResult<DepartmentInfo>> GetDepartmentInfo(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
-            var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId));
-
-            if (departmentInfo == null)
+            try
             {
-                return NotFound();
-            }
+                // Get department by ID only - not filtered by hospital
+                var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id);
 
-            return departmentInfo;
+                if (departmentInfo == null)
+                {
+                    return NotFound();
+                }
+
+                return departmentInfo;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in GetDepartmentInfo: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new { message = "Error retrieving department", error = ex.Message });
+            }
         }
 
         // PUT: api/DepartmentInfoes/5
@@ -89,40 +117,47 @@ namespace hospitalApiProject.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutDepartmentInfo(int id, DepartmentInfo departmentInfo)
         {
-            if (id != departmentInfo.DepartmentId)
-            {
-                return BadRequest();
-            }
-
-            // Ensure DisplayName is properly handled (can be null or empty)
-            if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
-            {
-                departmentInfo.DisplayName = null;
-            }
-
-            // Tag with HospitalId if provided in header
-            var hospitalId = GetHospitalIdFromHeader();
-            if (hospitalId != null) departmentInfo.HospitalId = hospitalId;
-
-            _context.Entry(departmentInfo).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!DepartmentInfoExists(id))
+                if (id != departmentInfo.DepartmentId)
                 {
-                    return NotFound();
+                    return BadRequest();
                 }
-                else
-                {
-                    throw;
-                }
-            }
 
-            return NoContent();
+                // Ensure DisplayName is properly handled (can be null or empty)
+                if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
+                {
+                    departmentInfo.DisplayName = null;
+                }
+
+                // Don't set hospital ID - departments are not tied to hospitals
+                _context.Entry(departmentInfo).State = EntityState.Modified;
+
+                try
+                {
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!DepartmentInfoExists(id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in PutDepartmentInfo: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new { message = "Error updating department", error = ex.Message });
+            }
         }
 
         // POST: api/DepartmentInfoes
@@ -130,20 +165,27 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<DepartmentInfo>> PostDepartmentInfo(DepartmentInfo departmentInfo)
         {
-            // Ensure DisplayName is properly handled (can be null or empty)
-            if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
+            try
             {
-                departmentInfo.DisplayName = null;
+                // Ensure DisplayName is properly handled (can be null or empty)
+                if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
+                {
+                    departmentInfo.DisplayName = null;
+                }
+
+                // Don't set hospital ID - departments are not tied to hospitals
+                _context.DepartmentInfos.Add(departmentInfo);
+                await _context.SaveChangesAsync();
+
+                return CreatedAtAction("GetDepartmentInfo", new { id = departmentInfo.DepartmentId }, departmentInfo);
             }
-
-            // Tag with HospitalId if provided in header
-            var hospitalId = GetHospitalIdFromHeader();
-            departmentInfo.HospitalId = hospitalId;
-
-            _context.DepartmentInfos.Add(departmentInfo);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetDepartmentInfo", new { id = departmentInfo.DepartmentId }, departmentInfo);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in PostDepartmentInfo: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new { message = "Error creating department", error = ex.Message });
+            }
         }
                 
 
@@ -151,22 +193,40 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDepartmentInfo(int id)
         {
-            var hospitalId = GetHospitalIdFromHeader();
-            var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId));
-            if (departmentInfo == null)
+            try
             {
-                return NotFound();
+                // Find department by ID only - not filtered by hospital
+                var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id);
+                if (departmentInfo == null)
+                {
+                    return NotFound();
+                }
+
+                _context.DepartmentInfos.Remove(departmentInfo);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.DepartmentInfos.Remove(departmentInfo);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in DeleteDepartmentInfo: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                
+                return StatusCode(500, new { message = "Error deleting department", error = ex.Message });
+            }
         }
 
         private bool DepartmentInfoExists(int id)
         {
-            return _context.DepartmentInfos.Any(e => e.DepartmentId == id);
+            try
+            {
+                return _context.DepartmentInfos.Any(e => e.DepartmentId == id);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in DepartmentInfoExists: {ex.Message}");
+                return false; // Return false if there's an error checking existence
+            }
         }
     }
 }

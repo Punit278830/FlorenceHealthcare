@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, map } from 'rxjs';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
 
@@ -67,11 +67,11 @@ export class RoleAuthorizationService {
     const roleName = role.roleName.toLowerCase();
     
     return {
-      canAccessHospitalManagement: roleName === 'superadmin',
-      canAccessAllHospitals: roleName === 'superadmin',
-      canManageStaff: roleName === 'superadmin' || roleName === 'admin',
-      canViewReports: roleName === 'superadmin' || roleName === 'admin',
-      isSuperAdmin: roleName === 'superadmin',
+      canAccessHospitalManagement: roleName === 'superadmin' || roleName === 'globalsuperadmin',
+      canAccessAllHospitals: roleName === 'superadmin' || roleName === 'globalsuperadmin',
+      canManageStaff: roleName === 'superadmin' || roleName === 'globalsuperadmin' || roleName === 'admin',
+      canViewReports: roleName === 'superadmin' || roleName === 'globalsuperadmin' || roleName === 'admin',
+      isSuperAdmin: roleName === 'superadmin' || roleName === 'globalsuperadmin',
       isAdmin: roleName === 'admin',
       isReceptionist: roleName === 'receptionist',
       isNurse: roleName === 'nurse',
@@ -115,11 +115,24 @@ export class RoleAuthorizationService {
     return this.http.get(`${api_Url}RoleMaster/GetRolesByHospital/${hospitalId}`);
   }
 
+  getAllRoles(): Observable<UserRole[]> {
+    return this.http.get(`${api_Url}RoleMaster`);
+  }
+
   clearRole(): void {
     this.currentUserRoleSubject.next(null);
     this.currentPermissionsSubject.next(null);
     localStorage.removeItem('userRole');
     localStorage.removeItem('userRoleData');
     localStorage.removeItem('userPermissions');
+  }
+
+  refreshUserRole(staffId: number): Observable<UserRole> {
+    return this.getUserRoleByStaffId(staffId).pipe(
+      map((role: UserRole) => {
+        this.setUserRole(role);
+        return role;
+      })
+    );
   }
 }

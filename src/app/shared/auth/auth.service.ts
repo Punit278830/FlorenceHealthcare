@@ -47,6 +47,9 @@ export class AuthService {
           localStorage.setItem('currentHospitalId', '1');
         }
         
+        // Store staff ID for Super Admin detection in API calls
+        localStorage.setItem('currentStaffId', data.staffId.toString());
+        
         const logingData=JSON.stringify(this.authentication)
         this.userRole=data.designation;
 
@@ -64,6 +67,7 @@ export class AuthService {
             // Update localStorage with the correct role
             const updatedLoginData = JSON.stringify(this.authentication);
             localStorage.setItem('data', updatedLoginData);
+            localStorage.setItem('authenticated', 'true');
           },
           error: (error) => {
             console.warn('Could not fetch user role, using default permissions:', error);
@@ -77,6 +81,7 @@ export class AuthService {
               isActive: true
             };
             this.roleService.setUserRole(defaultRole);
+            localStorage.setItem('authenticated', 'true');
           }
         });
 

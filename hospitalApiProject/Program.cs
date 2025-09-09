@@ -43,6 +43,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddTransient<IPatientInfoService, PatientInfoService>();
 builder.Services.AddScoped<IFhirBundleService, FhirBundleService>();
 builder.Services.AddTransient<FideliusEncryption>();
+builder.Services.AddScoped<ISuperAdminService, SuperAdminService>();
 
 var app = builder.Build();
 
@@ -63,6 +64,8 @@ else
 
 app.UseHttpsRedirection();
 app.UseRouting();
+// Note: Authentication would go here if implemented
+// app.UseAuthentication();
 app.UseAuthorization();
 
 
@@ -87,9 +90,6 @@ app.Use(async (context, next) =>
 });
 
 // Map controllers and additional endpoints
-app.UseEndpoints(endpoints =>
-{
-  endpoints.MapControllers();
-});
+app.MapControllers();
 
 app.Run();

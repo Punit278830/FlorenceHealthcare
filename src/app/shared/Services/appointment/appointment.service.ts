@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 //import { api_Url } from 'src/environment/environment';
 import { api_Url } from '../../../../environment/environment';
-import { Iappointment, IstaffInfo } from '../../models/models';
+import { Iappointment, IstaffInfo, AppointmentSearchCriteria, AppointmentInfoResponse, SearchResponseBase } from '../../models/models';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 @Injectable({
@@ -89,5 +89,14 @@ export class AppointmentService {
 
    }
 
+   searchAppointments(criteria: AppointmentSearchCriteria): Observable<SearchResponseBase<AppointmentInfoResponse>> {
+      console.log('AppointmentService.searchAppointments called with criteria:', criteria);
+      console.log('API URL:', `${this.apiUrl}AppointmentInfoes/Search`);
+      
+      return this._http.post(
+         `${this.apiUrl}AppointmentInfoes/Search`,
+         criteria
+      ) as unknown as Observable<SearchResponseBase<AppointmentInfoResponse>>;
+   }
 
 }

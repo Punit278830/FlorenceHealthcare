@@ -20,8 +20,7 @@ namespace hospitalApiProject.Models
         [MaxLength(255)]
         public string? RoleDescription { get; set; }
 
-        [Required]
-        public int HospitalId { get; set; }
+        public int? HospitalId { get; set; }
 
         public bool IsActive { get; set; } = true;
 

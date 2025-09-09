@@ -36,12 +36,41 @@
                         </div>
                         <div class="row custom-invoice">
                             <div class="col-12 col-md-6 m-b-20 part-one">
-                                <img src="assets/img/Mediscycro.jpeg" width="35" height="35" alt=""> <span>Medisyncro</span>
-                                <ul class="list-unstyled invoice-clinic mt-2">
-                                    <li>Kheri Road, Kheri</li>
-                                    <li>Lakhimpur Kheri-262701</li>
-                                    <li>Near By Don Bosco School</li>
-                                </ul>
+                                <!-- Hospital Details Section -->
+                                <div *ngIf="hospitalDetails; else defaultHospital">
+                                    <img src="assets/img/Mediscycro.jpeg" width="35" height="35" alt=""> 
+                                    <span><strong>{{hospitalDetails.name}}</strong></span>
+                                    <ul class="list-unstyled invoice-clinic mt-2">
+                                        <!-- Complete Address Display -->
+                                        <li *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2 || hospitalDetails.city || hospitalDetails.state || hospitalDetails.pincode">
+                                            <strong>Address:</strong>
+                                            <div class="ms-2">
+                                                <span *ngIf="hospitalDetails.addressLine1">{{hospitalDetails.addressLine1}}</span>
+                                                <span *ngIf="hospitalDetails.addressLine2 && hospitalDetails.addressLine1">, </span>
+                                                <span *ngIf="hospitalDetails.addressLine2">{{hospitalDetails.addressLine2}}</span>
+                                                <br *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2">
+                                                <span *ngIf="hospitalDetails.city">{{hospitalDetails.city}}</span>
+                                                <span *ngIf="hospitalDetails.state && hospitalDetails.city">, </span>
+                                                <span *ngIf="hospitalDetails.state">{{hospitalDetails.state}}</span>
+                                                <span *ngIf="hospitalDetails.pincode"> - {{hospitalDetails.pincode}}</span>
+                                                <span *ngIf="hospitalDetails.country">, {{hospitalDetails.country}}</span>
+                                            </div>
+                                        </li>
+                                        <li *ngIf="hospitalDetails.contactNumber"><strong>Phone:</strong> {{hospitalDetails.contactNumber}}</li>
+                                        <li *ngIf="hospitalDetails.email"><strong>Email:</strong> {{hospitalDetails.email}}</li>
+                                        <li *ngIf="hospitalDetails.gstin"><strong>GSTIN:</strong> {{hospitalDetails.gstin}}</li>
+                                        <li *ngIf="hospitalDetails.licenseNumber"><strong>License:</strong> {{hospitalDetails.licenseNumber}}</li>
+                                    </ul>
+                                </div>
+                                <ng-template #defaultHospital>
+                                    <img src="assets/img/Mediscycro.jpeg" width="35" height="35" alt=""> 
+                                    <span>Medisyncro</span>
+                                    <ul class="list-unstyled invoice-clinic mt-2">
+                                        <li>Kheri Road, Kheri</li>
+                                        <li>Lakhimpur Kheri-262701</li>
+                                        <li>Near By Don Bosco School</li>
+                                    </ul>
+                                </ng-template>
                             </div>
                             <div class="col-12 col-md-6 m-b-20 part-two">
                                 <div class="invoice-details">
@@ -250,10 +279,44 @@
 
 <div *ngIf="thermalvisible" #printview [ngClass]="[classes.printAreaContainer, classes.fontMono,'arial-font']"
     [ngStyle]="{ width: width }">
-    <div [ngClass]="classes.textCenter"><strong>Medisyncro RMEE2225901</strong></div>
-    <div [ngClass]="classes.textCenter"><strong>Kheri Road, Near Don Bosco School Lakhimpur Kheri UP - 262701</strong>
+    <!-- Hospital Details for Print -->
+    <div *ngIf="hospitalDetails; else defaultPrintHospital">
+        <div [ngClass]="classes.textCenter"><strong>{{hospitalDetails.name}}</strong></div>
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.licenseNumber">
+            <strong>License: {{hospitalDetails.licenseNumber}}</strong>
+        </div>
+        <!-- Complete Address for Print -->
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2 || hospitalDetails.city || hospitalDetails.state || hospitalDetails.pincode">
+            <strong>
+                <span *ngIf="hospitalDetails.addressLine1">{{hospitalDetails.addressLine1}}</span>
+                <span *ngIf="hospitalDetails.addressLine2 && hospitalDetails.addressLine1">, </span>
+                <span *ngIf="hospitalDetails.addressLine2">{{hospitalDetails.addressLine2}}</span>
+            </strong>
+        </div>
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.city || hospitalDetails.state || hospitalDetails.pincode">
+            <strong>
+                <span *ngIf="hospitalDetails.city">{{hospitalDetails.city}}</span>
+                <span *ngIf="hospitalDetails.state && hospitalDetails.city">, </span>
+                <span *ngIf="hospitalDetails.state">{{hospitalDetails.state}}</span>
+                <span *ngIf="hospitalDetails.pincode"> - {{hospitalDetails.pincode}}</span>
+                <span *ngIf="hospitalDetails.country">, {{hospitalDetails.country}}</span>
+            </strong>
+        </div>
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.contactNumber">
+            <strong>Ph.No: {{hospitalDetails.contactNumber}}</strong>
+        </div>
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.email">
+            <strong>Email: {{hospitalDetails.email}}</strong>
+        </div>
+        <div [ngClass]="classes.textCenter" *ngIf="hospitalDetails.gstin">
+            <strong>GSTIN: {{hospitalDetails.gstin}}</strong>
+        </div>
     </div>
-    <div [ngClass]="classes.textCenter"><strong>Ph.No:6388803534</strong></div>
+    <ng-template #defaultPrintHospital>
+        <div [ngClass]="classes.textCenter"><strong>Medisyncro RMEE2225901</strong></div>
+        <div [ngClass]="classes.textCenter"><strong>Kheri Road, Near Don Bosco School Lakhimpur Kheri UP - 262701</strong></div>
+        <div [ngClass]="classes.textCenter"><strong>Ph.No:6388803534</strong></div>
+    </ng-template>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
 
     <div [ngClass]="classes.textCenter"><strong>Receipt / Invoice / Bill</strong> </div>

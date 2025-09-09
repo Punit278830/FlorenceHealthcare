@@ -6,6 +6,7 @@ import { AuthService } from 'src/app/shared/auth/auth.service';
 import { IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
+import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 
 @Component({
   selector: 'app-login',
@@ -31,7 +32,8 @@ export class LoginComponent implements OnInit {
   constructor(public auth: AuthService, 
     private router: Router,
     private toaster: ToastrService,
-    private loadingService: LoadingService) {}
+    private loadingService: LoadingService,
+    private roleService: RoleAuthorizationService) {}
 
   ngOnInit(): void {
     if (localStorage.getItem('authenticated')) {
@@ -47,17 +49,32 @@ export class LoginComponent implements OnInit {
 
       this.auth.login(email, password).subscribe(
         (staffInfo: IstaffInfo) => {
-          // Login successful, navigate based on user role and status
           this.loadingService.hideLoader();
-          if (staffInfo.designation.toLowerCase() === 'admin' && staffInfo.activeStatus === 1) {
-            this.router.navigate([routes.adminDashboard]);
-          } else if (staffInfo.designation.toLowerCase() === 'doctor' && staffInfo.activeStatus === 1) {
-            this.router.navigate([routes.doctorDashboard]);
-          } else if (staffInfo.designation.toLowerCase() === 'reception' && staffInfo.activeStatus === 1) {
-            this.router.navigate([routes.appointmentList]);
-          } else if (staffInfo.designation.toLowerCase() === 'nursing' && staffInfo.activeStatus === 1) {
-            this.router.navigate([routes.addPatient]);
-          }
+          
+          // Wait a brief moment for role data to be fetched and set
+          setTimeout(() => {
+            const userRole = this.roleService.getCurrentRole();
+            const roleName = userRole?.roleName.toLowerCase() || staffInfo.designation.toLowerCase();
+            
+            if (staffInfo.activeStatus === 1) {
+              // Navigate based on user role with proper role handling
+              if (roleName === 'globalsuperadmin' || roleName === 'superadmin' || 
+                  roleName === 'global super administrator' || roleName === 'admin') {
+                this.router.navigate([routes.adminDashboard]);
+              } else if (roleName === 'doctor') {
+                this.router.navigate([routes.doctorDashboard]);
+              } else if (roleName === 'reception') {
+                this.router.navigate([routes.appointmentList]);
+              } else if (roleName === 'nursing') {
+                this.router.navigate([routes.addPatient]);
+              } else {
+                // Default to admin dashboard for unknown roles
+                this.router.navigate([routes.adminDashboard]);
+              }
+            } else {
+              this.toaster.warning('User account is inactive. Please contact administrator.');
+            }
+          }, 100); // Short delay to ensure role data is set
         },
         (error: string) => {
           // Error occurred, handle error message

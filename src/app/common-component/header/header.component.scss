@@ -1,0 +1,435 @@
+/* Hospital Switcher - Enhanced Theme-Aligned Styling */
+:host ::ng-deep .nav-item .hospital-switcher,
+.nav-item .dropdown-toggle.hospital-switcher,
+.hospital-switcher {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  padding: 8px 16px !important;
+  margin: 0 8px !important;
+  border: none !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+  min-width: 180px !important;
+  text-decoration: none !important;
+  font-weight: 500 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  
+  &:hover,
+  &:focus,
+  &:active,
+  &.show {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    transform: translateY(-1px) !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+  }
+  
+  .hospital-name {
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+    display: inline-block !important;
+  }
+  
+  i {
+    color: #ffffff !important;
+  }
+  
+  span {
+    color: #ffffff !important;
+  }
+}
+
+.hospital-dropdown {
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+  padding: 0 !important;
+  min-width: 280px !important;
+  margin-top: 8px !important;
+  background: #ffffff !important;
+  
+  .dropdown-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    padding: 16px 20px !important;
+    border-bottom: none !important;
+    border-radius: 12px 12px 0 0 !important;
+    text-align: left !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
+    
+    i {
+      color: #ffffff !important;
+    }
+    
+    span {
+      color: #ffffff !important;
+      font-weight: 600 !important;
+    }
+  }
+  
+  .dropdown-divider {
+    margin: 0 !important;
+    border-color: #e9ecef !important;
+  }
+}
+
+.hospital-item {
+  padding: 12px 20px !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  background: #ffffff !important;
+  color: #2c3e50 !important;
+  text-decoration: none !important;
+  
+  &:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    padding-left: 24px !important;
+    transform: translateX(4px) !important;
+    text-decoration: none !important;
+    
+    .hospital-text {
+      color: #ffffff !important;
+    }
+    
+    i.fas.fa-hospital {
+      color: #ffffff !important;
+    }
+  }
+  
+  &:focus {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    outline: none !important;
+    text-decoration: none !important;
+    
+    .hospital-text {
+      color: #ffffff !important;
+    }
+  }
+  
+  &.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
+    
+    .hospital-text {
+      color: #ffffff !important;
+    }
+    
+    i.fas.fa-hospital {
+      color: #ffffff !important;
+    }
+  }
+  
+  .hospital-text {
+    flex: 1 !important;
+    color: #2c3e50 !important;
+    font-weight: 400 !important;
+  }
+  
+  i.fas.fa-hospital {
+    color: #667eea !important;
+    width: 16px !important;
+    margin-right: 8px !important;
+  }
+  
+  i.fas.fa-check {
+    color: #27ae60 !important;
+    font-size: 14px !important;
+  }
+}
+
+/* Force text visibility overrides */
+.nav-link.hospital-switcher {
+  color: #ffffff !important;
+  
+  &:hover,
+  &:focus,
+  &:active {
+    color: #ffffff !important;
+  }
+  
+  .hospital-name {
+    color: #ffffff !important;
+  }
+  
+  i {
+    color: #ffffff !important;
+  }
+}
+
+/* Additional Bootstrap and Global Overrides for Hospital Switcher */
+:host ::ng-deep {
+  .nav-item.dropdown .dropdown-toggle.hospital-switcher {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    border: none !important;
+    
+    &:hover,
+    &:focus,
+    &:active,
+    &.show,
+    &[aria-expanded="true"] {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+    
+    &::after {
+      display: none !important; /* Hide default Bootstrap arrow */
+    }
+  }
+  
+  .dropdown.show .dropdown-toggle.hospital-switcher {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+    color: #ffffff !important;
+  }
+}
+
+/* Additional visibility fixes for hospital switcher */
+.nav-item.dropdown .hospital-switcher {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #667eea !important;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  
+  &:hover,
+  &:focus,
+  &:active,
+  &.show,
+  &[aria-expanded="true"] {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+    color: #ffffff !important;
+    border-color: #5a6fd8 !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+    text-decoration: none !important;
+  }
+  
+  .hospital-name {
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  img {
+    filter: brightness(0) invert(1) !important; /* Make the icon white */
+  }
+}
+
+/* Ensure dropdown arrow is visible */
+.nav-item.dropdown .hospital-switcher::after {
+  display: inline-block !important;
+  margin-left: 8px !important;
+  vertical-align: middle !important;
+  content: "" !important;
+  border-top: 0.3em solid #ffffff !important;
+  border-right: 0.3em solid transparent !important;
+  border-bottom: 0 !important;
+  border-left: 0.3em solid transparent !important;
+}
+
+/* Force all text elements to be white */
+.hospital-switcher,
+.hospital-switcher * {
+  color: #ffffff !important;
+}
+
+/* Override any Bootstrap theme that might interfere */
+.navbar-light .navbar-nav .nav-link.hospital-switcher {
+  color: #ffffff !important;
+  
+  &:focus,
+  &:hover {
+    color: #ffffff !important;
+  }
+}
+
+.navbar-dark .navbar-nav .nav-link.hospital-switcher {
+  color: #ffffff !important;
+  
+  &:focus,
+  &:hover {
+    color: #ffffff !important;
+  }
+}
+
+/* Ensure it works in different header backgrounds */
+.header .hospital-switcher,
+.main-wrapper .header .hospital-switcher {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: #ffffff !important;
+  border: 2px solid #667eea !important;
+  
+  &:hover,
+  &:focus,
+  &:active {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+    color: #ffffff !important;
+    border-color: #5a6fd8 !important;
+  }
+}
+
+/* Enhanced Notification Sidebar Styling */
+:host ::ng-deep .notification-box {
+  box-shadow: -8px 0 32px rgba(0, 0, 0, 0.15) !important;
+  border-left: 1px solid #e9ecef !important;
+  z-index: 1050 !important;
+  background: #ffffff !important;
+  
+  .msg-sidebar {
+    background: #ffffff !important;
+    box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1) !important;
+    border-left: 3px solid #667eea !important;
+    
+    .topnav-dropdown-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      color: #ffffff !important;
+      font-weight: 600 !important;
+      padding: 20px !important;
+      border-bottom: 1px solid #e9ecef !important;
+      box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
+      
+      span {
+        color: #ffffff !important;
+        font-size: 16px !important;
+        font-weight: 600 !important;
+      }
+    }
+    
+    .drop-scroll {
+      max-height: calc(100vh - 200px) !important;
+      overflow-y: auto !important;
+      
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+      
+      &::-webkit-scrollbar-track {
+        background: #f8f9fa;
+      }
+      
+      &::-webkit-scrollbar-thumb {
+        background: #667eea;
+        border-radius: 3px;
+      }
+      
+      &::-webkit-scrollbar-thumb:hover {
+        background: #5a6fd8;
+      }
+    }
+    
+    .list-box {
+      padding: 0 !important;
+      margin: 0 !important;
+      
+      li {
+        border-bottom: 1px solid #f0f0f0 !important;
+        transition: all 0.2s ease !important;
+        
+        &:hover {
+          background: #f8f9ff !important;
+          border-left: 4px solid #667eea !important;
+          padding-left: 16px !important;
+        }
+        
+        &:last-child {
+          border-bottom: none !important;
+        }
+        
+        a {
+          text-decoration: none !important;
+          color: inherit !important;
+          
+          .list-item {
+            padding: 16px 20px !important;
+            
+            .list-left {
+              .avatar {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+                color: #ffffff !important;
+                font-weight: 600 !important;
+                box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+              }
+            }
+            
+            .list-body {
+              .message-author {
+                color: #2c3e50 !important;
+                font-weight: 600 !important;
+              }
+              
+              .message-time {
+                color: #6c757d !important;
+                font-size: 12px !important;
+              }
+              
+              .message-content {
+                color: #495057 !important;
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+              }
+            }
+            
+            &.new-message {
+              background: linear-gradient(90deg, #e3f2fd 0%, #f3e5f5 100%) !important;
+              border-left: 4px solid #667eea !important;
+            }
+          }
+        }
+      }
+    }
+    
+    .topnav-dropdown-footer {
+      background: #f8f9fa !important;
+      border-top: 1px solid #e9ecef !important;
+      padding: 16px 20px !important;
+      text-align: center !important;
+      
+      a {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: #ffffff !important;
+        text-decoration: none !important;
+        padding: 10px 24px !important;
+        border-radius: 6px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+        display: inline-block !important;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+        
+        &:hover {
+          background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+          transform: translateY(-1px) !important;
+        }
+      }
+    }
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hospital-switcher {
+    padding: 6px 12px !important;
+    margin: 0 4px !important;
+    min-width: 160px !important;
+    
+    .hospital-name {
+      font-size: 12px !important;
+    }
+  }
+  
+  .hospital-dropdown {
+    min-width: 240px !important;
+  }
+}

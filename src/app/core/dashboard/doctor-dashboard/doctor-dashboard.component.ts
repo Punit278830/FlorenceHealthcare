@@ -1,4 +1,4 @@
-import { Component, ViewChild,OnInit } from '@angular/core';
+import { Component, ViewChild,OnInit, OnDestroy } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import {
   ChartComponent,
@@ -19,13 +19,14 @@ import {
 } from 'ng-apexcharts';
 import { AuthService } from 'src/app/shared/auth/auth.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, Subscription } from 'rxjs';
 import { MedicineService } from 'src/app/shared/Services/medicine/medicine.service';
 import { ReturnStatement } from '@angular/compiler';
 import { ToastrService } from 'ngx-toastr';
 import { IPredefineDiagnosis, ImedicineMaster } from 'src/app/shared/models/models';
 import { ConsultService } from 'src/app/shared/Services/consultation/consult.service';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 interface data {
   value: string ;
 }
@@ -68,7 +69,7 @@ export type ChartOptions = {
   templateUrl: './doctor-dashboard.component.html',
   styleUrls: ['./doctor-dashboard.component.scss'],
 })
-export class DoctorDashboardComponent implements OnInit {
+export class DoctorDashboardComponent implements OnInit, OnDestroy {
   public routes = routes;
   @ViewChild('chart') chart!: ChartComponent;
   public chartOptionsOne: Partial<ChartOptions>;
@@ -94,6 +95,7 @@ export class DoctorDashboardComponent implements OnInit {
   public appCount=0;
   public consultatCount=0;
   public earning=0;
+  private hospitalSubscription: Subscription = new Subscription();
 
 
   constructor(private _auth:AuthService,
@@ -101,7 +103,8 @@ export class DoctorDashboardComponent implements OnInit {
     private medicineService:MedicineService,
     private toaster:ToastrService,
     private consultService:ConsultService,
-    private appointmentService:AppointmentService) {
+    private appointmentService:AppointmentService,
+    private hospitalService: HospitalService) {
     this.chartOptionsOne = {
       chart: {
         height: 200,
@@ -268,15 +271,31 @@ export class DoctorDashboardComponent implements OnInit {
 this.userName=data.fname +" "+data.lname;
 this.doctorId=data.loginId;
 
-
 this.initlizeMedForm();
 this.initlizeDiagnosForm();
 this.getMedicine();
-this.totalEarning();
-this.appointmentCount();
-this.consultationCount();
 
+// Load initial data
+this.loadDashboardData();
+
+// Subscribe to hospital changes
+this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+  if (hospitalId) {
+    console.log('Hospital changed to:', hospitalId);
+    this.loadDashboardData();
+  }
+});
     
+  }
+  
+  public ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
+  }
+  
+  private loadDashboardData() {
+    this.totalEarning();
+    this.appointmentCount();
+    this.consultationCount();
   }
 
   public status=[{key:1,value:'Active'},{key:2,value:'In active'}]

@@ -86,6 +86,16 @@ export class AddPatientComponent implements OnInit {
     const currentDate = this.datePipe.transform(new Date(), 'yyyy-MM-dd');
     this.patientReg.get('regstrationDate')?.setValue(currentDate);
 
+    // Conditional validator for IdentityNumber
+    this.patientReg.get('IdentityName')?.valueChanges.subscribe((value) => {
+      const identityNumberControl = this.patientReg.get('IdentityNumber');
+      if (value) {
+        identityNumberControl?.setValidators([Validators.required]);
+      } else {
+        identityNumberControl?.clearValidators();
+      }
+      identityNumberControl?.updateValueAndValidity();
+    });
   }
 
   createPatient() {
@@ -93,15 +103,15 @@ export class AddPatientComponent implements OnInit {
       firstName: ['', [Validators.required]],
       lastName: ['',],
       dob: [null, [Validators.required, this.futureDateValidator()]],
-      mobile: ['', [Validators.pattern(/^\d{10}$/)]],
+      mobile: ['', [Validators.pattern(/^[0-9]{10}$/)]],
       email: ['', [Validators.email]],
       address: ['', [Validators.required]],
       gender: ['Male', [Validators.required]],
       regstrationDate: [null, Validators.required],
-      age: ['', [Validators.pattern(/^\d+$/), Validators.min(0)]],
+      age: ['', [Validators.pattern(/^[0-9]+$/), Validators.min(0)]],
       ageUnit: ['year'],
-      IdentiyNumber: [''],
-      IdentiyName: [''],
+      IdentityNumber: [''],
+      IdentityName: [''],
     })
   }
 
@@ -114,10 +124,8 @@ export class AddPatientComponent implements OnInit {
 
       console.log(patientData.value);
       this._patientDto = patientData.value;
-      this._patientDto.IdentityName = patientData.value.IdentiyName;
-      this._patientDto.IdentityNumber = patientData.value.IdentiyNumber;
       //assigning age in month to store in background
-      this._patientDto.ageinYear=this.months;
+      this._patientDto.ageinYear = this.months;
       this._patientDto.patientImage = this.previewImage;
 
       this.patientService.CreatePatient(this._patientDto).subscribe(

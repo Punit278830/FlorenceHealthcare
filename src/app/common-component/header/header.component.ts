@@ -120,8 +120,7 @@ this.userRole=data.userRole;
   public selectHospital(hospital: HospitalModel): void {
     if (hospital.hospitalId) {
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
-      // Optionally refresh the page to reload data with new hospital
-      window.location.reload();
+      // No need to reload - components should subscribe to hospital changes
     }
   }
 }

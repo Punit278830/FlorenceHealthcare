@@ -11,11 +11,8 @@ namespace hospitalApiProject.Controllers
   [ApiController]
   public class AppointmentInfoesController : WithHospitalController
   {
-    private readonly FlorenceDbContext _context;
-
     public AppointmentInfoesController(FlorenceDbContext context) : base(context)
     {
-      _context = context;
     }
     // Get Appointment Data by  Current date 
     // GET: api/AppointmentInfoes
@@ -24,7 +21,7 @@ namespace hospitalApiProject.Controllers
     {
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
-      var hospitalId = GetHospitalIdFromHeader();
+      var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
       var appointmentInfo = await _context.AppointmentInfos
           .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .OrderByDescending(p => p.Id)
@@ -507,6 +504,174 @@ namespace hospitalApiProject.Controllers
 
 
     }
-  }
 
+    [HttpPost("Search")]
+    public async Task<SearchResponseBase<AppointmentInfoResponse>> SearchAppointments([FromBody] AppointmentSearch criteria)
+    {
+        var response = new SearchResponseBase<AppointmentInfoResponse>();
+        try
+        {
+            var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
+            
+            // Base appointments query (server-side filtering + sorting, then paginate)
+            var appointmentsQuery = _context.AppointmentInfos
+                .AsNoTracking()
+                .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
+                .AsQueryable();
+
+            // Date filters:
+            // - If from/to provided: filter by Appointment.Date (date only)
+            // - If not provided: do NOT apply any date filter (return all)
+            if (!string.IsNullOrWhiteSpace(criteria.FromDate) && DateTime.TryParse(criteria.FromDate, out var fromDate)
+                && !string.IsNullOrWhiteSpace(criteria.ToDate) && DateTime.TryParse(criteria.ToDate, out var toDate))
+            {
+                fromDate = fromDate.Date;
+                toDate = toDate.Date;
+                appointmentsQuery = appointmentsQuery.Where(a => a.Date.Date >= fromDate && a.Date.Date <= toDate);
+            }
+
+            // Filter by appointment status
+            if (criteria.AppointmentStatus.HasValue && criteria.AppointmentStatus.Value != AppointmentStatus.All)
+            {
+                var status = criteria.AppointmentStatus.Value.ToString();
+                appointmentsQuery = appointmentsQuery.Where(a => a.AppointmentStatus != null && a.AppointmentStatus.ToLower() == status.ToLower());
+            }
+
+            // Filter by doctor
+            if (criteria.DoctorId.HasValue && criteria.DoctorId.Value > 0)
+            {
+                appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == criteria.DoctorId.Value);
+            }
+
+            // Search by patient name or general search term
+            if (!string.IsNullOrWhiteSpace(criteria.PatientName) || !string.IsNullOrWhiteSpace(criteria.SearchTerm))
+            {
+                var searchTerm = !string.IsNullOrWhiteSpace(criteria.PatientName) ? criteria.PatientName : criteria.SearchTerm;
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    appointmentsQuery = appointmentsQuery.Where(a => 
+                        _context.PatientInfos.Any(p => p.PatientId == a.PatientId && 
+                            ((p.FirstName != null && p.FirstName.ToLower().Contains(searchTerm.ToLower())) || 
+                             (p.LastName != null && p.LastName.ToLower().Contains(searchTerm.ToLower())) ||
+                             (p.Mobile != null && p.Mobile.Contains(searchTerm)))));
+                }
+            }
+
+            // Sorting
+            if (!string.IsNullOrEmpty(criteria.SortFieldName))
+            {
+                if ((SortDirection)criteria.SortDirection == SortDirection.Descending)
+                    appointmentsQuery = appointmentsQuery.OrderByDescending(e => EF.Property<object>(e, criteria.SortFieldName));
+                else
+                    appointmentsQuery = appointmentsQuery.OrderBy(e => EF.Property<object>(e, criteria.SortFieldName));
+            }
+            else
+            {
+                appointmentsQuery = appointmentsQuery.OrderByDescending(e => e.Id);
+            }
+
+            // Total count BEFORE paging
+            var totalCount = await appointmentsQuery.CountAsync();
+
+            // Paging
+            var pageNumber = criteria.PageNumber <= 0 ? 1 : criteria.PageNumber;
+            var pageSize = criteria.PageSize <= 0 ? 50 : criteria.PageSize; // Smaller default page size for appointments
+            var skip = (pageNumber - 1) * pageSize;
+
+            // Select minimal fields for the current page
+            var pageAppointments = await appointmentsQuery
+                .Skip(skip)
+                .Take(pageSize)
+                .Select(a => new {
+                    a.Id,
+                    a.PatientId,
+                    a.DoctorId,
+                    a.Date,
+                    AppointTime = a.AppointTime,
+                    a.AppointmentStatus,
+                    a.Notes,
+                    a.HospitalId,
+                    a.Fee
+                })
+                .ToListAsync();
+
+            var patientIds = pageAppointments.Select(a => a.PatientId).Distinct().ToList();
+            var doctorIds = pageAppointments.Select(a => a.DoctorId).Distinct().ToList();
+            var hospitalIds = pageAppointments.Where(a => a.HospitalId.HasValue).Select(a => a.HospitalId!.Value).Distinct().ToList();
+
+            // Load related data for the selected appointments (single round trip per set)
+            var patients = await _context.PatientInfos
+                .AsNoTracking()
+                .Where(p => patientIds.Contains(p.PatientId))
+                .Select(p => new { p.PatientId, p.FirstName, p.LastName, p.Mobile, p.Gender, p.Dob })
+                .ToListAsync();
+
+            var doctors = await _context.StaffInfos
+                .AsNoTracking()
+                .Where(s => doctorIds.Contains(s.StaffId))
+                .Select(s => new { s.StaffId, s.FirstName, s.LastName })
+                .ToListAsync();
+
+            var hospitals = await _context.Hospitals
+                .AsNoTracking()
+                .Where(h => hospitalIds.Contains(h.HospitalId))
+                .Select(h => new { h.HospitalId, h.Name })
+                .ToListAsync();
+
+            // Create lookup dictionaries
+            var patientDict = patients.ToDictionary(p => p.PatientId, p => p);
+            var doctorDict = doctors.ToDictionary(d => d.StaffId, d => d);
+            var hospitalDict = hospitals.ToDictionary(h => h.HospitalId, h => h);
+
+            var results = pageAppointments.Select(a =>
+            {
+                var patient = patientDict.TryGetValue(a.PatientId, out var p) ? p : null;
+                var doctor = doctorDict.TryGetValue(a.DoctorId, out var d) ? d : null;
+                var hospital = a.HospitalId.HasValue && hospitalDict.TryGetValue(a.HospitalId.Value, out var h) ? h : null;
+
+                var age = patient?.Dob != null ? 
+                    DateTime.Now.Year - patient.Dob.Year - (DateTime.Now.DayOfYear < patient.Dob.DayOfYear ? 1 : 0) : 
+                    (int?)null;
+
+                return new AppointmentInfoResponse
+                {
+                    Id = a.Id,
+                    PatientId = a.PatientId,
+                    PatientName = patient != null ? $"{patient.FirstName} {patient.LastName}".Trim() : "Unknown",
+                    PatientMobile = patient?.Mobile ?? "",
+                    DoctorId = a.DoctorId,
+                    DoctorName = doctor != null ? $"{doctor.FirstName} {doctor.LastName}".Trim() : "Unknown",
+                    Date = a.Date,
+                    Time = a.AppointTime ?? "",
+                    AppointmentStatus = a.AppointmentStatus ?? "Unknown",
+                    Reason = "", // Not available in current model
+                    Notes = a.Notes,
+                    HospitalId = a.HospitalId ?? 0,
+                    HospitalName = hospital?.Name ?? "Unknown",
+                    CreatedDate = null, // Not available in current model
+                    Gender = patient?.Gender ?? "",
+                    Dob = patient?.Dob,
+                    Age = age
+                };
+            }).ToList();
+
+            response.Results = results;
+            response.TotalCount = totalCount;
+            response.TotalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            response.ErrorMessage = "";
+
+            return response;
+        }
+        catch (Exception ex)
+        {
+            response.ErrorMessage = $"Error searching appointments: {ex.Message}";
+            response.Results = new List<AppointmentInfoResponse>();
+            response.TotalCount = 0;
+            response.TotalPages = 0;
+            return response;
+        }
+    }
+
+    // ...existing code...
+  }
 }
