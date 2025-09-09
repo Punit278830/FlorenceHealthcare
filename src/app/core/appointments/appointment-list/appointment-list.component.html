@@ -137,7 +137,7 @@
                         class="custom-badge">{{data.appointmentStatus}}</button></td>
                     <td>{{data.fee}}</td>
                     <td>{{ data.isConsultationPaid ? 'Paid' : 'Not Paid' }}</td>
-                    <td>{{ formatDateWithTime(data.date, data.appointTime) }}</td>
+                    <td>{{ formatDateWithTime(data.date, data.appointTime) | date: 'dd/MM/yyyy' }}</td>
 
                     <td class="text-end">
                       <div class="dropdown dropdown-action">

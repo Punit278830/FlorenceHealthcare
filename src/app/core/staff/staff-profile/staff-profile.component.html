@@ -55,7 +55,7 @@
                                         </li>
                                         <li style="width: 100%;">
                                             <span class="title">Date of Birth:</span>
-                                            <span class="text">{{staffInfo.dob}}</span>
+                                            <span class="text">{{staffInfo.dob | date : 'dd/MM/yyyy'}}</span>
                                         </li>
                                         <li>
                                             <span class="title">Address:</span>
@@ -95,8 +95,7 @@
                 </li>
                 <li style="width: 100%;">
                     <span class="title">Date of joining:</span>
-                    <span class="text">{{staffInfo.doj
-                           }}</span>
+                    <span class="text">{{staffInfo.doj | date : 'dd/MM/yyyy' }}</span>
                 </li>
                 <li style="width: 100%;">
                     <span class="title">Education:</span>

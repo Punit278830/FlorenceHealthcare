@@ -553,7 +553,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         // Call saveAsExcel
         this.saveAsExcelFile(excelBuffer, 'Appointment');
       }
-
     }
     
 

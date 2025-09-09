@@ -127,7 +127,7 @@
                                             <!-- <span
                                                  class="login-danger">*</span>-->
                                                 </label>
-                                        <mat-select formControlName="IdentiyName" formControlName="IdentiyName"
+                                        <mat-select formControlName="IdentityName"
                                             class="form-control select" placeholder="Select Identity">
                                             <mat-option *ngFor="let data of IdentityDocNumber"
                                                 [value]="data.value">
@@ -146,14 +146,14 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="lastname">Identity Number </label>
-                                        <input class="form-control" formControlName="IdentiyNumber" type="text"
+                                        <input class="form-control" formControlName="IdentityNumber" type="text"
                                             placeholder="Enter Identity doc Number">
-                                        <!-- <div *ngIf="patientReg.get('IdentiyNumber')?.invalid && (patientReg.get('IdentiyNumber')?.dirty || patientReg.get('IdentiyNumber')?.touched)"
+                                        <div *ngIf="patientReg.get('IdentityNumber')?.invalid && (patientReg.get('IdentityNumber')?.dirty || patientReg.get('IdentityNumber')?.touched)"
                                             class="text-danger">
-                                            <div
-                                                *ngIf="patientReg.get('IdentiyNumber')?.errors?.['required']">
-                                                Number is required.</div>
-                                        </div> -->
+                                            <div *ngIf="patientReg.get('IdentityNumber')?.errors?.['required']">
+                                                Identity Number is required when Identity Name is selected.
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-3">

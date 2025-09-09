@@ -151,10 +151,9 @@ export class AddStaffComponent implements OnInit {
   // ];
 
   designationList: data[] = [
-    { value: 'admin' },
     { value: 'Doctor' },
-    { value: 'reception' },
-    { value: 'Nursing' },
+    { value: 'Receptionist' },
+    { value: 'Nurse' },
 
   ]
 
@@ -279,11 +278,16 @@ export class AddStaffComponent implements OnInit {
 
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
-      
+
+      // If roleId is empty string, set to null so backend treats as optional
+      if (staffData.roleId === '') {
+        staffData.roleId = null;
+      }
+
       // Handle hospitalId validation and conversion
       console.log("Original hospitalId value:", staffData.hospitalId);
       console.log("Original hospitalId type:", typeof staffData.hospitalId);
-      
+
       // For Super Admin, hospitalId must be selected
       if (this.isSuperAdmin && (staffData.hospitalId === null || staffData.hospitalId === undefined || staffData.hospitalId === '')) {
         console.error("Super Admin must select a hospital");
@@ -291,7 +295,7 @@ export class AddStaffComponent implements OnInit {
         this.isSubmitting = false;
         return;
       }
-      
+
       // Ensure hospitalId is a number
       if (staffData.hospitalId !== null && staffData.hospitalId !== undefined) {
         const parsedHospitalId = typeof staffData.hospitalId === 'number' ? staffData.hospitalId : parseInt(staffData.hospitalId.toString());
@@ -303,12 +307,12 @@ export class AddStaffComponent implements OnInit {
         }
         staffData.hospitalId = parsedHospitalId;
       }
-      
+
       console.log("Final hospitalId value:", staffData.hospitalId);
       console.log("Final hospitalId type:", typeof staffData.hospitalId);
-      
+
       console.log("Sending staff data:", staffData);
-      
+
       this.staffService.CreateStaff(staffData).subscribe((res:any) => {
         console.log("API Response:", res);
         this.isSubmitting = false;
