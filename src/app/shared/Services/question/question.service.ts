@@ -12,7 +12,7 @@ export class QuestionService {
 
   private readonly apiUrl=api_Url;
    constructor(private http:ApiHttpService) {
-    console.log();
+
    }
 
    getAllQuestionaireName():Observable<IQuestionnaires[]>

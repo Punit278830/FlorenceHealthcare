@@ -90,8 +90,8 @@ export class AppointmentService {
    }
 
    searchAppointments(criteria: AppointmentSearchCriteria): Observable<SearchResponseBase<AppointmentInfoResponse>> {
-      console.log('AppointmentService.searchAppointments called with criteria:', criteria);
-      console.log('API URL:', `${this.apiUrl}AppointmentInfoes/Search`);
+
+
       
       return this._http.post(
          `${this.apiUrl}AppointmentInfoes/Search`,

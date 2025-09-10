@@ -281,7 +281,7 @@ this.loadDashboardData();
 // Subscribe to hospital changes
 this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
   if (hospitalId) {
-    console.log('Hospital changed to:', hospitalId);
+
     this.loadDashboardData();
   }
 });
@@ -384,7 +384,7 @@ this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(ho
 public getGreetingMsg()
   {
     this.CurrentTime = new Date().getHours()
-    console.log(this.CurrentTime)
+
     if(this.CurrentTime>0 && this.CurrentTime<12)
     {this.greetingMsg='Good Morning'}
     

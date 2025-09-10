@@ -10,7 +10,7 @@ import { ImedicineMaster, IprescribeMedicine } from '../../models/models';
 export class MedicineService {
  private readonly apiUrl=api_Url;
    constructor(private http:ApiHttpService) {
-    console.log();
+
    }
 
    getAllMedicine():Observable<ImedicineMaster[]>

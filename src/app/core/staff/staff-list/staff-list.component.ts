@@ -74,7 +74,7 @@ export class StaffListComponent implements OnInit {
 
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
-    console.log("loggedin", this.loggedIn)
+
 
 
     //this.getTableData();
@@ -113,11 +113,11 @@ export class StaffListComponent implements OnInit {
 
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
-          //console.log(res.DOJ)
+
           this.serialNumberArray.push(serialNumber);
         }
       });
-      console.log("list",this.staffList);
+
 
       this.loadingService.hideLoader();
       
@@ -144,7 +144,7 @@ export class StaffListComponent implements OnInit {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
           this.staffList.push(res);
-          console.log(res.DOJ)
+
           this.serialNumberArray.push(serialNumber);
         }
       });
@@ -155,7 +155,7 @@ export class StaffListComponent implements OnInit {
 
     })
     
-    console.log("stafflist", this.staffList)
+
 
     // this.data.getStaffList().subscribe((data: apiResultFormat) => {
     //   this.totalData = data.totalData;
@@ -166,11 +166,11 @@ export class StaffListComponent implements OnInit {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
     if (value != '') {
-      console.log("value", value)
-      console.log("datasource", this.dataSource)
+
+
       this.dataSource.filter = value.trim().toLowerCase();
       this.staffList = this.dataSource.filteredData;
-      console.log("value", this.staffList)
+
       if (this.staffList.length > 0) {
         this.staffList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)
@@ -200,7 +200,7 @@ export class StaffListComponent implements OnInit {
   //   }
 
   //   this.staffList = data.sort((a, b) => {
-  //     console.log("a b", a, b)
+
   //     const isAsc = sort.direction === "asc";
   //     switch (sort.active) {
   //       case "doj":

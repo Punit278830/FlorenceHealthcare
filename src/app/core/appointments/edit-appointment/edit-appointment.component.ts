@@ -97,7 +97,7 @@ export class EditAppointmentComponent implements OnInit {
 
   getAppointDetail(id: number) {
     this.appointmentService.getAppointmentById(id).subscribe(res => {
-      console.log("appointmentdata", res)
+
       this.appointmentDto = res;
       this.patchAppointmentForm(this.appointmentDto)
     });
@@ -166,10 +166,10 @@ export class EditAppointmentComponent implements OnInit {
 
   updateFormattedDateTime(event: any) {
     const currentDate = new Date();
-    console.log("currentDate" + currentDate)
+
     //this.formattedDateTime = this.datePipe.transform(currentDate, 'yyyy-MM-ddTHH:mm:ss.SSSZ');
     this.formattedDateTime = event.value.toISOString().replace(/\.\d{3}Z$/, 'Z');
-    console.log("formaatted", this.formattedDateTime)
+
   }
 
 
@@ -177,7 +177,7 @@ export class EditAppointmentComponent implements OnInit {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    console.log('Selected Date (Date Only):', dateOnly);
+
     this.bookappointment.get('date')?.setValue(dateOnly);
 
 
@@ -199,7 +199,7 @@ export class EditAppointmentComponent implements OnInit {
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
 
 
-    console.log("date", appointment.date)
+
     // this.appointmentDto.date=this.formattedDateTime;
     this.appointmentDto.date = appointment.value.date;
     this.appointmentDto.doctorId = appointment.value.doctorId;
@@ -212,7 +212,7 @@ export class EditAppointmentComponent implements OnInit {
     //this.appointmentDto.patientId=this.patientId;
     this.appointmentDto.scheduledByid = userData.loginId;
     this.appointmentService.updateAppointment(this.appointmentService.appointmentId, this.appointmentDto).subscribe(result => {
-      console.log(result);
+
       this.toastr.success("Appointmnt Updated Successfuly", "Update Appointment");
       setTimeout(() => {
         this.route.navigate(['/accounts/invoice-view']);
@@ -237,7 +237,7 @@ export class EditAppointmentComponent implements OnInit {
 
   getDepartmentLits() {
     this.departmentService.getDepartmentList().subscribe((data: any) => {
-      console.log("departmentlist", data);
+
       data.map((res: any) => {
         this.departmentList.push(res)
       })
@@ -255,7 +255,7 @@ export class EditAppointmentComponent implements OnInit {
       })
 
     })
-    console.log("doctor list", this.doctorList)
+
 
   }
 
@@ -279,7 +279,7 @@ export class EditAppointmentComponent implements OnInit {
         //this.FileUploadDto.FileData= this.base64String;
         this.FileUploadDto.AppointmentId = this.appointmentService.appointmentId;
         this.fileUploadService.uploadFiletoDataBase(this.FileUploadDto).subscribe(result => {
-          console.log(result);
+
           this.spinner.hide();
           this.toastr.success('File uploaded Successfully', 'Success');
 
@@ -338,13 +338,13 @@ export class EditAppointmentComponent implements OnInit {
           addDownloads.fileName = this.downlodedFileName;
           addDownloads.downloadLink = objectUrl;
           this.downLoadList.push(addDownloads);
-          console.log("downLoadList" + this.downLoadList);
+
         }
       })
       this.spinner.hide();
     },
       (error) => {
-        console.error('Download failed:', error);
+
         //this.toastr.error("No file available for this user");
         this.spinner.hide();
 

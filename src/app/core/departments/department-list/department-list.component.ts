@@ -96,7 +96,7 @@ export class DepartmentListComponent implements OnInit{
     this.serialNumberArray = [];
 
     this.departmentservice.getDepartmentList().subscribe((data: Idepartment[]) => {
-      console.log("totalData",data)
+
       this.totalData = data.length;
       data.map((res:Idepartment, index: number) => {
         const serialNumber = index + 1;
@@ -214,7 +214,6 @@ export class DepartmentListComponent implements OnInit{
   async onDepartmentChange(event:any)
   {
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-      debugger
 this.staffList=data.filter((item:any) => item.designation === 'Doctor');
 
     })

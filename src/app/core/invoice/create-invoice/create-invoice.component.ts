@@ -132,7 +132,7 @@ export class CreateInvoiceComponent {
     this.InitlizeInvoiceItemForm();
     this.getInvoiceMaster();
     this.addItemFormGroup.get('discount')?.valueChanges.subscribe(() => {
-      console.log("dis fee", this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value)
+
       this.updateTotal(this.addItemFormGroup.get('discount')?.value, this.addItemFormGroup.get('fee')?.value);
     });
 
@@ -198,7 +198,7 @@ export class CreateInvoiceComponent {
 
     this.searchResults = [];
     //inputField.value=''
-    console.log("appointmentData", this.patientInfo);
+
     //this.route.navigate([routes.addAppointment])
 
   }
@@ -219,7 +219,7 @@ export class CreateInvoiceComponent {
         // this.staffList.push(data);
         this.allpatientList = data;
 
-        console.log(data);
+
         this.loadingService.hideLoader();
 
         data.map((res: any, index: number) => {
@@ -229,7 +229,7 @@ export class CreateInvoiceComponent {
             res.ageinYear = this.age;
 
             this.patientList.push(res);
-            console.log(res.DOJ)
+
             this.serialNumberArray.push(serialNumber);
           }
         });
@@ -243,10 +243,10 @@ export class CreateInvoiceComponent {
         this.totalData = data.length;
         // this.staffList.push(data);
         this.allpatientList = data;
-        console.log("allpatients", this.allpatientList)
+
         this.loadingService.hideLoader();
 
-        console.log(data)
+
         data.map((res: any, index: number) => {
           const serialNumber = index + 1;
           if (index >= this.skip && serialNumber <= this.limit) {
@@ -499,11 +499,11 @@ export class CreateInvoiceComponent {
 
   public searchData(value: any): void {
     if (value != '') {
-      console.log("value", value)
-      console.log("datasource", this.dataSource)
+
+
       this.dataSource.filter = value.trim().toLowerCase();
       this.patientList = this.dataSource.filteredData;
-      console.log("value", this.patientList)
+
       if (this.patientList.length > 0) {
         this.patientList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)

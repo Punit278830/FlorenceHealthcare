@@ -11,7 +11,7 @@ export class ConsultationTemplateMasterService {
     private readonly apiUrl = api_Url;
 
     constructor(private http: ApiHttpService) {
-        console.log();
+
     }
 
     addConsultationTemplate(data: IConsultationTemplate): Observable<any> {

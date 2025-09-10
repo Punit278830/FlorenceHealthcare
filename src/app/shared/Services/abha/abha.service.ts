@@ -14,7 +14,7 @@ export class AbhaService {
   private readonly apiUrl = api_Url;
 
   constructor(private http: ApiHttpService) {
-    console.log();
+
   }
 
   generateOtp(aadhar: string): Observable<any> {

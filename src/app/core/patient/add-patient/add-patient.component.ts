@@ -122,7 +122,7 @@ export class AddPatientComponent implements OnInit {
     if (patientData.valid) {
       this.loadingService.showLoader();
 
-      console.log(patientData.value);
+
       this._patientDto = patientData.value;
       //assigning age in month to store in background
       this._patientDto.ageinYear = this.months;
@@ -130,7 +130,7 @@ export class AddPatientComponent implements OnInit {
 
       this.patientService.CreatePatient(this._patientDto).subscribe(
         res => {
-          console.log("res", res);
+
           if (!res.message) {
             this.toastr.success("Patient added successfully", "Add Patient");
             this.resetAddPatientForm();
@@ -140,7 +140,7 @@ export class AddPatientComponent implements OnInit {
           }
         },
         err => {
-          console.error("Error", err);
+
           this.toastr.error(err.message || "An error occurred", "Error");
         }
       );
@@ -253,23 +253,23 @@ export class AddPatientComponent implements OnInit {
       }
     }).then((res) => {
       this.camerastatus = res;
-      console.log(res);
+
     }).catch(err => {
-      console.log(err);
+
     })
     //this.camerastatus=!this.camerastatus;
   }
 
   captureImage() {
     this.trigger.next();
-    console.log()
+
   }
   snapshot(event: WebcamImage) {
 
     this.previewImage = event.imageAsDataUrl;
     this.btnLable = 'Re Capture Image';
     this.camerastatus = '';
-    console.log(event)
+
   }
   cancel() {
     this.camerastatus = '';
@@ -282,7 +282,6 @@ export class AddPatientComponent implements OnInit {
 
 
   changedob(year: any) {
-    debugger
     const currentYear = new Date().getFullYear();
     const y = currentYear - year;
 

@@ -123,15 +123,15 @@ export class PrescriptionMasterComponent {
     // Save the selected diagnosisId for submission
     this.selectedDiagnosisId = selectedTemplate.diagnosisId || 0;
 
-    console.log('Editing Template:', selectedTemplate);
+
   }
 
   onDelete(id: number) {
-    console.log('deleteId', id);
+
     if (id) {
       this.confirmDelete(id);
     } else {
-      console.error('Invalid item ID');
+
     }
   }
   
@@ -145,7 +145,7 @@ export class PrescriptionMasterComponent {
         }
       },
       error: (err) => {
-        console.error('Error deleting item:', err);
+
         this.toaster.error('Failed to delete template');
       }
     });
@@ -154,7 +154,7 @@ export class PrescriptionMasterComponent {
   getAllTemplates(): void {
     this.consultTemplateService.getConsultationTemplates().subscribe((data: any) => {
       this.templates = data;
-      console.log('templates:', data);
+
     })
   }
 

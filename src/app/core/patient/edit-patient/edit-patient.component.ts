@@ -124,7 +124,7 @@ export class EditPatientComponent implements OnInit {
     this.patientService.getPatientData(id).subscribe(data => {
       this._patientDto = data;
       this.previewImage = data.patientImage;
-      console.log("patientdata",this._patientDto)
+
     //   this.patientReg.get('IdentiyName')?.patchValue(this._patientDto.IdentityName);
     // this.patientReg.get('IdentiyNumber')?.patchValue(this._patientDto.IdentityNumber);
       this.patientReg.patchValue(this._patientDto);
@@ -150,7 +150,7 @@ export class EditPatientComponent implements OnInit {
 
   UpdatePatientInfo() {
     if (this.patientReg.valid) {
-      console.log(this.patientReg.value)
+
       this._patientDto = this.patientReg.value;
       this._patientDto.patientId = this.patientId;
       this._patientDto.IdentityName = this.patientReg.value.IdentityName;
@@ -194,9 +194,9 @@ export class EditPatientComponent implements OnInit {
       }
     }).then((res) => {
       this.camerastatus = res;
-      console.log(res);
+
     }).catch(err => {
-      console.log(err);
+
     })
     //this.camerastatus=!this.camerastatus;
   }
@@ -205,14 +205,14 @@ export class EditPatientComponent implements OnInit {
   }
   captureImage() {
     this.trigger.next();
-    console.log()
+
   }
   snapshot(event: WebcamImage) {
 
     this.previewImage = event.imageAsDataUrl;
     this.btnLable = 'Re Capture Image';
     this.camerastatus = '';
-    console.log(event)
+
   }
   cancel() {
     this.camerastatus = '';

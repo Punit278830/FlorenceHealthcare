@@ -153,7 +153,7 @@ export class AllInvoiceComponent implements OnInit{
       const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
       return this.datePipe.transform(istDate, 'dd/MM/yyyy HH:mm:ss', '+0530') || '';
     } catch (error) {
-      console.error('Error formatting date:', error);
+
       return '';
     }
   }
@@ -165,7 +165,7 @@ export class AllInvoiceComponent implements OnInit{
       const istDate = new Date(dateObj.getTime() + (5.5 * 60 * 60 * 1000));
       return this.datePipe.transform(istDate, 'dd/MM/yyyy', '+0530') || '';
     } catch (error) {
-      console.error('Error formatting date:', error);
+
       return '';
     }
   }

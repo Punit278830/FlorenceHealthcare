@@ -14,7 +14,7 @@ export class ConsultService {
   public diagnosisId!: number;
 
   constructor(private http: ApiHttpService) {
-    console.log();
+
   }
 
   addConsultationData(data: Iconsultation): Observable<any> {

@@ -47,7 +47,7 @@ export class RoleAuthorizationService {
         const roleData = JSON.parse(storedRoleData);
         this.setUserRole(roleData);
       } catch (error) {
-        console.error('Error parsing stored role data:', error);
+
       }
     }
   }

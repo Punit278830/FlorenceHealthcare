@@ -77,7 +77,7 @@ export class AddScheduleComponent implements OnInit {
       status: this.status
     };
 
-    console.log('Saving schedule:', payload);
+
     alert('Schedule saved (mocked). Check console log for payload.');
   }
 

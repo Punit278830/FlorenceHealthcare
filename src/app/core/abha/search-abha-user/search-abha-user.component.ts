@@ -71,7 +71,7 @@ export class SearchAbhaUserComponent {
         }
 
         this.generateOtp();
-        console.log(res);
+
       },
       error => {
         this.toster.error("Invalid Abha number provided!");
@@ -91,7 +91,7 @@ export class SearchAbhaUserComponent {
         this.txnId = res.transactionId;
 
         this.toster.success("OTP sent for verification.");
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -117,7 +117,7 @@ export class SearchAbhaUserComponent {
         this.abhaProfile = res;
         this.showAddPatient = true;
         this.toster.success("OTP verified successfully.");
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);

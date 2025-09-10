@@ -31,12 +31,12 @@ export class AppComponent implements OnInit {
               this.roleService.setUserRole(roleData);
             },
             error: (error) => {
-              console.warn('Could not fetch user role on app init:', error);
+
             }
           });
         }
       } catch (error) {
-        console.error('Error parsing stored user data:', error);
+
       }
     }
   }

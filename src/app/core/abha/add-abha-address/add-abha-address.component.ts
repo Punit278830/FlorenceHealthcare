@@ -163,7 +163,7 @@ export class AddAbhaAddressComponent {
             this.showRegistrationViaAbhaForm = true;
           }
 
-          console.log(res);
+
         },
         error => {
           this.toster.error(error);
@@ -245,7 +245,7 @@ export class AddAbhaAddressComponent {
         this.hideAllForms();
         this.showConfirmOTPForm = true;
         this.toster.success("OTP sent for verification.");
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -274,7 +274,7 @@ export class AddAbhaAddressComponent {
         this.showLinkedAbhaAddressessForm = true;
 
         this.toster.success("OTP verified successfully.");
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -293,7 +293,7 @@ export class AddAbhaAddressComponent {
 
         this.hideAllForms();
         this.showCreateNewAbhaAddressForm = true;
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -325,7 +325,7 @@ export class AddAbhaAddressComponent {
 
         //this.hideAllForms();
         //this.showCreateNewAbhaAddressForm = true;
-        console.log("Abha address created successfully!");
+
         this.toster.success("Abha address created successfully!");
 
       },
@@ -378,7 +378,7 @@ export class AddAbhaAddressComponent {
         this.showMobileLinkedAbhaAddressessForm = true;
 
         this.toster.success("OTP verified successfully.");
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -439,7 +439,7 @@ export class AddAbhaAddressComponent {
         //this.toster.success("Details submitted successfully!");
 
         this.getSuggestions();
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -460,7 +460,7 @@ export class AddAbhaAddressComponent {
         this.showMobileCreateNewAbhaAddressForm = true;
         this.toster.success("Details submitted successfully!");
 
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -485,7 +485,7 @@ export class AddAbhaAddressComponent {
 
         //this.hideAllForms();
         //this.showCreateNewAbhaAddressForm = true;
-        console.log("Abha address created successfully!");
+
         this.toster.success("Abha address created successfully!");
 
       },

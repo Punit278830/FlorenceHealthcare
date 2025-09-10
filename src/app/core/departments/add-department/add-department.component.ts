@@ -47,13 +47,13 @@ export class AddDepartmentComponent implements OnInit {
       this.depDto = dep.value;
       this.departmentService.createDepartment(this.depDto).subscribe(
         res => {
-          console.log(res);
+
           res ? this.toster.success("Department Added successfully") : null
           this.resetForm();
         },
         error => {
           this.toster.error(error.statusText, 'Error')
-          console.error('Error during post:', error);
+
         });
 
     } else {

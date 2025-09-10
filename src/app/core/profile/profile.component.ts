@@ -332,14 +332,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
             },
             error => {
               this.loaderService.hideLoader();
-              console.error('Error uploading file:', error);
+
               this.toastr.error('File upload failed', 'Error');
             }
           );
         };
       }).catch(error => {
         this.loaderService.hideLoader();
-        console.error('Error generating PDF:', error);
+
         this.toastr.error('Error generating PDF', 'Error');
       });
     } else {
@@ -384,7 +384,7 @@ printContent(): void {
   loadSavedAnswers(appointmentId: number) {
     this.question.getQuestionwithAnswerByAppointmentId(appointmentId).subscribe((res: any[]) => {
       this.questionData = res;
-      console.log("question answer res", res)
+
 
       // Push unique submitted questionnaireIds to submittedQues
       const uniqueQuestionnaireIds = Array.from(new Set(res.map((item: { questionnaireId: number }) => item.questionnaireId)));
@@ -400,8 +400,8 @@ printContent(): void {
           } else if (question.questionType === 1) {
             question.savedSelectedOptionId = answer.selectedOptionId;
           }
-          console.log("saved question", question);
-          console.log("saved answer", answer);
+
+
         }
       });
 
@@ -459,7 +459,7 @@ printContent(): void {
         }
       },
       (error) => {
-        console.error("Error fetching patient data:", error);
+
         // Navigate to patient list in case of an error
         this.route.navigate([routes.patientsList]);
       }
@@ -535,7 +535,7 @@ printContent(): void {
 
     },
       (error) => {
-        console.error('Download failed:', error);
+
         //this.toastr.error("No file available for this user");
       })
 
@@ -550,7 +550,7 @@ printContent(): void {
         this.pdfUrl = URL.createObjectURL(pdfBlob);
       },
       (error) => {
-        console.error('Error loading PDF:', error);
+
       }
     );
   }
@@ -566,7 +566,7 @@ printContent(): void {
       this.currentQuestionData.options.map((res: Ioptions) => {
 
         if (res.optionId == answer.value[answerKey]) {
-          console.log("res.mapQuestionId", res.mapQuestionId)
+
           this.nextQuestionId = res.mapQuestionId;
         }
       })
@@ -648,7 +648,7 @@ printContent(): void {
 
 
     } else {
-      console.log('Question not found');
+
     }
   }
 
@@ -748,7 +748,7 @@ printContent(): void {
           this.medicine.push(medicationControl);
         });
       } else {
-        console.error("Expected an array of medications, but received:", data);
+
       }
 
       this.subscribeToFormChanges(); // Call after populating the form
@@ -756,7 +756,7 @@ printContent(): void {
       this.loaderService.hideLoader();
     }, error => {
       this.loaderService.hideLoader();
-      console.error("Error fetching medications:", error);
+
     });
   }
 
@@ -889,7 +889,7 @@ printContent(): void {
         this.questionList = res;
       },
       (error) => {
-        console.error('Error fetching questions:', error);
+
       }
     );
   }
@@ -914,24 +914,24 @@ printContent(): void {
       }
     }
 
-    console.log("current", this.currentQuestionData);
+
 
   }
 
   submitAnswers() {
     this.loaderService.showLoader();
     var temp = this.questionnaireDto.filter(item => item.questionnaireId == this.selectedques);
-    console.log("submQues", this.submittedQues, this.selectedques);
+
 
     // if(!this.submittedQues.includes(this.selectedques)){
     //   
     // }
     if (this.submittedQues.includes(this.selectedques)) {
 
-      console.log("answer dto in update", this.answerDto)
+
 
       this.question.updateQuestionniareAnswers(this.answerDto, this.latestId, this.selectedques).subscribe(res => {
-        console.log(res);
+
         this.ApiCallsForPreview();
         this.toaster.success("Questionniare updated successfully", "Questionniare")
       })
@@ -939,7 +939,7 @@ printContent(): void {
 
 
     } else {
-      console.log("answer dto in add", this.answerDto)
+
       this.submittedQues.push(this.selectedques);
       this.question.postQuestionniareAnswers(this.answerDto).subscribe(res => {
         this.ApiCallsForPreview();
@@ -955,10 +955,10 @@ printContent(): void {
     this.finishQuestionniary = false;
 
 
-    console.log("submQues", this.submittedQues, this.selectedques);
+
     this.patientInfo.SubQues = this.submittedQues;
     this.patientService.updatePatientData(this.patientId, this.patientInfo).subscribe(res => {
-      console.log("patientInfo updated")
+
       this.loadPatientInfo();
     })
     this.answerDto = [];
@@ -986,7 +986,7 @@ printContent(): void {
   }
 
   getAppointmentFiles(fileid: number) {
-    console.log();
+
   }
 
   closePdfView() {
@@ -1074,13 +1074,13 @@ printContent(): void {
           this.stepper.next();
           this.loaderService.hideLoader();
         }).catch((error) => {
-          console.error("Error getting questionnaire:", error);
+
           this.loaderService.hideLoader();
           // Handle error scenario (e.g., show an error message)
         });
       },
       (error) => {
-        console.error("Error updating vital info:", error);
+
         this.loaderService.hideLoader();
         // Handle error scenario (e.g., show an error message)
       }
@@ -1096,7 +1096,7 @@ printContent(): void {
           resolve();
         },
         (error) => {
-          console.error("Error fetching questionnaire:", error);
+
           reject(error);
         }
       );
@@ -1253,7 +1253,7 @@ printContent(): void {
         this.loaderService.hideLoader();
       },
       error: err => {
-        console.error("Error in addNewMedication:", err);
+
         this.loaderService.hideLoader();
       }
     });
@@ -1313,7 +1313,6 @@ printContent(): void {
   }
 
   getUploadedFiles(id: number) {
-    debugger
     this.presDocuments = [];
     this.vitalDocuments = [];
     this.previewFile = [];
@@ -1323,7 +1322,7 @@ printContent(): void {
           if (item.docName == "prescription" || item.docName == "pen-prescription" || item.docName=='drawing') {
             this.presDocuments.push(item);
             this.checkPenPrescription();
-            console.log(this.presDocuments)
+
           }
           if (item.docName == "vital") {
             this.vitalDocuments.push(item);
@@ -1334,7 +1333,7 @@ printContent(): void {
         })
       },
       error: (error) => {
-        console.log('No uploaded files found for appointment:', id);
+
         this.presDocuments = [];
         this.vitalDocuments = [];
         this.previewFile = [];
@@ -1370,11 +1369,11 @@ printContent(): void {
         this.stepper.next();
       },
         error => {
-          console.error('Error adding consultation data:', error);
+
           // Handle the error as needed
         },
         () => {
-          console.log('Consultation data observable completed');
+
         })
       this.loaderService.hideLoader();
 
@@ -1403,11 +1402,11 @@ printContent(): void {
         this.stepper.next();
       },
         error => {
-          console.error('Error adding consultation data:', error);
+
           // Handle the error as needed
         },
         () => {
-          console.log('Consultation data observable completed');
+
         })
 
       this.loaderService.hideLoader();
@@ -1435,7 +1434,7 @@ printContent(): void {
       this.toaster.success("Consultation Info Successfully Updated", "Consultation update");
       // this.abhaService.confirmOtp().subscribe(
       //   res => {
-      //     console.log(res);
+
       //   }
       // );      
       this.ApiCallsForPreview();
@@ -1443,7 +1442,7 @@ printContent(): void {
     },
       error => {
         this.loaderService.hideLoader();
-        console.error('Error in updating consultation:', error);
+
         this.toastr.error('Consultation update failed!', 'Error');
       });
   }
@@ -1476,7 +1475,7 @@ printContent(): void {
 
     })
     this.medicineService.getPrescribeMedicine(this.latestId).subscribe(res => {
-      console.log("medicine", res)
+
       this.medicineDto = res;
     })
 
@@ -1486,7 +1485,7 @@ printContent(): void {
     const pdf = new jspdf.jsPDF();
     const content: HTMLElement | null = document.getElementById('pdfview');
     if (content === null) {
-      console.error('Element with ID "contentToExport" not found');
+
       return;
 
     }
@@ -1523,7 +1522,6 @@ printContent(): void {
   }
 
   onFileUpload(docName: string) {
-    debugger
     if (this.selectedFile) {
       // Show spinner or loading indicator if needed
 
@@ -1554,7 +1552,7 @@ printContent(): void {
             },
             error => {
               this.loaderService.hideLoader();
-              console.error('Error uploading file:', error);
+
               this.toastr.error('File upload failed', 'Error');
             }
           );
@@ -1647,10 +1645,9 @@ printContent(): void {
 
   }
   getCurrentAppointmentDetils() {
-    debugger;
     this.appointmentService.getAppointmentById(this.latestId).subscribe(res => {
       this._appointmentDto = res;
-      console.log("Appointment" ,res);
+
     })
   }
   getConsultationFiles() {
@@ -1662,7 +1659,7 @@ printContent(): void {
         this.displayImage = res;
       },
       error: (error) => {
-        console.log('No consultation files found for appointment:', this.latestId);
+
         this.displayImage = [];
       }
     })

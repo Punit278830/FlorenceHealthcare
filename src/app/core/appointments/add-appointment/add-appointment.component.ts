@@ -124,7 +124,7 @@ export class AddAppointmentComponent implements OnInit {
       this.totalData = data.length;
       // this.staffList.push(data);
 
-      console.log(data)
+
       data.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
@@ -132,7 +132,7 @@ export class AddAppointmentComponent implements OnInit {
           res.ageinYear = this.age;
 
           this.patientlist.push(res);
-          console.log(res.DOJ)
+
           this.serialNumberArray.push(serialNumber);
         }
       });
@@ -329,7 +329,7 @@ export class AddAppointmentComponent implements OnInit {
 
     this.searchResults = [];
     //inputField.value=''
-    console.log("appointmentData", this.patientAppointmentData);
+
     //this.route.navigate([routes.addAppointment])
 
   }
@@ -387,10 +387,10 @@ export class AddAppointmentComponent implements OnInit {
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
 
       this.appointmentDto.appointTime = formattedTime || '';
-      console.log("tme", this.appointmentDto)
+
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
-        console.log("result", result);
+
         this.toater.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
         this.invoiceService.invoiceId = result.invoiceId;
@@ -405,7 +405,7 @@ export class AddAppointmentComponent implements OnInit {
 
   getDepartmentLits() {
     this.departmentService.getDepartmentList().subscribe((data: any) => {
-      console.log(data);
+
       data.map((res: any) => {
         if (res.departmentName != 'admin') {
           this.departmentList.push(res)
@@ -419,7 +419,7 @@ export class AddAppointmentComponent implements OnInit {
     this.doctorList = [];
     const doctorOnLeave: number[] = [];
     const allDocSchedule: Istaffschedule[] = [];
-    console.log(event.value);
+
     this.appointmentDto.departmentid = event.value;
 
     await this.staffScheduleService.getStaffOnLeve(event.value, this.formattedDateTime).subscribe(res => {
@@ -428,45 +428,45 @@ export class AddAppointmentComponent implements OnInit {
       }
     })
     await this.staffService.getScheduleList().subscribe(data => {
-      console.log("schedule ress", data)
+
       data.forEach(item => {
         allDocSchedule.push(item)
       })
     })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
-      console.log("doctoronleave", doctorOnLeave);
+
       data.map((res: any) => {
-        console.log("doc res", res);
+
 
         const available = doctorOnLeave.find(e => e == res.staffId)
-        console.log("doc avai", available);
+
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
-            console.log("entered book appoint.time")
+
             const docschedule: any = allDocSchedule.find(item =>
               item.staffId == res.staffId &&
               item.scheduleDate.getTime() === this.formattedDateTime.getTime() &&
               item.leaveStatus == 1 &&
               item.status == "Approved"
             );
-            console.log("doc sche", docschedule);
+
             if (docschedule && docschedule.fromTime != '' && docschedule.toTime != '') {
               const fromTime: any = this.convertToComparableTime(docschedule.fromTime, docschedule.fromPostfix);
               const toTime: any = this.convertToComparableTime(docschedule.toTime, docschedule.toPostfix);
 
               // Check if appointment time falls within doctor's available time range
               if (!this.isTimeBetween(this.bookappointment.value.appointTime, fromTime, toTime)) {
-                console.log("Doctor added based on time:", res);
+
                 this.doctorList.push(res);
               }
             }
             else {
-              console.log("Doctor added without time check:", res);
+
               this.doctorList.push(res);
             }
           }
           else {
-            console.log("Doctor added without appointTime value entered:", res);
+
             this.doctorList.push(res);
           }
         }
@@ -485,8 +485,8 @@ export class AddAppointmentComponent implements OnInit {
   isTimeBetween(appointmentTime: Date, fromTime: Date, toTime: Date): boolean {
     const appointmentHours = appointmentTime.getHours();
     const appointmentMinutes = appointmentTime.getMinutes();
-    console.log("app 1", appointmentHours)
-    console.log("app 1", appointmentMinutes)
+
+
     const fromHours = fromTime.getHours();
     const fromMinutes = fromTime.getMinutes();
     const toHours = toTime.getHours();

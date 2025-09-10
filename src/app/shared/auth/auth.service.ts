@@ -70,7 +70,7 @@ export class AuthService {
             localStorage.setItem('authenticated', 'true');
           },
           error: (error) => {
-            console.warn('Could not fetch user role, using default permissions:', error);
+
             // Create a default role based on designation if role fetch fails
             const defaultRole = {
               roleId: 0,
@@ -99,10 +99,10 @@ export class AuthService {
 
   private handleError(error: HttpErrorResponse): Observable<never> {
     if (error.status === 404) {
-      console.error('User not found or incorrect credentials.');
+
       return throwError('User not found or incorrect credentials.');
     } else {
-      console.error('An error occurred:', error.error.message || error.message);
+
       return throwError('Error occurred while logging in. Please try again.');
     }
   }

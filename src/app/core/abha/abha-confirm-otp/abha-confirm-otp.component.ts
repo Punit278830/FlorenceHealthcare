@@ -59,7 +59,7 @@ export class AbhaConfirmOtpComponent {
         // var abhaNumber = res?.ABHAProfile.phrAddress[0];
         //this.abhaDataService.setData({ message: name, txnId: res.abhaNumber });
         //this.router.navigate([routes.abhaProfile]);
-        console.log(res);
+
       }
     );
   }

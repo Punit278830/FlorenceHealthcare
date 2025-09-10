@@ -64,7 +64,7 @@ export class EditStaffComponent implements OnInit {
 
   ngOnInit(): void {
     //this.staffReg=this._staffDto;
-    console.log()
+
   }
 
   togglePassword() {
@@ -78,8 +78,8 @@ export class EditStaffComponent implements OnInit {
 
   getStaffInfo(sid: number) {
     this.staffService.getStaff(sid).subscribe((data: IstaffInfo) => {
-      console.log(data);
-      console.log("data",data)
+
+
 
       this._staffDto = data;
       //this.fillStaffDataInForm()
@@ -88,7 +88,7 @@ export class EditStaffComponent implements OnInit {
       //this.staffReg.patchValue({activeStatus:this._staffDto.activeStatus})
       this.staffReg.get('activeStatus')?.patchValue(this._staffDto.activeStatus)
       this.staffReg.get('regestrationNumber')?.patchValue(this._staffDto?.regestrationNumber)
-      console.log("staffDto",this._staffDto)
+
       
       
 
@@ -101,7 +101,7 @@ export class EditStaffComponent implements OnInit {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    console.log('Selected Date (Date Only):', dateOnly);
+
     this.staffReg.get('dob')?.setValue(dateOnly);
 
 
@@ -111,7 +111,7 @@ export class EditStaffComponent implements OnInit {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    console.log('Selected Date (Date Only):', dateOnly);
+
     this.staffReg.get('doj')?.setValue(dateOnly);
 
 
@@ -250,7 +250,7 @@ export class EditStaffComponent implements OnInit {
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
       staffData.staffId = this.staffId;
-      console.log("staff data ", staffData)
+
 
       this.staffService.updateStaff(this.staffId, staffData).subscribe(res => {
         res ? this.toastr.success("Staff info updated Successfully", "Update Staff Info") : null;

@@ -20,7 +20,7 @@ export class AbhaDashboardComponent {
 
   public getGreetingMsg() {
     this.CurrentTime = new Date().getHours()
-    console.log(this.CurrentTime)
+
     if (this.CurrentTime > 0 && this.CurrentTime < 12) { this.greetingMsg = 'Good Morning' }
 
     if (this.CurrentTime >= 12 && this.CurrentTime < 17) { this.greetingMsg = 'Good AfterNoon' }

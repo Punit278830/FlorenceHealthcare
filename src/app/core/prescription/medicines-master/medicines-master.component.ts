@@ -73,7 +73,7 @@ export class MedicinesMasterComponent {
   getAllGroups(): void {
     this.medicinesGroupService.getAllMedicinesGroup().subscribe((data: any[]) => {
       this.groups = data; // Assign the groups to the local variable
-      console.log('Groups', data);
+
 
       // Assign the first group to selectedGroup if data exists
       if (this.groups && this.groups.length > 0) {
@@ -109,7 +109,7 @@ export class MedicinesMasterComponent {
     this.isMedicineSearch = true;
     if (medname.length > 3) {
       this.medicineService.SearchMatchMedicine(medname).subscribe((res) => {
-        console.log(res);
+
         this.SearchMedicineList = res;
       })
     }
@@ -226,11 +226,11 @@ export class MedicinesMasterComponent {
   }
 
   onDelete(id: number) {
-    console.log('deleteId', id);
+
     if (id) {
       this.confirmDelete(id);
     } else {
-      console.error('Invalid item ID');
+
     }
   }
 

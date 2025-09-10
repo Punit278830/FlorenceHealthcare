@@ -101,7 +101,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
       if (hospitalId) {
-        console.log('Hospital changed to:', hospitalId);
         // Reset pagination and reload data
         this.searchCriteria.pageNumber = 1;
         this.pageIndex = 0;
@@ -178,7 +177,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         // Handle errors (network issues, 404, 500, etc.)
-        console.error('Delete appointment error:', error);
         if (error.error && error.error.message) {
           this.toastr.error(error.error.message);
         } else if (error.status === 404) {
@@ -253,7 +251,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     
     let appointmentData$;
     if (from !== null && to !== null) {
-      console.log("from to", from, to)
+
       if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing' || this.loggedIn.userRole == 'Doctor') {
         appointmentData$ = this.appointmentService.getAppointmentByDate(from, to);
         this.isAppointmentDateSelected = false;
@@ -265,7 +263,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     }
     else {
       if (this.loggedIn.userRole == 'admin' || this.loggedIn.userRole == 'reception' || this.loggedIn.userRole == 'nursing') {
-        console.log("all")
+
         appointmentData$ = this.appointmentService.getAppointmentList();
       }
       else {
@@ -280,12 +278,12 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     const patientData$ = this.patientService.getPatientList();
     forkJoin([appointmentData$, departmentData$, staffData$, patientData$]).subscribe(([appointments, departments, staffs, patient]) => {
       // Debug log to check department data
-      console.log('Departments from API:', departments);
+
       // Combine data based on departmentId
       this.totalData = appointments.length;
 
       this.serialNumberArray = [];
-      console.log("appointments", appointments)
+
 
       if (appointments.message === "No records found") {
         this.appointmentList = [];
@@ -305,7 +303,9 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
             displayName: department ? department.displayName : undefined,
             patientFname: patients ? patients.firstName : 'Unknown Patient',
             patientLname: patients ? patients.lastName : '',
-            patientId: patients ? patients.patientId : null
+            patientId: patients ? patients.patientId : null,
+            // For legacy fetchCombineData, default to false since this method doesn't fetch payment status
+            isConsultationPaid: appointment.isConsultationPaid || false
           };
         });
 
@@ -320,7 +320,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         this.loadingService.hideLoader();
 
         this.toastr.error("No Appointment Available", "Appointment Status");
-        console.log(error);
+
 
       });
 
@@ -331,13 +331,13 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     this.serialNumberArray = [];
 
     // this.appointmentService.getappointmentByIDAndDate(19,dateOnly).subscribe(res=>{
-    //   console.log(res);
+
     // })
     this.appointmentService.getAppointmentList().subscribe((data: any) => {
       this.totalData = data.length;
       // this.staffList.push(data);
 
-      console.log(data)
+
       data.map((res: any, index: number) => {
         const serialNumber = index + 1;
         if (index >= this.skip && serialNumber <= this.limit) {
@@ -345,7 +345,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
           // res.ageinYear=this.age;
 
           this.appointmentList.push(res);
-          // console.log(res.DOJ)
+
           this.serialNumberArray.push(serialNumber);
         }
       });
@@ -478,8 +478,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
 
   movetoProfile(patientId: number, appointmentId: number, departmentId: number, status: string, doctorId: number) {
     this.loadingService.showLoader();
-    //this.patientService.patientId = patientId;
-    this.patientService.patientId=0;
+    this.patientService.patientId = patientId;
     this.appointmentService.appointmentId = appointmentId;
     this.departmentService.departmentId = departmentId;
     this.dosctoService.staffId = doctorId;
@@ -488,7 +487,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     }
 
     setTimeout(() => {
-      this.route.navigate([routes.profile], { queryParams: { patientId: patientId } });
+      this.route.navigate([routes.profile]);
       this.loadingService.hideLoader();
     }, 0);
 
@@ -673,11 +672,11 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     // Remove automatic doctor filtering - only use date range
     // this.searchCriteria.doctorId will remain undefined/null
 
-    console.log('Fetching paginated appointments with criteria:', this.searchCriteria);
+
 
     this.appointmentService.searchAppointments(this.searchCriteria).subscribe({
       next: (response) => {
-        console.log('Paginated search response:', response);
+
         this.loadingService.hideLoader();
         
         if (response.hasError) {
@@ -687,27 +686,25 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         } else {
           this.searchResults = response.results || [];
           this.totalData = response.totalCount || 0;
-          this.totalPages = response.totalPages || 0;
-          
-          // Transform the search results to match the existing template format
-          this.appointmentList = this.searchResults.map(appointment => ({
-            id: appointment.id,
-            patientId: appointment.patientId,
-            doctorId: appointment.doctorId,
-            date: appointment.date,
-            notes: appointment.notes,
-            appointmentStatus: appointment.appointmentStatus,
-            fee: 0, // Fee not available in new response
-            appointTime: appointment.time,
-            patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
-            patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
-            doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
-            doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
-            displayName: appointment.hospitalName,
-            departmentName: 'General', // Default department for now
-            departmentid: 1, // Default department ID
-            isConsultationPaid: false // Default to false for now
-          }));
+          this.totalPages = response.totalPages || 0;            // Transform the search results to match the existing template format
+            this.appointmentList = this.searchResults.map(appointment => ({
+              id: appointment.id,
+              patientId: appointment.patientId,
+              doctorId: appointment.doctorId,
+              date: appointment.date,
+              notes: appointment.notes,
+              appointmentStatus: appointment.appointmentStatus,
+              fee: 0, // Fee not available in new response
+              appointTime: appointment.time,
+              patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
+              patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
+              doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
+              doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
+              displayName: appointment.hospitalName,
+              departmentName: 'General', // Default department for now
+              departmentid: 1, // Default department ID
+              isConsultationPaid: appointment.isConsultationPaid || false // Use actual payment status from backend
+            }));
           
           if (this.appointmentList.length === 0) {
             this.toastr.info('No appointments found for the selected criteria');
@@ -728,7 +725,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
       },
       error: (error) => {
-        console.error('Error fetching paginated appointments:', error);
+
         this.loadingService.hideLoader();
         this.toastr.error('Error fetching appointments');
         this.searchResults = [];

@@ -43,7 +43,7 @@ export class EditDepartmentComponent {
   }
   setData(){
     this.departmentService.getDepartmentByID(this.departmentService.departmentId).subscribe(data=>{
-      console.log("data",data)
+
       this.depForm.patchValue(data);
     })
   }
@@ -65,10 +65,10 @@ export class EditDepartmentComponent {
     if (this.depForm.valid) {
       this.depDto=dep.value;
       this.depDto.departmentId=this.depId;
-      console.log(this.depId,"depid ", this.depDto,"dto")
+
       this.departmentService.updateDepartment(this.depId,this.depDto).subscribe(
         res=>{
-        console.log(res);
+
         res?this.toster.success("Department updated successfully"):null
         this.route.navigate([routes.departmentList])
         
@@ -83,7 +83,7 @@ export class EditDepartmentComponent {
   }
 cancleUpdate()
 {
-  console.log()
+
 }
   
 }

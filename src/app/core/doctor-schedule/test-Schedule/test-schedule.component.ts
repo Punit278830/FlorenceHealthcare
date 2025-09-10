@@ -121,11 +121,11 @@ export class TestScheduleComponent implements OnInit {
 
 
   submitschedule(scheduleData: FormGroup) {
-    console.log(scheduleData.valid);
+
     this.loaderService.showLoader();
     if (scheduleData.valid) {
       //this._staffScheduleDto=scheduleData.value;  
-      console.log(scheduleData.value);
+
 
       this.leaveCheckBoxStatus ? this.scheduleGroup.get('leaveStatus')?.setValue(2) : this.scheduleGroup.get('leaveStatus')?.setValue(1);
       this._staffScheduleDto = this.scheduleGroup.value;
@@ -133,9 +133,9 @@ export class TestScheduleComponent implements OnInit {
       this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
       this._staffScheduleDto.status = 'Pending';
       //  this._staffScheduleDto.name=`${this.loggedInUser.fname} ${this.loggedInUser.lname}`
-      console.log("staffschedule", this._staffScheduleDto)
+
       this.staffScheduleService.addStaffSchedule(this._staffScheduleDto).subscribe(res => {
-        console.log(res);
+
         this.showAdujestmentSchedule(this.loggedInUser.loginId);
         this._staffScheduleDto.leaveStatus == 1 ? this.toster.success("Schedule adjusted Successfully", "Success") : this.toster.success("Leave apply successfully", "Success");
         this.scheduleGroup.reset();
@@ -154,7 +154,7 @@ export class TestScheduleComponent implements OnInit {
     this._staffScheduleDto.staffId = this.loggedInUser.loginId;
     this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
     this.staffScheduleService.addStaffSchedule(this._staffScheduleDto).subscribe(res => {
-      console.log(res);
+
       this.showAdujestmentSchedule(this.loggedInUser.loginId);
       this.toster.success("Leave Apply Successfully", "Apply Leave")
     })
@@ -175,7 +175,7 @@ export class TestScheduleComponent implements OnInit {
     // Extract the date part only
     // const datePipe = new DatePipe('en-US');
     const dateOnly = this.datePipe.transform(event.value, 'yyyy-MM-dd');
-    console.log('Selected Date (Date Only):', dateOnly);
+
     this.scheduleGroup.get('scheduleDate')?.setValue(dateOnly);
   }
 
@@ -186,7 +186,7 @@ export class TestScheduleComponent implements OnInit {
   showAdujestmentSchedule(id: number) {
     this.blockedDates = [];
     this.staffScheduleService.getStaffScheduleByStaffId(id).subscribe(res => {
-      console.log(res);
+
       res.map(result => {
 
         this.blockedDates.push(new Date(result.scheduleDate));
@@ -204,7 +204,7 @@ export class TestScheduleComponent implements OnInit {
         const lessDate = this.DateCompareFromToday(new Date(result.scheduleDate))
         if (lessDate) {
           this.staffScheduleService.getSelectedSchedule(scheduleId).subscribe(res => {
-            console.log(res);
+
             this.staffScheduleService.scheduleId = res.scheduleId;
             if (res.leaveStatus == 2) {
               this.scheduleGroup.get('scheduleDate')?.patchValue(res.scheduleDate);
@@ -225,7 +225,7 @@ export class TestScheduleComponent implements OnInit {
 
 
     // this.staffScheduleService.getSelectedSchedule(scheduleId).subscribe(res=>{
-    // console.log(res);
+
     // this.staffScheduleService.scheduleId=res.scheduleId;
     //   if(res.leaveStatus==2)
     //   {
@@ -249,7 +249,7 @@ export class TestScheduleComponent implements OnInit {
 
     this._staffScheduleDto.departmentId = this.loggedInUser.departmentId;
     this.staffScheduleService.updateSchedule(id, this._staffScheduleDto).subscribe(res => {
-      console.log(res);
+
       this.showAdujestmentSchedule(this.loggedInUser.loginId);
       this.toster.success("Schedule updated successFully", "Update Schedule");
     })
@@ -268,13 +268,13 @@ export class TestScheduleComponent implements OnInit {
 
   deleteSchedule(event: any) {
     const scheduleId = parseInt((event.target as HTMLButtonElement).value);
-    console.log()
+
     this.scheduleList.map(result => {
       if (result.scheduleId == scheduleId) {
         const lessDate = this.DateCompareFromToday(new Date(result.scheduleDate))
         if (lessDate) {
           this.staffScheduleService.deleteScheuleById(scheduleId).subscribe(result => {
-            console.log(result)
+
             this.toster.success("Rescore deleted successfully", "Delete schedule")
             this.showAdujestmentSchedule(this.loggedInUser.loginId);
           })

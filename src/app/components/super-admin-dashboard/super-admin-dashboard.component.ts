@@ -256,7 +256,7 @@ export class SuperAdminDashboardComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Error checking super admin status:', error);
+
       }
     });
   }
@@ -268,7 +268,7 @@ export class SuperAdminDashboardComponent implements OnInit {
         this.systemSummary = summary;
       },
       error: (error) => {
-        console.error('Error loading system summary:', error);
+
       }
     });
 
@@ -278,7 +278,7 @@ export class SuperAdminDashboardComponent implements OnInit {
         this.hospitals = hospitals;
       },
       error: (error) => {
-        console.error('Error loading hospitals:', error);
+
       }
     });
   }
@@ -289,25 +289,25 @@ export class SuperAdminDashboardComponent implements OnInit {
 
   viewHospitalDetails(hospitalId: number): void {
     // Navigate to hospital-specific view
-    console.log('View hospital details for:', hospitalId);
+
     // You can implement navigation logic here
   }
 
   viewAllAppointments(): void {
     // Navigate to global appointments view
-    console.log('View all appointments');
+
     // You can implement navigation logic here
   }
 
   viewAllPatients(): void {
     // Navigate to global patients view
-    console.log('View all patients');
+
     // You can implement navigation logic here
   }
 
   viewAllStaff(): void {
     // Navigate to global staff view
-    console.log('View all staff');
+
     // You can implement navigation logic here
   }
 }

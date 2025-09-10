@@ -26,7 +26,7 @@ export class HospitalInitService {
           }
         },
         error: (error: any) => {
-          console.error('Failed to load hospitals, defaulting to hospital ID 1:', error);
+
           // Default to hospital ID 1 if loading fails
           this.hospitalService.setCurrentHospitalId(1);
         }

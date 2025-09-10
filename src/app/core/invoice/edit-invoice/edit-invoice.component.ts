@@ -121,17 +121,17 @@ export class EditInvoiceComponent implements OnInit {
             this.itemService.getItemById(itemId).subscribe((data: any) => {
                 this.invoiceItemDto = data;
                 this.filteredItemList = [data];
-                console.log('Search by ID result:', data);
+
             }, (error: any) => {
-                console.error('Error fetching item by ID:', error);
+
             });
         } else {
             // Search by name
             this.itemService.searchItemByName(value).subscribe((data: any) => {
                 this.filteredItemList = data;
-                console.log('Search by name result:', data);
+
             }, (error: any) => {
-                console.error('Error fetching item by name:', error);
+
             });
         }
     }
@@ -215,7 +215,7 @@ export class EditInvoiceComponent implements OnInit {
         this.filteredItemList = response;
       },
       (error: any) => {
-        console.error('Error searching items by name:', error);
+
       }
     );
   }

@@ -11,6 +11,6 @@ const routes: Routes = [{ path: '', component: StaffScheduleComponent }];
 export class StaffScheduleRoutingModule {
   constructor()
   {
-    console.log("StaffScheduleRoutingModule module loading")
+
   }
  }

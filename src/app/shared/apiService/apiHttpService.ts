@@ -15,9 +15,9 @@ export class ApiHttpService {
   private withHospitalHeader(options?: any): any {
     const hospitalId = localStorage.getItem('currentHospitalId') || '1'; // Default to hospital ID 1
     const staffId = localStorage.getItem('currentStaffId'); // Get current staff ID
-    console.log('ApiHttpService: Using hospital ID:', hospitalId);
-    console.log('ApiHttpService: Using staff ID:', staffId);
-    console.log('ApiHttpService: Original options:', options);
+
+
+
     
     // Create a new HttpHeaders object properly
     let headers: HttpHeaders;
@@ -44,7 +44,7 @@ export class ApiHttpService {
       }
     }
     
-    console.log('ApiHttpService: Final headers:', headers);
+
     
     return { 
       ...options,
@@ -68,9 +68,9 @@ export class ApiHttpService {
       ...(staffId && { 'X-Staff-Id': staffId })
     });
     
-    console.log('ApiHttpService POST: URL:', url);
-    console.log('ApiHttpService POST: Headers:', headers);
-    console.log('ApiHttpService POST: Data:', data);
+
+
+
     
     return this.http.post(url, data, { 
       ...options,

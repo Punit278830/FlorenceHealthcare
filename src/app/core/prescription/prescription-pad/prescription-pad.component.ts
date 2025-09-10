@@ -241,7 +241,6 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
 
   saveCanvasToDatabase(): void {
-    debugger
     
     if (this.prescriptionPad.isEmpty()) {
       this.toastr.error("No content to save! Please draw something.", "Error");
@@ -302,10 +301,10 @@ export class PrescriptionPadComponent implements AfterViewInit {
 
   uploadNewImage() {
     
-     console.log("foleDto" + this.FileUploadDto)
+
     this.fileUploadServie.uploadConsultationFile(this.FileUploadDto).subscribe(
       result => {
-        console.log("data" +result);
+
         const newFileId = result.fileId;
 
         // Append the file ID to the URL as a query parameter
@@ -329,7 +328,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
       },
       error => {
         this.loaderService.hideLoader();
-        console.error('Error uploading canvas image:', error);
+
         this.toastr.error('Image upload failed', 'Error');
       }
     );
@@ -344,7 +343,7 @@ export class PrescriptionPadComponent implements AfterViewInit {
       },
       error => {
         this.loaderService.hideLoader();
-        console.error('Error updating canvas image:', error);
+
         this.toastr.error('Image update failed', 'Error');
       }
     );

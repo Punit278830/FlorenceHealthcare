@@ -598,6 +598,7 @@ namespace hospitalApiProject.Controllers
             var patientIds = pageAppointments.Select(a => a.PatientId).Distinct().ToList();
             var doctorIds = pageAppointments.Select(a => a.DoctorId).Distinct().ToList();
             var hospitalIds = pageAppointments.Where(a => a.HospitalId.HasValue).Select(a => a.HospitalId!.Value).Distinct().ToList();
+            var appointmentIds = pageAppointments.Select(a => a.Id).Distinct().ToList();
 
             // Load related data for the selected appointments (single round trip per set)
             var patients = await _context.PatientInfos
@@ -618,16 +619,25 @@ namespace hospitalApiProject.Controllers
                 .Select(h => new { h.HospitalId, h.Name })
                 .ToListAsync();
 
+            // Load invoice information to determine payment status
+            var invoices = await _context.InvoiceInfos
+                .AsNoTracking()
+                .Where(i => appointmentIds.Contains(i.AppointmentId) && i.IsDeleted != true)
+                .Select(i => new { i.AppointmentId, i.IsConsultationPaid })
+                .ToListAsync();
+
             // Create lookup dictionaries
             var patientDict = patients.ToDictionary(p => p.PatientId, p => p);
             var doctorDict = doctors.ToDictionary(d => d.StaffId, d => d);
             var hospitalDict = hospitals.ToDictionary(h => h.HospitalId, h => h);
+            var invoiceDict = invoices.ToDictionary(i => i.AppointmentId, i => i);
 
             var results = pageAppointments.Select(a =>
             {
                 var patient = patientDict.TryGetValue(a.PatientId, out var p) ? p : null;
                 var doctor = doctorDict.TryGetValue(a.DoctorId, out var d) ? d : null;
                 var hospital = a.HospitalId.HasValue && hospitalDict.TryGetValue(a.HospitalId.Value, out var h) ? h : null;
+                var invoice = invoiceDict.TryGetValue(a.Id, out var inv) ? inv : null;
 
                 var age = patient?.Dob != null ? 
                     DateTime.Now.Year - patient.Dob.Year - (DateTime.Now.DayOfYear < patient.Dob.DayOfYear ? 1 : 0) : 
@@ -651,7 +661,8 @@ namespace hospitalApiProject.Controllers
                     CreatedDate = null, // Not available in current model
                     Gender = patient?.Gender ?? "",
                     Dob = patient?.Dob,
-                    Age = age
+                    Age = age,
+                    IsConsultationPaid = invoice?.IsConsultationPaid ?? false
                 };
             }).ToList();
 

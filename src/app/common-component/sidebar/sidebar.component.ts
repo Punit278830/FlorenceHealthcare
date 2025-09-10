@@ -105,7 +105,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       }
     }
     
-    console.log('Current user role:', userRole);
+
     
     this.sidebarData.map((mainMenus: SideBarData) => {
      if(mainMenus.tittle === userRole)

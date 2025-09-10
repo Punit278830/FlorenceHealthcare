@@ -267,7 +267,7 @@ export class InvoiceViewComponent implements OnInit {
         this.hospitalDetails = res;
       },
       error: (error) => {
-        console.error('Error fetching hospital details:', error);
+
         this.hospitalDetails = null;
       }
     });
@@ -372,7 +372,7 @@ export class InvoiceViewComponent implements OnInit {
     );
 
     if (!previous) {
-      console.warn("No appointment found before the selected appointment date.");
+
       return;
     }
 
@@ -517,7 +517,7 @@ export class InvoiceViewComponent implements OnInit {
         tpm.print();
         this.thermalvisible = false;
       } else {
-        console.error('printView is not defined');
+
       }
     }, 100);
   }
@@ -672,7 +672,7 @@ class ThermalPrinterService {
       printerWindow.focus();
       printerWindow.print();
     } else {
-      console.error("Failed to open the print window. Please check your browser settings and try again.");
+
     }
   }
 }

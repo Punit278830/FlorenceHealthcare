@@ -826,6 +826,7 @@ export interface AppointmentInfoResponse {
   gender: string;
   dob?: Date;
   age?: number;
+  isConsultationPaid: boolean;
 }
 
 export enum AppointmentStatus {

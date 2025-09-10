@@ -48,6 +48,6 @@ export class DoctorScheduleRoutingModule {
 
   constructor()
   {
-    console.log("Doctor schedule module loding...")
+
   }
 }

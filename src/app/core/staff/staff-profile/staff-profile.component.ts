@@ -25,7 +25,7 @@ export class StaffProfileComponent {
     const idhere=this.staffservice.staffId;
     this.staffservice.getStaffByID(idhere).subscribe((data:any)=>{
       this.staffInfo=data;
-      console.log("data",this.staffInfo)
+
       this.staffInfo.IdentityName=data.identityName;
       this.staffInfo.IdentityNumber=data.identityNumber;
       

@@ -125,8 +125,8 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.selectedPaymentStatus = 'All';
     this.selectedPaymentMode = 'All';
     
-    console.log('Initialized with date:', formattedToday);
-    console.log('Form values:', this.searchForm.value);
+
+
     
     // Sync form data with search criteria and selected values before calling search
     this.getFormData();
@@ -153,21 +153,21 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     if (event) {
       event.preventDefault();
     }
-    console.log('Search button clicked - searchInvoices method called');
-    console.log('Form valid:', this.searchForm.valid);
-    console.log('Form value:', this.searchForm.value);
-    console.log('Form errors:', this.searchForm.errors);
+
+
+
+
     
     // Temporarily remove form validation to test
     // if (!this.searchForm.valid) {
-    //   console.log('Form is invalid, marking all fields as touched');
+
     //   this.searchForm.markAllAsTouched();
     //   return;
     // }
     
     // Call getTableData with filtered parameters
     this.getFormData();
-    console.log('Search criteria after getFormData:', this.searchCriteria);
+
     this.getTableData();
   }
 
@@ -195,16 +195,16 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
   // Now you can call getFormData in getTableData directly
  public getTableData(): void {
-  console.log('getTableData called with search criteria:', this.searchCriteria);
+
   this.loadingService.showLoader();
   
-  console.log('Making API call to searchInvoices...');
+
   this.invoiceService.searchInvoices(this.searchCriteria).subscribe(
     (response) => {
-      console.log('API response received:', response);
+
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
-      console.log('Number of invoices loaded:', this.invoices.length);
+
       
       // Calculate total payment amount for the selected date range, payment mode, and payment status using paymentDate
       this.calculateTotalPaymentAmount();
@@ -219,7 +219,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
 
       // If no data after filter, fallback to last 30 days
       if (this.invoices.length === 0 && this.searchCriteria.fromDate && this.searchCriteria.toDate) {
-        console.log('No data found, trying fallback date range');
+
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(today.getDate() - 1);
@@ -229,10 +229,10 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
         this.searchCriteria.toDate = formattedToday;
         this.searchForm.patchValue({ from: formattedYesterday, to: formattedToday });
         this.invoiceService.searchInvoices(this.searchCriteria).subscribe((fallbackResponse) => {
-          console.log('Fallback API response:', fallbackResponse);
+
           this.searchResponse = fallbackResponse;
           this.invoices = fallbackResponse?.results ?? [];
-          console.log('Fallback: Number of invoices loaded:', this.invoices.length);
+
           this.calculateTotalPaymentAmount();
           const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
           this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
@@ -243,7 +243,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
       }
     },
     (error) => {
-      console.error('Error loading invoice data:', error);
+
       this.loadingService.hideLoader();
     }
   );
@@ -256,8 +256,8 @@ private calculateTotalPaymentAmount(): void {
     const selectedStatus: string = this.selectedPaymentStatus;
     let total = 0;
     
-    console.log('Calculating total with filters:', { fromDate, toDate, selectedMode, selectedStatus });
-    console.log('Number of invoices:', this.invoices.length);
+
+
     
     this.invoices.forEach((invoice: any) => {
       if (Array.isArray(invoice.paymentDetails)) {
@@ -287,15 +287,6 @@ private calculateTotalPaymentAmount(): void {
               (selectedStatus === 'Partially Paid' && (invoice.status.toLowerCase() === 'partially paid' || invoice.status.toLowerCase() === 'partial'))
             ));
           
-          console.log('Payment detail check:', {
-            paymentDate,
-            isDateMatch,
-            isModeMatch,
-            isStatusMatch,
-            amount: pd.amount,
-            paymentMode: pd.paymentMode,
-            invoiceStatus: invoice.status
-          });
           
           if (isDateMatch && isModeMatch && isStatusMatch) {
             total += Number(pd.amount) || 0;
@@ -304,7 +295,7 @@ private calculateTotalPaymentAmount(): void {
       }
     });
     
-    console.log('Calculated total payment amount:', total);
+
     this.totalPaymentAmount = total;
   }
 
@@ -398,10 +389,10 @@ private calculateTotalPaymentAmount(): void {
 
   moveToEditInvoice(id: number) {
     this.invoiceService.invoiceId = id;
-    this.route.navigate(['/invoice/edit-invoice'])
-
+    this.route.navigate(['/invoice/edit-invoice']);
   }
- deleteInvoice(idhere: number) {
+
+  deleteInvoice(idhere: number) {
     this.modalservice.openModal({
       type: 'invoice',
       id: idhere,
@@ -412,11 +403,10 @@ private calculateTotalPaymentAmount(): void {
   confirmDelete(idhere: number) {
     this.invoiceService.deleteInvoice(idhere).subscribe(res => {
       if (res == null) {
-        this.toaster.success("Invoice is deleted!")
+        this.toaster.success("Invoice is deleted!");
         this.getTableData();
       }
-    })
-
+    });
   }
 
 
@@ -749,7 +739,7 @@ getTotalUnpaidAmount(): number {
       const formatted = this.datePipe.transform(dateToFormat, format, 'Asia/Kolkata');
       return formatted || 'Invalid Date';
     } catch (error) {
-      console.error('Error formatting date:', error, 'Input:', dateValue);
+
       return 'Invalid Date';
     }
   }
@@ -795,7 +785,7 @@ getTotalUnpaidAmount(): number {
       const formatted = this.formatDate(latestDate, 'dd/MM/yyyy HH:mm');
       return formatted || 'N/A';
     } catch (error) {
-      console.error('Error formatting payment date:', error);
+
       return 'N/A';
     }
   }

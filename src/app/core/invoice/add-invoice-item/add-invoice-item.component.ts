@@ -39,7 +39,7 @@ export class AddInvoiceItemComponent {
     this.getAllInvoiceItem();
     // Get the ID from the route
     this.itemId = Number(this.activeroute.snapshot.paramMap.get('id'));
-    console.log('idddd ', this.itemId);
+
     
     if (this.itemId) {
       // Fetch item details if ID is present
@@ -53,7 +53,7 @@ getInvoiceItemById(id: number) {
   this.InvoiceService.getInvoiceMasterById(id).subscribe(
     (res) => {
       if (res && this.invoiceItem) {
-        console.log('Fetched Item:', res);
+
         // Patch the form with the fetched data
         this.invoiceItem.patchValue({
           itemName: res.itemName || '',
@@ -62,22 +62,22 @@ getInvoiceItemById(id: number) {
           fee: res.fee || 0
         });
       } else {
-        console.error('Response is undefined or form is not initialized');
+
       }
     },
     (error) => {
-      console.error('Error fetching item details:', error);
+
     }
   );
 }
 
 
   deleteInvoiceItem(id: number) {
-    console.log('deleteId', id);
+
     if (id) {
       this.confirmDelete(id);
     } else {
-      console.error('Invalid item ID');
+
     }
   }
   
@@ -91,7 +91,7 @@ getInvoiceItemById(id: number) {
         }
       },
       error: (err) => {
-        console.error('Error deleting item:', err);
+
         this.toater.error('Failed to delete item');
       }
     });
@@ -100,7 +100,7 @@ getInvoiceItemById(id: number) {
 
   onEditItem(id: number) {
     this.isEditMode = true;
-    console.log('Editing Item ID:', id);
+
     this.InvoiceService.itemId=id;
     // Fetch item details if ID is present
     this.getInvoiceItemById(id);
@@ -111,7 +111,7 @@ getInvoiceItemById(id: number) {
   getAllInvoiceItem() : void {
     this.InvoiceService.getAllInvoiceMaster().subscribe((data:any) =>{
       this.invoiceitems=data;
-      console.log('INVOICE ITEMS:', data);
+
     }
   
   )};
@@ -127,7 +127,7 @@ getInvoiceItemById(id: number) {
 
   // addInvoiceItem(invoiceItem:FormGroup){
   //   if(this.invoiceItem.valid){
-  //     console.log(invoiceItem.value)
+
   //     this.invoicedto=invoiceItem.value;
   //     //this.invoicedto.regstrationDate=parse(dd ,'yyyy-MM-dd', new Date());
   //     this.InvoiceService.postInvoiceItem(this.invoicedto).subscribe(res=>{
@@ -145,7 +145,7 @@ getInvoiceItemById(id: number) {
     addInvoiceItem(invoiceItem: FormGroup) {
       this.isEditMode = false;
       if (this.invoiceItem.valid) {
-        console.log(invoiceItem.value);
+
         this.invoicedto = invoiceItem.value;
     
         // Check if it's an edit operation or a new add operation
@@ -160,7 +160,7 @@ getInvoiceItemById(id: number) {
               this.InvoiceService.itemId = 0; // Clear the itemId after update
             },
             error: (err:any) => {
-              console.error('Error updating item:', err);
+
               this.toater.error("Failed to update Invoice Item");
             }
           });
@@ -173,7 +173,7 @@ getInvoiceItemById(id: number) {
               this.resetForm(); // Reset form after add
             },
             error: (err:any) => {
-              console.error('Error adding item:', err);
+
               this.toater.error("Failed to add Invoice Item");
             }
           });

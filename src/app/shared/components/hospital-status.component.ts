@@ -83,7 +83,7 @@ export class HospitalStatusComponent implements OnInit {
         this.updateCurrentHospitalName();
       },
       error: (error) => {
-        console.error('Failed to load hospitals:', error);
+
       }
     });
   }

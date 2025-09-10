@@ -14,7 +14,7 @@ export class InvoiceItemService
 private readonly apiUrl = api_Url;
   public itemId!: number;
   constructor(private http: ApiHttpService,) {
-    console.log();
+
   }
 
   getItemById(itemId:number):Observable<IinvoiceItem>

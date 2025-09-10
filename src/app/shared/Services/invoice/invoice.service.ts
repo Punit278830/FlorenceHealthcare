@@ -17,7 +17,7 @@ export class InvoiceService {
   public itemId!: number;
 
   constructor(private http: ApiHttpService,) {
-    console.log();
+
   }
 
   // getAllInvoice(paymentMode: string): Observable<Iinvoice[]> {
@@ -144,8 +144,8 @@ export class InvoiceService {
 
   searchInvoices(criteria: SearchCriteriaBase): Observable<SearchResponseBase<Iinvoice>> {
     // Debug logging
-    console.log('InvoiceService.searchInvoices called with criteria:', criteria);
-    console.log('API URL:', `${this.apiUrl}InvoiceInfoes/Search`);
+
+
     
     // Don't pass additional headers, let ApiHttpService handle all headers
     return this.http.post(

@@ -125,7 +125,7 @@ export class PatientsListComponent implements OnInit {
         // this.staffList.push(data);
         this.allpatientList = data;
 
-        console.log(data);
+
         this.loadingService.hideLoader();
 
         data.map((res: any, index: number) => {
@@ -135,7 +135,7 @@ export class PatientsListComponent implements OnInit {
             res.ageinYear = this.age;
 
             this.patientList.push(res);
-            console.log(res.DOJ)
+
             this.serialNumberArray.push(serialNumber);
           }
         });
@@ -150,10 +150,10 @@ export class PatientsListComponent implements OnInit {
         this.totalData = data.length;
         // this.staffList.push(data);
         this.allpatientList = data;
-        console.log("allpatients", this.allpatientList)
+
         this.loadingService.hideLoader();
 
-        console.log(data)
+
         data.map((res: any, index: number) => {
           const serialNumber = index + 1;
           if (index >= this.skip && serialNumber <= this.limit) {
@@ -161,7 +161,7 @@ export class PatientsListComponent implements OnInit {
             res.ageinYear = this.age;
 
             this.patientList.push(res);
-            console.log(res.DOJ)
+
             this.serialNumberArray.push(serialNumber);
           }
         });
@@ -172,74 +172,14 @@ export class PatientsListComponent implements OnInit {
       })
     }
 
-    // this.patientService.getPatientList().subscribe((data:any)=>{
-    //    this.totalData=data.length;
-    //     // this.staffList.push(data);
-
-    //         console.log(data)
-    //         data.map((res: any, index: number) => {
-    //   const serialNumber = index + 1;
-    //   if (index >= this.skip && serialNumber <= this.limit) {
-    //     this.calculateDateDifference(res.dob);
-    //     res.ageinYear=this.age;
-
-    //     this.patientList.push(res);
-    //     console.log(res.DOJ)
-    //     this.serialNumberArray.push(serialNumber);
-    //   }
-    // });
-    //         this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientList);
-    //         this.calculateTotalPages(this.totalData, this.pageSize);
-
-    // })
-
-    // this.data.getStaffList().subscribe((data: apiResultFormat) => {
-    //   this.totalData = data.totalData;
-    //   console.log("mock data"+data);
-
-
-    //   // data.data.map((res: staffList, index: number) => {
-    //   //   const serialNumber = index + 1;
-    //   //   if (index >= this.skip && serialNumber <= this.limit) {
-
-    //   //     //this.staffList.push(res);
-    //   //     this.serialNumberArray.push(serialNumber);
-    //   //   }
-    //   // });
-    //   //this.dataSource = new MatTableDataSource<staffList>(this.staffList);
-    //   //this.calculateTotalPages(this.totalData, this.pageSize);
-    // });
   
   }
-  // private getTableData(): void {
-  //   this.patientsList = [];
-  //   this.serialNumberArray = [];
-
-  //   this.data.getPatientsList().subscribe((data: apiResultFormat) => {
-  //     this.totalData = data.totalData;
-  //     data.data.map((res: patientsList, index: number) => {
-  //       const serialNumber = index + 1;
-  //       if (index >= this.skip && serialNumber <= this.limit) {
-
-  //         this.patientsList.push(res);
-  //         this.serialNumberArray.push(serialNumber);
-  //       }
-  //     });
-  //     this.dataSource = new MatTableDataSource<patientsList>(this.patientsList);
-  //     this.calculateTotalPages(this.totalData, this.pageSize);
-  //   });
-  // }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
-    // this.serialNumberArray = [];
-    // this.totalData = 0;
-
+  
     if (value != '') {
-      console.log("value", value)
-      console.log("datasource", this.dataSource)
       this.dataSource.filter = value.trim().toLowerCase();
       this.patientList = this.dataSource.filteredData;
-      console.log("value", this.patientList)
       if (this.patientList.length > 0) {
         this.patientList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)
@@ -277,9 +217,6 @@ export class PatientsListComponent implements OnInit {
   }
 
   public getMoreData(event: string): void {
-    console.log('Current Page:', this.currentPage);
-    console.log('Total Pages:', this.totalPages);
-    console.log('Patients List:', this.patientsList);
 
     if (event == 'next' && this.currentPage < this.pageNumberArray.length) {
       this.currentPage++;
@@ -334,14 +271,12 @@ export class PatientsListComponent implements OnInit {
 
   onEditPatient(id: number) {
     this.patientService.patientId = id;
-    console.log("stafflist", this.patientList)
 
   }
 
   onBookAppointment(id: number) {
     this.patientService.patientId = id;
     localStorage.setItem('lastPath','patientList');
-    console.log("stafflist", this.patientList)
   }
 
   calculateDateDifference(dob: Date) {

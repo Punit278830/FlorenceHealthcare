@@ -194,7 +194,7 @@ private route : Router)
   // Subscribe to hospital changes
   this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
     if (hospitalId) {
-      console.log('Hospital changed to:', hospitalId);
+
       this.loadDashboardData();
     }
   });
@@ -220,7 +220,7 @@ private route : Router)
   
   getPatientCountByDepartment():void {
     this.patientService.getPatientCountByDepartment().subscribe((data: any) => {
-        console.log('Fetched data:', data);
+
 
     this.chartOptionsTwo = {
       series: data?.map((x:any) => x.patientCount),
@@ -262,7 +262,7 @@ private route : Router)
 
 getPatientCountByGender(): void {
   this.patientService.getPatientCountByGender().subscribe((data: any) => {
-      console.log('Fetched data:', data); // Log the response
+
 
       // Convert object to array format
       if (data && typeof data === 'object') {
@@ -272,7 +272,7 @@ getPatientCountByGender(): void {
               { gender: 'transgender', count: data.transgender || 0 }
           ];
       } else {
-          console.error('Unexpected data format:', data);
+
       }
   });
 }
@@ -377,7 +377,7 @@ public getGreetingMsg()
 appointmentCount() {
   this.appointmentService.getAppointmentCount().subscribe(
     count => {
-      console.log('Appointment count:', count);
+
       if (typeof count === 'number') {
         this.count = count > 0 ? count : 0;
       } else {
@@ -385,7 +385,7 @@ appointmentCount() {
       }
     },
     error => {
-      console.error('Error fetching appointment count:', error);
+
       this.count = 0;
     }
   );
@@ -397,7 +397,7 @@ appointmentCount() {
 patientCountToday() {
   this.patientService.GetNewPatientsToday().subscribe(
     res => {
-      console.log('Patients visited today:', res);
+
       if (typeof res === 'number') {
         this.consultatCount = res > 0 ? res : 0;
       } else {
@@ -405,7 +405,7 @@ patientCountToday() {
       }
     },
     error => {
-      console.error('Error fetching patients visited today:', error);
+
       this.consultatCount = 0;
     }
   );

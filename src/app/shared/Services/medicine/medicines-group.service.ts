@@ -11,7 +11,7 @@ export class MedicinesGroupService {
 
   private readonly apiUrl = api_Url;
   constructor(private http: ApiHttpService) {
-    console.log();
+
   }
 
   addMedicineGroup(medDetails: IMedicinesGroup): Observable<any> {

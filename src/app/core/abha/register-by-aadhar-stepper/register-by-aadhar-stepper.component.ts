@@ -90,7 +90,7 @@ export class RegisterByAadharStepperComponent {
         this.txnId = res.txnId;
         this.messageStep1 = res.message;
         this.toster.success(res.message);
-        console.log(res);
+
         this.stepper.next();
       },
       error => {
@@ -126,7 +126,7 @@ export class RegisterByAadharStepperComponent {
           : "Aadhar authentication completed successfully! You can skip to next step";
         this.isMobileVerified = !this.isDifferentMobile;
         this.xToken = "Bearer " + res.tokens.token;
-        console.log(res);
+
         this.stepper.next();
       },
       error => {
@@ -163,7 +163,7 @@ export class RegisterByAadharStepperComponent {
         this.txnId = res.txnId;
         this.isMobileVerified = true;
         this.toster.success(res.message);
-        console.log(res);
+
 
         this.stepper.next();
       },
@@ -184,7 +184,7 @@ export class RegisterByAadharStepperComponent {
 
         this.txnId = res.txnId;
         this.showOtp = true;
-        console.log(res);
+
       },
       error => {
         this.toster.error(error);
@@ -204,7 +204,7 @@ export class RegisterByAadharStepperComponent {
         var fileURL = URL.createObjectURL(file);
         window.open(fileURL);
 
-        console.log(res);
+
       }
     );
   }

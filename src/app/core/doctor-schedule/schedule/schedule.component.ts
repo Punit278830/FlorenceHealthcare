@@ -106,13 +106,13 @@ private loaderService : LoadingService) {
 
       this.combinedData = staff.map((staffres: Istaffschedule) => {
         const dept = department.find((dept: Idepartment) => dept.departmentId == staffres.departmentId);
-        console.log("dept", dept)
+
         return {
           ...staffres,
           departmentName: dept ? dept.departmentName : null
         };
       });
-      console.log("the com", this.combinedData)
+
       this.combinedData = this.combinedData.map((staffres) => {
 
         const staff = allStaff.find((dept: IstaffInfo) => dept.staffId == staffres.staffId);
@@ -130,11 +130,11 @@ private loaderService : LoadingService) {
 
         if (index >= this.skip && serialNumber <= this.limit) {
           this.schedule.push(res);
-          //console.log(res.DOJ)
+
           this.serialNumberArray.push(serialNumber);
         }
       });
-      console.log("list", this.schedule)
+
       this.totalData = this.schedule.length;
       this.loaderService.hideLoader();
       this.dataSource = new MatTableDataSource<any[]>(this.schedule);
@@ -168,7 +168,7 @@ private loaderService : LoadingService) {
           this.serialNumberArray.push(serialNumber);
         }
       });
-      console.log("data", this.schedule)
+
       // this.dataSource = new MatTableDataSource<schedule>(this.schedule);
       this.calculateTotalPages(this.totalData, this.pageSize);
     });

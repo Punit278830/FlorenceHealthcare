@@ -112,7 +112,7 @@ export class EditScheduleComponent implements OnInit {
 
   setScheduleData() {
     this.staffScheduleService.getSelectedSchedule(this.scheduleId).subscribe(data => {
-      console.log("data", data)
+
       this.schedule.patchValue(data)
       this.schedule.get('status')?.setValue(data.status||'Pending');
       
@@ -132,9 +132,9 @@ export class EditScheduleComponent implements OnInit {
   UpdateStaffScheduleInfo(myschedule: FormGroup) {
     if(myschedule.valid){
       this.scheduleDto = myschedule.value;
-    console.log("schelduledto", this.scheduleDto)
+
     this.staffScheduleService.updateSchedule(this.scheduleId, this.scheduleDto).subscribe((data) => {
-      console.log("update response", data)
+
       this.route.navigate([routes.schedule])
     })
 

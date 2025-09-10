@@ -323,7 +323,7 @@ export class AddQuestionnaireComponent {
 
   getQuestionByQuestionniareId(questId: number) {
     this.question.getQuestionByQuestionaireId(questId).subscribe(res => {
-      console.log(res);
+
       this.questiontoDisplay = res;
 
       if (this.questiontoDisplay != null && this.questiontoDisplay.length > 0) {
@@ -407,7 +407,7 @@ export class AddQuestionnaireComponent {
     }
     this.answerDto.push(answerObject);
 
-    console.log(answer.value)
+
     this.nextQuestion();
 
   }
@@ -418,7 +418,7 @@ export class AddQuestionnaireComponent {
     this.editQuestion = true;
 
     this.question.getQuestionById(this.questionId).subscribe(res => {
-      console.log(res)
+
       this.questionForm.get('questionText')?.patchValue(res.questionText);
       this.questionForm.get('questionType')?.patchValue(res.questionType);
       this.questionForm.get("questionMapping")?.patchValue(270);
@@ -432,7 +432,7 @@ export class AddQuestionnaireComponent {
         this.questionList = res;
       },
       (error) => {
-        console.error('Error fetching questions:', error);
+
       }
     );
   }
@@ -566,7 +566,7 @@ export class AddQuestionnaireComponent {
 
 
     } else {
-      console.log('Question not found');
+
     }
   }
 
@@ -591,7 +591,7 @@ export class AddQuestionnaireComponent {
   // submitAnswers()
   // {
   //   this.question.postQuestionniareAnswers(this.answerDto).subscribe(res=>{
-  //     console.log(res);
+
 
   //     this.toaster.success("Questionniare submitted successfully","Questionniare")
   //   })
@@ -643,7 +643,7 @@ export class AddQuestionnaireComponent {
 
   onOptionChange(index: number) {
     this.selectedOption = index;
-    console.log('Selected Option ID:', this.selectedOption);
+
   }
 
   populateQuestionId(questionId: number): void {

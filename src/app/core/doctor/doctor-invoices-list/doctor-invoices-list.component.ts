@@ -148,7 +148,7 @@ export class DoctorInvoicesListComponent implements OnInit {
         this.loadingService.hideLoader();
       },
       (error) => {
-        console.error('Error loading data:', error);
+
         this.loadingService.hideLoader();
       }
     );

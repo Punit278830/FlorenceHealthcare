@@ -96,10 +96,10 @@
                     <th mat-sort-header="consultingDoctor">Consulting Doctor</th>
                     <th mat-sort-header="treatment">Department</th>
                     <th mat-sort-header="mobile">Notes</th>
-                    <th mat-sort-header="email">Status</th>
-                    <th mat-sort-header="email">Fee</th>
-                    <th mat-sort-header="email">Payment</th>
-                    <th mat-sort-header="email">Date & Time</th>
+                    <th mat-sort-header="status">Status</th>
+                    <th mat-sort-header="fee">Fee</th>
+                    <th mat-sort-header="payment">Payment</th>
+                    <th mat-sort-header="dateTime">Date & Time</th>
 
                     <th></th>
                   </tr>
@@ -115,17 +115,19 @@
                     <td>{{serialNumberArray[i]}}</td>
                    <td class="profile-image">
   <ng-container *ngIf="data.isConsultationPaid; else notPaid">
-    <a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
-      (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)">
+    <div (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
+         style="cursor: pointer; color: #007bff;">
       <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
       {{data.patientFname}} {{data.patientLname}}
-    </a>
+    </div>
+    <small class="d-block text-muted">Click to view profile (Paid)</small>
   </ng-container>
   <ng-template #notPaid>
-    <span>
+    <span style="color: #6c757d;">
       <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
       {{data.patientFname}} {{data.patientLname}}
     </span>
+    <small class="d-block text-muted">Payment required</small>
   </ng-template>
 </td>
 
@@ -136,7 +138,20 @@
                         [ngClass]="{'status-green' : data.appointmentStatus === 'Active', 'status-pink' : data.appointmentStatus === 'In Active','status-gray' : data.appointmentStatus === 'Cancel'}"
                         class="custom-badge">{{data.appointmentStatus}}</button></td>
                     <td>{{data.fee}}</td>
-                    <td>{{ data.isConsultationPaid ? 'Paid' : 'Not Paid' }}</td>
+                    <td>
+                      <ng-container *ngIf="data.isConsultationPaid; else notPaidStatus">
+                        <a href="javascript:void(0);" 
+                           [ngClass]="{ 'disabled': !isAllowed }"
+                           (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
+                           class="text-success fw-bold" 
+                           style="cursor: pointer; text-decoration: none;">
+                          Paid
+                        </a>
+                      </ng-container>
+                      <ng-template #notPaidStatus>
+                        <span class="text-danger">Not Paid</span>
+                      </ng-template>
+                    </td>
                     <td>{{ formatDateWithTime(data.date, data.appointTime) | date: 'dd/MM/yyyy' }}</td>
 
                     <td class="text-end">

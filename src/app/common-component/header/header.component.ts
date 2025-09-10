@@ -46,7 +46,7 @@ export class HeaderComponent {
     //this.userRole=localStorage.getItem('userRole')||'';
 
     
-    console.log(this.userRole);
+
      const data=JSON.parse(localStorage.getItem('data')||'')
 this.userName=data.fname +" "+data.lname;
 this.userRole=data.userRole;
@@ -103,7 +103,7 @@ this.userRole=data.userRole;
         this.updateCurrentHospitalName();
       },
       error: (error: any) => {
-        console.error('Failed to load hospitals:', error);
+
       }
     });
   }
