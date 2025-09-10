@@ -442,7 +442,22 @@ namespace hospitalApiProject.Controllers
 
         if (invoiceInfo != null)
         {
-          invoiceInfo.Status = hasUnpaidInvoiceItems ? "Partially Paid" : "Paid";
+          // Check both consultation payment and additional items
+          bool isConsultationUnpaid = invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value;
+          
+          if (isConsultationUnpaid && hasUnpaidInvoiceItems)
+          {
+            invoiceInfo.Status = "Unpaid";
+          }
+          else if (isConsultationUnpaid || hasUnpaidInvoiceItems)
+          {
+            invoiceInfo.Status = "Partially Paid";
+          }
+          else
+          {
+            invoiceInfo.Status = "Paid";
+          }
+          
           _context.InvoiceInfos.Update(invoiceInfo);
         }
 
