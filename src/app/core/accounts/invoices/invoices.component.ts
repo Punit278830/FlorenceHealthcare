@@ -18,6 +18,7 @@ import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 import dayjs from 'dayjs';
+import { TimezoneService } from 'src/app/timeZone.service';
 
 
 
@@ -34,6 +35,7 @@ interface data {
 })
 
 export class InvoicesComponent implements OnInit {
+   userTimeZone = 'UTC';
   public routes = routes;
   public selectedValue !: string;
   public invoices: any[] = [];
@@ -90,7 +92,9 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private modalservice: ModalServiceService,
-    private toaster: ToastrService  ) {
+    private toaster: ToastrService, 
+  private timezoneService: TimezoneService
+  ) {
 
   }
   ngOnInit() {
@@ -133,6 +137,7 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     
     // Call search to load initial data and calculate total
     this.searchInvoices();
+    this.userTimeZone = this.timezoneService.getTimeZone();
   }
 
   // Initialize the search form with From, To, Payment Status, and Payment Mode

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using hospitalApiProject.Controllers.Base;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using hospitalApiProject.Services.Shared;
 
 namespace hospitalApiProject.Controllers
 {
@@ -353,6 +355,8 @@ namespace hospitalApiProject.Controllers
       bool isRepeatWithin6Days = false;
       try
       {
+        DateTime merged = appointmentInfo.Date + appointmentInfo.AppointTime;
+        var utcTime = TimeZoneHelper.ConvertToUtc(appointmentInfo.Date, appointmentInfo.TimeZone) ;
         var hospitalId = GetHospitalIdFromHeader();
         appointmentInfo.HospitalId = hospitalId; // tag appointment
         // Add and save the appointment information
