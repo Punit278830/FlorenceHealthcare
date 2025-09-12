@@ -156,6 +156,7 @@ export class EditInvoiceComponent implements OnInit {
   addItemToInvoice(id: number) {
     const data = this.itemList.find(e => e.itemId == id);
     if (data) {
+       window.scrollTo({ top: 0, behavior: 'smooth' });
       this.addItemFormGroup.get('itemName')?.patchValue(data.itemName);
       this.addItemFormGroup.get('description')?.patchValue(data.description);
       this.addItemFormGroup.get('discount')?.patchValue(data.discount);

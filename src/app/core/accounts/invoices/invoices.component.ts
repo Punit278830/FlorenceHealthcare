@@ -172,17 +172,33 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
   }
 
   // Private method to extract form data and return it
-  private getFormData() {
-    const formData = this.searchForm.value;
-    const today = dayjs(); // no timezone adjustment
-    this.searchCriteria.fromDate = formData.from ? dayjs(formData.from).format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
-    this.searchCriteria.toDate = formData.to ? dayjs(formData.to).format('YYYY-MM-DD') : today.format('YYYY-MM-DD');
-    this.searchCriteria.paymentMode = Number(formData.paymentMode ?? 0);
-    this.searchCriteria.paymentStatus = Number(formData.paymentStatus ?? 0);
-    // Update the selected values used in calculation
-    this.selectedPaymentMode = formData.paymentMode || 'All';
-    this.selectedPaymentStatus = formData.paymentStatus || 'All';
-  }
+private getFormData() {
+  const formData = this.searchForm.value;
+  const today = dayjs(); // no timezone adjustment
+
+  this.searchCriteria.fromDate = formData.from
+    ? dayjs(formData.from).format('YYYY-MM-DD')
+    : today.format('YYYY-MM-DD');
+
+  this.searchCriteria.toDate = formData.to
+    ? dayjs(formData.to).format('YYYY-MM-DD')
+    : today.format('YYYY-MM-DD');
+
+  // Only include paymentMode and paymentStatus if not 'All'
+  this.searchCriteria.paymentMode =
+    formData.paymentMode && formData.paymentMode !== 'All'
+      ? formData.paymentMode
+      : null;
+
+  this.searchCriteria.paymentStatus =
+    formData.paymentStatus && formData.paymentStatus !== 'All'
+      ? formData.paymentStatus
+      : null;
+
+  // For display or calculation
+  this.selectedPaymentMode = formData.paymentMode || 'All';
+  this.selectedPaymentStatus = formData.paymentStatus || 'All';
+}
 
   // Utility: Get invoice generated time in IST for display
   // public getInvoiceGeneratedTime(invoice: any): string {
