@@ -73,6 +73,7 @@ export class AddAppointmentComponent implements OnInit {
 
   //public searchDataValue = '';
   public searchDataValue: string = '';
+  public allPatients: any[] = [];
   constructor(private patierntService: PatientService,
     private route: Router,
     private appointmentService: AppointmentService,
@@ -241,10 +242,14 @@ export class AddAppointmentComponent implements OnInit {
     this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
       this.clearOtherFields();
     });
+ this.patierntService.getPatientList().subscribe((patients: any[]) => {
+    this.allPatients = patients; // Store full list
+  });
 
 
   }
 
+  
   clearOtherFields() {
     this.bookappointment.patchValue({
 
@@ -285,21 +290,17 @@ export class AddAppointmentComponent implements OnInit {
 
   }
 
-  searchData(data: string) {
-    this.searchResults = [];
-    if (!data || data.trim() === '') {
-      return;
-    }
-    this.patierntService.getPatientList().subscribe((patients: any[]) => {
-      const search = data.trim().toLowerCase();
-      this.searchResults = patients.filter(p =>
-        (p.firstName && p.firstName.toLowerCase().includes(search)) ||
-        (p.lastName && p.lastName.toLowerCase().includes(search)) ||
-        (p.mobile && p.mobile.toLowerCase().includes(search)) ||
-        (p.email && p.email.toLowerCase().includes(search))
-      );
-    });
-  }
+searchData(data: string) {
+  this.searchResults = [];
+  const search = data.trim().toLowerCase();
+
+  this.searchResults = this.allPatients.filter(p =>
+    (p.firstName && p.firstName.toLowerCase().startsWith(search)) ||
+    (p.lastName && p.lastName.toLowerCase().startsWith(search)) ||
+    (p.mobile && p.mobile.toLowerCase().startsWith(search)) ||
+    (p.email && p.email.toLowerCase().startsWith(search))
+  );
+}
 
   postDatatoAppointment(id: number) {
     this.flag = true;

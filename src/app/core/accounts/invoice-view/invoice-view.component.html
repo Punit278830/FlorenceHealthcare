@@ -145,6 +145,7 @@
                                             <th>Discount (%)</th>
                                             <th>Total</th>
                                             <th>Status</th>
+                                             <th>Transaction Mode</th>
                                              <th>Transaction ID</th> 
                                             <th>Action</th>
                                             <th>Remove</th>
@@ -166,7 +167,7 @@
                                                     'Unpaid'}}</button>   </td>
                                             <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
                                                     '--'  }}</td>
-                                            
+                                            <td></td>
                                             <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
                                                 tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
                                                 ( 'Cash Payment' )  }}
@@ -186,7 +187,6 @@
                                        
                                         <ng-container *ngIf="addtionalInoiveItem.length>0">
                                             <tr *ngFor="let data of addtionalInoiveItem; let i=index">
-                                          
                                                 <td>{{doctorDetails === undefined ? i+1 : i+2}}</td>
                                                 <td>{{data.itemName}}</td>
                                                 <td>{{data.description}}</td>
@@ -194,22 +194,36 @@
                                                 <td>{{data.discount}} </td>
                                                 <td>{{ data.fee - ((data.discount/100) * data.fee) }}</td>
                                                 <!-- <td>{{data.finalAmount}}</td> -->
-                                                <td><button
-                                                        [ngClass]="{'status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
-                                                        class="custom-badge">{{data.status}}</button>
+                                                <td>
+                                                    <ng-container *ngIf="(data.fee - ((data.discount/100) * data.fee)) < 0; else normalStatus">
+                                                        <button [ngClass]="{'status-green': data.status === 'Paid', 'status-pink': data.status === 'Unpaid'}" class="custom-badge">
+                                                            {{data.status === 'Paid' ? 'Refunded' : 'Refund'}}
+                                                        </button>
+                                                    </ng-container>
+                                                    <ng-template #normalStatus>
+                                                        <button [ngClass]="{'status-green': data.status === 'Paid', 'status-pink': data.status === 'Unpaid'}" class="custom-badge">
+                                                            {{data.status}}
+                                                        </button>
+                                                    </ng-template>
                                                 </td>
                                                 <td style="text-align: center">
-                                                    {{ data.status === 'Paid' ? (data.transactionId ? data.transactionId : 'Cash Payment') : '--' }}
-                                                  </td>                                                  
-
-                                                <td>
-                                                    <button type="button" (click)="paidsubInvoiceItem(data)"
-                                                        [disabled]="data.status === 'Paid'"
-                                                        class="btn btn-primary custom-badge">{{data.status == 'Paid' ?
-                                                        'Paid' : 'Pay'}}</button>
+                                                    {{ data.transactionId ? 'Online' : 'Cash' }}
                                                 </td>
-                                                <td><a href="javascript:void(0);" class="remove-btn" *ngIf="data.status !== 'Paid'"><i
-                                                    class="fa fa-trash-alt" (click)="removeItem(data.itemName)"></i></a></td>
+                                                <td></td>
+                                                <td>
+                                                    <ng-container *ngIf="(data.fee - ((data.discount/100) * data.fee)) < 0; else normalAction">
+                                                        <button type="button" (click)="paidsubInvoiceItem(data)"
+                                                            [disabled]="data.status === 'Paid'"
+                                                            class="btn btn-primary custom-badge">{{data.status == 'Paid' ? 'Refunded' : 'Refund'}}</button>
+                                                    </ng-container>
+                                                    
+                                                    <ng-template #normalAction>
+                                                        <button type="button" (click)="paidsubInvoiceItem(data)"
+                                                            [disabled]="data.status === 'Paid'"
+                                                            class="btn btn-primary custom-badge">{{data.status == 'Paid' ? 'Paid' : 'Pay'}}</button>
+                                                    </ng-template>
+                                                </td>
+                                               <td><a href="javascript:void(0);" class="remove-btn" *ngIf="data.status !== 'Paid'"><i class="fa fa-trash-alt" (click)="removeItem(data.itemName)"></i></a></td>
                                             </tr>
                                         </ng-container>
                                     </tbody>
@@ -247,7 +261,7 @@
                             </div>
                             <div class="invoice-info">
                                 <h5>Terms & Condition</h5>
-                                <p class="text-muted">OPD Prescription valid for 6(six) days including
+                                <p class="text-muted">OPD Prescription valid for {{ doctorDetails?.PrescriptionValidity || 6 }} days including
                                     today.Audiometry services are subject to availability and warranty services are only
                                     being provided by selling company. Authorized Signatory</p>
                             </div>
@@ -330,7 +344,7 @@
     <div [ngClass]="classes.textRight"><strong>InvoiceId-</strong>#INV-{{invoiceDetails.invoiceId}} </div>
     <div [ngClass]="classes.textRight">
         <strong>Payment Mode:
-          {{ getMergedTransactionIds().length > 0 ? 'Online' : 'Cash Payment' }}
+          {{ getMergedTransactionIds().length > 0 ? 'Online' : 'Cash' }}
         </strong>
       </div>
       <div *ngIf="getMergedTransactionIds().length > 0" [ngClass]="classes.textRight">
@@ -383,7 +397,7 @@
     <!--<div [ngClass]="classes.textLeft">Terms and Conditions</div>-->
     <div [ngClass]="classes.singleLine">&nbsp;</div>
     <div [ngClass]="classes.textLeft"><strong>Terms and Conditions</strong> </div>
-    <div [ngClass]="classes.textLeft">OPD Prescription valid for 6(six) days including today</div>
+    <div [ngClass]="classes.textLeft">OPD Prescription valid for {{ doctorDetails?.PrescriptionValidity || 6 }} days including today</div>
     <div [ngClass]="classes.textLeft">Audiometry services are subject to availability and warranty services are only
         being provided by selling company.</div>
     <div [ngClass]="classes.singleLine">&nbsp;</div>
