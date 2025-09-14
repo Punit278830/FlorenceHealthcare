@@ -18,7 +18,7 @@ import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
 import dayjs from 'dayjs';
-import { TimezoneService } from 'src/app/timeZone.service';
+import { TimezoneService } from 'src/app/shared/Services/timezone/timezone.service';
 
 
 
@@ -760,48 +760,6 @@ getTotalUnpaidAmount(): number {
   }
 
   formatPaymentDate(paymentDetails: any[]): string {
-    if (!paymentDetails || paymentDetails.length === 0) {
-      return 'N/A';
-    }
-
-    // Find the most recent payment date
-    const validDates = paymentDetails
-      .map(payment => payment?.paymentDate)
-      .filter(date => {
-        // Filter out null, undefined, empty strings, and problematic values
-        if (!date || date === null || date === undefined || date === '' || 
-            date === 'null' || date === 'nullZ' || date === 'undefined') {
-          return false;
-        }
-        // Additional check for invalid date strings
-        if (typeof date === 'string' && (date.toLowerCase().includes('null') || date.toLowerCase().includes('undefined'))) {
-          return false;
-        }
-        return true;
-      })
-      .map(date => {
-        try {
-          const parsedDate = new Date(date);
-          return isNaN(parsedDate.getTime()) ? null : parsedDate;
-        } catch {
-          return null;
-        }
-      })
-      .filter(date => date !== null) as Date[];
-
-    if (validDates.length === 0) {
-      return 'N/A';
-    }
-
-    // Get the most recent date
-    const latestDate = new Date(Math.max(...validDates.map(d => d.getTime())));
-    
-    try {
-      const formatted = this.formatDate(latestDate, 'dd/MM/yyyy HH:mm');
-      return formatted || 'N/A';
-    } catch (error) {
-      console.error('Error formatting payment date:', error);
-      return 'N/A';
-    }
+    return this.timezoneService.formatPaymentDate(paymentDetails);
   }
 }

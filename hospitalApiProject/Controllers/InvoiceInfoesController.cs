@@ -7,6 +7,7 @@ using NuGet.Protocol;
 using System;
 using DateTime = System.DateTime;
 using hospitalApiProject.Controllers.Base;
+using hospitalApiProject.Services.Shared;
 
 namespace hospitalApiProject.Controllers
 {
@@ -46,16 +47,16 @@ namespace hospitalApiProject.Controllers
             .Contains(paymentMode.ToLower())); // Filter by the specified payment mode
       }
 
-      // Parse the fromDate and toDate just once at the beginning.
-      var fromDateParsed = DateTime.Parse(fromDate).Date;
-      var toDateParsed = DateTime.Parse(toDate).Date.AddDays(1);
+      // Parse the fromDate and toDate and convert to UTC for proper comparison
+      var fromDateParsed = TimeZoneHelper.ConvertIstToUtc(DateTime.Parse(fromDate).Date);
+      var toDateParsed = TimeZoneHelper.ConvertIstToUtc(DateTime.Parse(toDate).Date.AddDays(1));
 
       // Apply date filtering for paymentDate in PaymentModeInfo instead of invoice.CreatedDate
       query = query.Where(invoice => _context.PaymentModeInfo
           .Any(pm => pm.InvoiceId == invoice.InvoiceId &&
                      pm.PaymentDate.HasValue &&
-                     pm.PaymentDate.Value.Date >= fromDateParsed &&
-                     pm.PaymentDate.Value.Date <= toDateParsed));
+                     pm.PaymentDate.Value >= fromDateParsed &&
+                     pm.PaymentDate.Value <= toDateParsed));
 
       // Apply paymentStatus filtering
       if (paymentStatus.ToLower() != "all")
@@ -139,12 +140,15 @@ namespace hospitalApiProject.Controllers
     [HttpGet("GetInvoicesForToday")]
     public async Task<IActionResult> GetInvoicesForTodayAsync()
     {
-      // Get today's date as DateTime
-      var today = DateTime.Today;
+      // Get today's date in IST and convert to UTC range for comparison
+      var todayIST = TimeZoneHelper.GetCurrentIst();
+      var startOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST.Date);
+      var endOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST.Date.AddDays(1).AddTicks(-1));
+      
       var hospitalId = GetHospitalIdFromHeader();
       // Retrieve invoices with patient data for today
       var invoicesToday = await _context.InvoiceInfos
-          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value.Date == today && invoice.IsDeleted != true && (hospitalId == null || invoice.HospitalId == hospitalId))
+          .Where(invoice => invoice.CreatedDate.HasValue && invoice.CreatedDate.Value >= startOfDayUTC && invoice.CreatedDate.Value <= endOfDayUTC && invoice.IsDeleted != true && (hospitalId == null || invoice.HospitalId == hospitalId))
           .Join(
               _context.PatientInfos,
               invoice => invoice.PatientId,

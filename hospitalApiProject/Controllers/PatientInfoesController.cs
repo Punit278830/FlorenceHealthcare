@@ -1,5 +1,6 @@
 using hospitalApiProject.Models;
 using hospitalApiProject.Services.Interfaces;
+using hospitalApiProject.Services.Shared;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using hospitalApiProject.Controllers.Base;
@@ -217,9 +218,10 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetNewPatientsToday()
     {
       var hospitalId = GetHospitalIdFromHeader();
+      var today = TimeZoneHelper.GetCurrentIst().Date;
       var count = await _context.PatientInfos
           .AsNoTracking()
-          .Where(p => p.RegstrationDate != null && p.RegstrationDate.Value.Date == DateTime.Today && (hospitalId == null || p.HospitalId == hospitalId))
+          .Where(p => p.RegstrationDate != null && p.RegstrationDate.Value.Date == today && (hospitalId == null || p.HospitalId == hospitalId))
           .Select(p => p.PatientId)
           .Distinct()
           .CountAsync();

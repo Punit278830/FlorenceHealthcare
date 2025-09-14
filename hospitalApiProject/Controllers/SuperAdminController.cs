@@ -78,7 +78,7 @@ namespace hospitalApiProject.Controllers
             RoleDescription = "Global Super Administrator with access to all hospitals and data",
             HospitalId = null,
             IsActive = true,
-            CreatedDate = DateTime.Now
+            CreatedDate = DateTime.UtcNow
           };
           _context.RoleMasters.Add(globalSuperAdminRole);
           await _context.SaveChangesAsync();

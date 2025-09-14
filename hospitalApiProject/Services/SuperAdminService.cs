@@ -85,7 +85,7 @@ namespace hospitalApiProject.Services
             RoleDescription = "Hospital Administrator",
             HospitalId = staff.HospitalId.HasValue ? staff.HospitalId.Value : 1,
             IsActive = true,
-            CreatedDate = DateTime.Now
+            CreatedDate = DateTime.UtcNow
           };
           _context.RoleMasters.Add(newAdminRole);
           await _context.SaveChangesAsync();

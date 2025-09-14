@@ -371,23 +371,24 @@ export class AddAppointmentComponent implements OnInit {
         dateObj = datePart;
       }
 
+      // Create date in IST timezone, then it will be converted to UTC on backend
       const year = dateObj.getFullYear();
-      const month = dateObj.getMonth() + 1; // getMonth() is zero-based
+      const month = dateObj.getMonth(); // getMonth() is zero-based, keep as is
       const day = dateObj.getDate();
 
-      // Only set hour/minute if appointTime is present, else default to 0
-      // Create UTC date directly without timezone conversion
-      let combinedDateTimeUTC = new Date(Date.UTC(year, month - 1, day, hour, minute));
+      // Create the date in local time (IST) with the specified hour/minute
+      let appointmentDateTime = new Date(year, month, day, hour, minute);
 
       const userData = JSON.parse(localStorage.getItem('data') || '');
-      this.appointmentDto.date = combinedDateTimeUTC;
+      this.appointmentDto.date = appointmentDateTime;
       this.appointmentDto.doctorId = appointment.value.doctorId;
       this.appointmentDto.notes = appointment.value.notes;
       this.appointmentDto.patientId = this.patientId;
       this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
-
       this.appointmentDto.appointTime = formattedTime || '';
-      console.log("tme", this.appointmentDto)
+      this.appointmentDto.timeZone = 'Asia/Kolkata'; // Add timezone info
+      
+      console.log("Appointment DTO:", this.appointmentDto)
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
         console.log("result", result);

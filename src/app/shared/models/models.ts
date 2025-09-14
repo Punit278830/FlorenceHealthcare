@@ -207,9 +207,8 @@ export interface Iappointment {
   notes: string,
   appointmentStatus: string,
   fee: number;
-
   appointTime: string;
-
+  timeZone?: string;
 }
 
 export interface Idepartment {

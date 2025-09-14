@@ -22,7 +22,7 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentInfos()
     {
       // return await _context.AppointmentInfos.ToListAsync();
-      var currentDate = DateTime.Now.Date;
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date;
       var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
       var appointmentInfo = await _context.AppointmentInfos
           .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
@@ -41,9 +41,9 @@ namespace hospitalApiProject.Controllers
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date;
       var hospitalId = GetHospitalIdFromHeader();
-      var today = DateTime.Now.Date;
+      var today = TimeZoneHelper.GetCurrentIst().Date;
       var tomorrow = today.AddDays(1);
 
       var appointmentCount = await _context.AppointmentInfos
@@ -65,7 +65,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount")]
     public async Task<ActionResult<int>> GetConsultationCount()
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date;
       var hospitalId = GetHospitalIdFromHeader();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active" && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
@@ -85,7 +85,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount/{id}")]
     public async Task<ActionResult<int>> GetConsultationCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date;
       var hospitalId = GetHospitalIdFromHeader();
       var appointmentCount = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
@@ -103,7 +103,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("Earning/{id}")]
     public async Task<ActionResult<int>> GetEarning(int id)
     {
-      var currentDate = DateTime.Now.Date;
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date;
       var hospitalId = GetHospitalIdFromHeader();
       var Earning = 0;
       var appointments = await _context.AppointmentInfos
@@ -152,11 +152,15 @@ namespace hospitalApiProject.Controllers
     [HttpGet("TodayEarning/")]
     public async Task<ActionResult<int>> GetTodayEarning()
     {
-      var currentDate = DateTime.Now.Date;
+      // Get today's date in IST and convert to UTC range for comparison
+      var todayIST = TimeZoneHelper.GetCurrentIst();
+      var startOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST.Date);
+      var endOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST.Date.AddDays(1).AddTicks(-1));
+      
       var hospitalId = GetHospitalIdFromHeader();
       var TodayEarning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
+          .Where(e => e.Date >= startOfDayUTC && e.Date <= endOfDayUTC && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -175,12 +179,16 @@ namespace hospitalApiProject.Controllers
     [HttpGet("TotalEarnings/Doctor/{id}")]
     public async Task<ActionResult<int>> GetTodayEarningDoctor(int id)
     {
-      DateTime currentDate = DateTime.UtcNow.Date;
+      var todayIST = TimeZoneHelper.GetCurrentIst().Date;
+      var startOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST);
+      var endOfDayUTC = TimeZoneHelper.ConvertIstToUtc(todayIST.AddDays(1).AddTicks(-1));
       int? TodayEarning = 0;
       var hospitalId = GetHospitalIdFromHeader();
       var totalAmount = await _context.InvoiceInfos
         .Join(_context.AppointmentInfos, V1 => V1.AppointmentId, V2 => V2.Id, (v1, v2) => new { v1, v2 })
-          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate.HasValue && e.v1.CreatedDate.Value.Date == currentDate && (hospitalId == null || e.v1.HospitalId == hospitalId))
+          .Where(e => e.v1.IsConsultationPaid == true && e.v2.DoctorId == id && e.v1.CreatedDate.HasValue 
+                 && e.v1.CreatedDate.Value >= startOfDayUTC && e.v1.CreatedDate.Value < endOfDayUTC 
+                 && (hospitalId == null || e.v1.HospitalId == hospitalId))
           .ToListAsync();
 
       if (totalAmount.Count == 0) // Check if appointments were found
@@ -221,7 +229,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("doctor/{id}")]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentByDoctorId(int id)
     {
-      var currentDate = DateTime.Now.Date; // Get current date without time component
+      var currentDate = TimeZoneHelper.GetCurrentIst().Date; // Get current date without time component
       var hospitalId = GetHospitalIdFromHeader();
       var appointmentInfo = await _context.AppointmentInfos
           .Where(e => e.DoctorId == id && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
@@ -324,6 +332,9 @@ namespace hospitalApiProject.Controllers
         return BadRequest();
       }
 
+      // Ensure the appointment date is stored in UTC
+      appointmentInfo.Date = TimeZoneHelper.EnsureUtc(appointmentInfo.Date, appointmentInfo.TimeZone);
+
       _context.Entry(appointmentInfo).State = EntityState.Modified;
 
       try
@@ -355,8 +366,9 @@ namespace hospitalApiProject.Controllers
       bool isRepeatWithin6Days = false;
       try
       {
-        DateTime merged = appointmentInfo.Date + appointmentInfo.AppointTime;
-        var utcTime = TimeZoneHelper.ConvertToUtc(appointmentInfo.Date, appointmentInfo.TimeZone) ;
+        // Ensure the appointment date is stored in UTC
+        appointmentInfo.Date = TimeZoneHelper.EnsureUtc(appointmentInfo.Date, appointmentInfo.TimeZone);
+        
         var hospitalId = GetHospitalIdFromHeader();
         appointmentInfo.HospitalId = hospitalId; // tag appointment
         // Add and save the appointment information
@@ -633,8 +645,9 @@ namespace hospitalApiProject.Controllers
                 var doctor = doctorDict.TryGetValue(a.DoctorId, out var d) ? d : null;
                 var hospital = a.HospitalId.HasValue && hospitalDict.TryGetValue(a.HospitalId.Value, out var h) ? h : null;
 
+                var currentIst = TimeZoneHelper.GetCurrentIst();
                 var age = patient?.Dob != null ? 
-                    DateTime.Now.Year - patient.Dob.Year - (DateTime.Now.DayOfYear < patient.Dob.DayOfYear ? 1 : 0) : 
+                    currentIst.Year - patient.Dob.Year - (currentIst.DayOfYear < patient.Dob.DayOfYear ? 1 : 0) : 
                     (int?)null;
 
                 return new AppointmentInfoResponse

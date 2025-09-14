@@ -22,6 +22,7 @@ import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, appointmentList, Iappointment, Ilogin, AppointmentSearchCriteria, AppointmentInfoResponse, AppointmentStatus, SortDirection } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { TimezoneService } from 'src/app/shared/Services/timezone/timezone.service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -87,7 +88,8 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     private toastr: ToastrService,
     private modalservice: ModalServiceService,
     private loadingService: LoadingService,
-    private hospitalService: HospitalService
+    private hospitalService: HospitalService,
+    private timezoneService: TimezoneService
   ) {
 
   }
@@ -615,38 +617,18 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         
   }
 
-  // Add a method to format date/time using dayjs
+  // Add a method to format date/time using timezone service
   getLocalDateTime(date: any): string {
-    if (!date) return '';
-    // Convert to local time zone (e.g., 'Asia/Kolkata')
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY hh:mm A');
+    return this.timezoneService.convertToIST(date);
   }
 
   getLocalDate(date: any): string {
-    if (!date) return '';
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY');
+    return this.timezoneService.convertToISTDateOnly(date);
   }
 
-  // Combine only the date part of `date` with the given appointment time without timezone conversion
+  // Combine only the date part of `date` with the given appointment time using timezone service
   formatDateWithTime(date: any, appointTime?: any): string {
-    if (!date && !appointTime) return '';
-
-    let datePart = '';
-    if (date) {
-      if (typeof date === 'string') {
-        const tIndex = date.indexOf('T');
-        datePart = tIndex > 0 ? date.substring(0, tIndex) : date;
-      } else {
-        // If it's a Date object or other type, format as YYYY-MM-DD
-        datePart = dayjs(date).format('YYYY-MM-DD');
-      }
-    }
-
-    if (appointTime) {
-      return `${datePart ? datePart + ' ' : ''}${String(appointTime)}`;
-    }
-
-    return datePart;
+    return this.timezoneService.formatAppointmentDateTime(date, appointTime);
   }
 
   // New paginated search method

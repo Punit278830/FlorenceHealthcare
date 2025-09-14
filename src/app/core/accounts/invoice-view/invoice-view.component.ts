@@ -14,6 +14,7 @@ import { create, SheetsRegistry } from "jss";
 import preset from "jss-preset-default";
 import { IInvoicePaymentDto, IPaymentMode, ISubItemInvoicePaymentDto } from '../../../shared/models/models';
 import { api_Url } from 'src/environment/environment';
+import { TimezoneService } from 'src/app/shared/Services/timezone/timezone.service';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
@@ -191,7 +192,8 @@ export class InvoiceViewComponent implements OnInit {
     private http: HttpClient,
     private toastr: ToastrService,
     private decimalPipe: DecimalPipe,
-    private route: Router) {
+    private route: Router,
+    private timezoneService: TimezoneService) {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     if (!this.invoiceService.invoiceId) {
       this.route.navigate(['/accounts/invoices'])
@@ -494,9 +496,9 @@ export class InvoiceViewComponent implements OnInit {
     // Use invoice generated time for Timenow
     let invoiceTime: string | undefined = undefined;
     if (this.invoiceDetails?.InvoiceDate) {
-      invoiceTime = dayjs.utc(this.invoiceDetails.InvoiceDate).tz('Asia/Kolkata').format('HH:mm');
+      invoiceTime = this.timezoneService.convertToISTTimeOnly(this.invoiceDetails.InvoiceDate);
     } else if (this.invoiceDetails?.createdDate) {
-      invoiceTime = dayjs.utc(this.invoiceDetails.createdDate).tz('Asia/Kolkata').format('HH:mm');
+      invoiceTime = this.timezoneService.convertToISTTimeOnly(this.invoiceDetails.createdDate);
     }
     this.Timenow = invoiceTime || '';
 

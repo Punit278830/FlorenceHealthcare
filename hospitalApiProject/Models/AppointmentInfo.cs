@@ -33,4 +33,7 @@ public partial class AppointmentInfo
 
   // New nullable HospitalId for multi-tenant separation
   public int? HospitalId { get; set; }
+  
+  // TimeZone property for timezone handling
+  public string? TimeZone { get; set; }
 }

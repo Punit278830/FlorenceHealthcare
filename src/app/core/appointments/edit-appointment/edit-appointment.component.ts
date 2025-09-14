@@ -198,16 +198,27 @@ export class EditAppointmentComponent implements OnInit {
 
     const formattedTime = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} ${ampm}`;
 
+    // Handle date properly for timezone
+    const datePart = appointment.value.date;
+    let dateObj: Date;
+    if (typeof datePart === 'string') {
+      dateObj = new Date(datePart);
+    } else {
+      dateObj = datePart;
+    }
 
-    console.log("date", appointment.date)
-    // this.appointmentDto.date=this.formattedDateTime;
-    this.appointmentDto.date = appointment.value.date;
+    // Create date in local time (IST) with the specified hour/minute
+    const year = dateObj.getFullYear();
+    const month = dateObj.getMonth(); // getMonth() is zero-based, keep as is
+    const day = dateObj.getDate();
+    let appointmentDateTime = new Date(year, month, day, appointTime.getHours(), appointTime.getMinutes());
+
+    this.appointmentDto.date = appointmentDateTime;
     this.appointmentDto.doctorId = appointment.value.doctorId;
     this.appointmentDto.notes = appointment.value.notes;
-    // this.appointmentDto.identiyName = appointment.value.IdentiyName;
-    // this.appointmentDto.identiyNumber = appointment.value.IdentiyNumber;
     this.appointmentDto.appointmentStatus = appointment.value.appointmentStatus;
     this.appointmentDto.appointTime = formattedTime;
+    this.appointmentDto.timeZone = 'Asia/Kolkata'; // Add timezone info
 
     //this.appointmentDto.patientId=this.patientId;
     this.appointmentDto.scheduledByid = userData.loginId;
@@ -218,9 +229,6 @@ export class EditAppointmentComponent implements OnInit {
         this.route.navigate(['/accounts/invoice-view']);
       }, 1200); // 1.2 seconds delay to show the success message
     })
-
-
-
   }
 
 
