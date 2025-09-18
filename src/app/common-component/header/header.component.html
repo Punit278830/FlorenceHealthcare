@@ -106,8 +106,8 @@
                 tabindex="0"><img src="assets/img/icons/note-icon-01.svg" alt=""><span class="pulse"></span> </a>
         </li>
         
-        <!-- Hospital Selector -->
-        <li class="nav-item dropdown d-none d-sm-block">
+        <!-- Hospital Selector: Only for SuperGlobalAdmin -->
+        <li *ngIf="userRole === 'globalsuperadmin'" class="nav-item dropdown d-none d-sm-block">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link hospital-switcher" data-bs-toggle="dropdown">
                 <img src="assets/img/icons/hospital-icon.svg" alt="" style="width: 16px; height: 16px; margin-right: 5px;">
                 <span class="hospital-name">{{ currentHospitalName || 'Select Hospital' }}</span>
