@@ -355,19 +355,21 @@ export class AddStaffComponent implements OnInit {
 
 
   onHospitalSelectionChange(event: MatSelectChange) {
-
-
-    
     // Ensure the value is a number
     const hospitalId = typeof event.value === 'string' ? parseInt(event.value) : event.value;
-
     
     // Set the value in the form control
     this.staffReg.get('hospitalId')?.setValue(hospitalId);
     this.staffReg.get('hospitalId')?.markAsTouched();
     
-
-
+    // Clear existing departments and roles when hospital changes
+    this._depDto = [];
+    this.roles = [];
+    this.staffReg.get('departmentId')?.reset();
+    this.staffReg.get('roleId')?.reset();
+    
+    // Reload departments for the selected hospital
+    this.getDepartmentList();
     
     // Update roles based on selected hospital
     if (hospitalId && !isNaN(hospitalId)) {

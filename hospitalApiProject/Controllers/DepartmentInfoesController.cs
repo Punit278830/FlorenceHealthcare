@@ -70,8 +70,12 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                // Return all departments - not filtered by hospital
+                var hospitalId = await GetHospitalIdForFilteringAsync();
+                
+                // If super admin (hospitalId is null), return all departments
+                // Otherwise, filter by hospital
                 var departments = await _context.DepartmentInfos
+                    .Where(d => hospitalId == null || d.HospitalId == hospitalId)
                     .OrderByDescending(p => p.DepartmentId)
                     .ToListAsync();
                 
@@ -93,8 +97,12 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                // Get department by ID only - not filtered by hospital
-                var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id);
+                var hospitalId = await GetHospitalIdForFilteringAsync();
+                
+                // Filter by hospital if not super admin
+                var departmentInfo = await _context.DepartmentInfos
+                    .Where(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId))
+                    .FirstOrDefaultAsync();
 
                 if (departmentInfo == null)
                 {
@@ -124,14 +132,26 @@ namespace hospitalApiProject.Controllers
                     return BadRequest();
                 }
 
+                var hospitalId = await GetHospitalIdForFilteringAsync();
+                var existingDepartment = await _context.DepartmentInfos
+                    .Where(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId))
+                    .FirstOrDefaultAsync();
+
+                if (existingDepartment == null)
+                {
+                    return NotFound();
+                }
+
                 // Ensure DisplayName is properly handled (can be null or empty)
                 if (string.IsNullOrWhiteSpace(departmentInfo.DisplayName))
                 {
                     departmentInfo.DisplayName = null;
                 }
 
-                // Don't set hospital ID - departments are not tied to hospitals
-                _context.Entry(departmentInfo).State = EntityState.Modified;
+                // Update the existing department
+                existingDepartment.DepartmentName = departmentInfo.DepartmentName;
+                existingDepartment.DisplayName = departmentInfo.DisplayName;
+                existingDepartment.DepartmentStatus = departmentInfo.DepartmentStatus;
 
                 try
                 {
@@ -173,7 +193,13 @@ namespace hospitalApiProject.Controllers
                     departmentInfo.DisplayName = null;
                 }
 
-                // Don't set hospital ID - departments are not tied to hospitals
+                // Set hospital ID if provided (for multi-tenant support)
+                var hospitalId = await GetHospitalIdForFilteringAsync();
+                if (hospitalId != null)
+                {
+                    departmentInfo.HospitalId = hospitalId.Value;
+                }
+
                 _context.DepartmentInfos.Add(departmentInfo);
                 await _context.SaveChangesAsync();
 
@@ -195,8 +221,13 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                // Find department by ID only - not filtered by hospital
-                var departmentInfo = await _context.DepartmentInfos.FirstOrDefaultAsync(d => d.DepartmentId == id);
+                var hospitalId = await GetHospitalIdForFilteringAsync();
+                
+                // Filter by hospital if not super admin
+                var departmentInfo = await _context.DepartmentInfos
+                    .Where(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId))
+                    .FirstOrDefaultAsync();
+                    
                 if (departmentInfo == null)
                 {
                     return NotFound();
