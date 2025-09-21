@@ -23,8 +23,9 @@ namespace hospitalApiProject.Controllers
       {
         // Return all hospitals (including inactive and deleted for Super Admin view)
         var hospitals = await _context.Hospitals
-          .OrderBy(h => h.Name)
-          .ToListAsync();
+                            .Where(h => h.IsDeleted != true)
+                            .OrderBy(h => h.Name)
+                           .ToListAsync();
         return Ok(hospitals);
       }
       catch (Exception ex)
@@ -88,6 +89,8 @@ namespace hospitalApiProject.Controllers
           .Select(h => new {
             h.HospitalId,
             h.Name,
+            h.Code,
+            h.RegistrationNumber,
             h.Email,
             h.ContactNumber,
             h.LicenseNumber,
@@ -130,7 +133,7 @@ namespace hospitalApiProject.Controllers
         // For now, just set IsActive to false until DB columns are added
         hospital.IsActive = false;
         // TODO: Uncomment after DB migration
-        // hospital.IsDeleted = true;
+        hospital.IsDeleted = true;
         // hospital.ModifiedOn = DateTime.UtcNow;
         // hospital.ModifiedBy = "SuperAdmin";
 

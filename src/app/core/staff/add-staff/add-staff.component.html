@@ -190,7 +190,7 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="designation">Designation <span class="login-danger">*</span></label>
+                                        <label for="designation">Designation</label>
                                         <mat-select formControlName="designation" class="form-control select"
                                             (selectionChange)="onSelectionChange($event)"
                                             placeholder="Select Designation">
@@ -199,10 +199,7 @@
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="staffReg.get('designation')?.invalid && (staffReg.get('designation')?.dirty || staffReg.get('designation')?.touched)"
-                                            class="text-danger">
-                                            <div *ngIf="staffReg.get('designation')?.errors?.['required']">Designation
-                                                is required.</div>
-                                        </div>
+                                            class="text-danger" style="display:none"></div>
                                     </div>
                                 </div>
 

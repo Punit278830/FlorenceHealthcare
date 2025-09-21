@@ -42,24 +42,25 @@
                                     <span><strong>{{hospitalDetails.name}}</strong></span>
                                     <ul class="list-unstyled invoice-clinic mt-2">
                                         <!-- Complete Address Display -->
-                                        <li *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2 || hospitalDetails.city || hospitalDetails.state || hospitalDetails.pincode">
-                                            <strong>Address:</strong>
-                                            <div class="ms-2">
-                                                <span *ngIf="hospitalDetails.addressLine1">{{hospitalDetails.addressLine1}}</span>
-                                                <span *ngIf="hospitalDetails.addressLine2 && hospitalDetails.addressLine1">, </span>
-                                                <span *ngIf="hospitalDetails.addressLine2">{{hospitalDetails.addressLine2}}</span>
-                                                <br *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2">
-                                                <span *ngIf="hospitalDetails.city">{{hospitalDetails.city}}</span>
-                                                <span *ngIf="hospitalDetails.state && hospitalDetails.city">, </span>
-                                                <span *ngIf="hospitalDetails.state">{{hospitalDetails.state}}</span>
-                                                <span *ngIf="hospitalDetails.pincode"> - {{hospitalDetails.pincode}}</span>
-                                                <span *ngIf="hospitalDetails.country">, {{hospitalDetails.country}}</span>
-                                            </div>
+                                      <li *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2 || hospitalDetails.city || hospitalDetails.state || hospitalDetails.pincode || hospitalDetails.country">
+                                        <strong>Address:</strong>
+                                        <span>
+                                            <span *ngIf="hospitalDetails.addressLine1">{{ hospitalDetails.addressLine1 }}</span>
+                                            <span *ngIf="hospitalDetails.addressLine2 && hospitalDetails.addressLine1">, </span>
+                                            <span *ngIf="hospitalDetails.addressLine2">{{ hospitalDetails.addressLine2 }}</span>
+                                            <br *ngIf="hospitalDetails.addressLine1 || hospitalDetails.addressLine2">
+                                            <span *ngIf="hospitalDetails.city">{{ hospitalDetails.city }}</span>
+                                            <span *ngIf="hospitalDetails.state && hospitalDetails.city">, </span>
+                                            <span *ngIf="hospitalDetails.state">{{ hospitalDetails.state }}</span>
+                                            <span *ngIf="hospitalDetails.pincode"> - {{ hospitalDetails.pincode }}</span>
+                                            <span *ngIf="hospitalDetails.country">, {{ hospitalDetails.country }}</span>
+                                        </span>
                                         </li>
                                         <li *ngIf="hospitalDetails.contactNumber"><strong>Phone:</strong> {{hospitalDetails.contactNumber}}</li>
                                         <li *ngIf="hospitalDetails.email"><strong>Email:</strong> {{hospitalDetails.email}}</li>
                                         <li *ngIf="hospitalDetails.gstin"><strong>GSTIN:</strong> {{hospitalDetails.gstin}}</li>
-                                        <li *ngIf="hospitalDetails.licenseNumber"><strong>License:</strong> {{hospitalDetails.licenseNumber}}</li>
+                                       <li *ngIf="hospitalDetails.registrationNumber"><strong>Registration no.:</strong> {{hospitalDetails.registrationNumber}}</li>
+                                       <li *ngIf="hospitalDetails.code"><strong>Hospital Code:</strong> {{hospitalDetails.code}}</li>
                                     </ul>
                                 </div>
                                 <ng-template #defaultHospital>
@@ -165,9 +166,15 @@
                                                    [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
                                                     class="custom-badge">{{tempinvoiceDetails.isConsultationPaid ? 'Paid' :
                                                     'Unpaid'}}</button>   </td>
-                                            <td style="text-align: center">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId :
-                                                    '--'  }}</td>
-                                            <td></td>
+                                             <!-- ✅ Transaction Mode (Cash or Online) -->
+                                                <td style="text-align: center">
+                                                    {{ invoiceDetails.transactionId ? 'Online' : 'Cash' }}
+                                                </td>
+
+                                                <!-- ✅ Transaction ID (Show only if Online, else '--') -->
+                                                <td style="text-align: center">
+                                                    {{ invoiceDetails.transactionId ? invoiceDetails.transactionId : '--' }}
+                                                </td>
                                             <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
                                                 tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
                                                 ( 'Cash Payment' )  }}

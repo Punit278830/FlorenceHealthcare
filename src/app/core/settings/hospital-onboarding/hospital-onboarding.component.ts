@@ -183,6 +183,7 @@ export class HospitalOnboardingComponent implements OnInit {
     this.loading = true;
     this.error = undefined;
     this.success = undefined;
+    this.hospitals = this.hospitals.filter(h => h.hospitalId !== hospital.hospitalId);
 
     this.http.delete(`${this.apiBase}Hospitals/${hospital.hospitalId}`).subscribe({
       next: (response: any) => {

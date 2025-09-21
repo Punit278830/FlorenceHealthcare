@@ -206,7 +206,7 @@ export class AddStaffComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       address: ['', Validators.required],
       departmentId: ['', Validators.required],
-      designation: ['', Validators.required],
+  designation: [''],
       consultationFee: [0, Validators.required],
       activeStatus: [null, Validators.required],
       password: ['', Validators.required],
