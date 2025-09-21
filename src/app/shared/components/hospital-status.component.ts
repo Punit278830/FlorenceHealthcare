@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { HospitalService } from '../Services/hospital/hospital.service';
 import { HospitalModel } from '../models/models';
+import { RoleAuthorizationService } from '../Services/auth/role-authorization.service';
 
 @Component({
   selector: 'app-hospital-status',
   template: `
-    <div class="hospital-status" *ngIf="currentHospitalName">
+    <div class="hospital-status" *ngIf="currentHospitalName && isSuperAdmin">
       <div class="alert alert-info d-flex align-items-center" role="alert">
         <i class="fa fa-hospital-o me-2"></i>
         <div>
@@ -20,8 +21,8 @@ import { HospitalModel } from '../models/models';
       </div>
     </div>
 
-    <!-- Hospital Switch Modal -->
-    <div class="modal fade" id="hospitalSwitchModal" tabindex="-1" aria-labelledby="hospitalSwitchModalLabel" aria-hidden="true">
+    <!-- Hospital Switch Modal - Only show for Super Admins -->
+    <div class="modal fade" id="hospitalSwitchModal" tabindex="-1" aria-labelledby="hospitalSwitchModalLabel" aria-hidden="true" *ngIf="isSuperAdmin">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-header">
@@ -62,7 +63,14 @@ export class HospitalStatusComponent implements OnInit {
   currentHospitalId: number | null = null;
   currentHospitalName: string = '';
 
-  constructor(private hospitalService: HospitalService) {}
+  constructor(
+    private hospitalService: HospitalService,
+    private roleService: RoleAuthorizationService
+  ) {}
+
+  get isSuperAdmin(): boolean {
+    return this.roleService.isSuperAdmin();
+  }
 
   ngOnInit(): void {
     this.loadHospitals();
@@ -80,6 +88,13 @@ export class HospitalStatusComponent implements OnInit {
     this.hospitalService.getHospitals().subscribe({
       next: (hospitals) => {
         this.hospitals = hospitals;
+        
+        // If super admin and no hospital selected, default to first hospital for display
+        if (this.isSuperAdmin && !this.currentHospitalId && hospitals.length > 0 && hospitals[0].hospitalId) {
+          this.hospitalService.setCurrentHospitalId(hospitals[0].hospitalId!);
+          this.currentHospitalId = hospitals[0].hospitalId!;
+        }
+        
         this.updateCurrentHospitalName();
       },
       error: (error) => {
@@ -99,6 +114,9 @@ export class HospitalStatusComponent implements OnInit {
 
   public selectHospital(hospital: HospitalModel): void {
     if (hospital.hospitalId) {
+      // Clear any cached data before switching hospitals
+      this.clearHospitalCache();
+      
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
     }
     // Close modal
@@ -109,7 +127,23 @@ export class HospitalStatusComponent implements OnInit {
         bootstrapModal.hide();
       }
     }
-    // Optionally refresh the page to reload data with new hospital
+    // Force a page reload to ensure fresh data is loaded
     window.location.reload();
+  }
+
+  private clearHospitalCache(): void {
+    // Clear any service-level caches or stored data that might persist
+    // This ensures clean state when switching hospitals
+    
+    // Clear localStorage items that might contain hospital-specific data
+    // (but preserve authentication data)
+    const preserveKeys = ['data', 'token', 'refreshToken', 'currentStaffId'];
+    const allKeys = Object.keys(localStorage);
+    
+    allKeys.forEach(key => {
+      if (!preserveKeys.includes(key)) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 }

@@ -100,6 +100,14 @@ this.userRole=data.userRole;
     this.hospitalService.getHospitals().subscribe({
       next: (hospitals: HospitalModel[]) => {
         this.hospitals = hospitals;
+        
+        // If super admin and no hospital selected, default to first hospital for display
+        if ((this.userRole === 'globalsuperadmin' || this.userRole === 'superadmin') && 
+            !this.currentHospitalId && hospitals.length > 0 && hospitals[0].hospitalId) {
+          this.hospitalService.setCurrentHospitalId(hospitals[0].hospitalId!);
+          this.currentHospitalId = hospitals[0].hospitalId!;
+        }
+        
         this.updateCurrentHospitalName();
       },
       error: (error: any) => {
@@ -119,8 +127,30 @@ this.userRole=data.userRole;
 
   public selectHospital(hospital: HospitalModel): void {
     if (hospital.hospitalId) {
+      // Clear any cached data before switching hospitals
+      this.clearHospitalCache();
+      
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
-      // No need to reload - components should subscribe to hospital changes
+      
+      // Force a page reload to ensure fresh data is loaded
+      // This prevents data from previous hospital from persisting
+      window.location.reload();
     }
+  }
+
+  private clearHospitalCache(): void {
+    // Clear any service-level caches or stored data that might persist
+    // This ensures clean state when switching hospitals
+    
+    // Clear localStorage items that might contain hospital-specific data
+    // (but preserve authentication data)
+    const preserveKeys = ['data', 'token', 'refreshToken', 'currentStaffId'];
+    const allKeys = Object.keys(localStorage);
+    
+    allKeys.forEach(key => {
+      if (!preserveKeys.includes(key)) {
+        localStorage.removeItem(key);
+      }
+    });
   }
 }

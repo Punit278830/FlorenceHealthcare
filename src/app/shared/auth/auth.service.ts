@@ -40,10 +40,16 @@ export class AuthService {
         this.authentication.departmentId=data.departmentId;
         
         // Store hospital ID from user's profile for multi-tenant support
-        if (data.hospitalId) {
+        // Super admins should not be restricted to a specific hospital
+        const userRole = data.designation.toLowerCase();
+        if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
+          // Super admins don't have a fixed hospital - they can access all
+          // We'll set this later when they select a hospital or default to first available
+          localStorage.removeItem('currentHospitalId');
+        } else if (data.hospitalId) {
           localStorage.setItem('currentHospitalId', data.hospitalId.toString());
         } else {
-          // Default to hospital ID 1 if not provided
+          // Default to hospital ID 1 for regular users if not provided
           localStorage.setItem('currentHospitalId', '1');
         }
         

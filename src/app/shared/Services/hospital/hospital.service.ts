@@ -27,7 +27,17 @@ export class HospitalService {
   getCurrentHospitalId(): number | null {
     const val = localStorage.getItem('currentHospitalId');
     if (!val) {
-      // Default to hospital ID 1 if not set
+      // Check if user is super admin
+      const userData = localStorage.getItem('data');
+      if (userData) {
+        const user = JSON.parse(userData);
+        const userRole = user.userRole;
+        if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
+          // Super admins don't have a default hospital - return null
+          return null;
+        }
+      }
+      // Default to hospital ID 1 for regular users if not set
       this.setCurrentHospitalId(1);
       return 1;
     }
