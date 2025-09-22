@@ -12,6 +12,8 @@ import { LoaderComponent } from './core/loader/loader.component';
 import { MatIconModule } from '@angular/material/icon';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { TimezoneInterceptor } from 'src/app/timeZone.interceptor';
 
 @NgModule({ declarations: [
         AppComponent,
@@ -24,5 +26,12 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         NgxExtendedPdfViewerModule,
         ToastrModule.forRoot(),
         NgxSpinnerModule.forRoot(),
-        MatIconModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+    MatIconModule], providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        {
+            provide: HTTP_INTERCEPTORS,
+            useClass: TimezoneInterceptor,
+            multi: true
+        }
+    ] })
 export class AppModule { }
