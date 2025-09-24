@@ -39,13 +39,33 @@ namespace hospitalApiProject.Controllers
     [HttpGet("count")]
     public async Task<ActionResult<int>> GetAppointmentCount()
     {
-      var currentDate = DateTime.Now.Date;
       var hospitalId = GetHospitalIdFromHeader();
-      var today = DateTime.Now.Date;
-      var tomorrow = today.AddDays(1);
+      var userTimeZone = GetTimeZoneFromHeader(); // Get user's timezone from header
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        // Fallback to UTC if timezone is not found
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date in user's timezone
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      
+      // Convert back to UTC for database query (assuming appointments are stored in UTC)
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
 
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date >= today && e.Date < tomorrow && (hospitalId == null || e.HospitalId == hospitalId))
+          .Where(e => e.Date >= todayStartUtc && e.Date < todayEndUtc && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
 
@@ -63,10 +83,30 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount")]
     public async Task<ActionResult<int>> GetConsultationCount()
     {
-      var currentDate = DateTime.Now.Date;
       var hospitalId = GetHospitalIdFromHeader();
+      var userTimeZone = GetTimeZoneFromHeader();
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date range in user's timezone, then convert to UTC
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
+      
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.AppointmentStatus == "Active" && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
+          .Where(e => e.Date >= todayStartUtc && e.Date < todayEndUtc && e.AppointmentStatus == "Active" && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -83,10 +123,30 @@ namespace hospitalApiProject.Controllers
     [HttpGet("ConsultationCount/{id}")]
     public async Task<ActionResult<int>> GetConsultationCount(int id)
     {
-      var currentDate = DateTime.Now.Date;
       var hospitalId = GetHospitalIdFromHeader();
+      var userTimeZone = GetTimeZoneFromHeader();
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date range in user's timezone, then convert to UTC
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
+      
       var appointmentCount = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
+          .Where(e => e.DoctorId == id && e.AppointmentStatus == "Active" && e.Date >= todayStartUtc && e.Date < todayEndUtc && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .CountAsync();
 
       if (appointmentCount == 0) // Check if appointments were found
@@ -150,11 +210,31 @@ namespace hospitalApiProject.Controllers
     [HttpGet("TodayEarning/")]
     public async Task<ActionResult<int>> GetTodayEarning()
     {
-      var currentDate = DateTime.Now.Date;
       var hospitalId = GetHospitalIdFromHeader();
+      var userTimeZone = GetTimeZoneFromHeader();
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date range in user's timezone, then convert to UTC
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
+      
       var TodayEarning = 0;
       var appointments = await _context.AppointmentInfos
-          .Where(e => e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
+          .Where(e => e.Date >= todayStartUtc && e.Date < todayEndUtc && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
 
       if (!appointments.Any()) // Check if appointments were found
       {
@@ -219,10 +299,30 @@ namespace hospitalApiProject.Controllers
     [HttpGet("doctor/{id}")]
     public async Task<ActionResult<IEnumerable<AppointmentInfo>>> GetAppointmentByDoctorId(int id)
     {
-      var currentDate = DateTime.Now.Date; // Get current date without time component
       var hospitalId = GetHospitalIdFromHeader();
+      var userTimeZone = GetTimeZoneFromHeader();
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date range in user's timezone, then convert to UTC
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
+      
       var appointmentInfo = await _context.AppointmentInfos
-          .Where(e => e.DoctorId == id && e.Date == currentDate && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
+          .Where(e => e.DoctorId == id && e.Date >= todayStartUtc && e.Date < todayEndUtc && e.IsDeleted != true && (hospitalId == null || e.HospitalId == hospitalId))
           .ToListAsync();
 
       if (appointmentInfo == null || !appointmentInfo.Any()) // Check if appointments were found
@@ -543,14 +643,16 @@ namespace hospitalApiProject.Controllers
                 appointmentsQuery = appointmentsQuery.Where(a => a.DoctorId == criteria.DoctorId.Value);
             }
 
-            // Search by patient name or general search term
+            // Search by patient name or general search term (only within the filtered hospital)
             if (!string.IsNullOrWhiteSpace(criteria.PatientName) || !string.IsNullOrWhiteSpace(criteria.SearchTerm))
             {
                 var searchTerm = !string.IsNullOrWhiteSpace(criteria.PatientName) ? criteria.PatientName : criteria.SearchTerm;
                 if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
+                    // Filter patients by hospital first, then by search term
                     appointmentsQuery = appointmentsQuery.Where(a => 
                         _context.PatientInfos.Any(p => p.PatientId == a.PatientId && 
+                            (hospitalId == null || p.HospitalId == hospitalId) && // Ensure patient belongs to the same hospital
                             ((p.FirstName != null && p.FirstName.ToLower().Contains(searchTerm.ToLower())) || 
                              (p.LastName != null && p.LastName.ToLower().Contains(searchTerm.ToLower())) ||
                              (p.Mobile != null && p.Mobile.Contains(searchTerm)))));
@@ -586,6 +688,7 @@ namespace hospitalApiProject.Controllers
                     a.Id,
                     a.PatientId,
                     a.DoctorId,
+                    a.Departmentid,
                     a.Date,
                     AppointTime = a.AppointTime,
                     a.AppointmentStatus,
@@ -597,6 +700,7 @@ namespace hospitalApiProject.Controllers
 
             var patientIds = pageAppointments.Select(a => a.PatientId).Distinct().ToList();
             var doctorIds = pageAppointments.Select(a => a.DoctorId).Distinct().ToList();
+            var departmentIds = pageAppointments.Where(a => a.Departmentid.HasValue).Select(a => a.Departmentid!.Value).Distinct().ToList();
             var hospitalIds = pageAppointments.Where(a => a.HospitalId.HasValue).Select(a => a.HospitalId!.Value).Distinct().ToList();
             var appointmentIds = pageAppointments.Select(a => a.Id).Distinct().ToList();
 
@@ -611,6 +715,12 @@ namespace hospitalApiProject.Controllers
                 .AsNoTracking()
                 .Where(s => doctorIds.Contains(s.StaffId))
                 .Select(s => new { s.StaffId, s.FirstName, s.LastName })
+                .ToListAsync();
+
+            var departments = await _context.DepartmentInfos
+                .AsNoTracking()
+                .Where(d => departmentIds.Contains(d.DepartmentId))
+                .Select(d => new { d.DepartmentId, d.DepartmentName, d.DisplayName })
                 .ToListAsync();
 
             var hospitals = await _context.Hospitals
@@ -629,6 +739,7 @@ namespace hospitalApiProject.Controllers
             // Create lookup dictionaries
             var patientDict = patients.ToDictionary(p => p.PatientId, p => p);
             var doctorDict = doctors.ToDictionary(d => d.StaffId, d => d);
+            var departmentDict = departments.ToDictionary(d => d.DepartmentId, d => d);
             var hospitalDict = hospitals.ToDictionary(h => h.HospitalId, h => h);
             var invoiceDict = invoices.ToDictionary(i => i.AppointmentId, i => i);
 
@@ -636,6 +747,7 @@ namespace hospitalApiProject.Controllers
             {
                 var patient = patientDict.TryGetValue(a.PatientId, out var p) ? p : null;
                 var doctor = doctorDict.TryGetValue(a.DoctorId, out var d) ? d : null;
+                var department = a.Departmentid.HasValue && departmentDict.TryGetValue(a.Departmentid.Value, out var dept) ? dept : null;
                 var hospital = a.HospitalId.HasValue && hospitalDict.TryGetValue(a.HospitalId.Value, out var h) ? h : null;
                 var invoice = invoiceDict.TryGetValue(a.Id, out var inv) ? inv : null;
 
@@ -654,7 +766,7 @@ namespace hospitalApiProject.Controllers
                     Date = a.Date,
                     Time = a.AppointTime ?? "",
                     AppointmentStatus = a.AppointmentStatus ?? "Unknown",
-                    Reason = "", // Not available in current model
+                    Reason = department?.DisplayName ?? department?.DepartmentName ?? "General", // Use department as reason/service
                     Notes = a.Notes,
                     HospitalId = a.HospitalId ?? 0,
                     HospitalName = hospital?.Name ?? "Unknown",

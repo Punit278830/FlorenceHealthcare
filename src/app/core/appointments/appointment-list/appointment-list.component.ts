@@ -73,7 +73,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     pageSize: 50
   };
   public searchResults: AppointmentInfoResponse[] = [];
-  public usePaginatedSearch = true; // Toggle between old and new search
+  public usePaginatedSearch = true; // Use new paginated search by default for proper hospital filtering
   private hospitalSubscription: Subscription = new Subscription();
 
   constructor(public data: DataService, private appointmentService: AppointmentService,
@@ -299,8 +299,8 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
             ...appointment,
             doctorFname: doctor ? doctor.firstName : 'Unknown Doctor',
             doctorLname: doctor ? doctor.lastName : '',
-            departmentName: department ? (department.displayName || department.departmentName) : 'Unknown Department',
-            displayName: department ? department.displayName : undefined,
+            departmentName: department ? (department.displayName || department.departmentName) : 'General',
+            displayName: department ? department.displayName : 'General',
             patientFname: patients ? patients.firstName : 'Unknown Patient',
             patientLname: patients ? patients.lastName : '',
             patientId: patients ? patients.patientId : null,
@@ -357,30 +357,40 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
   }
 
   public searchData(value: any): void {
-    if (value != '') {
-      // Filter the combined data
-      const filteredData = this.combinedData.filter((item: any) => {
-        return (
-          item.patientFname?.toLowerCase().includes(value.toLowerCase()) ||
-          item.patientLname?.toLowerCase().includes(value.toLowerCase()) ||
-          item.doctorFname?.toLowerCase().includes(value.toLowerCase()) ||
-          item.doctorLname?.toLowerCase().includes(value.toLowerCase()) ||
-          item.departmentName?.toLowerCase().includes(value.toLowerCase()) ||
-          item.appointmentId?.toString().includes(value)
-        );
-      });
-
-      // Reset pagination and apply to filtered data
-      this.skip = 0;
+    if (this.usePaginatedSearch) {
+      // Use the paginated search with server-side filtering
+      this.searchCriteria.searchTerm = value || '';
+      this.searchCriteria.pageNumber = 1;
       this.currentPage = 1;
       this.pageIndex = 0;
-      this.applyPagination(filteredData);
+      this.fetchPaginatedAppointments();
     } else {
-      this.searchDataValue = '';
-      this.skip = 0;
-      this.currentPage = 1;
-      this.pageIndex = 0;
-      this.applyPagination();
+      // Legacy client-side filtering
+      if (value != '') {
+        // Filter the combined data
+        const filteredData = this.combinedData.filter((item: any) => {
+          return (
+            item.patientFname?.toLowerCase().includes(value.toLowerCase()) ||
+            item.patientLname?.toLowerCase().includes(value.toLowerCase()) ||
+            item.doctorFname?.toLowerCase().includes(value.toLowerCase()) ||
+            item.doctorLname?.toLowerCase().includes(value.toLowerCase()) ||
+            item.departmentName?.toLowerCase().includes(value.toLowerCase()) ||
+            item.appointmentId?.toString().includes(value)
+          );
+        });
+
+        // Reset pagination and apply to filtered data
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.applyPagination(filteredData);
+      } else {
+        this.searchDataValue = '';
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.applyPagination();
+      }
     }
   }
 
@@ -613,31 +623,27 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         
   }
 
-  // Add a method to format date/time using dayjs
+  // Add a method to format date/time using dayjs and convert from UTC to local timezone
   getLocalDateTime(date: any): string {
     if (!date) return '';
-    // Convert to local time zone (e.g., 'Asia/Kolkata')
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY hh:mm A');
+    // Assume the date comes from server as UTC, convert to user's local timezone
+    return dayjs.utc(date).local().format('DD/MM/YYYY hh:mm A');
   }
 
   getLocalDate(date: any): string {
     if (!date) return '';
-    return dayjs(date).tz(dayjs.tz.guess()).format('DD/MM/YYYY');
+    // Assume the date comes from server as UTC, convert to user's local timezone
+    return dayjs.utc(date).local().format('DD/MM/YYYY');
   }
 
-  // Combine only the date part of `date` with the given appointment time without timezone conversion
+  // Convert appointment date and time to local timezone for display
   formatDateWithTime(date: any, appointTime?: any): string {
     if (!date && !appointTime) return '';
 
     let datePart = '';
     if (date) {
-      if (typeof date === 'string') {
-        const tIndex = date.indexOf('T');
-        datePart = tIndex > 0 ? date.substring(0, tIndex) : date;
-      } else {
-        // If it's a Date object or other type, format as YYYY-MM-DD
-        datePart = dayjs(date).format('YYYY-MM-DD');
-      }
+      // Assume server date is in UTC, convert to local
+      datePart = dayjs.utc(date).local().format('YYYY-MM-DD');
     }
 
     if (appointTime) {
@@ -651,16 +657,16 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
   fetchPaginatedAppointments() {
     this.loadingService.showLoader();
     
-    // Set date filters from form
+    // Set date filters from form and convert to UTC for consistent server handling
     let from = this.appintmentDateForm.get('appointmentFrom')?.value || null;
     let to = this.appintmentDateForm.get('appointmentTo')?.value || null;
 
-    // Convert Date objects to proper format for API
+    // Convert Date objects to proper format for API (send as UTC)
     if (from instanceof Date) {
-      from = dayjs(from).format('YYYY-MM-DD');
+      from = dayjs(from).utc().format('YYYY-MM-DD');
     }
     if (to instanceof Date) {
-      to = dayjs(to).format('YYYY-MM-DD');
+      to = dayjs(to).utc().format('YYYY-MM-DD');
     }
 
     // Update search criteria
@@ -669,14 +675,16 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     this.searchCriteria.pageNumber = this.currentPage;
     this.searchCriteria.pageSize = this.pageSize;
 
-    // Remove automatic doctor filtering - only use date range
-    // this.searchCriteria.doctorId will remain undefined/null
-
-
+    // Only filter by doctor if the logged-in user is a doctor (not admin/reception/nursing)
+    if (this.loggedIn.userRole === 'Doctor') {
+      this.searchCriteria.doctorId = this.loggedIn.loginId;
+    } else {
+      // For admin/reception/nursing, don't filter by doctor - they should see all appointments for their hospital
+      this.searchCriteria.doctorId = undefined;
+    }
 
     this.appointmentService.searchAppointments(this.searchCriteria).subscribe({
       next: (response) => {
-
         this.loadingService.hideLoader();
         
         if (response.hasError) {
@@ -686,25 +694,27 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         } else {
           this.searchResults = response.results || [];
           this.totalData = response.totalCount || 0;
-          this.totalPages = response.totalPages || 0;            // Transform the search results to match the existing template format
-            this.appointmentList = this.searchResults.map(appointment => ({
-              id: appointment.id,
-              patientId: appointment.patientId,
-              doctorId: appointment.doctorId,
-              date: appointment.date,
-              notes: appointment.notes,
-              appointmentStatus: appointment.appointmentStatus,
-              fee: 0, // Fee not available in new response
-              appointTime: appointment.time,
-              patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
-              patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
-              doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
-              doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
-              displayName: appointment.hospitalName,
-              departmentName: 'General', // Default department for now
-              departmentid: 1, // Default department ID
-              isConsultationPaid: appointment.isConsultationPaid || false // Use actual payment status from backend
-            }));
+          this.totalPages = response.totalPages || 0;
+          
+          // Transform the search results to match the existing template format
+          this.appointmentList = this.searchResults.map(appointment => ({
+            id: appointment.id,
+            patientId: appointment.patientId,
+            doctorId: appointment.doctorId,
+            date: appointment.date,
+            notes: appointment.notes,
+            appointmentStatus: appointment.appointmentStatus,
+            fee: 0, // Fee not available in new response
+            appointTime: appointment.time,
+            patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
+            patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
+            doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
+            doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
+            displayName: appointment.hospitalName,
+            departmentName: appointment.reason || 'General', // Use reason field which contains department name
+            departmentid: 1, // Default department ID
+            isConsultationPaid: appointment.isConsultationPaid || false // Use actual payment status from backend
+          }));
           
           if (this.appointmentList.length === 0) {
             this.toastr.info('No appointments found for the selected criteria');
@@ -725,7 +735,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         this.dataSource = new MatTableDataSource<Iappointment>(this.appointmentList);
       },
       error: (error) => {
-
         this.loadingService.hideLoader();
         this.toastr.error('Error fetching appointments');
         this.searchResults = [];

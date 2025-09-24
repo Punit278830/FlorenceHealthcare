@@ -15,9 +15,7 @@ export class ApiHttpService {
   private withHospitalHeader(options?: any): any {
     const hospitalId = localStorage.getItem('currentHospitalId') || '1'; // Default to hospital ID 1
     const staffId = localStorage.getItem('currentStaffId'); // Get current staff ID
-
-
-
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone; // Get user's timezone
     
     // Create a new HttpHeaders object properly
     let headers: HttpHeaders;
@@ -25,26 +23,24 @@ export class ApiHttpService {
     if (options?.headers) {
       // If headers are already HttpHeaders, clone them
       if (options.headers instanceof HttpHeaders) {
-        headers = options.headers.set('X-Hospital-Id', hospitalId);
+        headers = options.headers.set('X-Hospital-Id', hospitalId).set('X-Time-Zone', timeZone);
         if (staffId) {
           headers = headers.set('X-Staff-Id', staffId);
         }
       } else {
         // If headers are a plain object, create new HttpHeaders
-        headers = new HttpHeaders(options.headers).set('X-Hospital-Id', hospitalId);
+        headers = new HttpHeaders(options.headers).set('X-Hospital-Id', hospitalId).set('X-Time-Zone', timeZone);
         if (staffId) {
           headers = headers.set('X-Staff-Id', staffId);
         }
       }
     } else {
       // No existing headers, create new ones
-      headers = new HttpHeaders().set('X-Hospital-Id', hospitalId);
+      headers = new HttpHeaders().set('X-Hospital-Id', hospitalId).set('X-Time-Zone', timeZone);
       if (staffId) {
         headers = headers.set('X-Staff-Id', staffId);
       }
     }
-    
-
     
     return { 
       ...options,
@@ -60,17 +56,15 @@ export class ApiHttpService {
   public post(url: string, data: any, options?: any) {
     const hospitalId = localStorage.getItem('currentHospitalId') || '1';
     const staffId = localStorage.getItem('currentStaffId');
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     // Create headers directly without merging conflicts
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'X-Hospital-Id': hospitalId,
+      'X-Time-Zone': timeZone,
       ...(staffId && { 'X-Staff-Id': staffId })
     });
-    
-
-
-
     
     return this.http.post(url, data, { 
       ...options,

@@ -26,11 +26,33 @@ namespace hospitalApiProject.Controllers
     {
         try
         {
-            var today = DateTime.Today;
             var hospitalId = await GetHospitalIdForFilteringAsync();
+            var userTimeZone = GetTimeZoneFromHeader(); // Get user's timezone from header
+            
+            // Get user's timezone info
+            TimeZoneInfo timeZoneInfo;
+            try
+            {
+                timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+            }
+            catch
+            {
+                // Fallback to UTC if timezone is not found
+                timeZoneInfo = TimeZoneInfo.Utc;
+            }
+            
+            // Get today's date in user's timezone
+            var utcNow = DateTime.UtcNow;
+            var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+            var todayStart = localNow.Date;
+            var todayEnd = todayStart.AddDays(1);
+            
+            // Convert back to UTC for database query
+            var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+            var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
 
             var result = await _context.AppointmentInfos
-                .Where(a => a.Date.Date == today && (hospitalId == null || a.HospitalId == hospitalId))
+                .Where(a => a.Date >= todayStartUtc && a.Date < todayEndUtc && (hospitalId == null || a.HospitalId == hospitalId))
                 .GroupBy(a => a.Departmentid)
                 .Select(g => new
                 {
