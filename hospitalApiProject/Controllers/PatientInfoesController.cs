@@ -217,9 +217,36 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetNewPatientsToday()
     {
       var hospitalId = GetHospitalIdFromHeader();
+      var userTimeZone = GetTimeZoneFromHeader(); // Get user's timezone from header
+      
+      // Get user's timezone info
+      TimeZoneInfo timeZoneInfo;
+      try
+      {
+        timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById(userTimeZone);
+      }
+      catch
+      {
+        // Fallback to UTC if timezone is not found
+        timeZoneInfo = TimeZoneInfo.Utc;
+      }
+      
+      // Get today's date in user's timezone
+      var utcNow = DateTime.UtcNow;
+      var localNow = TimeZoneInfo.ConvertTimeFromUtc(utcNow, timeZoneInfo);
+      var todayStart = localNow.Date;
+      var todayEnd = todayStart.AddDays(1);
+      
+      // Convert back to UTC for database query (assuming registration dates are stored in UTC)
+      var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
+      var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
+
       var count = await _context.PatientInfos
           .AsNoTracking()
-          .Where(p => p.RegstrationDate != null && p.RegstrationDate.Value.Date == DateTime.Today && (hospitalId == null || p.HospitalId == hospitalId))
+          .Where(p => p.RegstrationDate != null && 
+                     p.RegstrationDate.Value >= todayStartUtc && 
+                     p.RegstrationDate.Value < todayEndUtc && 
+                     (hospitalId == null || p.HospitalId == hospitalId))
           .Select(p => p.PatientId)
           .Distinct()
           .CountAsync();
