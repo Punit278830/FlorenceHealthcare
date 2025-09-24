@@ -273,6 +273,13 @@ export class InvoiceViewComponent implements OnInit {
     });
   }
 
+  getMainInvoiceTotal(): number {
+  const fee = this.appointmentDetails?.fee || 0;
+  const discount = this.disc || 0;
+  return fee - (discount / 100) * fee;
+}
+
+
   ngOnInit() {
     this.currentInvoiceDate = new Date(); // Set current date at runtime
     this.getInvoiceDetails();

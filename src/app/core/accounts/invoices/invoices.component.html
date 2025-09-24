@@ -191,9 +191,22 @@
                     <td> {{data.patientFname}}</td>
                     <td>{{data.amount}}</td>
                     <td>{{data.totalUnpaidAmount}}</td>
-                    <td><button
-                        [ngClass]="{'nstatus-orage':data.status==='Partially Paid','status-green' : data.status === 'Paid', 'status-pink' : data.status === 'Unpaid'}"
-                        class="custom-badge">{{data.status}}</button></td>
+                    <td>
+                      <button
+                        [ngClass]="
+                          (data.totalUnpaidAmount === 0 || data.disc === 100 || data.discount === 100 || data.discountPercent === 100) ? 'status-green' :
+                          (data.status === 'Paid' ? 'status-green' :
+                          (data.status === 'Unpaid' ? 'status-pink' :
+                          (data.status === 'Partially Paid' ? 'nstatus-orage' : '')))
+                        "
+                        class="custom-badge">
+                        {{
+                          (data.totalUnpaidAmount === 0 || data.disc === 100 || data.discount === 100 || data.discountPercent === 100)
+                            ? 'Paid'
+                            : data.status
+                        }}
+                      </button>
+                    </td>
                     <td><button
                         [ngClass]="{'status-orange':data.paymentModes===null,'status-green' : data.paymentModes !== null, }"
                         class="custom-badge">{{data.paymentModes ?? 'NA'}}</button></td>

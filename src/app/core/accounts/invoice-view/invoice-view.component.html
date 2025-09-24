@@ -28,8 +28,8 @@
                                 </div>
                                 <div class="col-12 col-md-6">
                                     <div class="invoice-counts float-end">
-                                        <h4>Status: <a href="javascript:;"
-                                                class="status-green">{{invoiceDetails.status}}</a></h4>
+                    <h4>Status: <a href="javascript:;"
+                        class="status-green">{{ (disc === 100) ? 'Paid' : (invoiceDetails.status === 'Paid' ? 'Paid' : invoiceDetails.status) }}</a></h4>
                                     </div>
                                 </div>
                             </div>
@@ -157,24 +157,23 @@
                                             <td>1</td>
                                             <td>{{ tempinvoiceDetails.tempItemName }} </td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
-                                            <td>{{appointmentDetails.fee}}</td>
-                                          <td>{{ flag ? 100 : 0 }}</td>
-                                            <td>{{ appointmentDetails.fee - ((disc/100) * appointmentDetails.fee) }}
-                                            </td>
+                                                        <td>{{ appointmentDetails.fee }}</td>
+                                                      <td>{{ disc }}</td>
+                                                          <td>{{ (disc === 100) ? 0 : getMainInvoiceTotal() }}</td>
                                             
-                                           <td><button
-                                                   [ngClass]="{'status-green' : tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
-                                                    class="custom-badge">{{tempinvoiceDetails.isConsultationPaid ? 'Paid' :
-                                                    'Unpaid'}}</button>   </td>
+                              <td><button
+                                    [ngClass]="{'status-green' : (disc === 100) || tempinvoiceDetails.isConsultationPaid === true, 'status-pink' : invoiceDetails.isConsultationPaid === false}"
+                                     class="custom-badge">{{(disc === 100) ? 'Paid' : (tempinvoiceDetails.isConsultationPaid ? 'Paid' : 'Unpaid')}}</button>   </td>
                                              <!-- ✅ Transaction Mode (Cash or Online) -->
-                                                <td style="text-align: center">
-                                                    {{ invoiceDetails.transactionId ? 'Online' : 'Cash' }}
-                                                </td>
 
-                                                <!-- ✅ Transaction ID (Show only if Online, else '--') -->
-                                                <td style="text-align: center">
-                                                    {{ invoiceDetails.transactionId ? invoiceDetails.transactionId : '--' }}
-                                                </td>
+                                                                         <td style="text-align: center">
+                                                                             {{ (disc === 100) ? '--' : (invoiceDetails.transactionId ? 'Online' : 'Cash') }}
+                                                                         </td>
+
+                                                                         <!-- ✅ Transaction ID (Show only if Online, else '--') -->
+                                                                         <td style="text-align: center">
+                                                                             {{ (disc === 100) ? '--' : (invoiceDetails.transactionId ? invoiceDetails.transactionId : '--') }}
+                                                                         </td>
                                             <!-- <td style="text-align: center" *ngIf="tempDoctorModels.transactionId > '0' || tempDoctorModels.transactionId == 'Y';else other_content">{{ invoiceDetails.transactionId ? invoiceDetails.transactionId : 
                                                 tempDoctorModels.transactionId ? tempDoctorModels.transactionId :
                                                 ( 'Cash Payment' )  }}
@@ -250,14 +249,14 @@
                                                         <td class="float-end">Subtotal : {{appointmentDetails.fee}}</td>
                                                     </tr> -->
                                                     <tr>
-                                                        <td class="float-end">Balance : ₹{{balanceAmount}}</td>
+                                                        <td class="float-end">Balance : ₹{{ (disc === 100) ? 0 : balanceAmount }}</td>
                                                     </tr>
                                                     <!-- <tr>
                                                         <td class="float-end">GST (10%) : ₹160</td>
                                                     </tr> -->
                                                     <tr class="bold-total-invoice">
                                                         <td class="float-end">
-                                                            <h5>Total :₹{{totalInvoiceAmount}}</h5>
+                                                            <h5>Total :₹{{ (disc === 100) ? 0 : totalInvoiceAmount }}</h5>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -281,7 +280,7 @@
         <div class="col-12">
             <div class="doctor-submit float-end">
                 
-                <ng-container *ngIf="invoiceDetails.status == 'Paid'">
+                <ng-container *ngIf="invoiceDetails.status === 'Paid' || disc === 100">
                     <a href="javascript:;" class="btn btn-primary submit-form me-2"
                        (click)="backToAppointmentList()">Finish</a>
                 </ng-container>
