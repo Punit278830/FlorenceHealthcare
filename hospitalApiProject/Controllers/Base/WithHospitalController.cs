@@ -73,5 +73,28 @@ namespace hospitalApiProject.Controllers.Base
       // Regular users are filtered by their hospital
       return new Tuple<bool, int?>(false, GetHospitalIdFromHeader());
     }
+
+    // New method that always uses the selected hospital ID from header
+    // This allows super admins to filter by their selected hospital
+    protected async Task<Tuple<bool, int?>> GetSelectedHospitalIdAsync()
+    {
+      var isSuperAdmin = await IsSuperAdminAsync();
+      var selectedHospitalId = GetHospitalIdFromHeader();
+      
+      // If super admin and has selected a hospital in header, use that
+      if (isSuperAdmin.Item1 && selectedHospitalId.HasValue)
+      {
+        return new Tuple<bool, int?>(true, selectedHospitalId.Value);
+      }
+      
+      // If super admin but no hospital selected, use their default hospital
+      if (isSuperAdmin.Item1)
+      {
+        return new Tuple<bool, int?>(true, isSuperAdmin.Item2);
+      }
+      
+      // Regular users use header hospital (should match their assigned hospital)
+      return new Tuple<bool, int?>(false, selectedHospitalId);
+    }
   }
 }

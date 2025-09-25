@@ -23,7 +23,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var (isSuperAdmin, _) = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, _) = await GetSelectedHospitalIdAsync();
         var globalSuperAdmin = await _superAdminService.GetGlobalSuperAdminAsync();
         
         return Ok(new 
@@ -108,7 +108,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var (isSuperAdmin, _) = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, _) = await GetSelectedHospitalIdAsync();
         if (!isSuperAdmin)
         {
           return Forbid("Only Super Admin can access this endpoint.");
@@ -140,7 +140,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var (isSuperAdmin, _) = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, _) = await GetSelectedHospitalIdAsync();
         if (!isSuperAdmin)
         {
           return Forbid("Only Super Admin can access this endpoint.");

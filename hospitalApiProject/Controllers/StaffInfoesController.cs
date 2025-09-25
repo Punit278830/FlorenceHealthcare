@@ -23,7 +23,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("doctors")]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetDoctorsInfo()
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       var result = await _context.StaffInfos
         .Where(e => e.Designation.ToLower() == "doctor" && (hospitalId == null || e.HospitalId == hospitalId))
@@ -36,7 +36,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("doctorsByDepartment")]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetDoctorsByDepartmentInfo(int id)
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       var result = await _context.StaffInfos.Where(e => e.DepartmentId == id && e.ActiveStatus == 1 && (hospitalId == null || e.HospitalId == hospitalId)).ToListAsync();
       return Ok(result);
@@ -46,7 +46,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet]
     public async Task<ActionResult<IEnumerable<StaffInfo>>> GetStaffInfos()
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       var result = await _context.StaffInfos
         .Where(p => hospitalId == null || p.HospitalId == hospitalId)
@@ -59,7 +59,7 @@ namespace hospitalApiProject.Controllers
     [HttpGet("{id}")]
     public async Task<ActionResult<StaffInfo>> GetStaffInfo(int id)
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       var staffInfo = await _context.StaffInfos.Where(s => s.StaffId == id && (hospitalId == null || s.HospitalId == hospitalId)).FirstOrDefaultAsync();
 
@@ -128,7 +128,7 @@ namespace hospitalApiProject.Controllers
     [HttpPost]
     public async Task<ActionResult<StaffInfo>> PostStaffInfo(StaffInfo staffInfo)
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       staffInfo.HospitalId = hospitalId; // tag staff with hospital if provided
 
@@ -149,7 +149,7 @@ namespace hospitalApiProject.Controllers
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteStaffInfo(int id)
     {
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync();
       var hospitalId = hospitalIdTuple.Item2;
       var staffInfo = await _context.StaffInfos.Where(s => s.StaffId == id && (hospitalId == null || s.HospitalId == hospitalId)).FirstOrDefaultAsync();
       if (staffInfo == null)
