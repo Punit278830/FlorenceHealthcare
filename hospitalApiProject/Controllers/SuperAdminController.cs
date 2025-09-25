@@ -104,33 +104,16 @@ namespace hospitalApiProject.Controllers
 
     // GET: api/SuperAdmin/hospitals
     [HttpGet("hospitals")]
-    public async Task<ActionResult<IEnumerable<object>>> GetAllHospitals()
+    public async Task<ActionResult<object>> GetAvailableHospitals()
     {
       try
       {
-        var (isSuperAdmin, _) = await GetSelectedHospitalIdAsync();
-        if (!isSuperAdmin)
-        {
-          return Forbid("Only Super Admin can access this endpoint.");
-        }
-
-        var hospitals = await _context.StaffInfos
-          .Where(s => s.HospitalId != null)
-          .GroupBy(s => s.HospitalId)
-          .Select(g => new 
-          {
-            hospitalId = g.Key!.Value,
-            staffCount = g.Count(),
-            // You might want to add hospital name if you have a hospitals table
-            // hospitalName = g.First().Hospital.Name
-          })
-          .ToListAsync();
-
-        return Ok(hospitals);
+        var hospitals = await GetAvailableHospitalsAsync();
+        return Ok(new { hospitals = hospitals });
       }
       catch (Exception ex)
       {
-        return StatusCode(500, $"Internal server error: {ex.Message}");
+        return StatusCode(500, new { error = ex.Message });
       }
     }
 
@@ -164,6 +147,34 @@ namespace hospitalApiProject.Controllers
       catch (Exception ex)
       {
         return StatusCode(500, $"Internal server error: {ex.Message}");
+      }
+    }
+
+    // GET: api/SuperAdmin/test-hospital-context
+    [HttpGet("test-hospital-context")]
+    public async Task<ActionResult<object>> TestHospitalContext()
+    {
+      try
+      {
+        var userInfo = await IsSuperAdminAsync();
+        var headerHospitalId = GetHospitalIdFromHeader();
+        var (isSuperAdmin, selectedHospitalId) = await GetSelectedHospitalIdAsync();
+        
+        return Ok(new 
+        { 
+          userType = userInfo.Item1 ? "Super Admin" : "Regular User",
+          userAssignedHospitalId = userInfo.Item2,
+          headerHospitalId = headerHospitalId,
+          finalSelectedHospitalId = selectedHospitalId,
+          isSuperAdmin = isSuperAdmin,
+          message = userInfo.Item1 ? 
+            "Super admin can switch hospitals via X-Hospital-Id header" : 
+            "Regular user is locked to their assigned hospital"
+        });
+      }
+      catch (Exception ex)
+      {
+        return Ok(new { error = ex.Message, requiresHospitalSelection = true });
       }
     }
   }
