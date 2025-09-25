@@ -26,7 +26,7 @@ namespace hospitalApiProject.Controllers
     {
         try
         {
-            var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+            var hospitalIdTuple = await GetSelectedHospitalIdAsync();
             int? hospitalId = null;
             if (hospitalIdTuple is Tuple<bool, int?> tuple)
             {
@@ -95,7 +95,7 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetSelectedHospitalIdAsync();
                 int? hospitalId = null;
                 if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {
@@ -127,7 +127,7 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetSelectedHospitalIdAsync();
                 int? hospitalId = null;
                 if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {
@@ -167,7 +167,7 @@ namespace hospitalApiProject.Controllers
                     return BadRequest();
                 }
 
-                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetSelectedHospitalIdAsync();
                 int? hospitalId = null;
                 if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {
@@ -234,7 +234,7 @@ namespace hospitalApiProject.Controllers
                 }
 
                 // Set hospital ID if provided (for multi-tenant support)
-                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetSelectedHospitalIdAsync();
                 if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {
                     departmentInfo.HospitalId = tuple.Item2;
@@ -261,7 +261,7 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetSelectedHospitalIdAsync();
                 int? hospitalId = null;
                 if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {

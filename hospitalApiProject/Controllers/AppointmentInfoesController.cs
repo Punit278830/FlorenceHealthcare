@@ -21,7 +21,7 @@ namespace hospitalApiProject.Controllers
     {
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
-      var hospitalIdTuple = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
+      var hospitalIdTuple = await GetSelectedHospitalIdAsync(); // Super Admin sees all hospitals
       var hospitalId = hospitalIdTuple.Item2; // Extract the hospital ID from the tuple
       var appointmentInfo = await _context.AppointmentInfos
           .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
@@ -612,7 +612,7 @@ namespace hospitalApiProject.Controllers
         var response = new SearchResponseBase<AppointmentInfoResponse>();
         try
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
+            var hospitalId = await GetSelectedHospitalIdAsync(); // Super Admin sees all hospitals
             
             // Base appointments query (server-side filtering + sorting, then paginate)
             var appointmentsQuery = _context.AppointmentInfos
