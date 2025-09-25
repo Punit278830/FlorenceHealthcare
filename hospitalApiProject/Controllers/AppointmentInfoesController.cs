@@ -21,7 +21,8 @@ namespace hospitalApiProject.Controllers
     {
       // return await _context.AppointmentInfos.ToListAsync();
       var currentDate = DateTime.Now.Date;
-      var hospitalId = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
+      var hospitalIdTuple = await GetHospitalIdForFilteringAsync(); // Super Admin sees all hospitals
+      var hospitalId = hospitalIdTuple.Item2; // Extract the hospital ID from the tuple
       var appointmentInfo = await _context.AppointmentInfos
           .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
           .OrderByDescending(p => p.Id)
@@ -616,7 +617,7 @@ namespace hospitalApiProject.Controllers
             // Base appointments query (server-side filtering + sorting, then paginate)
             var appointmentsQuery = _context.AppointmentInfos
                 .AsNoTracking()
-                .Where(a => a.IsDeleted != true && (hospitalId == null || a.HospitalId == hospitalId))
+                .Where(a => a.IsDeleted != true && (!hospitalId.Item2.HasValue || a.HospitalId == hospitalId.Item2))
                 .AsQueryable();
 
             // Date filters:
@@ -652,7 +653,7 @@ namespace hospitalApiProject.Controllers
                     // Filter patients by hospital first, then by search term
                     appointmentsQuery = appointmentsQuery.Where(a => 
                         _context.PatientInfos.Any(p => p.PatientId == a.PatientId && 
-                            (hospitalId == null || p.HospitalId == hospitalId) && // Ensure patient belongs to the same hospital
+                            (!hospitalId.Item2.HasValue || p.HospitalId == hospitalId.Item2) && // Ensure patient belongs to the same hospital
                             ((p.FirstName != null && p.FirstName.ToLower().Contains(searchTerm.ToLower())) || 
                              (p.LastName != null && p.LastName.ToLower().Contains(searchTerm.ToLower())) ||
                              (p.Mobile != null && p.Mobile.Contains(searchTerm)))));

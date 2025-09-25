@@ -1,8 +1,9 @@
 import { DatePipe } from '@angular/common';
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { dA } from '@fullcalendar/core/internal-common';
+import { Subscription } from 'rxjs';
 
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -10,6 +11,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { FileUploadService } from 'src/app/shared/Services/fileUpload/file-upload.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo } from 'src/app/shared/models/models';
@@ -28,7 +30,7 @@ interface IdownloadFile {
   styleUrls: ['./edit-appointment.component.scss'],
   providers: [DatePipe],
 })
-export class EditAppointmentComponent implements OnInit {
+export class EditAppointmentComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue!: string;
   public searchResults: IpatientInfo[] = [];
@@ -36,6 +38,7 @@ export class EditAppointmentComponent implements OnInit {
   public appointmentDto: Iappointment = {} as Iappointment;
   public bookappointment!: FormGroup;
   private patientId!: number;
+  private hospitalSubscription!: Subscription;
   private formattedDateTime: any;
   public age!: number;
   public doctorList: IstaffInfo[] = [];
@@ -62,7 +65,8 @@ export class EditAppointmentComponent implements OnInit {
     private patientService: PatientService,
     private fileUploadService: FileUploadService,
     private toastr: ToastrService,
-    private spinner: NgxSpinnerService
+    private spinner: NgxSpinnerService,
+    private hospitalService: HospitalService
   ) {
 
     if (!this.appointmentService.appointmentId) {
@@ -79,7 +83,23 @@ export class EditAppointmentComponent implements OnInit {
     this.appointmentFormInitlize();
     this.downloadPatientFile();
 
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        this.reloadDataForHospital();
+      }
+    });
+  }
 
+  ngOnDestroy(): void {
+    if (this.hospitalSubscription) {
+      this.hospitalSubscription.unsubscribe();
+    }
+  }
+
+  private reloadDataForHospital(): void {
+    this.getDepartmentLits();
+    // Patient data is specific to the appointment being editing, no need to reload
   }
   appointmentStatusData = [
     { value: 'Active' },

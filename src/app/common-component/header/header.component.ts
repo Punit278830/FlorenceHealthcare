@@ -127,30 +127,13 @@ this.userRole=data.userRole;
 
   public selectHospital(hospital: HospitalModel): void {
     if (hospital.hospitalId) {
-      // Clear any cached data before switching hospitals
-      this.clearHospitalCache();
-      
+      // Update the hospital service - this will notify all subscribers
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
+      this.currentHospitalId = hospital.hospitalId;
+      this.updateCurrentHospitalName();
       
-      // Force a page reload to ensure fresh data is loaded
-      // This prevents data from previous hospital from persisting
-      window.location.reload();
+      // All components that subscribe to hospitalService.currentHospitalId$ 
+      // will automatically reload their data - no page refresh needed
     }
-  }
-
-  private clearHospitalCache(): void {
-    // Clear any service-level caches or stored data that might persist
-    // This ensures clean state when switching hospitals
-    
-    // Clear localStorage items that might contain hospital-specific data
-    // (but preserve authentication data)
-    const preserveKeys = ['data', 'token', 'refreshToken', 'currentStaffId'];
-    const allKeys = Object.keys(localStorage);
-    
-    allKeys.forEach(key => {
-      if (!preserveKeys.includes(key)) {
-        localStorage.removeItem(key);
-      }
-    });
   }
 }

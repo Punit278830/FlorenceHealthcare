@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
@@ -6,17 +6,19 @@ import { ToastrService } from 'ngx-toastr';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { pageSelection, apiResultFormat, departmentList, Idepartment } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-department-list',
   templateUrl: './department-list.component.html',
   styleUrls: ['./department-list.component.scss']
 })
-export class DepartmentListComponent implements OnInit{
+export class DepartmentListComponent implements OnInit, OnDestroy{
   public routes = routes;
 
   public departmentList: Array<Idepartment> = [];
@@ -37,9 +39,11 @@ export class DepartmentListComponent implements OnInit{
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
   public staffList: Array<any> = [];
+  private hospitalSubscription: Subscription = new Subscription();
 
   constructor(public data : DataService,
     private departmentservice:DepartmentService,
+    private hospitalService: HospitalService,
     private route: Router,
     private  modalservice : ModalServiceService,
     private toaster : ToastrService,
@@ -52,6 +56,19 @@ export class DepartmentListComponent implements OnInit{
   ngOnInit() {
     this.getTableData();
     this.getDepartmentList();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe((hospitalId: number | null) => {
+      if (hospitalId) {
+        this.onRefresh(); // Reload department data when hospital changes
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.hospitalSubscription) {
+      this.hospitalSubscription.unsubscribe();
+    }
   }
 
   deleteDepartment(idhere: number) {

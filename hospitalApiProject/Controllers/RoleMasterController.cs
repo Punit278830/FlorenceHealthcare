@@ -14,12 +14,12 @@ namespace hospitalApiProject.Controllers
         }
 
         // GET: api/RoleMaster
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<RoleMaster>>> GetRoles()
+        [HttpGet("roles/{hospitalId}")]
+        public async Task<ActionResult<IEnumerable<RoleMaster>>> GetRoles(int hospitalId)
         {
             // Load all active roles regardless of hospital for simplicity
             var roles = await _context.RoleMasters
-                .Where(r => r.IsActive)
+                .Where(r => r.IsActive && r.HospitalId != hospitalId)
                 .OrderBy(r => r.HospitalId)
                 .ThenBy(r => r.RoleName)
                 .ToListAsync();
@@ -33,7 +33,7 @@ namespace hospitalApiProject.Controllers
         {
             // Allow loading roles for any hospital without authentication checks
             var roles = await _context.RoleMasters
-                .Where(r => r.HospitalId == hospitalId && r.IsActive)
+                .Where(r => r.HospitalId == hospitalId || r.HospitalId == null && r.IsActive)
                 .OrderBy(r => r.RoleName)
                 .ToListAsync();
 
@@ -44,7 +44,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("GetUserRole/{staffId}")]
         public async Task<ActionResult<RoleMaster>> GetUserRole(int staffId)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             
             var staff = await _context.StaffInfos
                 .Include(s => s.Role)
@@ -81,7 +81,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("CheckSuperAdmin/{staffId}")]
         public async Task<ActionResult<bool>> CheckSuperAdmin(int staffId)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             
             var staff = await _context.StaffInfos
                 .Where(s => s.StaffId == staffId && (hospitalId == null || s.HospitalId == hospitalId))
@@ -92,15 +92,15 @@ namespace hospitalApiProject.Controllers
                 return NotFound("Staff member not found");
             }
 
-            var isSuperAdmin = staff.Designation.ToLower() == "superadmin";
-            return Ok(isSuperAdmin);
+            var isStaffSuperAdmin = staff.Designation.ToLower() == "superadmin";
+            return Ok(isStaffSuperAdmin);
         }
 
         // GET: api/RoleMaster/5
         [HttpGet("{id}")]
         public async Task<ActionResult<RoleMaster>> GetRole(int id)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             var role = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -117,7 +117,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost]
         public async Task<ActionResult<RoleMaster>> CreateRole(RoleMaster role)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             if (hospitalId != null)
             {
                 role.HospitalId = hospitalId.Value;
@@ -141,7 +141,7 @@ namespace hospitalApiProject.Controllers
                 return BadRequest();
             }
 
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             var existingRole = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -181,7 +181,7 @@ namespace hospitalApiProject.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRole(int id)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             var role = await _context.RoleMasters
                 .Where(r => r.RoleId == id && (hospitalId == null || r.HospitalId == hospitalId))
                 .FirstOrDefaultAsync();
@@ -204,7 +204,7 @@ namespace hospitalApiProject.Controllers
         [HttpPost("AssignRoleToStaff")]
         public async Task<ActionResult> AssignRoleToStaff([FromBody] AssignRoleRequest request)
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             
             // Get staff member
             var staff = await _context.StaffInfos
@@ -244,7 +244,7 @@ namespace hospitalApiProject.Controllers
         [HttpGet("GetStaffWithRoles")]
         public async Task<ActionResult<IEnumerable<object>>> GetStaffWithRoles()
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
             
             var staffWithRoles = await _context.StaffInfos
                 .Include(s => s.Role)

@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { ModalServiceService } from 'src/app/shared/modalService/modal-service.service';
 import { Idepartment, IstaffInfo, apiResultFormat, pageSelection, staffList } from 'src/app/shared/models/models';
@@ -17,7 +18,7 @@ import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
   templateUrl: './staff-list.component.html',
   styleUrls: ['./staff-list.component.scss']
 })
-export class StaffListComponent implements OnInit {
+export class StaffListComponent implements OnInit, OnDestroy {
   public routes = routes;
   public staffList: Array<any> = [];
   public allstaffList: Array<any> = [];
@@ -40,10 +41,12 @@ export class StaffListComponent implements OnInit {
   public img = "assets/img/profiles/avatar-08.jpg";
   public combinedData: any[] = [];
   public loggedIn: any;
+  private hospitalSubscription: Subscription = new Subscription();
 
   constructor(public data: DataService,
     private staffService: StaffService,
     private departmentService: DepartmentService,
+    private hospitalService: HospitalService,
     private modalservice: ModalServiceService,
     private route: Router,
     private toaster: ToastrService,
@@ -70,16 +73,27 @@ export class StaffListComponent implements OnInit {
 
   }
 
-
-
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
 
-
-
     //this.getTableData();
     this.fetchCombineData();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        // Reset pagination and reload data when hospital changes
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.searchDataValue = '';
+        this.fetchCombineData();
+      }
+    });
+  }
 
+  ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
   }
   onRefresh() {
     this.staffList = [];

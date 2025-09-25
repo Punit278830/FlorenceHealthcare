@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators, ValidationErrors } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { Idepartment, IstaffInfo, HospitalModel } from 'src/app/shared/models/models';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DatePipe } from '@angular/common';
@@ -10,6 +11,7 @@ import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from 'src/app/shared/auth/auth.service';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import * as dayjs from 'dayjs';
 
 interface data {
@@ -21,7 +23,7 @@ interface data {
   styleUrls: ['./add-staff.component.scss'],
   providers: [DatePipe],
 })
-export class AddStaffComponent implements OnInit {
+export class AddStaffComponent implements OnInit, OnDestroy {
   public routes = routes;
   //public selectedValue !: string  ;
   staffReg!: FormGroup;
@@ -35,6 +37,7 @@ export class AddStaffComponent implements OnInit {
   public isLoadingHospitals = false;
   public isSubmitting = false;
   public maxDate: Date | null = null;
+  private hospitalSubscription: Subscription = new Subscription();
 
 
 
@@ -44,7 +47,8 @@ export class AddStaffComponent implements OnInit {
     private toster: ToastrService,
     private departmentService: DepartmentService,
     private authService: AuthService,
-    private roleService: RoleAuthorizationService) {
+    private roleService: RoleAuthorizationService,
+    private hospitalService: HospitalService) {
     
 
     this.createStaffRegrestrationForm();
@@ -57,7 +61,33 @@ export class AddStaffComponent implements OnInit {
     this.maxDate = new Date()
   }
   ngOnInit(): void {
-    // Removed the error throw
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId !== null) {
+        // Hospital changed, reload departments and roles
+        this.reloadDataForHospital();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.hospitalSubscription.unsubscribe();
+  }
+
+  private reloadDataForHospital(): void {
+    // Clear existing data
+    this._depDto = [];
+    this.roles = [];
+    
+    // Reset form selections that depend on hospital
+    this.staffReg.patchValue({
+      departmentId: '',
+      roleId: ''
+    });
+    
+    // Reload departments and roles for the new hospital
+    this.getDepartmentList();
+    this.loadRoles();
   }
 
   loadHospitals(): void {
@@ -76,15 +106,26 @@ export class AddStaffComponent implements OnInit {
   }
 
   loadRoles(): void {
-    // Load all roles from master table - not filtered by hospital
+    // Load roles filtered by hospital
     this.isLoadingRoles = true;
 
+    const hospitalId = this.staffReg.get('hospitalId')?.value;
     
-    this.roleService.getAllRoles().subscribe({
+    // If no hospital is selected, use the currently selected hospital for super admins
+    // or the user's hospital for regular users
+    const effectiveHospitalId = hospitalId || this.hospitalService.getCurrentHospitalId();
+    
+    if (!effectiveHospitalId) {
+      // If still no hospital ID available, show error
+      this.toster.error('Please select a hospital first');
+      this.isLoadingRoles = false;
+      return;
+    }
+
+    this.roleService.getAllRolesByHospital(effectiveHospitalId).subscribe({
       next: (roles: any[]) => {
         this.roles = roles;
         this.isLoadingRoles = false;
-
       },
       error: (error: any) => {
 

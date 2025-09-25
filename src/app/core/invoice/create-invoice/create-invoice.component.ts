@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { Iappointment, ICreateInvoiceDto, Idepartment, IinvoiceItem, Ilogin, IpatientInfo, IPaymentMode, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
@@ -9,7 +9,8 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { DatePipe } from '@angular/common';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
-import { Subject } from 'rxjs';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
+import { Subject, Subscription } from 'rxjs';
 import { MatTableDataSource } from '@angular/material/table';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 
@@ -24,7 +25,7 @@ interface data {
   styleUrls: ['./create-invoice.component.scss'],
   providers: [DatePipe]
 })
-export class CreateInvoiceComponent {
+export class CreateInvoiceComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue !: string;
   public bookappointment!: FormGroup;
@@ -36,6 +37,7 @@ export class CreateInvoiceComponent {
   public flag: boolean = false;
   public age!: number;
   private patientId!: number;
+  private hospitalSubscription!: Subscription;
 
   public lastIndex = 0;
   public pageSize = 50;
@@ -124,7 +126,8 @@ export class CreateInvoiceComponent {
     private route: Router,
     private fb: FormBuilder,
     private invoiceService: InvoiceService,
-    private loadingService: LoadingService
+    private loadingService: LoadingService,
+    private hospitalService: HospitalService
   ) {
     this.loggedInUser = JSON.parse(localStorage.getItem('data') || '')
 
@@ -531,6 +534,23 @@ export class CreateInvoiceComponent {
 
   ngOnInit() {
     this.initlizeDateForm();
+    this.getTableData();
+
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        this.reloadDataForHospital();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.hospitalSubscription) {
+      this.hospitalSubscription.unsubscribe();
+    }
+  }
+
+  private reloadDataForHospital(): void {
     this.getTableData();
   }
 
