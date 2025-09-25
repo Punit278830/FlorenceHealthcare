@@ -26,7 +26,12 @@ namespace hospitalApiProject.Controllers
     {
         try
         {
-            var hospitalId = await GetHospitalIdForFilteringAsync();
+            var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+            int? hospitalId = null;
+            if (hospitalIdTuple is Tuple<bool, int?> tuple)
+            {
+                hospitalId = tuple.Item2;
+            }
             var userTimeZone = GetTimeZoneFromHeader(); // Get user's timezone from header
             
             // Get user's timezone info
@@ -79,8 +84,6 @@ namespace hospitalApiProject.Controllers
         }
     }
 
-
-
     [HttpOptions]
         public IActionResult Options()
         {
@@ -92,7 +95,12 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalId = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                int? hospitalId = null;
+                if (hospitalIdTuple is Tuple<bool, int?> tuple)
+                {
+                    hospitalId = tuple.Item2;
+                }
                 
                 // If super admin (hospitalId is null), return all departments
                 // Otherwise, filter by hospital
@@ -119,7 +127,12 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalId = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                int? hospitalId = null;
+                if (hospitalIdTuple is Tuple<bool, int?> tuple)
+                {
+                    hospitalId = tuple.Item2;
+                }
                 
                 // Filter by hospital if not super admin
                 var departmentInfo = await _context.DepartmentInfos
@@ -154,7 +167,12 @@ namespace hospitalApiProject.Controllers
                     return BadRequest();
                 }
 
-                var hospitalId = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                int? hospitalId = null;
+                if (hospitalIdTuple is Tuple<bool, int?> tuple)
+                {
+                    hospitalId = tuple.Item2;
+                }
                 var existingDepartment = await _context.DepartmentInfos
                     .Where(d => d.DepartmentId == id && (hospitalId == null || d.HospitalId == hospitalId))
                     .FirstOrDefaultAsync();
@@ -216,10 +234,10 @@ namespace hospitalApiProject.Controllers
                 }
 
                 // Set hospital ID if provided (for multi-tenant support)
-                var hospitalId = await GetHospitalIdForFilteringAsync();
-                if (hospitalId != null)
+                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                if (hospitalIdTuple is Tuple<bool, int?> tuple)
                 {
-                    departmentInfo.HospitalId = hospitalId.Value;
+                    departmentInfo.HospitalId = tuple.Item2;
                 }
 
                 _context.DepartmentInfos.Add(departmentInfo);
@@ -243,7 +261,12 @@ namespace hospitalApiProject.Controllers
         {
             try
             {
-                var hospitalId = await GetHospitalIdForFilteringAsync();
+                var hospitalIdTuple = await GetHospitalIdForFilteringAsync();
+                int? hospitalId = null;
+                if (hospitalIdTuple is Tuple<bool, int?> tuple)
+                {
+                    hospitalId = tuple.Item2;
+                }
                 
                 // Filter by hospital if not super admin
                 var departmentInfo = await _context.DepartmentInfos

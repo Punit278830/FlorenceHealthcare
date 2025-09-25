@@ -1,8 +1,9 @@
-import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, OnDestroy } from '@angular/core';
 import { NgForm, FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
-import { forkJoin } from 'rxjs';
+import { forkJoin, Subscription } from 'rxjs';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { QuestionService } from 'src/app/shared/Services/question/question.service';
 import { IQuestionnaires, Ianswers, Idepartment, Ilogin, Ioptions, Iquestion } from 'src/app/shared/models/models';
 
@@ -15,7 +16,7 @@ import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
   templateUrl: './add-questionnaire.component.html',
   styleUrls: ['./add-questionnaire.component.scss'],
 })
-export class AddQuestionnaireComponent {
+export class AddQuestionnaireComponent implements OnInit, OnDestroy {
   @ViewChild('textInput') textInput!: ElementRef<HTMLInputElement>;
 
   public routes = routes;
@@ -26,6 +27,7 @@ export class AddQuestionnaireComponent {
   public combindQuestionOption: any[] = [];
 
   public answerDto: Ianswers[] = [];
+  private hospitalSubscription!: Subscription;
 
   public img = "assets/img/profiles/avatar-08.jpg";
 
@@ -80,11 +82,10 @@ export class AddQuestionnaireComponent {
     private question: QuestionService,
     private toaster: ToastrService,
     private modalservice: ModalServiceService,
-    private loadingService: LoadingService) {
+    private loadingService: LoadingService,
+    private hospitalService: HospitalService) {
 
     this.initlizaQuestForm();
-    this.getDepartmentList();
-    this.getQuestionairewithDepName();
     this.initlizeQuestionForm();
     this.answerForm = this.fb.group({});
     this.loggedInUserId = JSON.parse(localStorage.getItem('data') || '');
@@ -93,7 +94,24 @@ export class AddQuestionnaireComponent {
   ngOnInit(): void {
     this.loadQuestions();
     this.fetchAllOptions();
-    //this.dispalyPatientQuiz(); // Make sure this is called to set the initial question
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        this.reloadDataForHospital();
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.hospitalSubscription) {
+      this.hospitalSubscription.unsubscribe();
+    }
+  }
+
+  private reloadDataForHospital(): void {
+    this.getDepartmentList();
+    this.getQuestionairewithDepName();
   }
 
   initlizaQuestForm() {

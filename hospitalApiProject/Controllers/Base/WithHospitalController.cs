@@ -33,7 +33,7 @@ namespace hospitalApiProject.Controllers.Base
     }
 
     // New method to check if current user is Super Admin
-    protected async Task<bool> IsSuperAdminAsync()
+    protected async Task<Tuple<bool, int?>> IsSuperAdminAsync()
     {
       if (Request.Headers.TryGetValue("X-Staff-Id", out var staffIdValues))
       {
@@ -47,28 +47,31 @@ namespace hospitalApiProject.Controllers.Base
           if (staff?.Role != null)
           {
             // Check if user has GlobalSuperAdmin role OR legacy SuperAdmin designation
-            return staff.Role.RoleName?.ToLower() == "globalsuperadmin" || 
-                   staff.Role.RoleName?.ToLower() == "superadmin" ||
-                   staff.Designation?.ToLower() == "superadmin";
+            return new Tuple<bool, int?>(
+              staff.Role.RoleName?.ToLower() == "globalsuperadmin" ||
+              staff.Role.RoleName?.ToLower() == "superadmin" ||
+              staff.Designation?.ToLower() == "superadmin",
+              staff.HospitalId
+            );
           }
         }
       }
-      return false;
+      return new Tuple<bool, int?>(false, null);
     }
 
     // Enhanced method that returns null for Super Admin (no hospital filtering)
-    protected async Task<int?> GetHospitalIdForFilteringAsync()
+    protected async Task<Tuple<bool, int?>> GetHospitalIdForFilteringAsync()
     {
       var isSuperAdmin = await IsSuperAdminAsync();
       
       // Super Admin sees everything - no hospital filtering
-      if (isSuperAdmin)
+      if (isSuperAdmin.Item1 || isSuperAdmin.Item2 != null)
       {
-        return null;
+        return new Tuple<bool, int?>(true, isSuperAdmin.Item2);
       }
       
       // Regular users are filtered by their hospital
-      return GetHospitalIdFromHeader();
+      return new Tuple<bool, int?>(false, GetHospitalIdFromHeader());
     }
   }
 }

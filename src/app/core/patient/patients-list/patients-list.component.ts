@@ -1,10 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { routes } from 'src/app/shared/routes/routes';
 import { MatTableDataSource } from "@angular/material/table";
 import { pageSelection, IpatientInfo } from 'src/app/shared/models/models';
 import { Sort } from '@angular/material/sort';
 import { DataService } from 'src/app/shared/data/data.service';
 import { PatientService } from 'src/app/shared/Services/patient/patient.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import * as FileSaver from 'file-saver';
@@ -16,6 +17,7 @@ import { ModalServiceService } from 'src/app/shared/modalService/modal-service.s
 import { ToastrService } from 'ngx-toastr';
 import html2canvas from 'html2canvas';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-patients-list',
@@ -24,7 +26,7 @@ import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
   providers: [DatePipe],
 
 })
-export class PatientsListComponent implements OnInit {
+export class PatientsListComponent implements OnInit, OnDestroy {
   public routes = routes;
   public patientsList: Array<IpatientInfo> = [];
   dataSource!: MatTableDataSource<IpatientInfo>;
@@ -49,10 +51,12 @@ export class PatientsListComponent implements OnInit {
   public dateForm!: FormGroup;
   public minToDate: Date | null = null;
   public loggedIn: any;
+  private hospitalSubscription: Subscription = new Subscription();
 
 
   constructor(public data: DataService,
     private patientService: PatientService,
+    private hospitalService: HospitalService,
     private datePipe: DatePipe,
     private fb: FormBuilder,
     private route: Router,
@@ -100,6 +104,23 @@ export class PatientsListComponent implements OnInit {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initlizeDateForm();
     this.getTableData();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        // Reset pagination and reload data when hospital changes
+        this.skip = 0;
+        this.currentPage = 1;
+        this.pageIndex = 0;
+        this.searchDataValue = '';
+        this.dateForm.reset();
+        this.getTableData();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
   }
 
   onRefresh() {

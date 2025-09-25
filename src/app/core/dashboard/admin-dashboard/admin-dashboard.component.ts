@@ -179,6 +179,43 @@ private route : Router)
         },
     };
 
+    // Initialize chartOptionsTwo with default values to prevent errors
+    this.chartOptionsTwo = {
+      series: [],
+      labels: [],
+      chart: {
+        type: 'donut',
+        height: 200,
+        width: 200,
+        toolbar: {
+          show: false,
+        },
+      },
+      legend: {
+        show: false
+      },
+      plotOptions: {
+        bar: {
+            horizontal: false,
+            columnWidth: '50%'
+        },
+    },
+      dataLabels: {
+        enabled: false,
+      },
+      responsive: [{
+        breakpoint: 480,
+        options: {
+            chart: {
+                width: 200
+            },
+            legend: {
+              show: false
+            }
+        }
+    }],
+    };
+
     //     this.recentPatients = this.data.getPatientsList().slice(0, 5);
 // this.upcomingAppointments = this.data.getAppointmentList().slice(0, 5);
     

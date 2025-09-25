@@ -14,21 +14,35 @@ export class HospitalInitService {
     const currentHospitalId = this.hospitalService.getCurrentHospitalId();
     
     if (!currentHospitalId) {
-      // Load hospitals and set default to first available or ID 1
+      // Check if user is super admin
+      const userData = localStorage.getItem('data');
+      let isSuperAdmin = false;
+      if (userData) {
+        const user = JSON.parse(userData);
+        const userRole = user.userRole;
+        isSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
+      }
+      
+      // Load hospitals and set default to first available
       this.hospitalService.getHospitals().subscribe({
         next: (hospitals: HospitalModel[]) => {
           if (hospitals && hospitals.length > 0) {
-            // Set to first hospital in the list
+            // For super admins and regular users, set to first hospital in the list
+            // This ensures they have a working context
             this.hospitalService.setCurrentHospitalId(hospitals[0].hospitalId || 1);
-          } else {
-            // Default to hospital ID 1
+          } else if (!isSuperAdmin) {
+            // Default to hospital ID 1 only for regular users
             this.hospitalService.setCurrentHospitalId(1);
           }
+          // Super admins without hospitals available will remain with null,
+          // which will prompt them to configure hospitals first
         },
         error: (error: any) => {
-
-          // Default to hospital ID 1 if loading fails
-          this.hospitalService.setCurrentHospitalId(1);
+          console.error('Failed to load hospitals:', error);
+          if (!isSuperAdmin) {
+            // Default to hospital ID 1 only for regular users if loading fails
+            this.hospitalService.setCurrentHospitalId(1);
+          }
         }
       });
     }

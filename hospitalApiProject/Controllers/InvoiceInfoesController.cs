@@ -158,13 +158,8 @@ namespace hospitalApiProject.Controllers
               })
           .ToListAsync();
 
-      // If no invoices are found, return a 404 (Not Found)
-      if (invoicesToday == null || !invoicesToday.Any())
-      {
-        return NotFound("No invoices found for today.");
-      }
-
-      // Return the invoices as the response
+      // Return an empty list if no invoices found (instead of 404)
+      // This prevents frontend errors when there are no invoices for today
       return Ok(invoicesToday);
     }
 
@@ -359,9 +354,9 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetTotalAmount()
     {
       var hospitalId = GetHospitalIdFromHeader();
-      var result = _context.PaymentModeInfo
+      var result = await _context.PaymentModeInfo
        .Where(all => EF.Functions.DateDiffDay(all.PaymentDate, DateTime.Today) == 0 && (hospitalId == null || _context.InvoiceInfos.Where(i => i.InvoiceId == all.InvoiceId).Any(i => i.HospitalId == hospitalId)))
-       .Sum(all => (decimal?)all.Amount) ?? 0;
+       .SumAsync(all => (decimal?)all.Amount) ?? 0;
       return Ok(result);
     }
 

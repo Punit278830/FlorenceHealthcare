@@ -1,15 +1,17 @@
 import { DatePipe, formatNumber } from '@angular/common';
-import { OnInit, Component, ElementRef, ViewChild } from '@angular/core';
+import { OnInit, OnDestroy, Component, ElementRef, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { AppointmentService } from '../../../shared/Services/appointment/appointment.service';
 import { StaffScheduleService } from '../../../shared/Services/appointment/staff-schedule.service';
 import { DepartmentService } from '../../../shared/Services/department/department.service';
 import { FileUploadService } from '../../../shared/Services/fileUpload/file-upload.service';
 import { PatientService } from '../../../shared/Services/patient/patient.service';
 import { StaffService } from '../../../shared/Services/staff/staff.service';
+import { HospitalService } from '../../../shared/Services/hospital/hospital.service';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaffschedule, pageSelection } from '../../../shared/models/models';
 import { routes } from '../../../shared/routes/routes';
@@ -30,7 +32,7 @@ interface IdownloadFile {
   styleUrls: ['./add-appointment.component.scss'],
   providers: [DatePipe],
 })
-export class AddAppointmentComponent implements OnInit {
+export class AddAppointmentComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue!: string;
   public searchResults: IpatientInfo[] = [];
@@ -46,6 +48,7 @@ export class AddAppointmentComponent implements OnInit {
   public departmentList: Idepartment[] = [];
   public flag: boolean = false;
   public minDate: Date = new Date(); // sets today as the minimum selectable date
+  private hospitalSubscription: Subscription = new Subscription();
 
   // public deleteIcon=false;
   // public selectedFile!:File
@@ -87,6 +90,7 @@ export class AddAppointmentComponent implements OnInit {
     private toater: ToastrService,
     private patientService: PatientService,
     private modalservice: ModalServiceService,
+    private hospitalService: HospitalService,
 
   ) {
     this.getDepartmentLits();
@@ -242,11 +246,40 @@ export class AddAppointmentComponent implements OnInit {
     this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
       this.clearOtherFields();
     });
- this.patierntService.getPatientList().subscribe((patients: any[]) => {
-    this.allPatients = patients; // Store full list
-  });
+    
+    this.patierntService.getPatientList().subscribe((patients: any[]) => {
+      this.allPatients = patients; // Store full list
+    });
 
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId !== null) {
+        // Hospital changed, reload departments and clear doctor/department selections
+        this.reloadDataForHospital();
+      }
+    });
+  }
 
+  ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
+  }
+
+  private reloadDataForHospital() {
+    // Clear existing data
+    this.departmentList = [];
+    this.doctorList = [];
+    
+    // Reset form selections
+    this.bookappointment.patchValue({
+      departmentid: '',
+      doctorId: ''
+    });
+    
+    // Reload departments for the new hospital
+    this.getDepartmentLits();
+    
+    // Reload patients for the new hospital
+    this.getTableData();
   }
 
   

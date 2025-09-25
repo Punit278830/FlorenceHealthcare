@@ -25,7 +25,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         var query = _context.AdditionalInvoiceItems.AsQueryable();
         if (hospitalId != null)
         {
@@ -45,7 +45,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FirstOrDefaultAsync(a => a.Id == id && (hospitalId == null || a.HospitalId == hospitalId));
 
         if (additionalInvoiceItem == null)
@@ -68,7 +68,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
 
         var singleTransactionId = await _context.PaymentModeInfo
       .Where(p => p.InvoiceId == id && (hospitalId == null || p.HospitalId == hospitalId))
@@ -199,7 +199,7 @@ namespace hospitalApiProject.Controllers
 
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
 
         // Fetch PaymentModeInfo records where InvoiceId matches item.InvoiceId
         var results = await _context.PaymentModeInfo
@@ -228,7 +228,7 @@ namespace hospitalApiProject.Controllers
           return BadRequest();
         }
 
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         if (hospitalId != null)
         {
           request.additionalInvoiceItem.HospitalId = hospitalId;
@@ -313,7 +313,7 @@ namespace hospitalApiProject.Controllers
           return BadRequest();
         }
 
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
 
         // update the overall payment status of invoice
         var unpaidInvoiceItems = await _context.AdditionalInvoiceItems
@@ -349,7 +349,10 @@ namespace hospitalApiProject.Controllers
           if (paymentModeInfo != null && paymentModeInfo.InvoiceId != 0 && (unpaidInvoiceItems.Count != 0 ||
             (invoiceInfo.IsConsultationPaid.HasValue && !invoiceInfo.IsConsultationPaid.Value)))
           {
-            paymentModeInfo.Amount = unpaidAmount;
+            if (unpaidAmount.HasValue)
+            {
+              paymentModeInfo.Amount = unpaidAmount.Value;
+            }
             await AddPaymentModeInfo(paymentModeInfo);
           }
         }
@@ -369,7 +372,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         additionalInvoiceItem.HospitalId = hospitalId;
         _context.AdditionalInvoiceItems.Add(additionalInvoiceItem);
         await _context.SaveChangesAsync();
@@ -403,7 +406,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         var additionalInvoiceItem = await _context.AdditionalInvoiceItems.FirstOrDefaultAsync(a => a.Id == id && (hospitalId == null || a.HospitalId == hospitalId));
         if (additionalInvoiceItem == null)
         {
@@ -427,7 +430,7 @@ namespace hospitalApiProject.Controllers
     {
       try
       {
-        var hospitalId = await GetHospitalIdForFilteringAsync();
+        var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
         // Find the additional item to delete by invoiceId and itemName
         var additionalInvoiceItem = await _context.AdditionalInvoiceItems
             .FirstOrDefaultAsync(i => i.InvoiceId == invoiceId && i.ItemName == itemName && (hospitalId == null || i.HospitalId == hospitalId));
@@ -494,7 +497,7 @@ namespace hospitalApiProject.Controllers
     private async Task AddPaymentModeInfo(PaymentModeInfo paymentModeInfo)
     {
       // Tag with HospitalId if provided
-      var hospitalId = await GetHospitalIdForFilteringAsync();
+      var (isSuperAdmin, hospitalId) = await GetHospitalIdForFilteringAsync();
       if (hospitalId != null)
       {
         paymentModeInfo.HospitalId = hospitalId;

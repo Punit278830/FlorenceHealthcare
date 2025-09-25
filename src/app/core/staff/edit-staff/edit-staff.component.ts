@@ -1,10 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { Subscription } from 'rxjs';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { Idepartment, IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
@@ -17,7 +19,7 @@ interface data {
   styleUrls: ['./edit-staff.component.scss'],
   providers: [DatePipe],
 })
-export class EditStaffComponent implements OnInit {
+export class EditStaffComponent implements OnInit, OnDestroy {
   public routes = routes;
   public deleteIcon = true;
   public selectedValue !: string;
@@ -30,7 +32,8 @@ export class EditStaffComponent implements OnInit {
   public PassConfirmType = 'password';
   public passwordClass = false;
   public passwordClass1 = false;
-  public _depDto: Idepartment[] = []
+  public _depDto: Idepartment[] = [];
+  private hospitalSubscription!: Subscription;
 
 
 
@@ -39,9 +42,9 @@ export class EditStaffComponent implements OnInit {
     private datePipe: DatePipe,
     private route: Router,
     private toastr: ToastrService,
-    private departmentService: DepartmentService) {
+    private departmentService: DepartmentService,
+    private hospitalService: HospitalService) {
     this.createStaffRegrestrationForm();
-    this.getDepartmentList()
     this.staffId = this.staffService.staffId;
     if (this.staffId) {
       this.getStaffInfo(this.staffId);
@@ -63,8 +66,22 @@ export class EditStaffComponent implements OnInit {
   ]
 
   ngOnInit(): void {
-    //this.staffReg=this._staffDto;
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (hospitalId) {
+        this.reloadDataForHospital();
+      }
+    });
+  }
 
+  ngOnDestroy(): void {
+    if (this.hospitalSubscription) {
+      this.hospitalSubscription.unsubscribe();
+    }
+  }
+
+  private reloadDataForHospital(): void {
+    this.getDepartmentList();
   }
 
   togglePassword() {
