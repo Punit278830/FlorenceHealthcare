@@ -74,27 +74,65 @@ namespace hospitalApiProject.Controllers.Base
       return new Tuple<bool, int?>(false, GetHospitalIdFromHeader());
     }
 
-    // New method that always uses the selected hospital ID from header
-    // This allows super admins to filter by their selected hospital
+    // New method that handles hospital filtering for both regular users and super admins
     protected async Task<Tuple<bool, int?>> GetSelectedHospitalIdAsync()
     {
-      var isSuperAdmin = await IsSuperAdminAsync();
-      var selectedHospitalId = GetHospitalIdFromHeader();
+      var userInfo = await IsSuperAdminAsync(); // (isSuperAdmin, userHospitalId)
+      var headerHospitalId = GetHospitalIdFromHeader();
       
-      // If super admin and has selected a hospital in header, use that
-      if (isSuperAdmin.Item1 && selectedHospitalId.HasValue)
+      // SUPER ADMIN LOGIC
+      if (userInfo.Item1) // Is Super Admin
       {
-        return new Tuple<bool, int?>(true, selectedHospitalId.Value);
+        // Super admins can switch hospitals via header
+        if (headerHospitalId.HasValue)
+        {
+          return new Tuple<bool, int?>(true, headerHospitalId.Value);
+        }
+        
+        // If no hospital selected in header, require explicit hospital selection
+        // Super admins should not have a default hospital to avoid confusion
+        throw new InvalidOperationException("Super admin must select a hospital. Please select a hospital from the hospital selector.");
       }
       
-      // If super admin but no hospital selected, use their default hospital
-      if (isSuperAdmin.Item1)
+      // REGULAR USER LOGIC  
+      // Regular users are always tied to their assigned hospital
+      // They cannot change hospitals, so we ignore the header and use their assigned hospital
+      var assignedHospitalId = userInfo.Item2; // Hospital from staff record
+      
+      if (!assignedHospitalId.HasValue)
       {
-        return new Tuple<bool, int?>(true, isSuperAdmin.Item2);
+        throw new InvalidOperationException("User is not assigned to any hospital. Please contact administrator.");
       }
       
-      // Regular users use header hospital (should match their assigned hospital)
-      return new Tuple<bool, int?>(false, selectedHospitalId);
+      return new Tuple<bool, int?>(false, assignedHospitalId.Value);
+    }
+
+    // Helper method to get available hospitals for super admin hospital switching
+    protected async Task<List<object>> GetAvailableHospitalsAsync()
+    {
+      var userInfo = await IsSuperAdminAsync();
+      
+      if (!userInfo.Item1) // Not super admin
+      {
+        // Regular users can only see their own hospital
+        if (userInfo.Item2.HasValue)
+        {
+          var userHospital = await _context.Hospitals
+            .Where(h => h.HospitalId == userInfo.Item2.Value && h.IsDeleted != true)
+            .Select(h => new { h.HospitalId, HospitalName = h.Name })
+            .FirstOrDefaultAsync();
+            
+          return userHospital != null ? new List<object> { userHospital } : new List<object>();
+        }
+        return new List<object>();
+      }
+      
+      // Super admin can see all active hospitals
+      return await _context.Hospitals
+        .Where(h => h.IsDeleted != true)
+        .Select(h => new { h.HospitalId, HospitalName = h.Name })
+        .Cast<object>()
+        .ToListAsync();
     }
   }
 }
