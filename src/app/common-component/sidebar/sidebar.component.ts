@@ -5,6 +5,7 @@ import { MenuItem, SideBarData, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -77,7 +78,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   } else {
     // Fallback to old system
-    this.userData = JSON.parse(localStorage.getItem('data') || '{}');
+    this.userData = LocalStorageUtil.getUserData();
     this.userRole = this.userData.userRole || '';
     // Also handle the mapping in the fallback
     if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
@@ -98,7 +99,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         userRole = 'superadmin';
       }
     } else {
-      userRole = JSON.parse(localStorage.getItem('data') || '{}').userRole || '';
+      userRole = LocalStorageUtil.getUserData().userRole || '';
       // Also handle the mapping in the fallback
       if (userRole === 'globalsuperadmin' || userRole === 'global super administrator') {
         userRole = 'superadmin';

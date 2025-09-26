@@ -3,6 +3,7 @@ import { Observable, BehaviorSubject, of } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
+import { LocalStorageUtil } from '../../utils/local-storage.util';
 
 export interface SuperAdminStatus {
   isCurrentUserSuperAdmin: boolean;
@@ -46,13 +47,14 @@ export class SuperAdminService {
       catchError((error: any) => {
         console.error('SuperAdmin/check API failed:', error);
         // Fallback: determine super admin status based on localStorage role
-        const data = JSON.parse(localStorage.getItem('data') || '{}');
-        const userRole = data.userRole?.toLowerCase() || '';
-        
-        const fallbackStatus: SuperAdminStatus = {
-          isCurrentUserSuperAdmin: userRole === 'globalsuperadmin' || userRole === 'superadmin',
+        let fallbackStatus: SuperAdminStatus = {
+          isCurrentUserSuperAdmin: false,
           globalSuperAdminExists: true
         };
+        
+        const data = LocalStorageUtil.getUserData();
+        const userRole = data?.userRole?.toLowerCase() || '';
+        fallbackStatus.isCurrentUserSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
         
         console.log('Using fallback super admin status:', fallbackStatus);
         this.superAdminStatusSubject.next(fallbackStatus);
