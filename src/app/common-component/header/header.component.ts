@@ -56,6 +56,10 @@ export class HeaderComponent {
       // Debug logging to check role values
       console.log('Header Component - User Role:', this.userRole);
       console.log('Header Component - Full Data:', data);
+      
+      // Set initial super admin status based on role from localStorage
+      this.isSuperAdmin = this.isSuperAdminByRole();
+      console.log('Initial isSuperAdmin from role:', this.isSuperAdmin);
     }
     
     // Also check for super admin using the super admin service

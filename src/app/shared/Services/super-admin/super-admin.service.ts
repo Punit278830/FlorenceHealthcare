@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, BehaviorSubject } from 'rxjs';
-import { tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, of } from 'rxjs';
+import { tap, catchError } from 'rxjs/operators';
 import { ApiHttpService } from '../../apiService/apiHttpService';
 import { api_Url } from 'src/environment/environment';
 
@@ -42,7 +42,22 @@ export class SuperAdminService {
 
   checkSuperAdminStatus(): Observable<SuperAdminStatus> {
     return this.apiService.get(api_Url + 'SuperAdmin/check').pipe(
-      tap((status: SuperAdminStatus) => this.superAdminStatusSubject.next(status))
+      tap((status: SuperAdminStatus) => this.superAdminStatusSubject.next(status)),
+      catchError((error: any) => {
+        console.error('SuperAdmin/check API failed:', error);
+        // Fallback: determine super admin status based on localStorage role
+        const data = JSON.parse(localStorage.getItem('data') || '{}');
+        const userRole = data.userRole?.toLowerCase() || '';
+        
+        const fallbackStatus: SuperAdminStatus = {
+          isCurrentUserSuperAdmin: userRole === 'globalsuperadmin' || userRole === 'superadmin',
+          globalSuperAdminExists: true
+        };
+        
+        console.log('Using fallback super admin status:', fallbackStatus);
+        this.superAdminStatusSubject.next(fallbackStatus);
+        return of(fallbackStatus);
+      })
     );
   }
 
@@ -51,7 +66,14 @@ export class SuperAdminService {
   }
 
   getAllHospitals(): Observable<HospitalSummary[]> {
-    return this.apiService.get(api_Url + 'SuperAdmin/hospitals');
+    return this.apiService.get(api_Url + 'SuperAdmin/hospitals').pipe(
+      catchError((error: any) => {
+        console.error('SuperAdmin/hospitals API failed:', error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.get(api_Url + 'Hospitals');
+      })
+    );
   }
 
   getSystemSummary(): Observable<SystemSummary> {
