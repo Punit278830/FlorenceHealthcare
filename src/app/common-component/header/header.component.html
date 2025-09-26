@@ -107,7 +107,7 @@
         </li>
         
         <!-- Hospital Selector: Only for Super Admin users -->
-        <li *ngIf="userRole === 'globalsuperadmin' || userRole === 'superadmin'" class="nav-item dropdown d-none d-sm-block">
+        <li *ngIf="isSuperAdmin || userRole === 'globalsuperadmin' || userRole === 'superadmin' || userRole === 'GlobalSuperAdmin' || userRole === 'SuperAdmin' || (userRole && userRole.toLowerCase().includes('admin'))" class="nav-item dropdown d-none d-sm-block">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link hospital-switcher" data-bs-toggle="dropdown">
                 <img src="assets/img/icons/hospital-icon.svg" alt="" style="width: 16px; height: 16px; margin-right: 5px;">
                 <span class="hospital-name">{{ currentHospitalName || 'Select Hospital' }}</span>

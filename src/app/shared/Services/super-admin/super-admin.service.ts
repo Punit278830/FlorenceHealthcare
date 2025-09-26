@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { ApiHttpService } from '../../apiService/apiHttpService';
+import { api_Url } from 'src/environment/environment';
 
 export interface SuperAdminStatus {
   isCurrentUserSuperAdmin: boolean;
@@ -40,21 +41,21 @@ export class SuperAdminService {
   }
 
   checkSuperAdminStatus(): Observable<SuperAdminStatus> {
-    return this.apiService.get('SuperAdmin/check').pipe(
+    return this.apiService.get(api_Url + 'SuperAdmin/check').pipe(
       tap((status: SuperAdminStatus) => this.superAdminStatusSubject.next(status))
     );
   }
 
   setupGlobalSuperAdmin(staffId: number): Observable<any> {
-    return this.apiService.post('SuperAdmin/setup', { staffId });
+    return this.apiService.post(api_Url + 'SuperAdmin/setup', { staffId });
   }
 
   getAllHospitals(): Observable<HospitalSummary[]> {
-    return this.apiService.get('SuperAdmin/hospitals');
+    return this.apiService.get(api_Url + 'SuperAdmin/hospitals');
   }
 
   getSystemSummary(): Observable<SystemSummary> {
-    return this.apiService.get('SuperAdmin/all-data-summary');
+    return this.apiService.get(api_Url + 'SuperAdmin/all-data-summary');
   }
 
   isSuperAdmin(): boolean {
