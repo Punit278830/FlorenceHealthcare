@@ -50,12 +50,11 @@ export class LoginComponent implements OnInit {
       this.auth.login(email, password).subscribe(
         (staffInfo: IstaffInfo) => {
           this.loadingService.hideLoader();
-          
           // Wait a brief moment for role data to be fetched and set
           setTimeout(() => {
             const userRole = this.roleService.getCurrentRole();
             const roleName = userRole?.roleName.toLowerCase() || staffInfo.designation.toLowerCase();
-            
+
             if (staffInfo.activeStatus === 1) {
               // Navigate based on user role with proper role handling
               if (roleName === 'globalsuperadmin' || roleName === 'superadmin' || 
@@ -63,14 +62,15 @@ export class LoginComponent implements OnInit {
                 this.router.navigate([routes.adminDashboard]);
               } else if (roleName === 'doctor') {
                 this.router.navigate([routes.doctorDashboard]);
-              } else if (roleName === 'reception') {
-                this.router.navigate([routes.appointmentList]);
-              } else if (roleName === 'nursing') {
-                this.router.navigate([routes.addPatient]);
+              } else if (roleName === 'reception' || roleName === 'nursing') {
+                // Reception and nursing should land on /dashboard for role-based redirect
+                this.router.navigate(['/dashboard']);
               } else {
                 // Default to admin dashboard for unknown roles
                 this.router.navigate([routes.adminDashboard]);
               }
+              // Force a full reload to update layout/header for new role
+              setTimeout(() => { window.location.reload(); }, 100);
             } else {
               this.toaster.warning('User account is inactive. Please contact administrator.');
             }
