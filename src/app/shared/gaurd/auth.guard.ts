@@ -10,6 +10,7 @@ import { Observable } from 'rxjs';
 import { routes } from '../routes/routes';
 import { AuthService } from '../auth/auth.service';
 import { Ilogin } from '../models/models';
+import { LocalStorageUtil } from '../utils/local-storage.util';
 
 @Injectable({
   providedIn: 'root',
@@ -26,12 +27,16 @@ export class AuthGuard implements CanActivate {
     | Promise<boolean | UrlTree>
     | boolean
     | UrlTree {
-     this.loginData=JSON.parse(localStorage.getItem('data')||'')
-      if (this.loginData.loginStatus) {
-        return true;
-      } else {
-        this.router.navigate([routes.login]);
-        return false;
-      }
+     
+    // Use the utility to safely get user data
+    this.loginData = LocalStorageUtil.getUserData();
+    
+    if (this.loginData && this.loginData.loginStatus) {
+      return true;
+    }
+    
+    // If no valid login data, redirect to login
+    this.router.navigate([routes.login]);
+    return false;
   }
 }
