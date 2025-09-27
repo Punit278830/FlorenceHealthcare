@@ -1,6 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { Subscription } from 'rxjs';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 import { DataService } from 'src/app/shared/data/data.service';
 import { pageSelection, apiResultFormat, invoicereport } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
@@ -14,7 +16,7 @@ interface data {
   templateUrl: './invoice-reports.component.html',
   styleUrls: ['./invoice-reports.component.scss']
 })
-export class InvoiceReportsComponent implements OnInit {
+export class InvoiceReportsComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue !: string  ;
   public invoiceReports: Array<invoicereport> = [];
@@ -34,11 +36,29 @@ export class InvoiceReportsComponent implements OnInit {
   public pageSelection: Array<pageSelection> = [];
   public totalPages = 0;
 
-  constructor(public data : DataService){
+  private hospitalSubscription: Subscription = new Subscription();
+
+  constructor(
+    public data: DataService,
+    private hospitalService: HospitalService
+  ){
 
   }
   ngOnInit() {
+    // Load initial data
     this.getTableData();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (this.invoiceReports.length > 0) {
+        console.log('Hospital changed, reloading invoice reports for hospital:', hospitalId);
+        this.getTableData();
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    this.hospitalSubscription.unsubscribe();
   }
   private getTableData(): void {
     this.invoiceReports = [];

@@ -1,13 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { Router } from '@angular/router';
-import { combineLatest } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 import { LoadingService } from '../../../shared/Services/loader/loader.service';
 import { PatientService } from '../../../shared/Services/patient/patient.service';
+import { HospitalService } from '../../../shared/Services/hospital/hospital.service';
 import { DataService } from '../../../shared/data/data.service';
 import { pageSelection, apiResultFormat, invoices, Iinvoice, IpatientInfo, InvoiceInfoResponse, IInvoiceSummaryResponse, SearchCriteriaBase, SearchResponseBase, InvoiceSearch, PaymentStatus, PaymentMode } from '../../../shared/models/models';
 import { routes } from '../../../shared/routes/routes';
@@ -17,6 +18,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ModalServiceService } from '../../../shared/modalService/modal-service.service';
 import { ToastrService } from 'ngx-toastr';
+import { LocalStorageUtil } from '../../../shared/utils/local-storage.util';
 import dayjs from 'dayjs';
 
 
@@ -33,7 +35,7 @@ interface data {
   
 })
 
-export class InvoicesComponent implements OnInit {
+export class InvoicesComponent implements OnInit, OnDestroy {
   public routes = routes;
   public selectedValue !: string;
   public invoices: any[] = [];
@@ -81,6 +83,8 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     totalPages: 0
   };
 
+  private hospitalChangeSubscription?: Subscription;
+
 
   constructor(public data: DataService,
     private invoiceService: InvoiceService,
@@ -90,11 +94,12 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     private fb: FormBuilder,
     private datePipe: DatePipe,
     private modalservice: ModalServiceService,
-    private toaster: ToastrService  ) {
+    private toaster: ToastrService,
+    private hospitalService: HospitalService  ) {
 
   }
   ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
+    this.loggedIn = LocalStorageUtil.getUserData();
 
     const today = new Date();
     const formattedToday = today.toISOString().slice(0, 10);
@@ -125,9 +130,15 @@ filteredInvoices: InvoiceInfoResponse[] = [];   // Filtered list for view
     this.selectedPaymentStatus = 'All';
     this.selectedPaymentMode = 'All';
     
+    // Subscribe to hospital changes
+    this.hospitalChangeSubscription = this.hospitalService.currentHospitalId$.subscribe((hospitalId) => {
+      // Only reload data if this is not the initial load
+      if (this.invoices.length > 0) {
+        console.log('Hospital changed, reloading invoice data for hospital:', hospitalId);
+        this.searchInvoices();
+      }
+    });
 
-
-    
     // Sync form data with search criteria and selected values before calling search
     this.getFormData();
     
@@ -803,6 +814,12 @@ getTotalUnpaidAmount(): number {
     } catch (error) {
 
       return 'N/A';
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.hospitalChangeSubscription) {
+      this.hospitalChangeSubscription.unsubscribe();
     }
   }
 }

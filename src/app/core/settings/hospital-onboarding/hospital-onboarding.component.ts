@@ -6,6 +6,7 @@ import { routes } from 'src/app/shared/routes/routes';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
 
 @Component({
   selector: 'app-hospital-onboarding',
@@ -33,8 +34,17 @@ export class HospitalOnboardingComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Check if user data exists and role is properly set
+    const userData = LocalStorageUtil.getUserData();
+    if (!userData || !userData.userRole) {
+      this.toastr.error('User session invalid. Please login again.');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
     // Check if user has permission to access hospital management
-    if (!this.roleService.canAccessHospitalManagement()) {
+    const userRole = userData.userRole.toLowerCase();
+    if (userRole !== 'superadmin' && userRole !== 'globalsuperadmin') {
       this.toastr.error('Access denied. Only Super Admin users can access this page.');
       this.router.navigate(['/admin-dashboard']);
       return;
