@@ -1,3 +1,5 @@
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -91,22 +93,29 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
   ) {
 
   }
+  private initialized = false;
+  private hospitalChangeTimeout: any = null;
   ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     this.initializeAppointDateForm();
-    
-    // Load initial data
+    // Load initial data only once
     this.loadAppointmentData();
-    
-    // Subscribe to hospital changes
+    this.initialized = true;
+    // Subscribe to hospital changes, debounce to avoid rapid multiple calls
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-      if (hospitalId) {
-        // Reset pagination and reload data
-        this.searchCriteria.pageNumber = 1;
-        this.pageIndex = 0;
-        this.currentPage = 1;
-        this.loadAppointmentData();
+      if (!this.initialized) return;
+      if (this.hospitalChangeTimeout) {
+        clearTimeout(this.hospitalChangeTimeout);
       }
+      this.hospitalChangeTimeout = setTimeout(() => {
+        if (hospitalId) {
+          // Reset pagination and reload data
+          this.searchCriteria.pageNumber = 1;
+          this.pageIndex = 0;
+          this.currentPage = 1;
+          this.loadAppointmentData();
+        }
+      }, 200); // 200ms debounce
     });
   }
   
@@ -358,7 +367,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
 
   public searchData(value: any): void {
     if (this.usePaginatedSearch) {
-      // Use the paginated search with server-side filtering
       this.searchCriteria.searchTerm = value || '';
       this.searchCriteria.pageNumber = 1;
       this.currentPage = 1;
@@ -393,6 +401,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   public sortData(sort: Sort) {
     const data = this.appointmentList.slice();

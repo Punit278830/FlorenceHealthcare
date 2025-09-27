@@ -1,5 +1,6 @@
 import { DatePipe, formatNumber } from '@angular/common';
 import { OnInit, OnDestroy, Component, ElementRef, ViewChild } from '@angular/core';
+import { MatTableDataSource } from '@angular/material/table';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Sort } from '@angular/material/sort';
 import { Router } from '@angular/router';
@@ -33,6 +34,16 @@ interface IdownloadFile {
   providers: [DatePipe],
 })
 export class AddAppointmentComponent implements OnInit, OnDestroy {
+  // ...existing code...
+  private loadPatients() {
+    this.patientService.getPatientList().subscribe((patients: any[]) => {
+      this.allPatients = patients;
+      this.getTableData();
+    });
+  }
+  public dataSource!: MatTableDataSource<IpatientInfo>;
+  
+  private initialHospitalLoad = true;
   public routes = routes;
   public selectedValue!: string;
   public searchResults: IpatientInfo[] = [];
@@ -93,8 +104,8 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     private hospitalService: HospitalService,
 
   ) {
-    this.getDepartmentLits();
-    this.getTableData();
+  this.getDepartmentLits();
+  this.loadPatients();
   }
 
   onEditPatient(id: number) {
@@ -114,7 +125,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     this.patientService.deletePatient(idhere).subscribe(res => {
       if (res == null) {
         this.toater.success("Patient is deleted!")
-        this.getTableData()
+        this.loadPatients();
       }
     })
 
@@ -124,27 +135,18 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
 
     this.patientlist = [];
     this.serialNumberArray = [];
-
-    this.patientService.getPatientList().subscribe((data: any) => {
-      this.totalData = data.length;
-      // this.staffList.push(data);
-
-
-      data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.calculateDateDifference(res.dob);
-          res.ageinYear = this.age;
-
-          this.patientlist.push(res);
-
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-
-      this.calculateTotalPages(this.totalData, this.pageSize);
-
-    })
+    const data = this.allPatients || [];
+    this.totalData = data.length;
+    data.map((res: any, index: number) => {
+      const serialNumber = index + 1;
+      if (index >= this.skip && serialNumber <= this.limit) {
+        this.calculateDateDifference(res.dob);
+        res.ageinYear = this.age;
+        this.patientlist.push(res);
+        this.serialNumberArray.push(serialNumber);
+      }
+    });
+    this.calculateTotalPages(this.totalData, this.pageSize);
 
   }
   calculateDateDifference(dob: Date) {
@@ -179,13 +181,13 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
       this.pageIndex = this.currentPage - 1;
       this.limit += this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      this.getTableData();
+  this.getTableData();
     } else if (event == 'previous') {
       this.currentPage--;
       this.pageIndex = this.currentPage - 1;
       this.limit -= this.pageSize;
       this.skip = this.pageSize * this.pageIndex;
-      this.getTableData();
+  this.getTableData();
     }
   }
 
@@ -198,7 +200,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     } else if (pageNumber < this.currentPage) {
       this.pageIndex = pageNumber + 1;
     }
-    this.getTableData();
+  this.getTableData();
   }
 
   public PageSize(): void {
@@ -206,7 +208,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     this.limit = this.pageSize;
     this.skip = 0;
     this.currentPage = 1;
-    this.getTableData();
+  this.getTableData();
   }
 
   private calculateTotalPages(totalData: number, pageSize: number): void {
@@ -246,13 +248,13 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
       this.clearOtherFields();
     });
-    
-    this.patierntService.getPatientList().subscribe((patients: any[]) => {
-      this.allPatients = patients; // Store full list
-    });
 
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      if (this.initialHospitalLoad) {
+        this.initialHospitalLoad = false;
+        return;
+      }
       if (hospitalId !== null) {
         // Hospital changed, reload departments and clear doctor/department selections
         this.reloadDataForHospital();
@@ -278,8 +280,8 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     // Reload departments for the new hospital
     this.getDepartmentLits();
     
-    // Reload patients for the new hospital
-    this.getTableData();
+  // Reload patients for the new hospital
+  this.loadPatients();
   }
 
   
@@ -341,23 +343,19 @@ searchData(data: string) {
     //const inputField:HTMLInputElement=this.searchInput.nativeElement;
     this.patientId = id;
     if (this.searchResults.length > 0) {
-      this.searchResults.filter(res => {
-        if (res.patientId == id) {
-          this.age = this.appointmentService.calculateDateDifference(res.dob)
+      const data = this.allPatients; // Use the already fetched patient list
+      this.totalData = data.length;
+      data.map((res: any, index: number) => {
+        const serialNumber = index + 1;
+        if (index >= this.skip && serialNumber <= this.limit) {
+          this.calculateDateDifference(res.dob);
           res.ageinYear = this.age;
-          this.patientAppointmentData.push(res)
-
+          this.patientlist.push(res);
+          this.serialNumberArray.push(serialNumber);
         }
-      })
-    }
-    else {
-      this.patientService.getPatientData(id).subscribe(res => {
-        this.age = this.appointmentService.calculateDateDifference(res.dob)
-        res.ageinYear = this.age;
-        this.patientAppointmentData.push(res)
-      })
-
-
+      });
+      this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientlist);
+      this.calculateTotalPages(this.totalData, this.pageSize);
     }
 
 
