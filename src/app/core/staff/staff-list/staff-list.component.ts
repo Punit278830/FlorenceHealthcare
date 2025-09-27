@@ -75,13 +75,12 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
-
-    //this.getTableData();
-    this.fetchCombineData();
-    
-    // Subscribe to hospital changes
+    let initialHospitalId: any;
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-      if (hospitalId) {
+      if (initialHospitalId === undefined) {
+        initialHospitalId = hospitalId;
+        this.fetchCombineData(); // Only call once on init
+      } else if (hospitalId && hospitalId !== initialHospitalId) {
         // Reset pagination and reload data when hospital changes
         this.skip = 0;
         this.currentPage = 1;
@@ -147,63 +146,25 @@ export class StaffListComponent implements OnInit, OnDestroy {
 
 
   }
-  private getTableData() {
-    this.staffList = [];
-    this.serialNumberArray = [];
-
-    this.staffService.getStaffList().subscribe((data: any) => {
-      this.totalData = data.length;
-      this.allstaffList = data;
-      data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.staffList.push(res);
-
-          this.serialNumberArray.push(serialNumber);
-        }
-      });
-
-      // this.dataSource = new MatTableDataSource<IstaffInfo>(this.staffList);
-      this.dataSource = new MatTableDataSource<IstaffInfo>(this.allstaffList);
-      this.calculateTotalPages(this.totalData, this.pageSize);
-
-    })
-    
-
-
-    // this.data.getStaffList().subscribe((data: apiResultFormat) => {
-    //   this.totalData = data.totalData;
-
-
-    // });
-  }
+  // Removed getTableData to avoid double API calls. Always use fetchCombineData.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
     if (value != '') {
-
-
       this.dataSource.filter = value.trim().toLowerCase();
       this.staffList = this.dataSource.filteredData;
-
       if (this.staffList.length > 0) {
         this.staffList.map((item: any, index: number) => {
           this.serialNumberArray.push(index + 1)
         })
         this.totalData = this.staffList.length;
         this.calculateTotalPages(this.totalData, this.pageSize);
-
-      }
-      else {
+      } else {
         this.serialNumberArray = [];
         this.totalData = 0;
       }
-
+    } else {
+      this.fetchCombineData();
     }
-    else {
-      this.getTableData()
-    }
-  
-
   }
 
   // sortData(sort: Sort) {
