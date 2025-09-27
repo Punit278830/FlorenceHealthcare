@@ -82,6 +82,62 @@ export class SuperAdminService {
     return this.apiService.get(api_Url + 'SuperAdmin/all-data-summary');
   }
 
+  // Hospital management methods for Super Admin
+  createHospital(hospitalData: any): Observable<any> {
+    return this.apiService.post(api_Url + 'SuperAdmin/hospitals', hospitalData).pipe(
+      catchError((error: any) => {
+        console.error('SuperAdmin/hospitals POST failed:', error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.post(api_Url + 'Hospitals', hospitalData);
+      })
+    );
+  }
+
+  updateHospital(hospitalId: number, hospitalData: any): Observable<any> {
+    return this.apiService.put(api_Url + `SuperAdmin/hospitals/${hospitalId}`, hospitalData).pipe(
+      catchError((error: any) => {
+        console.error(`SuperAdmin/hospitals/${hospitalId} PUT failed:`, error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.put(api_Url + `Hospitals/${hospitalId}`, hospitalData);
+      })
+    );
+  }
+
+  deleteHospital(hospitalId: number): Observable<any> {
+    return this.apiService.delete(api_Url + `SuperAdmin/hospitals/${hospitalId}`).pipe(
+      catchError((error: any) => {
+        console.error(`SuperAdmin/hospitals/${hospitalId} DELETE failed:`, error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.delete(api_Url + `Hospitals/${hospitalId}`);
+      })
+    );
+  }
+
+  activateHospital(hospitalId: number): Observable<any> {
+    return this.apiService.put(api_Url + `SuperAdmin/hospitals/${hospitalId}/activate`, {}).pipe(
+      catchError((error: any) => {
+        console.error(`SuperAdmin/hospitals/${hospitalId}/activate PUT failed:`, error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.put(api_Url + `Hospitals/${hospitalId}/activate`, {});
+      })
+    );
+  }
+
+  deactivateHospital(hospitalId: number): Observable<any> {
+    return this.apiService.put(api_Url + `SuperAdmin/hospitals/${hospitalId}/deactivate`, {}).pipe(
+      catchError((error: any) => {
+        console.error(`SuperAdmin/hospitals/${hospitalId}/deactivate PUT failed:`, error);
+        // Fallback: try the regular hospitals endpoint
+        console.log('Falling back to regular hospitals endpoint...');
+        return this.apiService.put(api_Url + `Hospitals/${hospitalId}/deactivate`, {});
+      })
+    );
+  }
+
   isSuperAdmin(): boolean {
     const status = this.superAdminStatusSubject.value;
     return status?.isCurrentUserSuperAdmin || false;
