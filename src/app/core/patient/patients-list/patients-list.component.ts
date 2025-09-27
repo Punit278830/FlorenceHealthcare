@@ -103,11 +103,12 @@ export class PatientsListComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initlizeDateForm();
-    this.getTableData();
-    
-    // Subscribe to hospital changes
+    let initialHospitalId: any;
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-      if (hospitalId) {
+      if (initialHospitalId === undefined) {
+        initialHospitalId = hospitalId;
+        this.getTableData(); // Only call once on init
+      } else if (hospitalId && hospitalId !== initialHospitalId) {
         // Reset pagination and reload data when hospital changes
         this.skip = 0;
         this.currentPage = 1;
