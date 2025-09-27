@@ -9,7 +9,7 @@ export class LocalStorageUtil {
   static getItem<T>(key: string, defaultValue: T = null as T): T {
     try {
       const item = localStorage.getItem(key);
-      if (item === null || item === undefined) {
+      if (item === null || item === undefined || item === '' || item === 'undefined' || item === 'null') {
         return defaultValue;
       }
       return JSON.parse(item);
@@ -28,6 +28,10 @@ export class LocalStorageUtil {
    */
   static setItem(key: string, value: any): void {
     try {
+      if (value === null || value === undefined) {
+        localStorage.removeItem(key);
+        return;
+      }
       localStorage.setItem(key, JSON.stringify(value));
     } catch (error) {
       console.error(`Error setting localStorage item "${key}":`, error);
@@ -61,5 +65,16 @@ export class LocalStorageUtil {
   static isAuthenticated(): boolean {
     const userData = this.getUserData();
     return userData && userData.loginStatus === true;
+  }
+
+  /**
+   * Clear all authentication related data
+   */
+  static clearAuthData(): void {
+    this.removeItem('data');
+    this.removeItem('currentStaffId');
+    this.removeItem('currentHospitalId');
+    this.removeItem('token');
+    this.removeItem('refreshToken');
   }
 }

@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { NgModule, ErrorHandler } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -11,6 +11,7 @@ import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LoaderComponent } from './core/loader/loader.component';
 import { MatIconModule } from '@angular/material/icon';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { GlobalErrorHandler } from './shared/error-handler/global-error-handler';
 
 
 @NgModule({ declarations: [
@@ -24,5 +25,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         NgxExtendedPdfViewerModule,
         ToastrModule.forRoot(),
         NgxSpinnerModule.forRoot(),
-        MatIconModule], providers: [provideHttpClient(withInterceptorsFromDi())] })
+        MatIconModule], providers: [
+        provideHttpClient(withInterceptorsFromDi()),
+        { provide: ErrorHandler, useClass: GlobalErrorHandler }
+    ] })
 export class AppModule { }

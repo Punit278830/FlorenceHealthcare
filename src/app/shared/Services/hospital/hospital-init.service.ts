@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HospitalService } from './hospital.service';
 import { HospitalModel } from '../../models/models';
+import { LocalStorageUtil } from '../../utils/local-storage.util';
 
 @Injectable({
   providedIn: 'root'
@@ -15,13 +16,9 @@ export class HospitalInitService {
     
     if (!currentHospitalId) {
       // Check if user is super admin
-      const userData = localStorage.getItem('data');
-      let isSuperAdmin = false;
-      if (userData) {
-        const user = JSON.parse(userData);
-        const userRole = user.userRole;
-        isSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
-      }
+      const user = LocalStorageUtil.getUserData();
+      const userRole = user?.userRole;
+      const isSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
       
       // Load hospitals and set default to first available
       this.hospitalService.getHospitals().subscribe({
