@@ -1057,6 +1057,16 @@ export class DataService {
       separateRoute: false,
       menu: [
         {
+          menuValue: 'Dashboard',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: routes.adminDashboard,
+          route: routes.adminDashboard,
+          icon: 'fa-columns',
+          faIcon: true,
+          subMenus: [],
+        },
+        {
           menuValue: 'Add Patient',
           hasSubRoute: false,
           showSubRoute: false,
@@ -1312,6 +1322,16 @@ export class DataService {
       showAsTab: false,
       separateRoute: false,
       menu: [
+        {
+          menuValue: 'Dashboard',
+          hasSubRoute: false,
+          showSubRoute: false,
+          base: routes.adminDashboard,
+          route: routes.adminDashboard,
+          icon: 'fa-columns',
+          faIcon: true,
+          subMenus: [],
+        },
 
         {
           menuValue: 'Patient List',

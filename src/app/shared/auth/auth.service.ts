@@ -114,10 +114,12 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.clear();
-    this.roleService.clearRole();
-    this.authentication = {} as Ilogin;
-    this.userRole = '';
+  localStorage.clear();
+  this.roleService.clearRole();
+  this.authentication = {} as Ilogin;
+  this.userRole = '';
+  // Force a full reload to update layout/header for new role
+  window.location.reload();
   }
 
   getCurrentUserRole(): Observable<any> {
