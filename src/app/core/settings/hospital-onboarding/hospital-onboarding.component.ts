@@ -4,8 +4,10 @@ import { HttpClient } from '@angular/common/http';
 import { api_Url } from 'src/environment/environment';
 import { routes } from 'src/app/shared/routes/routes';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-admin.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
+import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
 
 @Component({
   selector: 'app-hospital-onboarding',
@@ -28,13 +30,23 @@ export class HospitalOnboardingComponent implements OnInit {
     private fb: FormBuilder, 
     private http: HttpClient,
     private roleService: RoleAuthorizationService,
+    private superAdminService: SuperAdminService,
     private router: Router,
     private toastr: ToastrService
   ) {}
 
   ngOnInit(): void {
+    // Check if user data exists and role is properly set
+    const userData = LocalStorageUtil.getUserData();
+    if (!userData || !userData.userRole) {
+      this.toastr.error('User session invalid. Please login again.');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
     // Check if user has permission to access hospital management
-    if (!this.roleService.canAccessHospitalManagement()) {
+    const userRole = userData.userRole.toLowerCase();
+    if (userRole !== 'superadmin' && userRole !== 'globalsuperadmin') {
       this.toastr.error('Access denied. Only Super Admin users can access this page.');
       this.router.navigate(['/admin-dashboard']);
       return;
@@ -88,8 +100,12 @@ export class HospitalOnboardingComponent implements OnInit {
     this.success = undefined;
 
     if (this.isEditMode && this.editingHospitalId) {
-      // Update existing hospital
-      this.http.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, this.form.value).subscribe({
+      // Update existing hospital - include hospitalId in the payload
+      const updatePayload = {
+        ...this.form.value,
+        hospitalId: this.editingHospitalId
+      };
+      this.http.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
         next: () => {
           this.success = 'Hospital updated successfully';
           this.resetForm();

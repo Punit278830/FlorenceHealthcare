@@ -6,6 +6,7 @@ import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-adm
 import { HospitalModel } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
+import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
 
 @Component({
   selector: 'app-header',
@@ -46,12 +47,12 @@ export class HeaderComponent {
 
   public ngOnInit()
   {
-    //this.userRole=localStorage.getItem('userRole')||'';
-
-    const data=JSON.parse(localStorage.getItem('data')||'{}');
-    if (data.fname && data.lname) {
+    // Use the safe utility to get user data
+    const data = LocalStorageUtil.getUserData();
+    
+    if (data && data.fname && data.lname) {
       this.userName = data.fname + " " + data.lname;
-      this.userRole = data.userRole;
+      this.userRole = data.userRole || '';
       
       // Debug logging to check role values
       console.log('Header Component - User Role:', this.userRole);

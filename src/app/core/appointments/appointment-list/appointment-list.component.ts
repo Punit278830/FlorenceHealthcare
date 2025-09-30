@@ -1,3 +1,5 @@
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
@@ -91,8 +93,10 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
   ) {
 
   }
+  private initialized = false;
+  private hospitalChangeTimeout: any = null;
   ngOnInit() {
-    this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '');
     this.initializeAppointDateForm();
     
     // Track initial load to prevent duplicate calls
@@ -358,7 +362,6 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
 
   public searchData(value: any): void {
     if (this.usePaginatedSearch) {
-      // Use the paginated search with server-side filtering
       this.searchCriteria.searchTerm = value || '';
       this.searchCriteria.pageNumber = 1;
       this.currentPage = 1;
@@ -393,6 +396,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
       }
     }
   }
+
 
   public sortData(sort: Sort) {
     const data = this.appointmentList.slice();

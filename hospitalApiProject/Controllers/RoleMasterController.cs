@@ -46,10 +46,16 @@ namespace hospitalApiProject.Controllers
         {
             var (isSuperAdmin, hospitalId) = await GetSelectedHospitalIdAsync();
             
-            var staff = await _context.StaffInfos
-                .Include(s => s.Role)
-                .Where(s => s.StaffId == staffId && (hospitalId == null || s.HospitalId == hospitalId))
-                .FirstOrDefaultAsync();
+            // For super admin context, don't apply hospital filtering when looking up staff
+            var staff = isSuperAdmin 
+                ? await _context.StaffInfos
+                    .Include(s => s.Role)
+                    .Where(s => s.StaffId == staffId)
+                    .FirstOrDefaultAsync()
+                : await _context.StaffInfos
+                    .Include(s => s.Role)
+                    .Where(s => s.StaffId == staffId && s.HospitalId == hospitalId)
+                    .FirstOrDefaultAsync();
 
             if (staff == null)
             {
@@ -63,11 +69,16 @@ namespace hospitalApiProject.Controllers
             }
 
             // Fallback: Get role based on staff designation (for backward compatibility)
-            var role = await _context.RoleMasters
-                .Where(r => r.HospitalId == staff.HospitalId && 
-                           r.RoleName.ToLower() == staff.Designation.ToLower() && 
-                           r.IsActive)
-                .FirstOrDefaultAsync();
+            // For super admin context, don't filter by hospital
+            var role = isSuperAdmin
+                ? await _context.RoleMasters
+                    .Where(r => r.RoleName.ToLower() == staff.Designation.ToLower() && r.IsActive)
+                    .FirstOrDefaultAsync()
+                : await _context.RoleMasters
+                    .Where(r => r.HospitalId == staff.HospitalId && 
+                               r.RoleName.ToLower() == staff.Designation.ToLower() && 
+                               r.IsActive)
+                    .FirstOrDefaultAsync();
 
             if (role == null)
             {

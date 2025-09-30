@@ -3,6 +3,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { api_Url } from 'src/environment/environment';
 import { HospitalModel } from '../../models/models';
+import { LocalStorageUtil } from '../../utils/local-storage.util';
 
 @Injectable({ providedIn: 'root' })
 export class HospitalService {
@@ -47,15 +48,12 @@ export class HospitalService {
     const val = localStorage.getItem('currentHospitalId');
     if (!val) {
       // Check if user is super admin
-      const userData = localStorage.getItem('data');
-      if (userData) {
-        const user = JSON.parse(userData);
-        const userRole = user.userRole;
-        if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
-          // Super admins need to select a hospital to work with
-          // Return null only if no hospital is selected
-          return null;
-        }
+      const user = LocalStorageUtil.getUserData();
+      const userRole = user?.userRole;
+      if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
+        // Super admins need to select a hospital to work with
+        // Return null only if no hospital is selected
+        return null;
       }
       // Default to hospital ID 1 for regular users if not set
       this.setCurrentHospitalId(1);
@@ -67,14 +65,11 @@ export class HospitalService {
   // For super admins: returns null when they should see all hospitals data (read operations)
   // For regular users: always returns the hospital ID
   getHospitalIdForViewing(): number | null {
-    const userData = localStorage.getItem('data');
-    if (userData) {
-      const user = JSON.parse(userData);
-      const userRole = user.userRole;
-      if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
-        // Super admins can see all hospitals data - return null for viewing
-        return null;
-      }
+    const user = LocalStorageUtil.getUserData();
+    const userRole = user?.userRole;
+    if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
+      // Super admins can see all hospitals data - return null for viewing
+      return null;
     }
     // Regular users see only their hospital data
     return this.getCurrentHospitalId();
@@ -85,13 +80,10 @@ export class HospitalService {
   getHospitalIdForActions(): number {
     const currentId = this.getCurrentHospitalId();
     if (currentId === null) {
-      const userData = localStorage.getItem('data');
-      if (userData) {
-        const user = JSON.parse(userData);
-        const userRole = user.userRole;
-        if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
-          throw new Error('Super admin must select a hospital before performing this action');
-        }
+      const user = LocalStorageUtil.getUserData();
+      const userRole = user?.userRole;
+      if (userRole === 'globalsuperadmin' || userRole === 'superadmin') {
+        throw new Error('Super admin must select a hospital before performing this action');
       }
       // Fallback for regular users
       return 1;
@@ -101,12 +93,8 @@ export class HospitalService {
 
   // Check if current user is super admin
   isSuperAdmin(): boolean {
-    const userData = localStorage.getItem('data');
-    if (userData) {
-      const user = JSON.parse(userData);
-      const userRole = user.userRole;
-      return userRole === 'globalsuperadmin' || userRole === 'superadmin';
-    }
-    return false;
+    const user = LocalStorageUtil.getUserData();
+    const userRole = user?.userRole;
+    return userRole === 'globalsuperadmin' || userRole === 'superadmin';
   }
 }

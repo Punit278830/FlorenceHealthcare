@@ -5,6 +5,8 @@ import { MenuItem, SideBarData, Ilogin } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { SideBarService } from 'src/app/shared/side-bar/side-bar.service';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-admin.service';
+import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -24,13 +26,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
   public sidebarData: Array<SideBarData> = [];
   public userRole='';
   public userData:Ilogin={}as Ilogin;
+  public isSuperAdmin = false;
   private roleSubscription: Subscription = new Subscription();
+  private superAdminSubscription: Subscription = new Subscription();
 
   constructor(
     private data: DataService,
     private router: Router,
     private sideBar: SideBarService,
-    private roleService: RoleAuthorizationService
+    private roleService: RoleAuthorizationService,
+    private superAdminService: SuperAdminService
   ) {
     this.initializeSidebar();
     router.events.subscribe((event: object) => {
@@ -47,11 +52,35 @@ export class SidebarComponent implements OnInit, OnDestroy {
       this.getUserRole();
       this.sidebarData = this.getFilteredSidebarData();
     });
+    
+    // Subscribe to super admin status changes
+    this.superAdminSubscription = this.superAdminService.superAdminStatus$.subscribe(status => {
+      if (status) {
+        console.log('📋 Sidebar - Super Admin Status Response (subscription):', status);
+        this.isSuperAdmin = status.isCurrentUserSuperAdmin;
+        console.log('📋 Sidebar - Is Super Admin (subscription):', this.isSuperAdmin);
+        
+        // If the userRole from localStorage doesn't match, trust the service
+        if (this.isSuperAdmin && !this.isSuperAdminByRole()) {
+          console.log('📋 Sidebar - Correcting user role based on super admin service');
+          this.userRole = 'superadmin'; // Set to superadmin for sidebar menu matching
+        }
+        
+        // Refresh sidebar with updated super admin status
+        this.sidebarData = this.getFilteredSidebarData();
+      }
+    });
+    
+    // Also manually check super admin status
+    this.checkSuperAdminStatus();
   }
 
   ngOnDestroy(): void {
     if (this.roleSubscription) {
       this.roleSubscription.unsubscribe();
+    }
+    if (this.superAdminSubscription) {
+      this.superAdminSubscription.unsubscribe();
     }
   }
 
@@ -71,19 +100,25 @@ export class SidebarComponent implements OnInit, OnDestroy {
   const currentRole = this.roleService.getCurrentRole();
   if (currentRole) {
     this.userRole = currentRole.roleName.toLowerCase();
+    console.log('🔍 Role from new service:', currentRole.roleName, '-> mapped to:', this.userRole);
     // Map GlobalSuperAdmin to superadmin for sidebar menu matching
     if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
       this.userRole = 'superadmin';
+      console.log('✅ Mapped to superadmin for sidebar');
     }
   } else {
     // Fallback to old system
-    this.userData = JSON.parse(localStorage.getItem('data') || '{}');
+    this.userData = LocalStorageUtil.getUserData();
     this.userRole = this.userData.userRole || '';
+    console.log('🔍 Role from localStorage:', this.userData.userRole, '-> mapped to:', this.userRole);
     // Also handle the mapping in the fallback
     if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
       this.userRole = 'superadmin';
+      console.log('✅ Mapped to superadmin for sidebar (fallback)');
     }
   }
+  
+  console.log('🎯 Final userRole for sidebar:', this.userRole);
  }
   public expandSubMenus(menu: MenuItem): void {
     sessionStorage.setItem('menuValue', menu.menuValue);
@@ -98,7 +133,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         userRole = 'superadmin';
       }
     } else {
-      userRole = JSON.parse(localStorage.getItem('data') || '{}').userRole || '';
+      userRole = LocalStorageUtil.getUserData().userRole || '';
       // Also handle the mapping in the fallback
       if (userRole === 'globalsuperadmin' || userRole === 'global super administrator') {
         userRole = 'superadmin';
@@ -142,10 +177,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
   }
   private getFilteredSidebarData(): Array<SideBarData> {
-    const isSuperAdmin = this.roleService.isSuperAdmin();
+    // Use both the role service and super admin service for accurate detection
+    const isSuperAdminFromService = this.roleService.isSuperAdmin();
+    const isSuperAdminFromSuperAdminService = this.isSuperAdmin;
+    const isSuperAdminFromRole = this.isSuperAdminByRole();
+    
+    const actualIsSuperAdmin = isSuperAdminFromService || isSuperAdminFromSuperAdminService || isSuperAdminFromRole;
+    
     const originalData = this.data.sideBar;
     
-    if (isSuperAdmin) {
+    if (actualIsSuperAdmin) {
       return originalData; // Super admins see all menu items
     }
     
@@ -159,6 +200,39 @@ export class SidebarComponent implements OnInit, OnDestroy {
         return true;
       })
     }));
+  }
+
+  private isSuperAdminByRole(): boolean {
+    const role = this.userRole?.toLowerCase();
+    return role === 'superadmin' || role === 'globalsuperadmin' || role === 'global super administrator';
+  }
+
+  private checkSuperAdminStatus(): void {
+    console.log('📋 Sidebar - Checking super admin status...');
+    
+    this.superAdminService.checkSuperAdminStatus().subscribe({
+      next: (status) => {
+        console.log('📋 Sidebar - Super Admin Status Response (manual check):', status);
+        if (status) {
+          this.isSuperAdmin = status.isCurrentUserSuperAdmin;
+          console.log('📋 Sidebar - Is Super Admin (manual):', this.isSuperAdmin);
+          
+          // If the userRole from localStorage doesn't match, trust the service
+          if (this.isSuperAdmin && !this.isSuperAdminByRole()) {
+            console.log('📋 Sidebar - Correcting user role based on super admin service');
+            this.userRole = 'superadmin'; // Set to superadmin for sidebar menu matching
+          }
+          
+          // Refresh sidebar with updated status
+          this.sidebarData = this.getFilteredSidebarData();
+        } else {
+          console.log('📋 Sidebar - No super admin status received (manual check)');
+        }
+      },
+      error: (error) => {
+        console.error('📋 Sidebar - Error checking super admin status (manual):', error);
+      }
+    });
   }
 
   public refreshSidebar(): void {
