@@ -191,6 +191,12 @@ export class HeaderComponent {
   }
 
   public selectHospital(hospital: HospitalModel): void {
+    // Prevent admin users from switching hospitals
+    if (this.isAdminUser()) {
+      console.log('Admin users cannot switch hospitals');
+      return;
+    }
+    
     if (hospital.hospitalId) {
       // Update the hospital service - this will notify all subscribers
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
@@ -256,5 +262,15 @@ export class HeaderComponent {
            this.userRole === 'superadmin' ||
            this.userRole === 'GlobalSuperAdmin' ||
            this.userRole === 'SuperAdmin';
+  }
+
+  private isAdminUser(): boolean {
+    return this.userRole === 'admin' || 
+           this.userRole === 'Admin';
+  }
+
+  public canSwitchHospitals(): boolean {
+    // Only super admins can switch hospitals, regular admins cannot
+    return this.isSuperAdminByRole() && !this.isAdminUser();
   }
 }

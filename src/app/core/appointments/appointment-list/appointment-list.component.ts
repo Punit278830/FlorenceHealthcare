@@ -95,17 +95,23 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     this.loggedIn = JSON.parse(localStorage.getItem('data') || '')
     this.initializeAppointDateForm();
     
-    // Load initial data
-    this.loadAppointmentData();
+    // Track initial load to prevent duplicate calls
+    let isInitialLoad = true;
     
-    // Subscribe to hospital changes
+    // Subscribe to hospital changes first
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
       if (hospitalId) {
-        // Reset pagination and reload data
-        this.searchCriteria.pageNumber = 1;
-        this.pageIndex = 0;
-        this.currentPage = 1;
-        this.loadAppointmentData();
+        if (isInitialLoad) {
+          // On initial load, just load the data once
+          isInitialLoad = false;
+          this.loadAppointmentData();
+        } else {
+          // On subsequent hospital changes, reset pagination and reload data
+          this.searchCriteria.pageNumber = 1;
+          this.pageIndex = 0;
+          this.currentPage = 1;
+          this.loadAppointmentData();
+        }
       }
     });
   }
@@ -123,13 +129,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     }
   }
 
-  // initilizeAppointDateForm() {
-  //   this.appintmentDateForm = this.fb.group({
-  //     appointmentFrom: [null, Validators.required],
-  //     appointmentTo: [null, Validators.required]
-  //   })
-  // }
-  initializeAppointDateForm() {
+   initializeAppointDateForm() {
     const todayIST = dayjs().tz('Asia/Kolkata');
     this.appintmentDateForm = this.fb.group({
       appointmentFrom: [todayIST.toDate(), Validators.required],

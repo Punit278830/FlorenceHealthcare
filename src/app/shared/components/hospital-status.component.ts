@@ -113,6 +113,12 @@ export class HospitalStatusComponent implements OnInit {
   }
 
   public selectHospital(hospital: HospitalModel): void {
+    // Only allow super admins to switch hospitals
+    if (!this.isSuperAdmin) {
+      console.log('Only super admins can switch hospitals');
+      return;
+    }
+    
     if (hospital.hospitalId) {
       // Clear any cached data before switching hospitals
       this.clearHospitalCache();
