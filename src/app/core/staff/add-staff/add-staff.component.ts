@@ -50,21 +50,27 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     private roleService: RoleAuthorizationService,
     private hospitalService: HospitalService) {
     
-
     this.createStaffRegrestrationForm();
-    this.getDepartmentList();
-    this.loadHospitals();
-    
-
-    this.loadRoles();
-    
     this.maxDate = new Date()
   }
+  
   ngOnInit(): void {
+    // Load hospitals first (not hospital-dependent)
+    this.loadHospitals();
+    
+    let initialHospitalId: any;
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-      if (hospitalId !== null) {
-        // Hospital changed, reload departments and roles
+      if (initialHospitalId === undefined) {
+        // First load - initialize with current hospital
+        initialHospitalId = hospitalId;
+        console.log('Initial hospital load:', hospitalId);
+        this.getDepartmentList();
+        this.loadRoles();
+      } else if (hospitalId !== initialHospitalId) {
+        // Hospital changed - reload departments and roles
+        console.log('Hospital changed from', initialHospitalId, 'to', hospitalId, '- reloading data');
+        initialHospitalId = hospitalId;
         this.reloadDataForHospital();
       }
     });
@@ -75,6 +81,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   }
 
   private reloadDataForHospital(): void {
+    console.log('Reloading data for hospital change...');
     // Clear existing data
     this._depDto = [];
     this.roles = [];
@@ -86,7 +93,9 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     });
     
     // Reload departments and roles for the new hospital
+    console.log('Reloading departments...');
     this.getDepartmentList();
+    console.log('Reloading roles...');
     this.loadRoles();
   }
 
@@ -115,8 +124,11 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     // or the user's hospital for regular users
     const effectiveHospitalId = hospitalId || this.hospitalService.getCurrentHospitalId();
     
+    console.log('Loading roles for hospital ID:', effectiveHospitalId);
+    
     if (!effectiveHospitalId) {
       // If still no hospital ID available, show error
+      console.error('No hospital ID available for loading roles');
       this.toster.error('Please select a hospital first');
       this.isLoadingRoles = false;
       return;
@@ -124,11 +136,12 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
     this.roleService.getAllRolesByHospital(effectiveHospitalId).subscribe({
       next: (roles: any[]) => {
+        console.log('Roles received:', roles.length, 'roles for hospital', effectiveHospitalId);
         this.roles = roles;
         this.isLoadingRoles = false;
       },
       error: (error: any) => {
-
+        console.error('Error loading roles:', error);
         this.isLoadingRoles = false;
         this.toster.error('Failed to load roles');
       }
@@ -424,11 +437,17 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   }
 
   getDepartmentList() {
-    this.departmentService.getDepartmentList().subscribe(res => {
-      this._depDto = res;
-
-
-    })
+    console.log('Fetching departments from API...');
+    this.departmentService.getDepartmentList().subscribe({
+      next: (res) => {
+        console.log('Departments received:', res.length, 'departments');
+        this._depDto = res;
+      },
+      error: (error) => {
+        console.error('Error fetching departments:', error);
+        this.toster.error('Failed to load departments');
+      }
+    });
   }
   onCancel() {
     this.route.navigate([routes.staffList]);

@@ -123,8 +123,10 @@ export class HospitalStatusComponent implements OnInit {
       // Clear any cached data before switching hospitals
       this.clearHospitalCache();
       
+      // Update hospital service - this will notify all subscribers automatically
       this.hospitalService.setCurrentHospitalId(hospital.hospitalId);
     }
+    
     // Close modal
     const modal = document.getElementById('hospitalSwitchModal');
     if (modal) {
@@ -133,8 +135,9 @@ export class HospitalStatusComponent implements OnInit {
         bootstrapModal.hide();
       }
     }
-    // Force a page reload to ensure fresh data is loaded
-    window.location.reload();
+    
+    // NO PAGE RELOAD - let the subscription system handle the updates automatically
+    // Components that subscribe to hospitalService.currentHospitalId$ will reload their data
   }
 
   private clearHospitalCache(): void {

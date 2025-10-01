@@ -41,6 +41,8 @@ export class HospitalService {
     } else {
       localStorage.setItem('currentHospitalId', String(id));
     }
+    
+    // Emit the new hospital ID to all subscribers
     this.currentHospitalIdSubject.next(id);
   }
 

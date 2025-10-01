@@ -192,9 +192,9 @@ export class HeaderComponent {
   }
 
   public selectHospital(hospital: HospitalModel): void {
-    // Prevent admin users from switching hospitals
-    if (this.isAdminUser()) {
-      console.log('Admin users cannot switch hospitals');
+    // Only allow super admins to switch hospitals
+    if (!this.canSwitchHospitals()) {
+      console.log('User cannot switch hospitals - not a super admin');
       return;
     }
     
