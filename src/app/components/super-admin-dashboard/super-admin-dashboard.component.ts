@@ -102,65 +102,63 @@ import { SuperAdminService, SuperAdminStatus, SystemSummary, HospitalSummary } f
     .header {
       text-align: center;
       margin-bottom: 32px;
-      padding: 24px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-radius: 12px;
     }
 
     .header h2 {
-      margin: 0 0 8px 0;
-      font-size: 2rem;
+      color: #2c3e50;
+      margin-bottom: 8px;
     }
 
     .summary-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 16px;
+      gap: 20px;
       margin-bottom: 32px;
     }
 
     .summary-card {
-      background: white;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
       padding: 24px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      border-radius: 12px;
       text-align: center;
-      border-left: 4px solid #667eea;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
 
     .summary-card h3 {
-      font-size: 2.5rem;
+      font-size: 2.5em;
       margin: 0 0 8px 0;
-      color: #667eea;
+      font-weight: 600;
     }
 
     .summary-card p {
       margin: 0;
-      color: #666;
-      font-weight: 500;
+      opacity: 0.9;
+      font-size: 1.1em;
     }
 
     .hospital-section, .actions-section, .super-admin-info {
       margin-bottom: 32px;
-      background: white;
-      padding: 24px;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
     .hospital-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 16px;
-      margin-top: 16px;
     }
 
     .hospital-card {
-      padding: 16px;
+      background: white;
       border: 1px solid #e0e0e0;
       border-radius: 8px;
+      padding: 20px;
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .hospital-card h4 {
+      color: #2c3e50;
+      margin-bottom: 12px;
     }
 
     .action-buttons {
@@ -169,7 +167,7 @@ import { SuperAdminService, SuperAdminStatus, SystemSummary, HospitalSummary } f
       flex-wrap: wrap;
     }
 
-    .btn-primary, .btn-secondary, .btn-view {
+    button {
       padding: 12px 24px;
       border: none;
       border-radius: 6px;
@@ -179,22 +177,21 @@ import { SuperAdminService, SuperAdminStatus, SystemSummary, HospitalSummary } f
     }
 
     .btn-primary {
-      background: #667eea;
+      background: #007bff;
       color: white;
     }
 
     .btn-primary:hover {
-      background: #5a6fd8;
+      background: #0056b3;
     }
 
     .btn-secondary {
-      background: #f8f9fa;
-      color: #333;
-      border: 1px solid #dee2e6;
+      background: #6c757d;
+      color: white;
     }
 
     .btn-secondary:hover {
-      background: #e9ecef;
+      background: #545b62;
     }
 
     .btn-view {

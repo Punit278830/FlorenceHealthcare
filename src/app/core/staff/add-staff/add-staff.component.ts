@@ -177,24 +177,12 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   ];
 
   ConsultationFeeList: number[] = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-  // {value:'0'},
-  // {value:'100'},
-  // {value:'200'},
-  // {value:'300'},
-  // {value:'400'},
-  // {value:'500'},
-  // {value:'600'},
-  // {value:'700'},
-  // {value:'800'},
-  // {value:'900'},
-  // {value:'1000'},
-
-  // ];
-
+  
   designationList: data[] = [
     { value: 'Doctor' },
     { value: 'Receptionist' },
     { value: 'Nurse' },
+    {value: 'Admin'}
 
   ]
 

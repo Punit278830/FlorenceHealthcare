@@ -24,9 +24,11 @@ export class HospitalInitService {
       this.hospitalService.getHospitals().subscribe({
         next: (hospitals: HospitalModel[]) => {
           if (hospitals && hospitals.length > 0) {
-            // For super admins and regular users, set to first hospital in the list
-            // This ensures they have a working context
-            this.hospitalService.setCurrentHospitalId(hospitals[0].hospitalId || 1);
+            if (!isSuperAdmin) {
+              // Only set default hospital for regular users
+              this.hospitalService.setCurrentHospitalId(hospitals[0].hospitalId || 1);
+            }
+            // Super admins remain with null - they need to explicitly select a hospital
           } else if (!isSuperAdmin) {
             // Default to hospital ID 1 only for regular users
             this.hospitalService.setCurrentHospitalId(1);
