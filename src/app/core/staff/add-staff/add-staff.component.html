@@ -205,7 +205,8 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="roleId">Role (Optional)</label>
+                                        <label for="roleId">Role <span class="text-danger">*</span></label>
+
                                         <mat-select formControlName="roleId" class="form-control select" placeholder="Select Role">
                                             <mat-option value="">-- No Role Assigned --</mat-option>
                                             <mat-option *ngFor="let role of roles" [value]="role.roleId">
@@ -218,9 +219,9 @@
                                         <div *ngIf="shouldShowHospitalDropdown && roles.length === 0 && !isLoadingRoles" class="text-muted mt-1">
                                             <small>Please select a hospital first to load available roles.</small>
                                         </div>
-                                        <div *ngIf="!shouldShowHospitalDropdown" class="text-muted mt-1">
+                                       <!-- <div *ngIf="!shouldShowHospitalDropdown" class="text-muted mt-1">
                                             <small>Role assignment is optional. If not selected, role will be based on designation.</small>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
 
