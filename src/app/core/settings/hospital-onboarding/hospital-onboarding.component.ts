@@ -8,6 +8,8 @@ import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-adm
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
+import { ApiHttpService } from 'src/app/shared/apiService/apiHttpService';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 
 @Component({
   selector: 'app-hospital-onboarding',
@@ -30,6 +32,8 @@ export class HospitalOnboardingComponent implements OnInit {
   constructor(
     private fb: FormBuilder, 
     private http: HttpClient,
+    private apiService: ApiHttpService,
+    private hospitalService: HospitalService,
     private roleService: RoleAuthorizationService,
     private superAdminService: SuperAdminService,
     private router: Router,
@@ -109,11 +113,25 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   submit(): void {
+    console.log('Hospital Registration: submit() method called');
+    console.log('Form status:', this.form.status);
+    console.log('Form value:', this.form.value);
+    console.log('Form errors:', this.form.errors);
+    console.log('All form controls validity:');
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control && control.invalid) {
+        console.log(`${key}: invalid -`, control.errors);
+      }
+    });
+
     if (this.form.invalid) {
+      console.log('Form is invalid, marking all fields as touched');
       this.form.markAllAsTouched();
       return;
     }
     
+    console.log('Form is valid, proceeding with submission');
     this.loading = true;
     this.error = undefined;
     this.success = undefined;
@@ -124,26 +142,38 @@ export class HospitalOnboardingComponent implements OnInit {
         ...this.form.value,
         hospitalId: this.editingHospitalId
       };
-      this.http.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
-        next: () => {
+      console.log('Making PUT request to update hospital:', updatePayload);
+      this.apiService.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
+        next: (response) => {
+          console.log('Hospital update successful:', response);
           this.success = 'Hospital updated successfully';
+          this.loading = false;
           this.resetForm();
           this.loadHospitals();
+          // Notify other components that hospital list has changed
+          this.hospitalService.notifyHospitalListChanged();
         },
         error: (err) => {
+          console.error('Hospital update failed:', err);
           this.error = err?.error || 'Failed to update hospital';
           this.loading = false;
         }
       });
     } else {
       // Create new hospital
-      this.http.post(this.apiBase + 'Hospitals', this.form.value).subscribe({
-        next: () => {
+      console.log('Making POST request to create hospital:', this.form.value);
+      this.apiService.post(`${this.apiBase}Hospitals`, this.form.value).subscribe({
+        next: (response) => {
+          console.log('Hospital creation successful:', response);
           this.success = 'Hospital created successfully';
+          this.loading = false;
           this.resetForm();
           this.loadHospitals();
+          // Notify other components that hospital list has changed
+          this.hospitalService.notifyHospitalListChanged();
         },
         error: (err) => {
+          console.error('Hospital creation failed:', err);
           this.error = err?.error || 'Failed to create hospital';
           this.loading = false;
         }
@@ -172,6 +202,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deactivated successfully`;
         this.loadHospitals();
+        // Notify other components that hospital list has changed
+        this.hospitalService.notifyHospitalListChanged();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to deactivate hospital';
@@ -199,6 +231,8 @@ export class HospitalOnboardingComponent implements OnInit {
         const action = isDeleted ? 'restored and activated' : 'activated';
         this.success = `Hospital "${hospital.name}" has been ${action} successfully`;
         this.loadHospitals();
+        // Notify other components that hospital list has changed
+        this.hospitalService.notifyHospitalListChanged();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to activate hospital';
@@ -224,6 +258,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deleted successfully`;
         this.loadHospitals();
+        // Notify other components that hospital list has changed
+        this.hospitalService.notifyHospitalListChanged();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to delete hospital';
@@ -351,5 +387,38 @@ export class HospitalOnboardingComponent implements OnInit {
     this.error = undefined;
     this.success = undefined;
     this.loading = false;
+  }
+
+  onSubmitClick(event: Event): void {
+    console.log('Button clicked!', event);
+    console.log('Form valid?', this.form.valid);
+    console.log('Loading state:', this.loading);
+    console.log('Button disabled?', this.loading);
+    
+    // Don't prevent default - let the form submission happen naturally
+    // But add debugging to see if this method is being called
+  }
+
+  debugFormState(): void {
+    console.log('=== FORM DEBUG INFO ===');
+    console.log('Form valid:', this.form.valid);
+    console.log('Form pristine:', this.form.pristine);
+    console.log('Form touched:', this.form.touched);
+    console.log('Form value:', this.form.value);
+    
+    // Check each control
+    Object.keys(this.form.controls).forEach(key => {
+      const control = this.form.get(key);
+      if (control) {
+        console.log(`${key}:`, {
+          value: control.value,
+          valid: control.valid,
+          errors: control.errors,
+          touched: control.touched,
+          dirty: control.dirty
+        });
+      }
+    });
+    console.log('=== END FORM DEBUG ===');
   }
 }

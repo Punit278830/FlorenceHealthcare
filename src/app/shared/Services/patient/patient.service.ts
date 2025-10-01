@@ -12,7 +12,7 @@ export class PatientService {
   //private staffDto!:IstaffInfo;
   //private readonly apiUrl="https://localhost:44320/api/";
   private readonly apiUrl = api_Url;
-  public patientId!: number;
+  public patientId: number = 0; // Initialize with 0 instead of undefined
   public patintDataForOPD!: IpatientInfo;
   //public patientId!:number
 

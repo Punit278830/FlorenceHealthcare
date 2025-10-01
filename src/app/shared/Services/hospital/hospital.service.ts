@@ -10,6 +10,10 @@ export class HospitalService {
   private currentHospitalIdSubject = new BehaviorSubject<number | null>(this.getCurrentHospitalId());
   currentHospitalId$ = this.currentHospitalIdSubject.asObservable();
 
+  // Add a subject to notify when hospital list changes
+  private hospitalListChangedSubject = new BehaviorSubject<boolean>(false);
+  hospitalListChanged$ = this.hospitalListChangedSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
@@ -98,5 +102,11 @@ export class HospitalService {
     const user = LocalStorageUtil.getUserData();
     const userRole = user?.userRole;
     return userRole === 'globalsuperadmin' || userRole === 'superadmin';
+  }
+
+  // Method to trigger hospital list refresh for all subscribed components (super admin only)
+  notifyHospitalListChanged(): void {
+    console.log('HospitalService: Notifying components that hospital list has changed');
+    this.hospitalListChangedSubject.next(true);
   }
 }

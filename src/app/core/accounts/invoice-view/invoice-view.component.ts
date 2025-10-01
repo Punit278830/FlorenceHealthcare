@@ -351,12 +351,22 @@ export class InvoiceViewComponent implements OnInit {
   loadPatientAppointments() {
     this.appointmentList = [];
     const currentYear = new Date().getFullYear();
+    
+    // Check if patientId is available
+    if (!this.patientService.patientId || this.patientService.patientId === 0) {
+      console.warn('Patient ID not available or invalid, skipping appointment list load');
+      return;
+    }
 
-    this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe(res => {
-      this.appointmentList = res;
-
-      // Find the latest appointment and check if it is within the last 6 days
-      this.checkLatestAppointmentWithin6Days();
+    this.appointmentService.getAppointmentListByPatientId(this.patientService.patientId, currentYear).subscribe({
+      next: (res) => {
+        this.appointmentList = res;
+        // Find the latest appointment and check if it is within the last 6 days
+        this.checkLatestAppointmentWithin6Days();
+      },
+      error: (error) => {
+        console.error('Error loading patient appointments:', error);
+      }
     });
   }
 

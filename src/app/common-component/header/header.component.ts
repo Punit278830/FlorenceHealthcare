@@ -76,6 +76,16 @@ export class HeaderComponent {
       this.currentHospitalId = id;
       this.updateCurrentHospitalName();
     });
+
+    // Subscribe to hospital list changes (only for super admins)
+    if (this.isSuperAdmin || this.isSuperAdminByRole()) {
+      this.hospitalService.hospitalListChanged$.subscribe(changed => {
+        if (changed) {
+          console.log('Header: Hospital list changed - reloading hospitals (super admin only)');
+          this.loadHospitals();
+        }
+      });
+    }
   }
   openBoxFunc() {
     this.openBox = !this.openBox;

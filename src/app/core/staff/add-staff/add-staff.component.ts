@@ -38,6 +38,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   public isSubmitting = false;
   public maxDate: Date | null = null;
   private hospitalSubscription: Subscription = new Subscription();
+  private hospitalListSubscription: Subscription = new Subscription();
 
 
 
@@ -57,6 +58,16 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Load hospitals first (not hospital-dependent)
     this.loadHospitals();
+    
+    // Subscribe to hospital list changes (only for super admins)
+    if (this.isSuperAdmin) {
+      this.hospitalListSubscription = this.hospitalService.hospitalListChanged$.subscribe(changed => {
+        if (changed) {
+          console.log('Hospital list changed - reloading hospitals (super admin only)');
+          this.loadHospitals();
+        }
+      });
+    }
     
     let initialHospitalId: any;
     // Subscribe to hospital changes
@@ -78,6 +89,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.hospitalSubscription.unsubscribe();
+    this.hospitalListSubscription.unsubscribe();
   }
 
   private reloadDataForHospital(): void {
@@ -101,13 +113,13 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
   loadHospitals(): void {
     this.isLoadingHospitals = true;
-    this.authService.getHospitals().subscribe(
+    this.hospitalService.getHospitals().subscribe(
       (hospitals: HospitalModel[]) => {
         this.hospitals = hospitals.filter(h => h.isActive !== false);
         this.isLoadingHospitals = false;
       },
       (error) => {
-
+        console.error('Error loading hospitals:', error);
         this.isLoadingHospitals = false;
         this.toster.error('Failed to load hospitals');
       }

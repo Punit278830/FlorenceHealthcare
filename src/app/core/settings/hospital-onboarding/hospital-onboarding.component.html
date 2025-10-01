@@ -204,12 +204,15 @@
                                     </div>
                                     <div class="col-md-3">
                                         <div class="form-group">
-                                            <button class="btn btn-primary submit-btn mt-4" [disabled]="loading" type="submit">
+                                            <button class="btn btn-primary submit-btn mt-4" [disabled]="loading" type="submit" (click)="onSubmitClick($event)">
                                                 <span *ngIf="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
                                                 {{ isEditMode ? 'Update Hospital' : 'Register Hospital' }}
                                             </button>
                                             <button *ngIf="isEditMode" class="btn btn-secondary ms-2 mt-4" type="button" (click)="cancelEdit()">
                                                 Cancel
+                                            </button>
+                                            <button class="btn btn-info ms-2 mt-4" type="button" (click)="debugFormState()">
+                                                Debug Form
                                             </button>
                                         </div>
                                     </div>

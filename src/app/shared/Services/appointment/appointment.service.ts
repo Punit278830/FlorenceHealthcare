@@ -70,6 +70,10 @@ export class AppointmentService {
    }
 
    getAppointmentListByPatientId(patientId: number, year: number): Observable<Iappointment[]> {
+      if (!patientId || patientId === undefined || patientId === null || patientId === 0) {
+         console.error('PatientId is invalid:', patientId);
+         throw new Error('Patient ID is required but was not provided or is invalid');
+      }
       return this._http.get(this.apiUrl + 'AppointmentInfoes/appointmentList/' + patientId + "/" + year);
    }
 

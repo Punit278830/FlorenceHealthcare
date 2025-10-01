@@ -82,6 +82,16 @@ export class HospitalStatusComponent implements OnInit {
       this.currentHospitalId = id;
       this.updateCurrentHospitalName();
     });
+
+    // Subscribe to hospital list changes (only for super admins)
+    if (this.isSuperAdmin) {
+      this.hospitalService.hospitalListChanged$.subscribe(changed => {
+        if (changed) {
+          console.log('Hospital-status: Hospital list changed - reloading hospitals (super admin only)');
+          this.loadHospitals();
+        }
+      });
+    }
   }
 
   private loadHospitals(): void {
