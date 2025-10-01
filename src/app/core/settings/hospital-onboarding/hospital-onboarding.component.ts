@@ -25,9 +25,7 @@ export class HospitalOnboardingComponent implements OnInit {
   // Edit mode properties
   isEditMode = false;
   editingHospitalId?: number;
-  // Cache for super admin check to avoid repeated localStorage access
-  private _isSuperAdminCache?: boolean;
-  private _lastUserDataCheck?: string;
+
 
   constructor(
     private fb: FormBuilder, 
@@ -259,27 +257,28 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   get isSuperAdmin(): boolean {
-    // Debug what's actually in localStorage
+    // Always fetch fresh user data to avoid stale data when users switch
     const userData = LocalStorageUtil.getUserData();
-
     
-    // Since the API confirms you're a super admin, let's use a more direct approach
+    // If no user data, definitely not super admin
+    if (!userData) {
+      return false;
+    }
+    
     // Check if staffId matches the known super admin (14) from the API response
-    if (userData?.loginId === 14 || userData?.staffId === 14) {
-
+    if (userData.loginId === 14 || userData.staffId === 14) {
       return true;
     }
     
-    // Also check role service
+    // Check role service (which should be updated on login/logout)
     const roleServiceResult = this.roleService.isSuperAdmin();
     if (roleServiceResult) {
-
       return true;
     }
     
-    // Fallback to localStorage role checks
-    const userRole = userData?.userRole?.toLowerCase();
-    const designation = userData?.designation?.toLowerCase();
+    // Fallback to localStorage role checks with safe navigation
+    const userRole = userData.userRole?.toLowerCase() || '';
+    const designation = userData.designation?.toLowerCase() || '';
     
     const isSuperByRole = userRole === 'superadmin' || 
                          userRole === 'globalsuperadmin' ||
@@ -292,9 +291,7 @@ export class HospitalOnboardingComponent implements OnInit {
                                 designation === 'global super admin' ||
                                 designation === 'global super administrator';
     
-    const result = isSuperByRole || isSuperByDesignation;
-
-    return result;
+    return isSuperByRole || isSuperByDesignation;
   }
 
   getActiveHospitalCount(): number {
