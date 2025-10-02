@@ -217,7 +217,7 @@ namespace hospitalApiProject.Controllers
     public async Task<ActionResult<int>> GetNewPatientsToday()
     {
       var hospitalId = GetHospitalIdFromHeader();
-      var userTimeZone = GetTimeZoneFromHeader(); // Get user's timezone from header
+      var userTimeZone = GetTimeZoneFromHeader();
       
       // Get user's timezone info
       TimeZoneInfo timeZoneInfo;
@@ -227,7 +227,6 @@ namespace hospitalApiProject.Controllers
       }
       catch
       {
-        // Fallback to UTC if timezone is not found
         timeZoneInfo = TimeZoneInfo.Utc;
       }
       
@@ -237,7 +236,7 @@ namespace hospitalApiProject.Controllers
       var todayStart = localNow.Date;
       var todayEnd = todayStart.AddDays(1);
       
-      // Convert back to UTC for database query (assuming registration dates are stored in UTC)
+      // Convert back to UTC for database query (dates are stored in UTC)
       var todayStartUtc = TimeZoneInfo.ConvertTimeToUtc(todayStart, timeZoneInfo);
       var todayEndUtc = TimeZoneInfo.ConvertTimeToUtc(todayEnd, timeZoneInfo);
 
@@ -247,11 +246,9 @@ namespace hospitalApiProject.Controllers
                      p.RegstrationDate.Value >= todayStartUtc && 
                      p.RegstrationDate.Value < todayEndUtc && 
                      (hospitalId == null || p.HospitalId == hospitalId))
-          .Select(p => p.PatientId)
-          .Distinct()
           .CountAsync();
 
-      return Ok(count); // returns a bare JSON number
+      return Ok(count);
     }
 
 
