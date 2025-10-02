@@ -113,25 +113,10 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   submit(): void {
-    console.log('Hospital Registration: submit() method called');
-    console.log('Form status:', this.form.status);
-    console.log('Form value:', this.form.value);
-    console.log('Form errors:', this.form.errors);
-    console.log('All form controls validity:');
-    Object.keys(this.form.controls).forEach(key => {
-      const control = this.form.get(key);
-      if (control && control.invalid) {
-        console.log(`${key}: invalid -`, control.errors);
-      }
-    });
-
     if (this.form.invalid) {
-      console.log('Form is invalid, marking all fields as touched');
       this.form.markAllAsTouched();
       return;
     }
-    
-    console.log('Form is valid, proceeding with submission');
     this.loading = true;
     this.error = undefined;
     this.success = undefined;
@@ -142,10 +127,8 @@ export class HospitalOnboardingComponent implements OnInit {
         ...this.form.value,
         hospitalId: this.editingHospitalId
       };
-      console.log('Making PUT request to update hospital:', updatePayload);
       this.apiService.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
         next: (response) => {
-          console.log('Hospital update successful:', response);
           this.success = 'Hospital updated successfully';
           this.loading = false;
           this.resetForm();
@@ -161,10 +144,8 @@ export class HospitalOnboardingComponent implements OnInit {
       });
     } else {
       // Create new hospital
-      console.log('Making POST request to create hospital:', this.form.value);
       this.apiService.post(`${this.apiBase}Hospitals`, this.form.value).subscribe({
         next: (response) => {
-          console.log('Hospital creation successful:', response);
           this.success = 'Hospital created successfully';
           this.loading = false;
           this.resetForm();
@@ -390,35 +371,8 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   onSubmitClick(event: Event): void {
-    console.log('Button clicked!', event);
-    console.log('Form valid?', this.form.valid);
-    console.log('Loading state:', this.loading);
-    console.log('Button disabled?', this.loading);
-    
     // Don't prevent default - let the form submission happen naturally
-    // But add debugging to see if this method is being called
   }
 
-  debugFormState(): void {
-    console.log('=== FORM DEBUG INFO ===');
-    console.log('Form valid:', this.form.valid);
-    console.log('Form pristine:', this.form.pristine);
-    console.log('Form touched:', this.form.touched);
-    console.log('Form value:', this.form.value);
-    
-    // Check each control
-    Object.keys(this.form.controls).forEach(key => {
-      const control = this.form.get(key);
-      if (control) {
-        console.log(`${key}:`, {
-          value: control.value,
-          valid: control.valid,
-          errors: control.errors,
-          touched: control.touched,
-          dirty: control.dirty
-        });
-      }
-    });
-    console.log('=== END FORM DEBUG ===');
-  }
+
 }
