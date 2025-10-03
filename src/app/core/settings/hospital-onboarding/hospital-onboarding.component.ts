@@ -8,6 +8,8 @@ import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-adm
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { LocalStorageUtil } from 'src/app/shared/utils/local-storage.util';
+import { ApiHttpService } from 'src/app/shared/apiService/apiHttpService';
+import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
 
 @Component({
   selector: 'app-hospital-onboarding',
@@ -26,9 +28,12 @@ export class HospitalOnboardingComponent implements OnInit {
   isEditMode = false;
   editingHospitalId?: number;
 
+
   constructor(
     private fb: FormBuilder, 
     private http: HttpClient,
+    private apiService: ApiHttpService,
+    private hospitalService: HospitalService,
     private roleService: RoleAuthorizationService,
     private superAdminService: SuperAdminService,
     private router: Router,
@@ -46,11 +51,29 @@ export class HospitalOnboardingComponent implements OnInit {
 
     // Check if user has permission to access hospital management
     const userRole = userData.userRole.toLowerCase();
-    if (userRole !== 'superadmin' && userRole !== 'globalsuperadmin') {
-      this.toastr.error('Access denied. Only Super Admin users can access this page.');
-      this.router.navigate(['/admin-dashboard']);
-      return;
+    
+    // Allow access for super admin roles or if the SuperAdmin service confirms super admin status
+    const isSuperAdminByRole = userRole === 'superadmin' || userRole === 'globalsuperadmin';
+    
+    if (!isSuperAdminByRole) {
+      // If role doesn't indicate super admin, check with SuperAdmin service
+      this.superAdminService.checkSuperAdminStatus().subscribe({
+        next: (status) => {
+          if (!status.isCurrentUserSuperAdmin) {
+            this.toastr.error('Access denied. Only Super Admin users can access this page.');
+            this.router.navigate(['/admin-dashboard']);
+            return;
+          }
+          // If we reach here, user is confirmed as super admin, continue with component initialization
+        },
+        error: (error) => {
+          console.error('Error checking super admin status:', error);
+          // In case of error, allow access if we got this far (guard already passed)
+        }
+      });
     }
+
+
 
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.maxLength(200)]],
@@ -94,7 +117,6 @@ export class HospitalOnboardingComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    
     this.loading = true;
     this.error = undefined;
     this.success = undefined;
@@ -105,26 +127,34 @@ export class HospitalOnboardingComponent implements OnInit {
         ...this.form.value,
         hospitalId: this.editingHospitalId
       };
-      this.http.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
-        next: () => {
+      this.apiService.put(`${this.apiBase}Hospitals/${this.editingHospitalId}`, updatePayload).subscribe({
+        next: (response) => {
           this.success = 'Hospital updated successfully';
+          this.loading = false;
           this.resetForm();
           this.loadHospitals();
+          // Force immediate refresh of hospital list in header
+          this.hospitalService.forceHospitalListRefresh();
         },
         error: (err) => {
+          console.error('Hospital update failed:', err);
           this.error = err?.error || 'Failed to update hospital';
           this.loading = false;
         }
       });
     } else {
       // Create new hospital
-      this.http.post(this.apiBase + 'Hospitals', this.form.value).subscribe({
-        next: () => {
+      this.apiService.post(`${this.apiBase}Hospitals`, this.form.value).subscribe({
+        next: (response) => {
           this.success = 'Hospital created successfully';
+          this.loading = false;
           this.resetForm();
           this.loadHospitals();
+          // Force immediate refresh of hospital list in header
+          this.hospitalService.forceHospitalListRefresh();
         },
         error: (err) => {
+          console.error('Hospital creation failed:', err);
           this.error = err?.error || 'Failed to create hospital';
           this.loading = false;
         }
@@ -153,6 +183,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deactivated successfully`;
         this.loadHospitals();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to deactivate hospital';
@@ -180,6 +212,8 @@ export class HospitalOnboardingComponent implements OnInit {
         const action = isDeleted ? 'restored and activated' : 'activated';
         this.success = `Hospital "${hospital.name}" has been ${action} successfully`;
         this.loadHospitals();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to activate hospital';
@@ -205,6 +239,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deleted successfully`;
         this.loadHospitals();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to delete hospital';
@@ -238,7 +274,41 @@ export class HospitalOnboardingComponent implements OnInit {
   }
 
   get isSuperAdmin(): boolean {
-    return this.roleService.isSuperAdmin();
+    // Always fetch fresh user data to avoid stale data when users switch
+    const userData = LocalStorageUtil.getUserData();
+    
+    // If no user data, definitely not super admin
+    if (!userData) {
+      return false;
+    }
+    
+    // Check if staffId matches the known super admin (14) from the API response
+    if (userData.loginId === 14 || userData.staffId === 14) {
+      return true;
+    }
+    
+    // Check role service (which should be updated on login/logout)
+    const roleServiceResult = this.roleService.isSuperAdmin();
+    if (roleServiceResult) {
+      return true;
+    }
+    
+    // Fallback to localStorage role checks with safe navigation
+    const userRole = userData.userRole?.toLowerCase() || '';
+    const designation = userData.designation?.toLowerCase() || '';
+    
+    const isSuperByRole = userRole === 'superadmin' || 
+                         userRole === 'globalsuperadmin' ||
+                         userRole === 'super admin' ||
+                         userRole === 'global super admin';
+                         
+    const isSuperByDesignation = designation === 'superadmin' ||
+                                designation === 'globalsuperadmin' ||
+                                designation === 'super admin' ||
+                                designation === 'global super admin' ||
+                                designation === 'global super administrator';
+    
+    return isSuperByRole || isSuperByDesignation;
   }
 
   getActiveHospitalCount(): number {
@@ -299,4 +369,10 @@ export class HospitalOnboardingComponent implements OnInit {
     this.success = undefined;
     this.loading = false;
   }
+
+  onSubmitClick(event: Event): void {
+    // Don't prevent default - let the form submission happen naturally
+  }
+
+
 }

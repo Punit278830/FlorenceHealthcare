@@ -25,6 +25,7 @@ import { forkJoin, Subscription } from 'rxjs';
 import { StaffService } from 'src/app/shared/Services/staff/staff.service';
 import { DepartmentService } from 'src/app/shared/Services/department/department.service';
 import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
+import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-admin.service';
 import { Router } from '@angular/router';
 export type ChartOptions = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -85,6 +86,11 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
   public patientCountByGender: any[]=[];
  public appCount = 0; // for dashboard appointments count
  private hospitalSubscription: Subscription = new Subscription();
+ 
+ // Hospital selection state
+ public isSuperAdmin = false;
+ public hospitalSelected = false;
+ public showHospitalSelectionPrompt = false;
 
 
   constructor(public data : DataService,
@@ -95,6 +101,7 @@ export class AdminDashboardComponent implements OnInit, OnDestroy {
 private staffService:StaffService,
 private departmentService:DepartmentService,
 private hospitalService: HospitalService,
+private superAdminService: SuperAdminService,
 private route : Router) 
 {
     this.chartOptionsOne = {
@@ -223,35 +230,114 @@ private route : Router)
   public ngOnInit(){
     this.getGreetingMsg();
     const data=JSON.parse(localStorage.getItem('data')||'')
-  this.userName=data.fname +" "+data.lname;
-  
-  // Load initial data
-  this.loadDashboardData();
-  
-  // Subscribe to hospital changes
-  this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-    if (hospitalId) {
-
-      this.loadDashboardData();
+    this.userName=data.fname +" "+data.lname;
+    
+    // Check if user is super admin
+    this.checkSuperAdminStatus();
+    
+    this.currentYear = new Date().getFullYear();
+    this.generateRecentYears();
+    
+    // Initialize data as empty
+    this.initializeDashboardData();
+    
+    // If super admin and no hospital selected initially, set prompt immediately
+    const currentHospitalId = this.hospitalService.getCurrentHospitalId();
+    if (this.isSuperAdmin && !currentHospitalId) {
+      this.showHospitalSelectionPrompt = true;
+      this.clearDashboardData();
+      console.log('Admin Dashboard - Super admin with no hospital, showing prompt immediately');
     }
-  });
-  
-  this.currentYear = new Date().getFullYear(); // Get the current year
-  this.generateRecentYears();
+    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      this.hospitalSelected = hospitalId !== null;
+      
+      if (this.isSuperAdmin && !this.hospitalSelected) {
+        // Super admin without hospital selection - show prompt, don't load data
+        this.showHospitalSelectionPrompt = true;
+        this.clearDashboardData(); // Clear any existing data
+      } else {
+        // Case 1: Super admin WITH hospital selection - load data
+        // Case 2: Regular admin (always tied to hospital) - load data  
+        this.showHospitalSelectionPrompt = false;
+        this.loadDashboardData();
+      }
+    });
   }
   
   public ngOnDestroy() {
     this.hospitalSubscription.unsubscribe();
   }
   
+  private checkSuperAdminStatus(): void {
+    // Check from localStorage first - this is the primary source
+    const userData = JSON.parse(localStorage.getItem('data') || '{}');
+    const userRole = userData.userRole?.toLowerCase();
+    this.isSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
+    
+    console.log('Admin Dashboard - User Role:', userRole);
+    console.log('Admin Dashboard - Is Super Admin:', this.isSuperAdmin);
+  }
+  
   private loadDashboardData() {
+    console.log('Admin Dashboard - Loading data check:');
+    console.log('  - Is Super Admin:', this.isSuperAdmin);
+    console.log('  - Hospital Selected:', this.hospitalSelected);
+    
+    // Don't make API calls if super admin hasn't selected a hospital
+    if (this.isSuperAdmin && !this.hospitalSelected) {
+      console.log('  - SKIPPING API calls - no hospital selected for super admin');
+      return;
+    }
+    
+    console.log('  - MAKING API calls - conditions met');
     this.appointmentCount();
     this.patientCountToday();
     this.totalAmounts();
     this.loadRecentPatients();
+    this.loadUpcomingAppointments();
     this.fetchCombineData();
     this.getPatientCountByGender();
     this.getPatientCountByDepartment();
+  }
+  
+  private initializeDashboardData() {
+    console.log('Admin Dashboard - Initializing data as empty');
+    // Initialize all dashboard data arrays and counters as empty
+    this.recentPatients = [];
+    this.upcomingAppointments = [];
+    this.combinedData = [];
+    this.invoices = [];
+    this.patientCountByGender = [];
+    
+    // Initialize counters
+    this.count = 0;
+    this.consultatCount = 0;
+    this.appCount = 0;
+    this.earning = 0;
+    this.totalAmount = 0;
+    
+    console.log('Admin Dashboard - Recent Patients after init:', this.recentPatients);
+    console.log('Admin Dashboard - Upcoming Appointments after init:', this.upcomingAppointments);
+  }
+
+  private clearDashboardData() {
+    console.log('  - CLEARING dashboard data - no hospital selected for super admin');
+    
+    // Clear all dashboard data arrays and counters
+    this.recentPatients = [];
+    this.upcomingAppointments = [];
+    this.combinedData = [];
+    this.invoices = [];
+    this.patientCountByGender = [];
+    
+    // Reset counters
+    this.count = 0;
+    this.consultatCount = 0;
+    this.appCount = 0;
+    this.earning = 0;
+    this.totalAmount = 0;
   }
   
   
@@ -322,14 +408,18 @@ generateRecentYears() {
   }
 
 loadRecentPatients(): void {
+  console.log('Admin Dashboard - Loading recent patients...');
   this.patientService.getPatientList().subscribe((result) => {
     this.recentPatients = result.slice(0, 5);
+    console.log('Admin Dashboard - Recent patients loaded:', this.recentPatients.length);
   });
 }
 
 loadUpcomingAppointments(): void {
+  console.log('Admin Dashboard - Loading upcoming appointments...');
   this.appointmentService.getAppointmentList().subscribe((result) => {
     this.upcomingAppointments = result.slice(0, 5);
+    console.log('Admin Dashboard - Upcoming appointments loaded:', this.upcomingAppointments.length);
   });
 }
 

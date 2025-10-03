@@ -425,22 +425,33 @@ printContent(): void {
   loadPatientAppointments() {
     this.appointmentList = [];
     this.selectedYear = this.profileForm.get('appointYear')?.value
-    this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe(res => {
-      // Assuming the date field is named 'date' and is in a format that can be compared directly (e.g., ISO string).
-
-      this.appointmentList = res.sort((a, b) => {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      });
-      this.latestId = this.appointmentList[0]?.id;
-      this.appointmentDate=this.appointmentList[0]?.date;
-      this.departmentId = this.appointmentList[0]?.departmentid;
-      this.getVitalByAppointment(this.latestId);
-      this.getQuestionnaireByDepartmentId(this.departmentId);
-      this.ApiCallsForPreview();
-      this.getConsultationOnAppointmentId(this.latestId)
-      this.getPrescribeMedicine();
-      this.getDoctorDetails();
-      this.getUploadedFiles(this.latestId);
+    
+    // Check if patientId is available
+    if (!this.patientId || this.patientId === 0) {
+      console.warn('Patient ID not available or invalid, skipping appointment list load');
+      return;
+    }
+    
+    this.appointmentService.getAppointmentListByPatientId(this.patientId, this.selectedYear).subscribe({
+      next: (res) => {
+        // Assuming the date field is named 'date' and is in a format that can be compared directly (e.g., ISO string).
+        this.appointmentList = res.sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        this.latestId = this.appointmentList[0]?.id;
+        this.appointmentDate=this.appointmentList[0]?.date;
+        this.departmentId = this.appointmentList[0]?.departmentid;
+        this.getVitalByAppointment(this.latestId);
+        this.getQuestionnaireByDepartmentId(this.departmentId);
+        this.ApiCallsForPreview();
+        this.getConsultationOnAppointmentId(this.latestId);
+        this.getPrescribeMedicine();
+        this.getDoctorDetails();
+        this.getUploadedFiles(this.latestId);
+      },
+      error: (error) => {
+        console.error('Error loading patient appointments:', error);
+      }
     });
   }
 

@@ -88,7 +88,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
   //public searchDataValue = '';
   public searchDataValue: string = '';
   public allPatients: any[] = [];
-  constructor(private patierntService: PatientService,
+  constructor(private patientService: PatientService,
     private route: Router,
     private appointmentService: AppointmentService,
     private invoiceService: InvoiceService,
@@ -99,7 +99,6 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     private fileUploadService: FileUploadService,
     private staffScheduleService: StaffScheduleService,
     private toater: ToastrService,
-    private patientService: PatientService,
     private modalservice: ModalServiceService,
     private hospitalService: HospitalService,
 
@@ -237,8 +236,8 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     this.fileFormInitlize();
     this.flag = false;
     this.patientAppointmentData = [];
-    if (this.patierntService.patientId && localStorage.getItem('lastPath') === 'patientList') {
-      this.postDatatoAppointment(this.patierntService.patientId);
+    if (this.patientService.patientId && localStorage.getItem('lastPath') === 'patientList') {
+      this.postDatatoAppointment(this.patientService.patientId);
       localStorage.removeItem('lastPath');
       this.patientService.patientId = 0;
     }
@@ -340,30 +339,45 @@ searchData(data: string) {
   postDatatoAppointment(id: number) {
     this.flag = true;
     this.patientAppointmentData = [];
-    //const inputField:HTMLInputElement=this.searchInput.nativeElement;
     this.patientId = id;
+    
+    // Find the selected patient from the available patient data
+    let selectedPatient = null;
+    
+    // First check in search results
     if (this.searchResults.length > 0) {
-      const data = this.allPatients; // Use the already fetched patient list
-      this.totalData = data.length;
-      data.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-          this.calculateDateDifference(res.dob);
-          res.ageinYear = this.age;
-          this.patientlist.push(res);
-          this.serialNumberArray.push(serialNumber);
+      selectedPatient = this.searchResults.find(patient => patient.patientId === id);
+    }
+    
+    // If not found in search results, check in all patients
+    if (!selectedPatient && this.allPatients.length > 0) {
+      selectedPatient = this.allPatients.find(patient => patient.patientId === id);
+    }
+    
+    // If patient found, populate the appointment data
+    if (selectedPatient) {
+      this.calculateDateDifference(selectedPatient.dob);
+      selectedPatient.ageinYear = this.age;
+      this.patientAppointmentData = [selectedPatient];
+    } else {
+      // If patient not found in cached data, fetch from service
+      this.patientService.getPatientData(id).subscribe({
+        next: (patient: any) => {
+          if (patient) {
+            this.calculateDateDifference(patient.dob);
+            patient.ageinYear = this.age;
+            this.patientAppointmentData = [patient];
+          }
+        },
+        error: (error: any) => {
+          console.error('Error fetching patient:', error);
+          this.toater.error('Error loading patient data');
         }
       });
-      this.dataSource = new MatTableDataSource<IpatientInfo>(this.patientlist);
-      this.calculateTotalPages(this.totalData, this.pageSize);
     }
 
-
+    // Clear search results to show the appointment form
     this.searchResults = [];
-    //inputField.value=''
-
-    //this.route.navigate([routes.addAppointment])
-
   }
 
   updateFormattedDateTime(event: any) {

@@ -32,8 +32,11 @@ namespace hospitalApiProject.Controllers
         public async Task<ActionResult<IEnumerable<RoleMaster>>> GetRolesByHospital(int hospitalId)
         {
             // Allow loading roles for any hospital without authentication checks
+            // Exclude super admin roles from dropdown selections
             var roles = await _context.RoleMasters
-                .Where(r => r.HospitalId == hospitalId || r.HospitalId == null && r.IsActive)
+                .Where(r => (r.HospitalId == hospitalId || r.HospitalId == null) && r.IsActive
+                    && r.RoleName.ToLower() != "superadmin" 
+                    && r.RoleName.ToLower() != "globalsuperadmin")
                 .OrderBy(r => r.RoleName)
                 .ToListAsync();
 

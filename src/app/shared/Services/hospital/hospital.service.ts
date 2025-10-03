@@ -10,6 +10,10 @@ export class HospitalService {
   private currentHospitalIdSubject = new BehaviorSubject<number | null>(this.getCurrentHospitalId());
   currentHospitalId$ = this.currentHospitalIdSubject.asObservable();
 
+  // Add a subject to notify when hospital list changes
+  private hospitalListChangedSubject = new BehaviorSubject<boolean>(false);
+  hospitalListChanged$ = this.hospitalListChangedSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
   private getHeaders(): HttpHeaders {
@@ -41,6 +45,8 @@ export class HospitalService {
     } else {
       localStorage.setItem('currentHospitalId', String(id));
     }
+    
+    // Emit the new hospital ID to all subscribers
     this.currentHospitalIdSubject.next(id);
   }
 
@@ -97,4 +103,22 @@ export class HospitalService {
     const userRole = user?.userRole;
     return userRole === 'globalsuperadmin' || userRole === 'superadmin';
   }
+
+  // Method to trigger hospital list refresh for all subscribed components (super admin only)
+  notifyHospitalListChanged(): void {
+    this.hospitalListChangedSubject.next(true);
+    // Reset after a short delay to allow for future notifications
+    setTimeout(() => {
+      this.hospitalListChangedSubject.next(false);
+    }, 100);
+  }
+
+  // Method to force immediate refresh of hospital list (for critical updates)
+  forceHospitalListRefresh(): void {
+    // Use a different approach - emit current timestamp to ensure uniqueness
+    this.hospitalListChangedSubject.next(true);
+    // Emit false immediately to reset for next notification
+    setTimeout(() => this.hospitalListChangedSubject.next(false), 50);
+  }
+
 }

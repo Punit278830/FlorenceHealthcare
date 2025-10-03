@@ -55,8 +55,27 @@ namespace hospitalApiProject.Controllers
         return BadRequest("Hospital name is required");
       }
 
-      _context.Hospitals.Add(hospital);
+     var addedHospital = _context.Hospitals.Add(hospital);
       await _context.SaveChangesAsync();
+
+      if (addedHospital.Entity == null)
+      {
+        return StatusCode(500, "Error creating hospital");
+      }
+      else
+      {
+        //create default roles for the new hospital
+        var defaultRoles = new List<RoleMaster>
+        {
+          new() { RoleName = "Admin", HospitalId = addedHospital.Entity.HospitalId, IsActive = true, RoleDisplayName = "Administrator" },
+          new() { RoleName = "Doctor", HospitalId = addedHospital.Entity.HospitalId, IsActive = true, RoleDisplayName = "Doctor" },
+          new() { RoleName = "Nurse", HospitalId = addedHospital.Entity.HospitalId, IsActive = true, RoleDisplayName = "Nurse" },
+          new() { RoleName = "Receptionist", HospitalId = addedHospital.Entity.HospitalId, IsActive = true, RoleDisplayName = "Receptionist" }
+        };
+        _context.RoleMasters.AddRange(defaultRoles);
+        await _context.SaveChangesAsync();
+      }
+
       return CreatedAtAction(nameof(GetHospital), new { id = hospital.HospitalId }, hospital);
     }
 

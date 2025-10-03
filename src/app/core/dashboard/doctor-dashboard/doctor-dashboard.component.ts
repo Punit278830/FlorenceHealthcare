@@ -27,6 +27,7 @@ import { IPredefineDiagnosis, ImedicineMaster } from 'src/app/shared/models/mode
 import { ConsultService } from 'src/app/shared/Services/consultation/consult.service';
 import { AppointmentService } from 'src/app/shared/Services/appointment/appointment.service';
 import { HospitalService } from 'src/app/shared/Services/hospital/hospital.service';
+import { SuperAdminService } from 'src/app/shared/Services/super-admin/super-admin.service';
 interface data {
   value: string ;
 }
@@ -96,6 +97,11 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   public consultatCount=0;
   public earning=0;
   private hospitalSubscription: Subscription = new Subscription();
+  
+  // Hospital selection state
+  public isSuperAdmin = false;
+  public hospitalSelected = false;
+  public showHospitalSelectionPrompt = false;
 
 
   constructor(private _auth:AuthService,
@@ -104,7 +110,8 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
     private toaster:ToastrService,
     private consultService:ConsultService,
     private appointmentService:AppointmentService,
-    private hospitalService: HospitalService) {
+    private hospitalService: HospitalService,
+    private superAdminService: SuperAdminService) {
     this.chartOptionsOne = {
       chart: {
         height: 200,
@@ -267,32 +274,57 @@ export class DoctorDashboardComponent implements OnInit, OnDestroy {
   public ngOnInit()
   {
     this.getGreetingMsg();
-     const data=JSON.parse(localStorage.getItem('data')||'')
-this.userName=data.fname +" "+data.lname;
-this.doctorId=data.loginId;
+    const data=JSON.parse(localStorage.getItem('data')||'')
+    this.userName=data.fname +" "+data.lname;
+    this.doctorId=data.loginId;
 
-this.initlizeMedForm();
-this.initlizeDiagnosForm();
-this.getMedicine();
+    // Check if user is super admin
+    this.checkSuperAdminStatus();
 
-// Load initial data
-this.loadDashboardData();
+    this.initlizeMedForm();
+    this.initlizeDiagnosForm();
+    this.getMedicine();
 
-// Subscribe to hospital changes
-this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
-  if (hospitalId) {
-
-    this.loadDashboardData();
-  }
-});
-    
+    // Subscribe to hospital changes
+    this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
+      this.hospitalSelected = hospitalId !== null;
+      
+      if (this.isSuperAdmin && !this.hospitalSelected) {
+        // Super admin without hospital selection - show prompt
+        this.showHospitalSelectionPrompt = true;
+      } else {
+        // Hospital selected or regular user - load data
+        this.showHospitalSelectionPrompt = false;
+        this.loadDashboardData();
+      }
+    });
   }
   
   public ngOnDestroy() {
     this.hospitalSubscription.unsubscribe();
   }
   
+  private checkSuperAdminStatus(): void {
+    // Check from localStorage first
+    const userData = JSON.parse(localStorage.getItem('data') || '{}');
+    const userRole = userData.userRole?.toLowerCase();
+    this.isSuperAdmin = userRole === 'globalsuperadmin' || userRole === 'superadmin';
+    
+    // Also check via super admin service for accuracy
+    this.superAdminService.superAdminStatus$.subscribe(status => {
+      if (status) {
+        this.isSuperAdmin = status.isCurrentUserSuperAdmin;
+      }
+    });
+  }
+  
   private loadDashboardData() {
+    // Don't make API calls if super admin hasn't selected a hospital
+    if (this.isSuperAdmin && !this.hospitalSelected) {
+      console.log('Skipping API calls - no hospital selected for super admin');
+      return;
+    }
+    
     this.totalEarning();
     this.appointmentCount();
     this.consultationCount();

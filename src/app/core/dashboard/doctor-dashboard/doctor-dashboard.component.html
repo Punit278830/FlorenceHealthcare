@@ -1,5 +1,31 @@
 <div class="page-wrapper">
     <div class="content">
+
+        <!-- Hospital Selection Prompt for Super Admins -->
+        <div *ngIf="showHospitalSelectionPrompt" class="hospital-selection-overlay">
+            <div class="hospital-selection-card">
+                <div class="card shadow-lg">
+                    <div class="card-body text-center p-5">
+                        <div class="mb-4">
+                            <i class="fas fa-hospital fa-4x text-primary mb-3"></i>
+                            <h3 class="card-title">Select Hospital</h3>
+                            <p class="text-muted">Please select a hospital from the header to view dashboard data.</p>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            As a Super Admin, you need to select a specific hospital to view its dashboard data.
+                        </div>
+                        <p class="text-sm text-muted mt-3">
+                            <i class="fas fa-arrow-up me-1"></i>
+                            Click on the hospital selector in the top navigation bar
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content (hidden when hospital selection prompt is shown) -->
+        <div *ngIf="!showHospitalSelectionPrompt">
         <div class="doctor-list-blk">
             <div class="row">
                
@@ -656,5 +682,7 @@
     
             </div>
         </div>
+        
+        </div> <!-- End Main Dashboard Content -->
     </div>
 </div>
