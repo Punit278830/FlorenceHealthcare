@@ -59,15 +59,15 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     // Load hospitals first (not hospital-dependent)
     this.loadHospitals();
     
-    // Subscribe to hospital list changes (only for super admins)
-    if (this.isSuperAdmin) {
-      this.hospitalListSubscription = this.hospitalService.hospitalListChanged$.subscribe(changed => {
-        if (changed) {
-          console.log('Hospital list changed - reloading hospitals (super admin only)');
+    // Subscribe to hospital list changes
+    this.hospitalListSubscription = this.hospitalService.hospitalListChanged$.subscribe(changed => {
+      if (changed) {
+        // Only reload if user is super admin (check at runtime)
+        if (this.isSuperAdmin) {
           this.loadHospitals();
         }
-      });
-    }
+      }
+    });
     
     let initialHospitalId: any;
     // Subscribe to hospital changes
@@ -75,12 +75,10 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       if (initialHospitalId === undefined) {
         // First load - initialize with current hospital
         initialHospitalId = hospitalId;
-        console.log('Initial hospital load:', hospitalId);
         this.getDepartmentList();
         this.loadRoles();
       } else if (hospitalId !== initialHospitalId) {
         // Hospital changed - reload departments and roles
-        console.log('Hospital changed from', initialHospitalId, 'to', hospitalId, '- reloading data');
         initialHospitalId = hospitalId;
         this.reloadDataForHospital();
       }
@@ -93,7 +91,6 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   }
 
   private reloadDataForHospital(): void {
-    console.log('Reloading data for hospital change...');
     // Clear existing data
     this._depDto = [];
     this.roles = [];
@@ -105,9 +102,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     });
     
     // Reload departments and roles for the new hospital
-    console.log('Reloading departments...');
     this.getDepartmentList();
-    console.log('Reloading roles...');
     this.loadRoles();
   }
 

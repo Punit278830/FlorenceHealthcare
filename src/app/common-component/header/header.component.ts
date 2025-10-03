@@ -54,13 +54,8 @@ export class HeaderComponent {
       this.userName = data.fname + " " + data.lname;
       this.userRole = data.userRole || '';
       
-      // Debug logging to check role values
-      console.log('Header Component - User Role:', this.userRole);
-      console.log('Header Component - Full Data:', data);
-      
       // Set initial super admin status based on role from localStorage
       this.isSuperAdmin = this.isSuperAdminByRole();
-      console.log('Initial isSuperAdmin from role:', this.isSuperAdmin);
     }
     
     // Also check for super admin using the super admin service
@@ -77,15 +72,15 @@ export class HeaderComponent {
       this.updateCurrentHospitalName();
     });
 
-    // Subscribe to hospital list changes (only for super admins)
-    if (this.isSuperAdmin || this.isSuperAdminByRole()) {
-      this.hospitalService.hospitalListChanged$.subscribe(changed => {
-        if (changed) {
-          console.log('Header: Hospital list changed - reloading hospitals (super admin only)');
+    // Subscribe to hospital list changes
+    this.hospitalService.hospitalListChanged$.subscribe(changed => {
+      if (changed) {
+        // Only reload if user is super admin (check at runtime)
+        if (this.isSuperAdmin || this.isSuperAdminByRole()) {
           this.loadHospitals();
         }
-      });
-    }
+      }
+    });
   }
   openBoxFunc() {
     this.openBox = !this.openBox;
@@ -122,17 +117,10 @@ export class HeaderComponent {
   }
 
   private loadHospitals(): void {
-    console.log('Loading hospitals...');
-    console.log('Is Super Admin (by service):', this.isSuperAdmin);
-    console.log('Is Super Admin (by role):', this.isSuperAdminByRole());
-    console.log('User Role:', this.userRole);
-    
     // For super admins, use the super admin service to get hospitals
     if (this.isSuperAdmin || this.isSuperAdminByRole()) {
-      console.log('Loading hospitals for SUPER ADMIN...');
       this.superAdminService.getAllHospitals().subscribe({
         next: (hospitalsResponse: any) => {
-          console.log('Super Admin Hospitals Response:', hospitalsResponse);
           
           // Check if the response has a 'hospitals' property
           const hospitalsList = hospitalsResponse.hospitals || hospitalsResponse;
@@ -159,8 +147,6 @@ export class HeaderComponent {
             createdOn: h.createdOn
           }));
           
-          console.log('Converted Hospitals:', this.hospitals);
-          
           // If super admin and no hospital selected, don't auto-select
           // Force them to explicitly choose a hospital
           this.updateCurrentHospitalName();
@@ -172,7 +158,6 @@ export class HeaderComponent {
         }
       });
     } else {
-      console.log('Loading hospitals for REGULAR USER...');
       this.loadHospitalsRegular();
     }
   }
@@ -204,7 +189,6 @@ export class HeaderComponent {
   public selectHospital(hospital: HospitalModel): void {
     // Only allow super admins to switch hospitals
     if (!this.canSwitchHospitals()) {
-      console.log('User cannot switch hospitals - not a super admin');
       return;
     }
     
@@ -220,50 +204,37 @@ export class HeaderComponent {
   }
 
   private checkSuperAdminStatus(): void {
-    console.log('Checking super admin status...');
-    
     // First manually call checkSuperAdminStatus to refresh the data
     this.superAdminService.checkSuperAdminStatus().subscribe({
       next: (status) => {
-        console.log('Super Admin Status Response (manual check):', status);
         if (status) {
           this.isSuperAdmin = status.isCurrentUserSuperAdmin;
-          console.log('Super Admin Service - Is Super Admin (manual):', this.isSuperAdmin);
           
           // If the userRole from localStorage doesn't match, trust the service
           if (this.isSuperAdmin && !this.isSuperAdminByRole()) {
-            console.log('Correcting user role based on super admin service');
             this.userRole = 'globalsuperadmin'; // Set to ensure hospital selector shows
           }
-        } else {
-          console.log('No super admin status received (manual check)');
         }
       },
       error: (error) => {
-        console.error('Error checking super admin status (manual):', error);
+        console.error('Error checking super admin status:', error);
       }
     });
     
     // Also subscribe to the observable for future changes
     this.superAdminService.superAdminStatus$.subscribe({
       next: (status) => {
-        console.log('Super Admin Status Response (subscription):', status);
         if (status) {
           this.isSuperAdmin = status.isCurrentUserSuperAdmin;
-          console.log('Super Admin Service - Is Super Admin (subscription):', this.isSuperAdmin);
-          console.log('Super Admin Service - Full Status:', status);
           
           // If the userRole from localStorage doesn't match, trust the service
           if (this.isSuperAdmin && !this.isSuperAdminByRole()) {
-            console.log('Correcting user role based on super admin service');
             this.userRole = 'globalsuperadmin'; // Set to ensure hospital selector shows
           }
-        } else {
-          console.log('No super admin status received (subscription)');
         }
       },
       error: (error) => {
-        console.error('Error checking super admin status (subscription):', error);
+        console.error('Error checking super admin status:', error);
       }
     });
   }

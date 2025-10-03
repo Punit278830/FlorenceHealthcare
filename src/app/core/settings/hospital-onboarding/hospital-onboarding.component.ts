@@ -133,8 +133,8 @@ export class HospitalOnboardingComponent implements OnInit {
           this.loading = false;
           this.resetForm();
           this.loadHospitals();
-          // Notify other components that hospital list has changed
-          this.hospitalService.notifyHospitalListChanged();
+          // Force immediate refresh of hospital list in header
+          this.hospitalService.forceHospitalListRefresh();
         },
         error: (err) => {
           console.error('Hospital update failed:', err);
@@ -150,8 +150,8 @@ export class HospitalOnboardingComponent implements OnInit {
           this.loading = false;
           this.resetForm();
           this.loadHospitals();
-          // Notify other components that hospital list has changed
-          this.hospitalService.notifyHospitalListChanged();
+          // Force immediate refresh of hospital list in header
+          this.hospitalService.forceHospitalListRefresh();
         },
         error: (err) => {
           console.error('Hospital creation failed:', err);
@@ -183,8 +183,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deactivated successfully`;
         this.loadHospitals();
-        // Notify other components that hospital list has changed
-        this.hospitalService.notifyHospitalListChanged();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to deactivate hospital';
@@ -212,8 +212,8 @@ export class HospitalOnboardingComponent implements OnInit {
         const action = isDeleted ? 'restored and activated' : 'activated';
         this.success = `Hospital "${hospital.name}" has been ${action} successfully`;
         this.loadHospitals();
-        // Notify other components that hospital list has changed
-        this.hospitalService.notifyHospitalListChanged();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to activate hospital';
@@ -239,8 +239,8 @@ export class HospitalOnboardingComponent implements OnInit {
       next: (response: any) => {
         this.success = `Hospital "${hospital.name}" has been deleted successfully`;
         this.loadHospitals();
-        // Notify other components that hospital list has changed
-        this.hospitalService.notifyHospitalListChanged();
+        // Force immediate refresh of hospital list in header
+        this.hospitalService.forceHospitalListRefresh();
       },
       error: (err) => {
         this.error = err?.error?.message || 'Failed to delete hospital';

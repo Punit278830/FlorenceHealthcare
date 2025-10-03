@@ -106,7 +106,19 @@ export class HospitalService {
 
   // Method to trigger hospital list refresh for all subscribed components (super admin only)
   notifyHospitalListChanged(): void {
-    console.log('HospitalService: Notifying components that hospital list has changed');
     this.hospitalListChangedSubject.next(true);
+    // Reset after a short delay to allow for future notifications
+    setTimeout(() => {
+      this.hospitalListChangedSubject.next(false);
+    }, 100);
   }
+
+  // Method to force immediate refresh of hospital list (for critical updates)
+  forceHospitalListRefresh(): void {
+    // Use a different approach - emit current timestamp to ensure uniqueness
+    this.hospitalListChangedSubject.next(true);
+    // Emit false immediately to reset for next notification
+    setTimeout(() => this.hospitalListChangedSubject.next(false), 50);
+  }
+
 }
