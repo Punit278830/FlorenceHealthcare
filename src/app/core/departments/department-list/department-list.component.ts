@@ -54,15 +54,17 @@ export class DepartmentListComponent implements OnInit, OnDestroy{
 
   }
   ngOnInit() {
-    this.getTableData();
-    this.getDepartmentList();
-    
-    // Subscribe to hospital changes
+    // Subscribe to hospital changes first
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe((hospitalId: number | null) => {
-      if (hospitalId) {
+      // Only reload if we have a hospital ID and it's not the initial load
+      if (hospitalId && this.departmentList.length > 0) {
         this.onRefresh(); // Reload department data when hospital changes
       }
     });
+    
+    // Load initial data
+    this.getTableData();
+    this.getDepartmentList();
   }
 
   ngOnDestroy() {
@@ -94,10 +96,20 @@ export class DepartmentListComponent implements OnInit, OnDestroy{
 
 
   onRefresh() {
-    this.departmentList = [];
-    this.searchDataValue = '';
+    console.log('Refreshing department list...'); // Debug log
     
-    this.getTableData()
+    // Reset all pagination and search
+    this.departmentList = [];
+    this.serialNumberArray = [];
+    this.searchDataValue = '';
+    this.currentPage = 1;
+    this.pageIndex = 0;
+    this.skip = 0;
+    this.limit = this.pageSize;
+    
+    // Reload data
+    this.getTableData();
+    this.getDepartmentList(); // Also refresh dropdown data
   }
 
 
@@ -109,22 +121,37 @@ export class DepartmentListComponent implements OnInit, OnDestroy{
   }
   private getTableData(): void {
     this.loaderService.showLoader();
+    
+    // Clear existing data to prevent duplicates
     this.departmentList = [];
     this.serialNumberArray = [];
 
     this.departmentservice.getDepartmentList().subscribe((data: Idepartment[]) => {
-
-      this.totalData = data.length;
-      data.map((res:Idepartment, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= this.skip && serialNumber <= this.limit) {
-        
-          this.departmentList.push(res);
-          this.serialNumberArray.push(serialNumber);
-        }
+      console.log('Department API Response:', data); // Debug log
+      
+      // Filter out any potential duplicates based on departmentId
+      const uniqueDepartments = data.filter((department, index, self) => 
+        index === self.findIndex(d => d.departmentId === department.departmentId)
+      );
+      
+      console.log('Unique Departments:', uniqueDepartments); // Debug log
+      
+      this.totalData = uniqueDepartments.length;
+      
+      // Apply pagination correctly
+      const startIndex = this.skip;
+      const endIndex = this.skip + this.pageSize;
+      
+      uniqueDepartments.slice(startIndex, endIndex).forEach((res: Idepartment, index: number) => {
+        this.departmentList.push(res);
+        this.serialNumberArray.push(startIndex + index + 1);
       });
+      
       this.dataSource = new MatTableDataSource<Idepartment>(this.departmentList);
       this.calculateTotalPages(this.totalData, this.pageSize);
+      this.loaderService.hideLoader();
+    }, error => {
+      console.error('Error fetching departments:', error);
       this.loaderService.hideLoader();
     });
   }

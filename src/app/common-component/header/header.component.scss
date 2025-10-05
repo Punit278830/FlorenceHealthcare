@@ -1,21 +1,122 @@
-/* Hospital Switcher - Enhanced Theme-Aligned Styling */
+/* Hospital Display Styles - Left of notification icon with full width */
+.hospital-display {
+  margin-right: 12px !important;
+  
+  .hospital-switcher {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+    min-width: 200px !important;
+    max-width: 300px !important;
+    text-decoration: none !important;
+    font-weight: 500 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    font-size: 14px !important;
+    
+    .hospital-icon {
+      color: #ffffff !important;
+      margin-right: 8px !important;
+      font-size: 13px !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .hospital-name {
+      flex: 1 !important;
+      color: #ffffff !important;
+      font-weight: 500 !important;
+      font-size: 14px !important;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+      white-space: nowrap !important;
+      /* Remove ellipsis constraints to show full name */
+      overflow: visible !important;
+      text-overflow: unset !important;
+      max-width: none !important;
+    }
+    
+    .dropdown-arrow {
+      color: #ffffff !important;
+      font-size: 11px !important;
+      margin-left: 8px !important;
+      flex-shrink: 0 !important;
+    }
+    
+    &:hover,
+    &:focus,
+    &:active,
+    &.show {
+      background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%) !important;
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+      transform: translateY(-1px) !important;
+      color: #ffffff !important;
+      text-decoration: none !important;
+      
+      .hospital-name,
+      .hospital-icon,
+      .dropdown-arrow {
+        color: #ffffff !important;
+      }
+    }
+  }
+  
+  .hospital-name-static {
+    background: rgba(102, 126, 234, 0.1) !important;
+    color: #2c3e50 !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    cursor: default !important;
+    min-width: 200px !important;
+    max-width: 300px !important;
+    
+    .hospital-icon {
+      color: #667eea !important;
+      margin-right: 8px !important;
+      font-size: 13px !important;
+      flex-shrink: 0 !important;
+    }
+    
+    .hospital-name {
+      color: #2c3e50 !important;
+      font-weight: 500 !important;
+      font-size: 14px !important;
+      white-space: nowrap !important;
+      /* Remove ellipsis constraints to show full name */
+      overflow: visible !important;
+      text-overflow: unset !important;
+      max-width: none !important;
+      flex: 1 !important;
+    }
+  }
+}
+
+/* Legacy Hospital Switcher Styles for backward compatibility */
 :host ::ng-deep .nav-item .hospital-switcher,
 .nav-item .dropdown-toggle.hospital-switcher,
 .hospital-switcher {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: #ffffff !important;
   border-radius: 8px !important;
-  padding: 8px 16px !important;
-  margin: 0 8px !important;
+  padding: 6px 12px !important;
+  margin: 0 !important;
   border: none !important;
   transition: all 0.3s ease !important;
   box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
-  min-width: 180px !important;
+  min-width: 160px !important;
   text-decoration: none !important;
   font-weight: 500 !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: center !important;
+  justify-content: space-between !important;
   
   &:hover,
   &:focus,
@@ -417,19 +518,289 @@
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .hospital-switcher {
-    padding: 6px 12px !important;
-    margin: 0 4px !important;
-    min-width: 160px !important;
+/* Hospital Name Display - Prominent Position */
+.hospital-display {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 20px;
+  
+  .hospital-info {
+    display: flex;
+    align-items: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
     
-    .hospital-name {
+    &:hover {
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      transform: translateY(-1px);
+    }
+    
+    .hospital-icon {
+      margin-right: 8px;
+      font-size: 16px;
+      color: #ffffff;
+    }
+    
+    .hospital-name-full {
+      font-weight: 600;
+      font-size: 16px;
+      white-space: nowrap;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+  
+  // Responsive adjustments
+  @media (max-width: 1200px) {
+    .hospital-info .hospital-name-full {
+      max-width: 250px;
+      font-size: 15px;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    margin: 0 15px;
+    .hospital-info {
+      padding: 6px 12px;
+      .hospital-name-full {
+        max-width: 200px;
+        font-size: 14px;
+      }
+    }
+  }
+  
+  @media (max-width: 768px) {
+    margin: 0 10px;
+    .hospital-info {
+      padding: 5px 10px;
+      .hospital-name-full {
+        max-width: 150px;
+        font-size: 13px;
+      }
+      .hospital-icon {
+        font-size: 14px;
+        margin-right: 6px;
+      }
+    }
+  }
+  
+  @media (max-width: 576px) {
+    display: none; // Hide on very small screens to save space
+  }
+}
+
+/* Mobile Hospital Display */
+.mobile-hospital {
+  .mobile-hospital-name {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white !important;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    margin-right: 8px;
+    display: flex !important;
+    align-items: center !important;
+    min-width: 120px;
+    max-width: 160px;
+    
+    i {
+      margin-right: 6px;
+      font-size: 11px;
+      color: white !important;
+      flex-shrink: 0;
+    }
+    
+    span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-block;
+      vertical-align: middle;
+      color: white !important;
+      flex: 1;
+    }
+  }
+}
+
+/* Update header layout to accommodate hospital display */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  .header-left {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    
+    .logo {
+      display: flex;
+      align-items: center;
+      margin-right: 15px;
+    }
+    
+    #toggle_btn,
+    #mobile_btn {
+      margin-left: 10px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      transition: all 0.3s ease;
+      
+      &:hover {
+        background: rgba(0, 0, 0, 0.05);
+      }
+      
+      img {
+        width: 18px;
+        height: 18px;
+      }
+    }
+    
+    #mobile_btn {
+      display: none;
+      
+      @media (max-width: 768px) {
+        display: inline-flex;
+      }
+    }
+    
+    #toggle_btn {
+      @media (max-width: 768px) {
+        display: none;
+      }
+    }
+  }
+  
+  .nav.user-menu {
+    flex-shrink: 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .hospital-display {
+    .hospital-switcher {
+      min-width: 180px !important;
+      max-width: 250px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      
+      .hospital-name {
+        font-size: 13px !important;
+      }
+    }
+    
+    .hospital-name-static {
+      min-width: 180px !important;
+      max-width: 250px !important;
+      padding: 6px 12px !important;
+      font-size: 13px !important;
+      
+      .hospital-name {
+        font-size: 13px !important;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .hospital-display {
+    margin-right: 8px !important;
+    
+    .hospital-switcher {
+      padding: 6px 10px !important;
+      min-width: 160px !important;
+      max-width: 200px !important;
       font-size: 12px !important;
+      
+      .hospital-name {
+        font-size: 12px !important;
+        /* On tablets, allow some truncation if needed */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 140px !important;
+      }
+      
+      .hospital-icon {
+        font-size: 11px !important;
+      }
+      
+      .dropdown-arrow {
+        font-size: 10px !important;
+      }
+    }
+    
+    .hospital-name-static {
+      padding: 6px 10px !important;
+      min-width: 160px !important;
+      max-width: 200px !important;
+      font-size: 12px !important;
+      
+      .hospital-name {
+        font-size: 12px !important;
+        /* On tablets, allow some truncation if needed */
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        max-width: 140px !important;
+      }
+      
+      .hospital-icon {
+        font-size: 11px !important;
+      }
     }
   }
   
   .hospital-dropdown {
-    min-width: 240px !important;
+    min-width: 200px !important;
+    right: 0 !important;
+    left: auto !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .hospital-display {
+    .hospital-switcher {
+      min-width: 140px !important;
+      max-width: 180px !important;
+      padding: 5px 8px !important;
+      
+      .hospital-name {
+        max-width: 120px !important;
+        font-size: 11px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+    }
+    
+    .hospital-name-static {
+      min-width: 140px !important;
+      max-width: 180px !important;
+      padding: 5px 8px !important;
+      
+      .hospital-name {
+        max-width: 120px !important;
+        font-size: 11px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+      }
+    }
+  }
+  
+  .hospital-dropdown {
+    min-width: 180px !important;
   }
 }

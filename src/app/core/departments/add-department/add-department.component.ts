@@ -14,7 +14,8 @@ import { ToastrService } from 'ngx-toastr';
 export class AddDepartmentComponent implements OnInit {
   public routes = routes;
   public depForm!: FormGroup;
-  private depDto!: Idepartment
+  private depDto!: Idepartment;
+  public isSubmitting = false;
   public depStatus = [
     { value: 'Active' },
     { value: 'Inactive' }
@@ -42,28 +43,46 @@ export class AddDepartmentComponent implements OnInit {
   }
 
   addDepartment(dep: FormGroup) {
-    if (this.depForm.valid) {
-
+    if (this.depForm.valid && !this.isSubmitting) {
+      // Prevent double submission
+      this.isSubmitting = true;
+      this.depForm.disable();
+      
       this.depDto = dep.value;
+      console.log('Adding department:', this.depDto); // Debug log
+      
       this.departmentService.createDepartment(this.depDto).subscribe(
         res => {
-
-          res ? this.toster.success("Department Added successfully") : null
-          this.resetForm();
+          console.log('Department creation response:', res); // Debug log
+          
+          if (res) {
+            this.toster.success("Department Added successfully");
+            this.resetForm();
+          }
+          
+          // Reset submission state
+          this.isSubmitting = false;
+          this.depForm.enable();
         },
         error => {
-          this.toster.error(error.statusText, 'Error')
-
+          console.error('Error creating department:', error); // Debug log
+          this.toster.error(error.statusText || 'Error creating department', 'Error');
+          
+          // Reset submission state on error
+          this.isSubmitting = false;
+          this.depForm.enable();
         });
 
-    } else {
-      this.depForm.markAllAsTouched()
+    } else if (!this.depForm.valid) {
+      this.depForm.markAllAsTouched();
     }
   }
 
   resetForm() {
+    this.isSubmitting = false;
     this.depForm.reset({
       departmentStatus: 'Active'
     });
+    this.depForm.enable();
   }
 }

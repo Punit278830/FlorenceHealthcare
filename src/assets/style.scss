@@ -1462,6 +1462,14 @@ table.table {
   display: flex;
   height: 70px;
   justify-content: flex-start;
+  
+  img {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+    display: block;
+  }
+  
   span {
     color: $color_3;
     font-size: 20px;

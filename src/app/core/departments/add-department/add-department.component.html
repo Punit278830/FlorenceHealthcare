@@ -64,10 +64,13 @@
                                         </div>
                                         <div class="col-12 col-md-6 col-xl-10">
                                             <div class="doctor-submit text-end">
-                                                <button type="submit" class="btn btn-primary submit-form me-2">Create
-                                                    Department</button>
+                                                <button type="submit" class="btn btn-primary submit-form me-2" 
+                                                        [disabled]="isSubmitting || depForm.invalid">
+                                                    <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                                    {{isSubmitting ? 'Creating...' : 'Create Department'}}
+                                                </button>
                                                 <button type="button" class="btn btn-primary cancel-form"
-                                                    (click)="resetForm()">Cancel</button>
+                                                    (click)="resetForm()" [disabled]="isSubmitting">Cancel</button>
                                             </div>
                                         </div>
                                     </div>
