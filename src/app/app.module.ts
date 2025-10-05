@@ -10,8 +10,9 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { NgxExtendedPdfViewerModule } from 'ngx-extended-pdf-viewer';
 import { LoaderComponent } from './core/loader/loader.component';
 import { MatIconModule } from '@angular/material/icon';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { GlobalErrorHandler } from './shared/error-handler/global-error-handler';
+import { ErrorInterceptor } from './shared/interceptors/error.interceptor';
 
 
 @NgModule({ declarations: [
@@ -25,8 +26,9 @@ import { GlobalErrorHandler } from './shared/error-handler/global-error-handler'
         NgxExtendedPdfViewerModule,
         ToastrModule.forRoot(),
         NgxSpinnerModule.forRoot(),
-        MatIconModule], providers: [
+        MatIconModule],    providers: [
         provideHttpClient(withInterceptorsFromDi()),
-        { provide: ErrorHandler, useClass: GlobalErrorHandler }
-    ] })
+        { provide: ErrorHandler, useClass: GlobalErrorHandler },
+        { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true }
+    ]})
 export class AppModule { }

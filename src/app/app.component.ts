@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { HospitalInitService } from './shared/Services/hospital/hospital-init.service';
 import { RoleAuthorizationService } from './shared/Services/auth/role-authorization.service';
 import { LocalStorageUtil } from './shared/utils/local-storage.util';
+import { CacheDetectionService } from './shared/Services/cache-detection/cache-detection.service';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +14,14 @@ export class AppComponent implements OnInit {
 
   constructor(
     private hospitalInitService: HospitalInitService,
-    private roleService: RoleAuthorizationService
+    private roleService: RoleAuthorizationService,
+    private cacheDetectionService: CacheDetectionService
   ) {}
 
   ngOnInit() {
+    // Check for cache issues first
+    this.cacheDetectionService.checkForCacheIssues();
+    
     // Initialize hospital selection on app startup
     this.hospitalInitService.initializeHospital();
     

@@ -124,11 +124,21 @@ export class AuthService {
   }
 
   private handleError(error: HttpErrorResponse): Observable<never> {
-    if (error.status === 404) {
-
+    console.error('Auth service error:', error);
+    
+    if (error.status === 0) {
+      // Network error or CORS issue
+      console.error('Network error or CORS issue detected');
+      return throwError('Network connection error. Please check your internet connection and try again.');
+    } else if (error.status === 404) {
       return throwError('User not found or incorrect credentials.');
+    } else if (error.status === 401) {
+      return throwError('Invalid credentials. Please check your email and password.');
+    } else if (error.status === 403) {
+      return throwError('Access forbidden. Please contact your administrator.');
+    } else if (error.status >= 500) {
+      return throwError('Server error. Please try again later.');
     } else {
-
       return throwError('Error occurred while logging in. Please try again.');
     }
   }

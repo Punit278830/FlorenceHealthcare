@@ -7,6 +7,7 @@ import { IstaffInfo } from 'src/app/shared/models/models';
 import { routes } from 'src/app/shared/routes/routes';
 import { LoadingService } from 'src/app/shared/Services/loader/loader.service';
 import { RoleAuthorizationService } from 'src/app/shared/Services/auth/role-authorization.service';
+import { DebugService } from 'src/app/shared/Services/debug/debug.service';
 
 @Component({
   selector: 'app-login',
@@ -33,9 +34,13 @@ export class LoginComponent implements OnInit {
     private router: Router,
     private toaster: ToastrService,
     private loadingService: LoadingService,
-    private roleService: RoleAuthorizationService) {}
+    private roleService: RoleAuthorizationService,
+    private debugService: DebugService) {}
 
   ngOnInit(): void {
+    // Run comprehensive diagnostic for deployment troubleshooting
+    this.debugService.runFullDiagnostic();
+    
     if (localStorage.getItem('authenticated')) {
       localStorage.removeItem('authenticated');
     }
