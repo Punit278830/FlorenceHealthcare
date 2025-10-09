@@ -83,6 +83,20 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         this.reloadDataForHospital();
       }
     });
+
+    // ensure update validators are called once form is created
+    this.updatePrescriptionValidityValidators();
+    this.updateDepartmentValidators();
+
+    // subscribe to changes to update validators dynamically
+    this.staffReg.get('designation')?.valueChanges.subscribe(() => {
+      this.updatePrescriptionValidityValidators();
+      this.updateDepartmentValidators();
+    });
+    this.staffReg.get('roleId')?.valueChanges.subscribe(() => {
+      this.updatePrescriptionValidityValidators();
+      this.updateDepartmentValidators();
+    });
   }
 
   ngOnDestroy(): void {
@@ -146,6 +160,9 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         console.log('Roles received:', roles.length, 'roles for hospital', effectiveHospitalId);
         this.roles = roles;
         this.isLoadingRoles = false;
+        // roles changed -> re-evaluate validators
+        this.updatePrescriptionValidityValidators();
+        this.updateDepartmentValidators();
       },
       error: (error: any) => {
         console.error('Error loading roles:', error);
@@ -325,9 +342,27 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
 
-      staffData.activeStatus = parseInt(staffData.activeStatus);
-      staffData.departmentId = parseInt(staffData.departmentId);
-
+      // Normalize activeStatus -> number or null
+      staffData.activeStatus = (staffData.activeStatus === '' || staffData.activeStatus === null || staffData.activeStatus === undefined)
+        ? null
+        : (typeof staffData.activeStatus === 'number' ? staffData.activeStatus : parseInt(staffData.activeStatus.toString()));
+ 
+      // Normalize departmentId -> number or null
+      if (staffData.departmentId === '' || staffData.departmentId === null || staffData.departmentId === undefined) {
+        staffData.departmentId = null;
+      } else {
+        const parsedDept = typeof staffData.departmentId === 'number' ? staffData.departmentId : parseInt(staffData.departmentId.toString());
+        staffData.departmentId = isNaN(parsedDept) ? null : parsedDept;
+      }
+      
+      // Normalize PrescriptionValidity -> number or null
+      if (staffData.PrescriptionValidity === '' || staffData.PrescriptionValidity === null || staffData.PrescriptionValidity === undefined) {
+        staffData.PrescriptionValidity = null;
+      } else {
+        const parsedPV = typeof staffData.PrescriptionValidity === 'number' ? staffData.PrescriptionValidity : parseInt(staffData.PrescriptionValidity.toString());
+        staffData.PrescriptionValidity = isNaN(parsedPV) ? null : parsedPV;
+      }
+ 
       // If roleId is empty string, set to null so backend treats as optional
       if (staffData.roleId === '') {
         staffData.roleId = null;
@@ -503,6 +538,77 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     }
     
     return result;
+  }
+
+  // helper to decide if PrescriptionValidity should be required
+  isPrescriptionRequired(): boolean {
+    const designation = this.staffReg.get('designation')?.value;
+    const roleId = this.staffReg.get('roleId')?.value;
+
+    // treat both Admin,Receptionist and Nurse as NOT requiring PrescriptionValidity
+    const isDesignationAdminOrNurseOrReceptionist = typeof designation === 'string' && ['admin', 'nurse','recptionist'].includes(designation.toLowerCase());
+
+    let isRoleAdminOrNurseOrReceptionist = false;
+    if (roleId !== null && roleId !== undefined && roleId !== '') {
+      // roleId may be numeric; find matching role object
+      const role = this.roles.find(r => r.roleId == roleId || r.roleId?.toString() === roleId?.toString());
+      if (role) {
+        const name = (role.roleDisplayName || role.roleName || role.name || '').toString();
+        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse','receptionist'].includes(name.toLowerCase());
+      } else if (typeof roleId === 'string') {
+        // fallback if roleId directly contains 'admin' or 'nurse'
+        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse','receptionist'].includes(roleId.toLowerCase());
+      }
+    }
+
+    return !(isDesignationAdminOrNurseOrReceptionist || isRoleAdminOrNurseOrReceptionist);
+  }
+
+  // helper to decide if Department should be required
+  isDepartmentRequired(): boolean {
+    const designation = this.staffReg.get('designation')?.value;
+    const roleId = this.staffReg.get('roleId')?.value;
+
+    // treat Admin and Receptionist as NOT requiring Department (include common misspellings)
+    const isDesignationAdminOrReceptionist = typeof designation === 'string' && ['admin', 'receptionist'].includes(designation.toLowerCase());
+
+    let isRoleAdminOrReceptionist = false;
+    if (roleId !== null && roleId !== undefined && roleId !== '') {
+      const role = this.roles.find(r => r.roleId == roleId || r.roleId?.toString() === roleId?.toString());
+      if (role) {
+        const name = (role.roleDisplayName || role.roleName || role.name || '').toString();
+        isRoleAdminOrReceptionist = ['admin', 'receptionist'].includes(name.toLowerCase());
+      } else if (typeof roleId === 'string') {
+        isRoleAdminOrReceptionist = ['admin', 'receptionist'].includes(roleId.toLowerCase());
+      }
+    }
+
+    // department is required unless designation/role is admin or receptionist
+    return !(isDesignationAdminOrReceptionist || isRoleAdminOrReceptionist);
+  }
+
+  // add/remove Validators.required on departmentId control
+  updateDepartmentValidators(): void {
+    const control = this.staffReg.get('departmentId');
+    if (!control) { return; }
+    if (this.isDepartmentRequired()) {
+      control.setValidators([Validators.required]);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+  }
+
+  // add/remove Validators.required on PrescriptionValidity control
+  updatePrescriptionValidityValidators(): void {
+    const control = this.staffReg.get('PrescriptionValidity');
+    if (!control) { return; }
+    if (this.isPrescriptionRequired()) {
+      control.setValidators([Validators.required]);
+    } else {
+      control.clearValidators();
+    }
+    control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
   }
 
 }
