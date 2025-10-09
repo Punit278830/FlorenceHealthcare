@@ -190,7 +190,13 @@
                         (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
                     <td> {{data.patientFname}}</td>
                     <td>{{data.amount}}</td>
-                    <td>{{data.totalUnpaidAmount}}</td>
+                    <td>
+                      {{
+                        (data.totalUnpaidAmount === 0 || data.disc === 100 || data.discount === 100 || data.discountPercent === 100)
+                          ? 0
+                          : data.totalUnpaidAmount
+                      }}
+                    </td>
                     <td>
                       <button
                         [ngClass]="

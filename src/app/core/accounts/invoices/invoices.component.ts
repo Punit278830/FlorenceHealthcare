@@ -231,8 +231,17 @@ private getFormData() {
 
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
-
-      
+      // Patch: Mark discounted invoices as paid in the list
+      this.invoices.forEach((inv: any) => {
+        if (
+          inv.disc === 100 ||
+          inv.discount === 100 ||
+          inv.discountPercent === 100
+        ) {
+          inv.status = 'Paid';
+          inv.totalUnpaidAmount = 0;
+        }
+      });
       // Calculate total payment amount for the selected date range, payment mode, and payment status using paymentDate
       this.calculateTotalPaymentAmount();
       
@@ -259,7 +268,17 @@ private getFormData() {
 
           this.searchResponse = fallbackResponse;
           this.invoices = fallbackResponse?.results ?? [];
-
+          // Patch: Mark discounted invoices as paid in the list (fallback)
+          this.invoices.forEach((inv: any) => {
+            if (
+              inv.disc === 100 ||
+              inv.discount === 100 ||
+              inv.discountPercent === 100
+            ) {
+              inv.status = 'Paid';
+              inv.totalUnpaidAmount = 0;
+            }
+          });
           this.calculateTotalPaymentAmount();
           const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
           this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
