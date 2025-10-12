@@ -62,12 +62,15 @@ export class HeaderComponent {
     this.checkSuperAdminStatus();
 
     // Load hospitals and current hospital
-    this.loadHospitals();
     this.currentHospitalId = this.hospitalService.getCurrentHospitalId();
-    this.updateCurrentHospitalName();
+    console.log('Initial hospital ID from localStorage:', this.currentHospitalId);
+    
+    // Load hospitals first, then update name
+    this.loadHospitals();
     
     // Subscribe to hospital changes
     this.hospitalService.currentHospitalId$.subscribe(id => {
+      console.log('Hospital ID changed to:', id);
       this.currentHospitalId = id;
       this.updateCurrentHospitalName();
     });
@@ -181,9 +184,36 @@ export class HeaderComponent {
     if (this.currentHospitalId && this.hospitals.length > 0) {
       const hospital = this.hospitals.find((h: HospitalModel) => h.hospitalId === this.currentHospitalId);
       this.currentHospitalName = hospital?.name || 'Unknown Hospital';
+      console.log('Updated hospital name:', this.currentHospitalName, 'for ID:', this.currentHospitalId);
+    } else if (this.currentHospitalId && this.hospitals.length === 0) {
+      // Hospitals not loaded yet, fetch the specific hospital
+      this.loadSpecificHospital(this.currentHospitalId);
     } else {
-      this.currentHospitalName = 'No Hospital Selected';
+      this.currentHospitalName = 'MediSyncr';
+      console.log('No hospital selected, using default name');
     }
+  }
+
+  private loadSpecificHospital(hospitalId: number): void {
+    // Load all hospitals to find the specific one we need
+    this.hospitalService.getHospitals().subscribe({
+      next: (hospitals: HospitalModel[]) => {
+        const hospital = hospitals.find(h => h.hospitalId === hospitalId);
+        if (hospital) {
+          this.currentHospitalName = hospital.name;
+          console.log('Loaded specific hospital:', this.currentHospitalName);
+          // Also cache the hospitals for future use
+          this.hospitals = hospitals;
+        } else {
+          this.currentHospitalName = 'MediSyncr';
+          console.log('Hospital not found with ID:', hospitalId);
+        }
+      },
+      error: (error: any) => {
+        console.error('Error loading hospitals:', error);
+        this.currentHospitalName = 'MediSyncr';
+      }
+    });
   }
 
   public selectHospital(hospital: HospitalModel): void {
@@ -254,5 +284,12 @@ export class HeaderComponent {
   public canSwitchHospitals(): boolean {
     // Only super admins can switch hospitals, regular admins cannot
     return this.isSuperAdminByRole() && !this.isAdminUser();
+  }
+
+  public shouldShowHospitalName(): boolean {
+    // Show hospital name for both super admins and regular users if a hospital is selected
+    return !!(this.currentHospitalName && 
+             this.currentHospitalName !== 'MediSyncr' && 
+             this.currentHospitalName !== '');
   }
 }

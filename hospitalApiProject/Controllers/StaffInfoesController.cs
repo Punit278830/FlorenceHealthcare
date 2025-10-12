@@ -163,6 +163,106 @@ namespace hospitalApiProject.Controllers
       return NoContent();
     }
 
+    // DEBUG ENDPOINT: Get staff info with hospital details for debugging
+    [HttpGet("debug/{id}")]
+    public async Task<ActionResult> GetStaffDebugInfo(int id)
+    {
+      try
+      {
+        var staff = await _context.StaffInfos
+          .Include(s => s.Role)
+          .Where(s => s.StaffId == id)
+          .Select(s => new {
+            s.StaffId,
+            s.FirstName,
+            s.LastName,
+            s.Email,
+            s.HospitalId,
+            s.Designation,
+            RoleName = s.Role != null ? s.Role.RoleName : null,
+            RoleDisplayName = s.Role != null ? s.Role.RoleDisplayName : null
+          })
+          .FirstOrDefaultAsync();
+
+        if (staff == null)
+        {
+          return NotFound($"Staff with ID {id} not found");
+        }
+
+        // Also get hospital info if hospitalId exists
+        object? hospitalInfo = null;
+        if (staff.HospitalId.HasValue)
+        {
+          hospitalInfo = await _context.Hospitals
+            .Where(h => h.HospitalId == staff.HospitalId.Value)
+            .Select(h => new {
+              h.HospitalId,
+              HospitalName = h.Name,
+              h.IsActive
+            })
+            .FirstOrDefaultAsync();
+        }
+
+        return Ok(new {
+          StaffInfo = staff,
+          HospitalInfo = hospitalInfo,
+          RequestHeaders = new {
+            StaffId = Request.Headers.ContainsKey("X-Staff-Id") ? Request.Headers["X-Staff-Id"].ToString() : "Not provided",
+            HospitalId = Request.Headers.ContainsKey("X-Hospital-Id") ? Request.Headers["X-Hospital-Id"].ToString() : "Not provided",
+            TimeZone = Request.Headers.ContainsKey("X-Time-Zone") ? Request.Headers["X-Time-Zone"].ToString() : "Not provided"
+          }
+        });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, new { 
+          message = "Error retrieving staff debug info", 
+          error = ex.Message,
+          stackTrace = ex.StackTrace
+        });
+      }
+    }
+
+    // UTILITY ENDPOINT: Update staff hospital assignment
+    [HttpPost("update-hospital/{staffId}/{hospitalId}")]
+    public async Task<ActionResult> UpdateStaffHospital(int staffId, int hospitalId)
+    {
+      try
+      {
+        var staff = await _context.StaffInfos.FindAsync(staffId);
+        if (staff == null)
+        {
+          return NotFound($"Staff with ID {staffId} not found");
+        }
+
+        var hospital = await _context.Hospitals.FindAsync(hospitalId);
+        if (hospital == null)
+        {
+          return NotFound($"Hospital with ID {hospitalId} not found");
+        }
+
+        var oldHospitalId = staff.HospitalId;
+        staff.HospitalId = hospitalId;
+        
+        await _context.SaveChangesAsync();
+
+        return Ok(new {
+          message = "Staff hospital assignment updated successfully",
+          staffId = staffId,
+          oldHospitalId = oldHospitalId,
+          newHospitalId = hospitalId,
+          hospitalName = hospital.Name
+        });
+      }
+      catch (Exception ex)
+      {
+        return StatusCode(500, new { 
+          message = "Error updating staff hospital assignment", 
+          error = ex.Message 
+        });
+      }
+    }
+
     private bool StaffInfoExists(int id)
     {
       return _context.StaffInfos.Any(e => e.StaffId == id);

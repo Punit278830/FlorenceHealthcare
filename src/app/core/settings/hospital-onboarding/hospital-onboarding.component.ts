@@ -121,6 +121,37 @@ export class HospitalOnboardingComponent implements OnInit {
     this.error = undefined;
     this.success = undefined;
 
+    // Uniqueness validation for active hospitals
+    const formValue = this.form.value;
+    const activeHospitals = this.hospitals.filter(h => h.isActive && !(h.isDeleted || false));
+    const duplicateFields: string[] = [];
+    activeHospitals.forEach(h => {
+      if (!this.isEditMode || h.hospitalId !== this.editingHospitalId) {
+        if (formValue.code && h.code && formValue.code.trim().toLowerCase() === h.code.trim().toLowerCase()) {
+          duplicateFields.push('Hospital Code');
+        }
+        if (formValue.registrationNumber && h.registrationNumber && formValue.registrationNumber.trim().toLowerCase() === h.registrationNumber.trim().toLowerCase()) {
+          duplicateFields.push('Registration Number');
+        }
+        if (formValue.licenseNumber && h.licenseNumber && formValue.licenseNumber.trim().toLowerCase() === h.licenseNumber.trim().toLowerCase()) {
+          duplicateFields.push('License Number');
+        }
+        if (formValue.gstin && h.gstin && formValue.gstin.trim().toLowerCase() === h.gstin.trim().toLowerCase()) {
+          duplicateFields.push('GSTIN');
+        }
+        if (formValue.websiteUrl && h.websiteUrl && formValue.websiteUrl.trim().toLowerCase() === h.websiteUrl.trim().toLowerCase()) {
+          duplicateFields.push('Website URL');
+        }
+      }
+    });
+    // Remove duplicates from duplicateFields array
+    const uniqueDuplicateFields = Array.from(new Set(duplicateFields));
+    if (uniqueDuplicateFields.length > 0) {
+      this.error = 'The following fields must be unique among all active hospitals: ' + uniqueDuplicateFields.join(', ');
+      this.loading = false;
+      return;
+    }
+
     if (this.isEditMode && this.editingHospitalId) {
       // Update existing hospital - include hospitalId in the payload
       const updatePayload = {

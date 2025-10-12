@@ -59,12 +59,83 @@ export class LocalStorageUtil {
   }
 
   /**
-   * Check if user is authenticated
+   * Validate session integrity
+   * @returns boolean indicating if session is valid
+   */
+  static isSessionValid(): boolean {
+    try {
+      const userData = this.getUserData();
+      const currentStaffId = this.getItem('currentStaffId');
+      
+      // Check if essential data exists
+      if (!userData || !userData.loginStatus || !currentStaffId) {
+        return false;
+      }
+      
+      // Check if staff ID matches between userData and stored staffId
+      if (userData.loginId && currentStaffId && 
+          userData.loginId.toString() !== currentStaffId) {
+        console.warn('Session data mismatch detected');
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Session validation error:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Recover from corrupted session data
+   */
+  static recoverSession(): boolean {
+    try {
+      console.log('Attempting session recovery...');
+      
+      // Try to get any valid data
+      const staffId = this.getItem('currentStaffId');
+      const hospitalId = this.getItem('currentHospitalId');
+      
+      if (staffId) {
+        console.log('Found staff ID, attempting to reconstruct session');
+        // We have staff ID, but user data might be corrupted
+        // Let the application handle re-authentication
+        return true;
+      }
+      
+      console.log('No recoverable session data found');
+      return false;
+    } catch (error) {
+      console.error('Session recovery failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Check if user is authenticated with additional validation
    * @returns boolean indicating if user is logged in
    */
   static isAuthenticated(): boolean {
+    // First check basic authentication
     const userData = this.getUserData();
-    return userData && userData.loginStatus === true;
+    if (!userData || !userData.loginStatus) {
+      return false;
+    }
+    
+    // Then validate session integrity
+    if (!this.isSessionValid()) {
+      console.warn('Session integrity check failed');
+      
+      // Attempt recovery
+      if (!this.recoverSession()) {
+        // If recovery fails, clear everything
+        this.clearAuthData();
+        return false;
+      }
+    }
+    
+    return true;
   }
 
   /**

@@ -402,6 +402,10 @@ export class InvoiceViewComponent implements OnInit {
       this.flag = true;
       this.totalInvoiceAmount -= this.invoiceDetails.amount;
       this.disc = 100;
+      // Mark invoice as paid for 100% discount (prescription validity)
+      this.invoiceDetails.status = 'Paid';
+      this.invoiceDetails.isConsultationPaid = true;
+      this.isAllowed = true;
       // Set previousAppointmentDate for display
       this.invoiceDetails.previousAppointmentDate = previousDate.format('YYYY-MM-DD');
     } else {

@@ -1,13 +1,14 @@
 <div class="header">
     <div class="header-left">
         <a [routerLink]="routes.adminDashboard" class="logo">
-            <img src="assets/img/Medisyncro.jpeg" width="35" height="35" alt=""> <span>Medisyncro</span>
+            <img src="assets/img/Medisyncro.png" width="35" height="35" alt="" alt=""> 
+            <!-- <span>Medisyncro</span> -->
         </a>
+        <a (click)="toggleSideBar()" id="toggle_btn" href="javascript:void(0);"><img src="assets/img/icons/bar-icon.svg"
+                alt=""></a>
+        <a (click)="toggleMobileSideBar()" (keyup.enter)="toggleMobileSideBar()" id="mobile_btn"
+            class="mobile_btn float-start" tabindex="0"><img src="assets/img/icons/bar-icon.svg" alt=""></a>
     </div>
-    <a (click)="toggleSideBar()" id="toggle_btn" href="javascript:void(0);"><img src="assets/img/icons/bar-icon.svg"
-            alt=""></a>
-    <a (click)="toggleMobileSideBar()" (keyup.enter)="toggleMobileSideBar()" id="mobile_btn"
-        class="mobile_btn float-start" tabindex="0"><img src="assets/img/icons/bar-icon.svg" alt=""></a>
         <!-- DO NOT DELETE -->
     <!-- <div class="top-nav-search mob-view">
         <form>
@@ -16,6 +17,48 @@
         </form>?
     </div> -->
     <ul class="nav user-menu float-end">
+        <!-- Hospital Display: Before notification icon for more space -->
+        <!-- For Super Admin: Hospital Switcher Dropdown -->
+        <li *ngIf="canSwitchHospitals()" class="nav-item dropdown d-none d-sm-block hospital-display">
+            <a href="javascript:void(0);" class="dropdown-toggle nav-link hospital-switcher" data-bs-toggle="dropdown">
+                <i class="fas fa-hospital hospital-icon"></i>
+                <span class="hospital-name">{{ currentHospitalName || 'Select Hospital' }}</span>
+                <i class="fas fa-chevron-down dropdown-arrow"></i>
+            </a>
+            <div class="dropdown-menu hospital-dropdown">
+                <div class="dropdown-header">
+                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
+                    <span>Switch Hospital</span>
+                </div>
+                <div class="dropdown-divider"></div>
+                <a *ngFor="let hospital of hospitals" 
+                   class="dropdown-item hospital-item" 
+                   (click)="selectHospital(hospital)"
+                   [class.active]="hospital.hospitalId === currentHospitalId">
+                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
+                    <span class="hospital-text">{{ hospital.name }}</span>
+                    <i *ngIf="hospital.hospitalId === currentHospitalId" class="fas fa-check"></i>
+                </a>
+            </div>
+        </li>
+        
+        <!-- For Regular Users: Static Hospital Name Display -->
+        <li *ngIf="!canSwitchHospitals() && currentHospitalName && currentHospitalName !== 'MediSyncr'" 
+            class="nav-item d-none d-sm-block hospital-display">
+            <span class="nav-link hospital-name-static">
+                <i class="fas fa-hospital hospital-icon"></i>
+                <span class="hospital-name">{{ currentHospitalName }}</span>
+            </span>
+        </li>
+        
+        <!-- Mobile Hospital Display -->
+        <li class="nav-item mobile-hospital d-block d-sm-none" *ngIf="currentHospitalName && currentHospitalName !== 'MediSyncr'">
+            <span class="nav-link mobile-hospital-name">
+                <i class="fas fa-hospital"></i>
+                <span [title]="currentHospitalName">{{ currentHospitalName }}</span>
+            </span>
+        </li>
+        
         <!-- DO NOT DELETE -->
         <!-- <li class="nav-item dropdown d-none d-sm-block">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link" data-bs-toggle="dropdown"><img
@@ -101,33 +144,10 @@
                 </div>
             </div>
         </li> -->
-        <li class="nav-item dropdown d-none d-sm-block">
+        <!-- <li class="nav-item dropdown d-none d-sm-block">
             <a (click)="openBoxFunc()" (keyup.enter)="openBoxFunc()" id="open_msg_box" class="hasnotifications nav-link"
                 tabindex="0"><img src="assets/img/icons/note-icon-01.svg" alt=""><span class="pulse"></span> </a>
-        </li>
-        
-        <!-- Hospital Selector: Only for Super Admin users -->
-        <li *ngIf="canSwitchHospitals()" class="nav-item dropdown d-none d-sm-block">
-            <a href="javascript:void(0);" class="dropdown-toggle nav-link hospital-switcher" data-bs-toggle="dropdown">
-                <img src="assets/img/icons/hospital-icon.svg" alt="" style="width: 16px; height: 16px; margin-right: 5px;">
-                <span class="hospital-name">{{ currentHospitalName || 'Select Hospital' }}</span>
-            </a>
-            <div class="dropdown-menu hospital-dropdown">
-                <div class="dropdown-header">
-                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
-                    <span>Switch Hospital</span>
-                </div>
-                <div class="dropdown-divider"></div>
-                <a *ngFor="let hospital of hospitals" 
-                   class="dropdown-item hospital-item" 
-                   (click)="selectHospital(hospital)"
-                   [class.active]="hospital.hospitalId === currentHospitalId">
-                    <i class="fas fa-hospital" style="margin-right: 8px;"></i>
-                    <span class="hospital-text">{{ hospital.name }}</span>
-                    <i *ngIf="hospital.hospitalId === currentHospitalId" class="fas fa-check"></i>
-                </a>
-            </div>
-        </li>
+        </li> -->
         
         <li class="nav-item dropdown has-arrow user-profile-list">
             <a href="javascript:void(0);" class="dropdown-toggle nav-link user-link" data-bs-toggle="dropdown">

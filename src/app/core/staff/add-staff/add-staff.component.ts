@@ -490,7 +490,19 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowHospitalDropdown(): boolean {
-    return this.isSuperAdmin;
+    const result = this.isSuperAdmin;
+    
+    // Debug logging to help identify cache issues
+    if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
+      console.log('🔍 Add Staff Component - Hospital Dropdown Check:', {
+        isSuperAdmin: result,
+        userRole: this.roleService.getCurrentRole()?.roleName || 'unknown',
+        timestamp: new Date().toISOString(),
+        component: 'AddStaffComponent'
+      });
+    }
+    
+    return result;
   }
 
 }

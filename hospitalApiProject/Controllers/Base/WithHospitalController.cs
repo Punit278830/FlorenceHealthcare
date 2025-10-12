@@ -44,17 +44,37 @@ namespace hospitalApiProject.Controllers.Base
             .Where(s => s.StaffId == staffId)
             .FirstOrDefaultAsync();
           
-          if (staff?.Role != null)
+          // Add debugging logs
+          Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Staff ID: {staffId}");
+          Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Staff found: {staff != null}");
+          Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Staff Hospital ID: {staff?.HospitalId}");
+          Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Staff Designation: {staff?.Designation}");
+          Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Staff Role: {staff?.Role?.RoleName}");
+          
+          if (staff != null)
           {
             // Check if user has GlobalSuperAdmin role OR legacy SuperAdmin designation
-            return new Tuple<bool, int?>(
-              staff.Role.RoleName?.ToLower() == "globalsuperadmin" ||
-              staff.Role.RoleName?.ToLower() == "superadmin" ||
-              staff.Designation?.ToLower() == "superadmin",
-              staff.HospitalId
-            );
+            bool isSuperAdmin = (staff.Role?.RoleName?.ToLower() == "globalsuperadmin" ||
+                                staff.Role?.RoleName?.ToLower() == "superadmin" ||
+                                staff.Designation?.ToLower() == "superadmin");
+                                
+            Console.WriteLine($"[DEBUG] IsSuperAdminAsync - Is Super Admin: {isSuperAdmin}");
+            
+            return new Tuple<bool, int?>(isSuperAdmin, staff.HospitalId);
+          }
+          else
+          {
+            Console.WriteLine($"[ERROR] IsSuperAdminAsync - Staff not found for ID: {staffId}");
           }
         }
+        else
+        {
+          Console.WriteLine($"[ERROR] IsSuperAdminAsync - Invalid Staff ID in header: {staffIdValues.FirstOrDefault()}");
+        }
+      }
+      else
+      {
+        Console.WriteLine($"[ERROR] IsSuperAdminAsync - No X-Staff-Id header found");
       }
       return new Tuple<bool, int?>(false, null);
     }
@@ -80,6 +100,12 @@ namespace hospitalApiProject.Controllers.Base
       var userInfo = await IsSuperAdminAsync(); // (isSuperAdmin, userHospitalId)
       var headerHospitalId = GetHospitalIdFromHeader();
       
+      // Add debugging logs
+      Console.WriteLine($"[DEBUG] GetSelectedHospitalIdAsync - Staff ID from header: {Request.Headers["X-Staff-Id"].FirstOrDefault()}");
+      Console.WriteLine($"[DEBUG] GetSelectedHospitalIdAsync - Is Super Admin: {userInfo.Item1}");
+      Console.WriteLine($"[DEBUG] GetSelectedHospitalIdAsync - User Hospital ID from DB: {userInfo.Item2}");
+      Console.WriteLine($"[DEBUG] GetSelectedHospitalIdAsync - Header Hospital ID: {headerHospitalId}");
+      
       // SUPER ADMIN LOGIC
       if (userInfo.Item1) // Is Super Admin
       {
@@ -96,11 +122,18 @@ namespace hospitalApiProject.Controllers.Base
       
       // REGULAR USER LOGIC  
       // Regular users are always tied to their assigned hospital
-      // They cannot change hospitals, so we ignore the header and use their assigned hospital
+      // However, if the database doesn't have the hospitalId, we can use the header as fallback
       var assignedHospitalId = userInfo.Item2; // Hospital from staff record
       
       if (!assignedHospitalId.HasValue)
       {
+        // FALLBACK: If staff record doesn't have hospital ID, use header hospital ID
+        if (headerHospitalId.HasValue)
+        {
+          Console.WriteLine($"[DEBUG] Using header hospital ID as fallback: {headerHospitalId.Value}");
+          return new Tuple<bool, int?>(false, headerHospitalId.Value);
+        }
+        
         throw new InvalidOperationException("User is not assigned to any hospital. Please contact administrator.");
       }
       

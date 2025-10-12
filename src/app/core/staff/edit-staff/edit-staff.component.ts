@@ -66,10 +66,17 @@ export class EditStaffComponent implements OnInit, OnDestroy {
   ]
 
   ngOnInit(): void {
+    // Load initial department data
+    this.getDepartmentList();
+    
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
       if (hospitalId) {
         this.reloadDataForHospital();
+        // Update form hospitalId if staff is already loaded
+        if (this._staffDto) {
+          this.staffReg.get('hospitalId')?.patchValue(hospitalId);
+        }
       }
     });
   }
@@ -95,23 +102,27 @@ export class EditStaffComponent implements OnInit, OnDestroy {
 
   getStaffInfo(sid: number) {
     this.staffService.getStaff(sid).subscribe((data: IstaffInfo) => {
-
-
-
+      console.log('Loading staff data:', data); // Debug log
+      
       this._staffDto = data;
-      //this.fillStaffDataInForm()
+      
+      // Patch all the form values
       this.staffReg.patchValue(this._staffDto);
-      this.staffReg.get('departmentId')?.patchValue(this._staffDto.departmentId)
-      //this.staffReg.patchValue({activeStatus:this._staffDto.activeStatus})
-      this.staffReg.get('activeStatus')?.patchValue(this._staffDto.activeStatus)
-      this.staffReg.get('regestrationNumber')?.patchValue(this._staffDto?.regestrationNumber)
-
+      this.staffReg.get('departmentId')?.patchValue(this._staffDto.departmentId);
+      this.staffReg.get('activeStatus')?.patchValue(this._staffDto.activeStatus);
+      this.staffReg.get('regestrationNumber')?.patchValue(this._staffDto?.regestrationNumber);
       
+      // Ensure hospitalId is preserved - use existing hospitalId or get current hospital
+      let hospitalId = this._staffDto.hospitalId;
+      if (!hospitalId) {
+        const currentHospitalId = this.hospitalService.getCurrentHospitalId();
+        hospitalId = currentHospitalId || undefined;
+        console.log('Staff had no hospitalId, using current hospital:', hospitalId);
+      }
+      this.staffReg.get('hospitalId')?.patchValue(hospitalId);
       
-
-
-    })
-
+      console.log('Form after patching:', this.staffReg.value); // Debug log
+    });
   }
 
   onDobDateChange(event: any): void {
@@ -209,6 +220,7 @@ export class EditStaffComponent implements OnInit, OnDestroy {
       identityName: ['', Validators.required],
       regestrationNumber: [''],
       PrescriptionValidity: [null],
+      hospitalId: [null], // Add hospitalId to form
 
     });
   }
@@ -264,15 +276,30 @@ export class EditStaffComponent implements OnInit, OnDestroy {
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
 
+      // Ensure proper data types
       staffData.activeStatus = parseInt(staffData.activeStatus);
       staffData.departmentId = parseInt(staffData.departmentId);
       staffData.staffId = this.staffId;
-
+      
+      // Ensure hospitalId is preserved - critical fix!
+      const hospitalId = this.ensureHospitalId();
+      if (!hospitalId) {
+        this.toastr.error("Hospital ID is required. Please refresh and try again.", "Missing Hospital");
+        return;
+      }
+      staffData.hospitalId = hospitalId;
+      
+      console.log('Updating staff with data:', staffData); // Debug log
 
       this.staffService.updateStaff(this.staffId, staffData).subscribe(res => {
-        res ? this.toastr.success("Staff info updated Successfully", "Update Staff Info") : null;
-        this.route.navigate([routes.staffList]);
-
+        console.log('Update response:', res); // Debug log
+        if (res) {
+          this.toastr.success("Staff info updated Successfully", "Update Staff Info");
+          this.route.navigate([routes.staffList]);
+        }
+      }, error => {
+        console.error('Error updating staff:', error);
+        this.toastr.error("Error updating staff information", "Update Error");
       });
     } else {
       this.staffReg.markAllAsTouched(); // Mark all controls as touched to trigger error display
@@ -291,5 +318,28 @@ export class EditStaffComponent implements OnInit, OnDestroy {
 
 
 
+  }
+
+  private ensureHospitalId(): number | null {
+    // First check if form has hospitalId
+    let hospitalId = this.staffReg.get('hospitalId')?.value;
+    
+    // If not, get from staff data
+    if (!hospitalId && this._staffDto) {
+      hospitalId = this._staffDto.hospitalId;
+    }
+    
+    // If still not, get current hospital
+    if (!hospitalId) {
+      hospitalId = this.hospitalService.getCurrentHospitalId();
+    }
+    
+    // Update form with the resolved hospital ID
+    if (hospitalId) {
+      this.staffReg.get('hospitalId')?.patchValue(hospitalId);
+    }
+    
+    console.log('Ensured hospital ID:', hospitalId);
+    return hospitalId;
   }
 }
