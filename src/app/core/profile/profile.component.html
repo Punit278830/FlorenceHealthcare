@@ -1143,7 +1143,7 @@
                                                                         <td><strong>Address:</strong></td>
                                                                         <td>{{patientInfo?.address}}</td>
                                                                         <td><strong>Validity:</strong></td>
-                                                                        <td>{{appointmentDate | checkValidity | date: 'dd MMM y'}}</td>
+                                                                        <td>{{appointmentDate | checkValidity:_doctorDto.PrescriptionValidity | date: 'dd MMM y'}}</td>
                                                                     </tr>
                                                                     <tr>
                                                                         <td><strong>Phone</strong></td>
