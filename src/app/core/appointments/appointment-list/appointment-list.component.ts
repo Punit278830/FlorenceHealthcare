@@ -747,4 +747,44 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
       }
     });
   }
+
+  // Return best department display for appointment row
+  getDepartmentDisplay(row: any): string {
+    if (!row) return 'NA';
+    return (row.departmentName ||
+            row.department ||
+            row.treatment ||
+            (row.departmentObj && (row.departmentObj.departmentName || row.departmentObj.name)) ||
+            'NA');
+  }
+
+  // Return the actual amount paid by patient (tries paymentDetails array/object then known fields, falls back to fee)
+  getPaidAmount(row: any): string | number {
+    if (!row) return 'NA';
+
+    let amt: any = null;
+    const pd = row.paymentDetails;
+
+    if (Array.isArray(pd) && pd.length) {
+      const last = pd[pd.length - 1];
+      amt = last.amount ?? last.paidAmount ?? last.paid ?? last.paymentAmount ?? last.price;
+    } else if (pd && typeof pd === 'object') {
+      amt = pd.amount ?? pd.paidAmount ?? pd.paid ?? pd.paymentAmount;
+    }
+
+    amt = amt ?? row.paidAmount ?? row.amountPaid ?? row.actualPaid ?? row.paid ?? row.paymentAmount ?? row.fee;
+
+    if (amt === null || amt === undefined || amt === '') return '0';
+    const num = Number(amt);
+    return isNaN(num) ? amt : num;
+  }
+
+  // return the fee/total amount for the appointment row
+  getFeeAmount(row: any): string | number {
+    if (!row) return '0';
+    const feeCandidate = row.fee ?? row.amount ?? row.totalAmount ?? row.consultationFee ?? row.feeAmount ?? row.price;
+    if (feeCandidate === null || feeCandidate === undefined || feeCandidate === '') return '0';
+    const n = Number(feeCandidate);
+    return isNaN(n) ? feeCandidate : n;
+  }
 }

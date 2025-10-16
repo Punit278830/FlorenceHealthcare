@@ -695,7 +695,8 @@ namespace hospitalApiProject.Controllers
                     a.AppointmentStatus,
                     a.Notes,
                     a.HospitalId,
-                    a.Fee
+                    a.Fee,
+                   
                 })
                 .ToListAsync();
 
@@ -775,7 +776,9 @@ namespace hospitalApiProject.Controllers
                     Gender = patient?.Gender ?? "",
                     Dob = patient?.Dob,
                     Age = age,
-                    IsConsultationPaid = invoice?.IsConsultationPaid ?? false
+                    IsConsultationPaid = invoice?.IsConsultationPaid ?? false,
+                    Fee = a.Fee,
+                    DepartmentName = department?.DepartmentName ?? "General"
                 };
             }).ToList();
 
@@ -796,6 +799,6 @@ namespace hospitalApiProject.Controllers
         }
     }
 
-    // ...existing code...
+  
   }
 }

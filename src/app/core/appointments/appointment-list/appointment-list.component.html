@@ -37,37 +37,41 @@
                         <!-- <a [routerLink]="routes.addAppointment" class="btn btn-primary add-pluss ms-2"><img
                             src="assets/img/icons/plus.svg" alt=""></a> -->
                         <a href="javascript:;" class="btn btn-primary doctor-refresh ms-2" (click)="onRefresh()"><img
-                            src="assets/img/icons/re-fresh.svg" alt="" ></a>
+                            src="assets/img/icons/re-fresh.svg" alt=""></a>
                       </div>
                       <!-- Code for Appointment Filter by date -->
                       <form [formGroup]="appintmentDateForm">
                         <div class="top-nav-search">
-                         
+
                           <input class="form-control datetimepicker" (dateChange)="appointmentByDate($event,'from')"
-                            formControlName="appointmentFrom" placeholder="From" type="text" matInput [matDatepicker]="appointmentFrom">
+                            formControlName="appointmentFrom" placeholder="From" type="text" matInput
+                            [matDatepicker]="appointmentFrom">
                           <mat-datepicker #appointmentFrom></mat-datepicker>
                           <mat-datepicker-toggle matIconSuffix [for]="appointmentFrom"></mat-datepicker-toggle>
 
                         </div>
                         <div class="top-nav-search">
-                         
+
                           <input class="form-control datetimepicker" (dateChange)="appointmentByDate($event,'to')"
-                            formControlName="appointmentTo" placeholder="to" type="text" matInput [matDatepicker]="appointmentTo" [min]="minToDateValue">
+                            formControlName="appointmentTo" placeholder="to" type="text" matInput
+                            [matDatepicker]="appointmentTo" [min]="minToDateValue">
                           <mat-datepicker #appointmentTo></mat-datepicker>
                           <mat-datepicker-toggle matIconSuffix [for]="appointmentTo"></mat-datepicker-toggle>
 
                         </div>
-                        
-                        </form>
-                        <div style="margin-left: 10px;">
-                          <a href="javascript:;" (click)="exportAppointmentList()" class=" me-2"><img src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
-                          <a href="javascript:;" (click)="exportAppointmentListAsPdf()" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
-                        </div>
+
+                      </form>
+                      <div style="margin-left: 10px;">
+                        <a href="javascript:;" (click)="exportAppointmentList()" class=" me-2"><img
+                            src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
+                        <a href="javascript:;" (click)="exportAppointmentListAsPdf()" class=" me-2"><img
+                            src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
+                      </div>
                     </div>
                   </div>
-                  
+
                 </div>
-                
+
                 <!-- DO NOT DELETE -->
                 <!-- <div class="col-auto text-end float-end ms-auto download-grp">
                   <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
@@ -100,7 +104,6 @@
                     <th mat-sort-header="fee">Fee</th>
                     <th mat-sort-header="payment">Payment</th>
                     <th mat-sort-header="dateTime">Date & Time</th>
-
                     <th></th>
                   </tr>
                 </thead>
@@ -113,38 +116,53 @@
                       </div>
                     </td> -->
                     <td>{{serialNumberArray[i]}}</td>
-                   <td class="profile-image">
-  <ng-container *ngIf="data.isConsultationPaid; else notPaid">
-    <div (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
-         style="cursor: pointer; color: #007bff;">
-      <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
-      {{data.patientFname}} {{data.patientLname}}
-    </div>
-    <small class="d-block text-muted">Click to view profile (Paid)</small>
-  </ng-container>
-  <ng-template #notPaid>
-    <span style="color: #6c757d;">
-      <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
-      {{data.patientFname}} {{data.patientLname}}
-    </span>
-    <small class="d-block text-muted">Payment required</small>
-  </ng-template>
-</td>
 
+                    <!-- Patient column -->
+                    <td class="profile-image">
+                      <ng-container *ngIf="data.isConsultationPaid; else notPaid">
+                        <div
+                          (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
+                          style="cursor: pointer; color: #007bff;">
+                          <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+                          {{data.patientFname}} {{data.patientLname}}
+                        </div>
+                        <small class="d-block text-muted">Click to view profile (Paid)</small>
+                      </ng-container>
+                      <ng-template #notPaid>
+                        <span style="color: #6c757d;">
+                          <img width="28" height="28" [src]="img" class="rounded-circle m-r-5" alt="">
+                          {{data.patientFname}} {{data.patientLname}}
+                        </span>
+                        <small class="d-block text-muted">Payment required</small>
+                      </ng-template>
+                    </td>
+
+                    <!-- Doctor -->
                     <td>{{data.doctorFname}} {{data.doctorLname}}</td>
-                    <td>{{data.displayName}}</td>
+
+                    <!-- Department -->
+                    <td>{{ getDepartmentDisplay(data) }}</td>
+
+                    <!-- Notes -->
                     <td>{{data.notes}}</td>
-                    <td><button
+
+                    <!-- Status -->
+                    <td>
+                      <button
                         [ngClass]="{'status-green' : data.appointmentStatus === 'Active', 'status-pink' : data.appointmentStatus === 'In Active','status-gray' : data.appointmentStatus === 'Cancel'}"
-                        class="custom-badge">{{data.appointmentStatus}}</button></td>
-                    <td>{{data.fee}}</td>
+                        class="custom-badge">{{data.appointmentStatus}}</button>
+                    </td>
+
+                    <!-- Fee: show total fee from API -->
+                    <!-- <td>{{ getFeeAmount(data) }}</td> -->
+                     <td>{{ getPaidAmount(data) }}</td><td>{{ getFeeAmount(data) }}</td>
+
+                    <!-- Payment link / label -->
                     <td>
                       <ng-container *ngIf="data.isConsultationPaid; else notPaidStatus">
-                        <a href="javascript:void(0);" 
-                           [ngClass]="{ 'disabled': !isAllowed }"
-                           (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
-                           class="text-success fw-bold" 
-                           style="cursor: pointer; text-decoration: none;">
+                        <a href="javascript:void(0);" [ngClass]="{ 'disabled': !isAllowed }"
+                          (click)="movetoProfile(data.patientId,data.id,data.departmentid,data.appointmentStatus,data.doctorId)"
+                          class="text-success fw-bold" style="cursor: pointer; text-decoration: none;">
                           Paid
                         </a>
                       </ng-container>
@@ -154,24 +172,26 @@
                     </td>
                     <td>{{ formatDateWithTime(data.date, data.appointTime) | date: 'dd/MM/yyyy' }}</td>
 
+                    <!-- Actions -->
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
                           aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                        <div 
-                          class="dropdown-menu dropdown-menu-end">
+                        <div class="dropdown-menu dropdown-menu-end">
                           <a class="dropdown-item" [routerLink]="routes.editAppointment"
                             (click)="onEditAppointment(data.id,data.appointmentStatus)"><i
                               class="fa-solid fa-pen-to-square m-r-5"></i>
                             Edit</a>
-                          <a class="dropdown-item" href="javascript:void(0);" (click)="deleteAppointment(data.id)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                          <a class="dropdown-item" href="javascript:void(0);" (click)="deleteAppointment(data.id)"><i
+                              class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <div class="table_footer" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0 16px;">
+              <div class="table_footer"
+                style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0 16px;">
                 <div class="col-sm-12 col-md-5">
                   <div class="dataTables_info">
                     Showing {{ serialNumberArray[0] }} to
@@ -183,14 +203,16 @@
                   <!-- Page size dropdown -->
                   <div style="margin-right: 16px; display: flex; align-items: center;">
                     <label for="pageSizeSelect" style="margin-right: 4px; font-weight: 500;">Page size:</label>
-                    <select id="pageSizeSelect" class="form-select" style="width: auto; display: inline-block;" [(ngModel)]="pageSize" (change)="PageSize()">
+                    <select id="pageSizeSelect" class="form-select" style="width: auto; display: inline-block;"
+                      [(ngModel)]="pageSize" (change)="PageSize()">
                       <option *ngFor="let size of [10, 25, 50, 100]" [value]="size">{{ size }}</option>
                     </select>
                   </div>
                   <div class="pagination_section">
                     <ul class="pagination">
                       <li class="page-item" [ngClass]="{disabled: currentPage === 1}">
-                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);" tabindex="-1">Previous</a>
+                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);"
+                          tabindex="-1">Previous</a>
                       </li>
                       <ng-container *ngFor="let item of pageNumberArray; let i = index">
                         <ng-container *ngIf="
@@ -210,7 +232,8 @@
                           <li class="page-item disabled"><span class="page-link">...</span></li>
                         </ng-container>
                       </ng-container>
-                      <li class="page-item" [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] || appointmentList.length === 0}">
+                      <li class="page-item"
+                        [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] || appointmentList.length === 0}">
                         <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next</a>
                       </li>
                     </ul>
