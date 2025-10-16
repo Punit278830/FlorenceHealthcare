@@ -627,27 +627,27 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         
   }
 
-  // Add a method to format date/time using dayjs and convert from UTC to local timezone
+  // Add a method to format date/time using dayjs and convert from UTC to IST
   getLocalDateTime(date: any): string {
     if (!date) return '';
-    // Assume the date comes from server as UTC, convert to user's local timezone
-    return dayjs.utc(date).local().format('DD/MM/YYYY hh:mm A');
+    // Convert UTC to IST (add 5:30 hours)
+    return dayjs.utc(date).tz('Asia/Kolkata').format('DD/MM/YYYY hh:mm A');
   }
 
   getLocalDate(date: any): string {
     if (!date) return '';
-    // Assume the date comes from server as UTC, convert to user's local timezone
-    return dayjs.utc(date).local().format('DD/MM/YYYY');
+    // Convert UTC to IST
+    return dayjs.utc(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
   }
 
-  // Convert appointment date and time to local timezone for display
+  // Convert appointment date and time to IST for display
   formatDateWithTime(date: any, appointTime?: any): string {
     if (!date && !appointTime) return '';
 
     let datePart = '';
     if (date) {
-      // Assume server date is in UTC, convert to local
-      datePart = dayjs.utc(date).local().format('YYYY-MM-DD');
+      // Convert UTC date to IST
+      datePart = dayjs.utc(date).tz('Asia/Kolkata').format('YYYY-MM-DD');
     }
 
     if (appointTime) {
@@ -655,6 +655,25 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     }
 
     return datePart;
+  }
+
+  // Convert appointment time from UTC to IST
+  formatAppointmentTime(date: any, time?: string): string {
+    if (!date) return time || '';
+    
+    try {
+      // If date contains time info, convert to IST
+      if (date.includes('T')) {
+        const istDateTime = dayjs.utc(date).tz('Asia/Kolkata');
+        return istDateTime.format('hh:mm A');
+      }
+      
+      // If only time is provided, return as-is (assuming it's already in correct format)
+      return time || '';
+    } catch (error) {
+      console.error('Error formatting appointment time:', error);
+      return time || '';
+    }
   }
 
   // New paginated search method
@@ -709,7 +728,7 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
             notes: appointment.notes,
             appointmentStatus: appointment.appointmentStatus,
             fee: 0, // Fee not available in new response
-            appointTime: appointment.time,
+            appointTime: appointment.time, // Use the IST time directly from API
             patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
             patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
             doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
