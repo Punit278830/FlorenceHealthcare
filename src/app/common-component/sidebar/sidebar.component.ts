@@ -100,24 +100,34 @@ export class SidebarComponent implements OnInit, OnDestroy {
   const currentRole = this.roleService.getCurrentRole();
   if (currentRole) {
     this.userRole = currentRole.roleName.toLowerCase();
-    console.log('🔍 Role from new service:', currentRole.roleName, '-> mapped to:', this.userRole);
     // Map GlobalSuperAdmin to superadmin for sidebar menu matching
     if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
       this.userRole = 'superadmin';
-      console.log('✅ Mapped to superadmin for sidebar');
     }
+    // Map receptionist/nurse to match sidebar tittle
+    if (this.userRole === 'receptionist') {
+      this.userRole = 'reception';
+    }
+    if (this.userRole === 'nurse') {
+      this.userRole = 'nursing';
+    }
+    console.log('🔍 Role from new service:', currentRole.roleName, '-> mapped to:', this.userRole);
   } else {
     // Fallback to old system
     this.userData = LocalStorageUtil.getUserData();
     this.userRole = this.userData.userRole || '';
-    console.log('🔍 Role from localStorage:', this.userData.userRole, '-> mapped to:', this.userRole);
     // Also handle the mapping in the fallback
     if (this.userRole === 'globalsuperadmin' || this.userRole === 'global super administrator') {
       this.userRole = 'superadmin';
-      console.log('✅ Mapped to superadmin for sidebar (fallback)');
     }
+    if (this.userRole === 'receptionist') {
+      this.userRole = 'reception';
+    }
+    if (this.userRole === 'nurse') {
+      this.userRole = 'nursing';
+    }
+    console.log('🔍 Role from localStorage:', this.userData.userRole, '-> mapped to:', this.userRole);
   }
-  
   console.log('🎯 Final userRole for sidebar:', this.userRole);
  }
   public expandSubMenus(menu: MenuItem): void {
