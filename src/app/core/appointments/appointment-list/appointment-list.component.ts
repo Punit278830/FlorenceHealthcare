@@ -727,14 +727,14 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
             date: appointment.date,
             notes: appointment.notes,
             appointmentStatus: appointment.appointmentStatus,
-            fee: 0, // Fee not available in new response
+            fee: (appointment as any).fee || 0, // Use actual fee from API response
             appointTime: appointment.time, // Use the IST time directly from API
             patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
             patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
             doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
             doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
             displayName: appointment.hospitalName,
-            departmentName: appointment.reason || 'General', // Use reason field which contains department name
+            departmentName: (appointment as any).departmentName || appointment.reason || 'General', // Use departmentName first, then reason as fallback
             departmentid: 1, // Default department ID
             isConsultationPaid: appointment.isConsultationPaid || false // Use actual payment status from backend
           }));
