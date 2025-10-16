@@ -170,7 +170,7 @@
                         <span class="text-danger">Not Paid</span>
                       </ng-template>
                     </td>
-                    <td>{{ formatDateWithTime(data.date, data.appointTime) | date: 'dd/MM/yyyy' }}</td>
+                    <td>{{ data.date | date: 'dd/MM/yyyy' }} {{ data.appointTime }}</td>
 
                     <!-- Actions -->
                     <td class="text-end">

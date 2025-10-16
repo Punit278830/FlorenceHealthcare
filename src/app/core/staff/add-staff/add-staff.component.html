@@ -26,25 +26,6 @@
                                         <h4>Staff Details</h4>
                                     </div>
                                 </div>
-
-                                <div class="col-12 col-md-6 col-xl-4" *ngIf="shouldShowHospitalDropdown">
-                                    <div class="form-group local-forms">
-                                        <label for="hospitalId">Hospital <span class="login-danger">*</span></label>
-                                        <mat-select formControlName="hospitalId" class="form-control select" placeholder="Select Hospital" (selectionChange)="onHospitalSelectionChange($event)">
-                                            <mat-option *ngFor="let hospital of hospitals" [value]="hospital.hospitalId">
-                                                {{ hospital.name }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="staffReg.get('hospitalId')?.invalid && (staffReg.get('hospitalId')?.dirty || staffReg.get('hospitalId')?.touched)"
-                                            class="text-danger">
-                                            <div *ngIf="staffReg.get('hospitalId')?.errors?.['required']">Hospital selection is required.</div>
-                                        </div>
-                                        <div *ngIf="isLoadingHospitals" class="text-muted mt-1">
-                                            <small>Loading hospitals...</small>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="name">First Name <span class="login-danger">*</span></label>
@@ -98,7 +79,10 @@
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
                                         <label for="email">Email <span class="login-danger">*</span></label>
-                                        <input class="form-control" type="email" formControlName="email">
+                                        <input type="text" style="display:none">
+                                        <input type="password" style="display:none">
+                                        <input class="form-control" type="email" formControlName="email"
+                                            id="new_staff_email" name="new_staff_email" autocomplete="off">
                                         <div *ngIf="staffReg.get('email')?.invalid && (staffReg.get('email')?.dirty || staffReg.get('email')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('email')?.errors?.['required']">Email is required.
@@ -179,7 +163,8 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="education">Education <span class="login-danger">*</span></label>
-                                        <input class="form-control" type="text" formControlName="education" placeholder="add -- to split it multiple line on prescription">
+                                        <input class="form-control" type="text" formControlName="education"
+                                            placeholder="add -- to split it multiple line on prescription">
                                         <div *ngIf="staffReg.get('education')?.invalid && (staffReg.get('education')?.dirty || staffReg.get('education')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('education')?.errors?.['required']">Education is
@@ -206,7 +191,8 @@
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="roleId">Role (Optional)</label>
-                                        <mat-select formControlName="roleId" class="form-control select" placeholder="Select Role">
+                                        <mat-select formControlName="roleId" class="form-control select"
+                                            placeholder="Select Role">
                                             <mat-option value="">-- No Role Assigned --</mat-option>
                                             <mat-option *ngFor="let role of roles" [value]="role.roleId">
                                                 {{ role.roleDisplayName }}
@@ -215,12 +201,14 @@
                                         <div *ngIf="isLoadingRoles" class="text-muted mt-1">
                                             <small>Loading roles...</small>
                                         </div>
-                                        <div *ngIf="shouldShowHospitalDropdown && roles.length === 0 && !isLoadingRoles" class="text-muted mt-1">
+                                        <!-- <div *ngIf="shouldShowHospitalDropdown && roles.length === 0 && !isLoadingRoles"
+                                            class="text-muted mt-1">
                                             <small>Please select a hospital first to load available roles.</small>
                                         </div>
                                         <div *ngIf="!shouldShowHospitalDropdown" class="text-muted mt-1">
-                                            <small>Role assignment is optional. If not selected, role will be based on designation.</small>
-                                        </div>
+                                            <small>Role assignment is optional. If not selected, role will be based on
+                                                designation.</small>
+                                        </div> -->
                                     </div>
                                 </div>
 
@@ -250,17 +238,16 @@
 
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="department">Department <span class="login-danger">*</span></label>
-                                        <mat-select formControlName="departmentId" class="form-control select"
-                                            placeholder="Select Department">
-                                            <mat-option *ngFor="let data of _depDto" [value]="data.departmentId">
-                                                {{data.displayName || data.departmentName}}
+                                        <label for="departmentId">Department
+                                            <span class="login-danger" *ngIf="isDepartmentRequired()">*</span>
+                                        </label>
+                                        <mat-select formControlName="departmentId" class="form-control select" placeholder="Select Department">
+                                            <mat-option *ngFor="let d of _depDto" [value]="d.departmentId">
+                                                {{ d.departmentName || ('Department ' + d.departmentId) }}
                                             </mat-option>
                                         </mat-select>
-                                        <div *ngIf="staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)"
-                                            class="text-danger">
-                                            <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department
-                                                is required.</div>
+                                        <div *ngIf="isDepartmentRequired() && staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)" class="text-danger mt-1">
+                                            <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department is required.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -271,21 +258,19 @@
                                                 class="login-danger">*</span></label>
                                         <mat-select formControlName="IdentityName" formControlName="IdentityName"
                                             class="form-control select" placeholder="Select Identity">
-                                            <mat-option *ngFor="let data of IdentityDocNumber"
-                                                [value]="data.value">
+                                            <mat-option *ngFor="let data of IdentityDocNumber" [value]="data.value">
                                                 {{data.value}}
                                             </mat-option>
                                         </mat-select>
                                         <div *ngIf="staffReg.get('IdentityName')?.invalid && (staffReg.get('IdentityName')?.dirty || staffReg.get('IdentityName')?.touched)"
                                             class="text-danger">
-                                            <div
-                                                *ngIf="staffReg.get('IdentityName')?.errors?.['required']">
+                                            <div *ngIf="staffReg.get('IdentityName')?.errors?.['required']">
                                                 Proof is required.</div>
                                         </div>
 
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-4">
+                                <!-- <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="lastname">Identity Number <span
                                                 class="login-danger">*</span></label>
@@ -293,9 +278,40 @@
                                             placeholder="Enter Identity Number">
                                         <div *ngIf="staffReg.get('IdentityNumber')?.invalid && (staffReg.get('IdentityNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
                                             class="text-danger">
-                                            <div
-                                                *ngIf="staffReg.get('IdentityNumber')?.errors?.['required']">
+                                            <div *ngIf="staffReg.get('IdentityNumber')?.errors?.['required']">
                                                 Number is required.</div>
+                                        </div>
+                                    </div>
+                                </div> -->
+                                <!-- <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="identity-number">Identity Number <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" id="identity-number"
+                                            formControlName="IdentityNumber" type="text"
+                                            placeholder="Enter Identity Number" autocomplete="off" />
+                                        <div *ngIf="staffReg.get('IdentityNumber')?.invalid && (staffReg.get('IdentityNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('IdentityNumber')?.errors?.['required']">
+                                                Number is required.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+ -->
+                                <input type="text" style="display:none" autocomplete="username">
+                                <div class="col-12 col-md-6 col-xl-4">
+                                    <div class="form-group local-forms">
+                                        <label for="identity-number">Identity Number <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" id="identity-number" name="no-autofill-id-number"
+                                            formControlName="IdentityNumber" type="text"
+                                            placeholder="Enter Identity Number" autocomplete="new-password" />
+                                        <div *ngIf="staffReg.get('IdentityNumber')?.invalid && (staffReg.get('IdentityNumber')?.dirty || staffReg.get('IdentityNumber')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('IdentityNumber')?.errors?.['required']">
+                                                Number is required.
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -308,7 +324,7 @@
                                     <div class="form-group local-forms">
                                         <label for="password">Password <span class="login-danger">*</span></label>
                                         <input class="form-control" [type]="passwordClass ? 'text' : 'password'"
-                                            formControlName="password">
+                                            formControlName="password" autocomplete="new-password">
                                         <span (click)="togglePassword()" (keyup.enter)="togglePassword()"
                                             [ngClass]="passwordClass ? 'feather icon-eye' : 'feather icon-eye-off'"
                                             class="profile-views toggle-password" tabindex="0"></span>
@@ -349,7 +365,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 col-md-6 col-xl-4" *ngIf="staffReg.get('designation')?.value === 'Doctor'">
+                                <div class="col-12 col-md-6 col-xl-4"
+                                    *ngIf="staffReg.get('designation')?.value === 'Doctor'">
                                     <div class="form-group local-forms">
                                         <label for="lastname">Registration Number</label>
                                         <input class="form-control" formControlName="registrationNumber" type="text"
@@ -374,12 +391,14 @@
 
                                 <div class="col-12">
                                     <div class="doctor-submit text-end">
-                                        <button type="submit" class="btn btn-primary submit-form me-2" [disabled]="isSubmitting">
-                                            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                                        <button type="submit" class="btn btn-primary submit-form me-2"
+                                            [disabled]="isSubmitting">
+                                            <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"
+                                                role="status"></span>
                                             {{ isSubmitting ? 'Submitting...' : 'Submit' }}
                                         </button>
-                                        <button type="button" class="btn btn-secondary cancel-form"
-                                            (click)="onCancel()" [disabled]="isSubmitting">Cancel</button>
+                                        <button type="button" class="btn btn-secondary cancel-form" (click)="onCancel()"
+                                            [disabled]="isSubmitting">Cancel</button>
                                     </div>
                                 </div>
                             </div>

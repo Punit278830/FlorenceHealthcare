@@ -48,16 +48,7 @@
                     </div>
                   </div>
                 </div>
-                <!-- <div class="col-auto text-end float-end ms-auto download-grp">
-                                    <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg"
-                                            alt=""></a>
-                                    <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-02.svg"
-                                            alt=""></a>
-                                    <a href="javascript:;" class=" me-2"><img src="assets/img/icons/pdf-icon-03.svg"
-                                            alt=""></a>
-                                    <a href="javascript:;"><img src="assets/img/icons/pdf-icon-04.svg" alt=""></a>
-
-                                </div> -->
+               
               </div>
             </div>
             <!-- /Table Header -->
@@ -190,7 +181,13 @@
                         (click)="movetoInvoiceView(data.invoiceId,data.patientId)">INV-{{data.invoiceId}}</a></td>
                     <td> {{data.patientFname}}</td>
                     <td>{{data.amount}}</td>
-                    <td>{{data.totalUnpaidAmount}}</td>
+                    <td>
+                      {{
+                        (data.totalUnpaidAmount === 0 || data.disc === 100 || data.discount === 100 || data.discountPercent === 100)
+                          ? 0
+                          : data.totalUnpaidAmount
+                      }}
+                    </td>
                     <td>
                       <button
                         [ngClass]="

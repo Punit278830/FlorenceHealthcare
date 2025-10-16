@@ -20,6 +20,12 @@ import { ModalServiceService } from '../../../shared/modalService/modal-service.
 import { ToastrService } from 'ngx-toastr';
 import { LocalStorageUtil } from '../../../shared/utils/local-storage.util';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Configure dayjs plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 
 
@@ -231,8 +237,17 @@ private getFormData() {
 
       this.searchResponse = response;
       this.invoices = response?.results ?? [];
-
-      
+      // Patch: Mark discounted invoices as paid in the list
+      this.invoices.forEach((inv: any) => {
+        if (
+          inv.disc === 100 ||
+          inv.discount === 100 ||
+          inv.discountPercent === 100
+        ) {
+          inv.status = 'Paid';
+          inv.totalUnpaidAmount = 0;
+        }
+      });
       // Calculate total payment amount for the selected date range, payment mode, and payment status using paymentDate
       this.calculateTotalPaymentAmount();
       
@@ -259,7 +274,17 @@ private getFormData() {
 
           this.searchResponse = fallbackResponse;
           this.invoices = fallbackResponse?.results ?? [];
-
+          // Patch: Mark discounted invoices as paid in the list (fallback)
+          this.invoices.forEach((inv: any) => {
+            if (
+              inv.disc === 100 ||
+              inv.discount === 100 ||
+              inv.discountPercent === 100
+            ) {
+              inv.status = 'Paid';
+              inv.totalUnpaidAmount = 0;
+            }
+          });
           this.calculateTotalPaymentAmount();
           const startSerial = ((this.searchCriteria.pageNumber ?? 1) - 1) * (this.searchCriteria.pageSize ?? 100) + 1;
           this.serialNumberArray = this.invoices.map((_, idx) => startSerial + idx);
@@ -793,7 +818,21 @@ getTotalUnpaidAmount(): number {
       })
       .map(date => {
         try {
-          const parsedDate = new Date(date);
+          let dateString = date;
+          
+          // Handle different timestamp formats from API
+          if (typeof date === 'string') {
+            // Format: "2025-10-16T17:43:52.93" (UTC without Z)
+            if (date.includes('T') && !date.includes('Z') && !date.includes('+')) {
+              dateString = date + 'Z'; // Add Z to indicate UTC
+            }
+            // Format: "2025-10-16 17:43:58.420" (space-separated UTC)
+            else if (date.includes(' ') && !date.includes('T')) {
+              dateString = date.replace(' ', 'T') + 'Z'; // Convert to ISO format with UTC indicator
+            }
+          }
+          
+          const parsedDate = new Date(dateString);
           return isNaN(parsedDate.getTime()) ? null : parsedDate;
         } catch {
           return null;
@@ -809,10 +848,11 @@ getTotalUnpaidAmount(): number {
     const latestDate = new Date(Math.max(...validDates.map(d => d.getTime())));
     
     try {
-      const formatted = this.formatDate(latestDate, 'dd/MM/yyyy HH:mm');
-      return formatted || 'N/A';
+      // Convert UTC to IST (add 5:30 hours)
+      const istDate = dayjs.utc(latestDate).tz('Asia/Kolkata');
+      return istDate.format('DD/MM/YYYY HH:mm');
     } catch (error) {
-
+      console.error('Error formatting payment date:', error);
       return 'N/A';
     }
   }

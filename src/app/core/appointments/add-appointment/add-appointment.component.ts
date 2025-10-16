@@ -450,16 +450,21 @@ searchData(data: string) {
   }
 
   getDepartmentLits() {
-    this.departmentService.getDepartmentList().subscribe((data: any) => {
-
-      data.map((res: any) => {
-        if (res.departmentName != 'admin') {
-          this.departmentList.push(res)
+    // clear previous list to avoid duplicates when this is called multiple times
+    this.departmentList = [];
+    this.departmentService.getDepartmentList().subscribe((data: Idepartment[] = []) => {
+      const map = new Map<number | string, Idepartment>();
+      data.forEach(res => {
+        if (!res) return;
+        // skip admin entry
+        if ((res.departmentName || '').toString().toLowerCase() === 'admin') return;
+        const key = res.departmentId ?? (res.departmentName || '').toString().toLowerCase();
+        if (!map.has(key)) {
+          map.set(key, res);
         }
-
-      })
-
-    })
+      });
+      this.departmentList = Array.from(map.values());
+    });
   }
   async loadDoctorData(event: any) {
     this.doctorList = [];
@@ -481,10 +486,15 @@ searchData(data: string) {
     })
     await this.staffService.getDoctorsListByDepartment(event.value).subscribe((data: any) => {
 
-      data.map((res: any) => {
+      // Only consider staff entries that are actually doctors.
+      data.forEach((res: any) => {
+        const designation = (res.designation || '').toString().toLowerCase();
+        const roleName = ((res.roleDisplayName || res.roleName || res.role) || '').toString().toLowerCase();
+        const isDoctor = designation === 'doctor' || roleName === 'doctor';
+        if (!isDoctor) return;
 
-
-        const available = doctorOnLeave.find(e => e == res.staffId)
+        const available = doctorOnLeave.find(e => e == res.staffId);
+        if (available) return;
 
         if (!available) {
           if (this.bookappointment.value.appointTime != null) {
@@ -510,14 +520,14 @@ searchData(data: string) {
 
               this.doctorList.push(res);
             }
-          }
-          else {
-
+          } else {
             this.doctorList.push(res);
           }
+        } else {
+          this.doctorList.push(res);
         }
-      })
-    })
+      });
+     })
   }
 
   convertToComparableTime(time: string, postfix: string): Date | null {
