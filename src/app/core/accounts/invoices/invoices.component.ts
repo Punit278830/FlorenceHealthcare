@@ -20,6 +20,12 @@ import { ModalServiceService } from '../../../shared/modalService/modal-service.
 import { ToastrService } from 'ngx-toastr';
 import { LocalStorageUtil } from '../../../shared/utils/local-storage.util';
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+
+// Configure dayjs plugins
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 
 
@@ -812,7 +818,21 @@ getTotalUnpaidAmount(): number {
       })
       .map(date => {
         try {
-          const parsedDate = new Date(date);
+          let dateString = date;
+          
+          // Handle different timestamp formats from API
+          if (typeof date === 'string') {
+            // Format: "2025-10-16T17:43:52.93" (UTC without Z)
+            if (date.includes('T') && !date.includes('Z') && !date.includes('+')) {
+              dateString = date + 'Z'; // Add Z to indicate UTC
+            }
+            // Format: "2025-10-16 17:43:58.420" (space-separated UTC)
+            else if (date.includes(' ') && !date.includes('T')) {
+              dateString = date.replace(' ', 'T') + 'Z'; // Convert to ISO format with UTC indicator
+            }
+          }
+          
+          const parsedDate = new Date(dateString);
           return isNaN(parsedDate.getTime()) ? null : parsedDate;
         } catch {
           return null;
@@ -828,10 +848,11 @@ getTotalUnpaidAmount(): number {
     const latestDate = new Date(Math.max(...validDates.map(d => d.getTime())));
     
     try {
-      const formatted = this.formatDate(latestDate, 'dd/MM/yyyy HH:mm');
-      return formatted || 'N/A';
+      // Convert UTC to IST (add 5:30 hours)
+      const istDate = dayjs.utc(latestDate).tz('Asia/Kolkata');
+      return istDate.format('DD/MM/YYYY HH:mm');
     } catch (error) {
-
+      console.error('Error formatting payment date:', error);
       return 'N/A';
     }
   }

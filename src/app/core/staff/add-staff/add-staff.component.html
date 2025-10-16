@@ -26,29 +26,6 @@
                                         <h4>Staff Details</h4>
                                     </div>
                                 </div>
-
-                                <div class="col-12 col-md-6 col-xl-4" *ngIf="shouldShowHospitalDropdown">
-                                    <div class="form-group local-forms">
-                                        <label for="hospitalId">Hospital <span class="login-danger">*</span></label>
-                                        <mat-select formControlName="hospitalId" class="form-control select"
-                                            placeholder="Select Hospital"
-                                            (selectionChange)="onHospitalSelectionChange($event)">
-                                            <mat-option *ngFor="let hospital of hospitals"
-                                                [value]="hospital.hospitalId">
-                                                {{ hospital.name }}
-                                            </mat-option>
-                                        </mat-select>
-                                        <div *ngIf="staffReg.get('hospitalId')?.invalid && (staffReg.get('hospitalId')?.dirty || staffReg.get('hospitalId')?.touched)"
-                                            class="text-danger">
-                                            <div *ngIf="staffReg.get('hospitalId')?.errors?.['required']">Hospital
-                                                selection is required.</div>
-                                        </div>
-                                        <div *ngIf="isLoadingHospitals" class="text-muted mt-1">
-                                            <small>Loading hospitals...</small>
-                                        </div>
-                                    </div>
-                                </div>
-
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
                                         <label for="name">First Name <span class="login-danger">*</span></label>
@@ -224,14 +201,14 @@
                                         <div *ngIf="isLoadingRoles" class="text-muted mt-1">
                                             <small>Loading roles...</small>
                                         </div>
-                                        <div *ngIf="shouldShowHospitalDropdown && roles.length === 0 && !isLoadingRoles"
+                                        <!-- <div *ngIf="shouldShowHospitalDropdown && roles.length === 0 && !isLoadingRoles"
                                             class="text-muted mt-1">
                                             <small>Please select a hospital first to load available roles.</small>
                                         </div>
                                         <div *ngIf="!shouldShowHospitalDropdown" class="text-muted mt-1">
                                             <small>Role assignment is optional. If not selected, role will be based on
                                                 designation.</small>
-                                        </div>
+                                        </div> -->
                                     </div>
                                 </div>
 
