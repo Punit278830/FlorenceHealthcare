@@ -28,15 +28,22 @@ export class AuthGuard implements CanActivate {
     | boolean
     | UrlTree {
      
-    // Check if user is authenticated with proper validation
-    const isAuthenticated = LocalStorageUtil.isAuthenticated();
-    
-    if (isAuthenticated) {
-      console.log('Auth guard: User is authenticated');
-      return true;
+    // Simplified authentication check (production version with minimal logging)
+    try {
+      const userData = localStorage.getItem('data');
+      const staffId = localStorage.getItem('currentStaffId');
+      
+      if (userData && staffId) {
+        const parsedData = JSON.parse(userData);
+        
+        if (parsedData.loginStatus === true) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Auth guard error:', error);
     }
     
-    console.log('Auth guard: User not authenticated, redirecting to login');
     // If no valid login data, redirect to login
     this.router.navigate([routes.login]);
     return false;

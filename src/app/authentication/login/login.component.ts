@@ -101,11 +101,11 @@ export class LoginComponent implements OnInit {
           const failCount = parseInt(localStorage.getItem('auth_failed_count') || '0') + 1;
           localStorage.setItem('auth_failed_count', failCount.toString());
           
-          // Run diagnostic after multiple failures
-          if (failCount >= 3) {
-            console.log('Multiple login failures detected, running diagnostic...');
-            this.debugService.runFullDiagnostic();
-          }
+          // Temporarily disable diagnostic to avoid confusion
+          // if (failCount >= 3) {
+          //   console.log('Multiple login failures detected, running diagnostic...');
+          //   this.debugService.runFullDiagnostic();
+          // }
           
           this.toaster.error(error);
         }
