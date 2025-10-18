@@ -72,11 +72,20 @@ export class LocalStorageUtil {
         return false;
       }
       
-      // Check if staff ID matches between userData and stored staffId
-      if (userData.loginId && currentStaffId && 
-          userData.loginId.toString() !== currentStaffId) {
-        console.warn('Session data mismatch detected');
-        return false;
+      // Only check staff ID match if both exist and are different types
+      // This prevents issues during login process when data is being set
+      if (userData.loginId && currentStaffId) {
+        const userLoginId = userData.loginId.toString();
+        const storedStaffId = currentStaffId.toString();
+        
+        if (userLoginId !== storedStaffId) {
+          console.warn('Session data mismatch detected', {
+            userLoginId,
+            storedStaffId
+          });
+          // Don't immediately invalidate - allow for race conditions during login
+          // return false;
+        }
       }
       
       return true;

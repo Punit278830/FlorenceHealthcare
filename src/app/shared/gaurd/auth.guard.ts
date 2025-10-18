@@ -28,13 +28,15 @@ export class AuthGuard implements CanActivate {
     | boolean
     | UrlTree {
      
-    // Use the utility to safely get user data
-    this.loginData = LocalStorageUtil.getUserData();
+    // Check if user is authenticated with proper validation
+    const isAuthenticated = LocalStorageUtil.isAuthenticated();
     
-    if (this.loginData && this.loginData.loginStatus) {
+    if (isAuthenticated) {
+      console.log('Auth guard: User is authenticated');
       return true;
     }
     
+    console.log('Auth guard: User not authenticated, redirecting to login');
     // If no valid login data, redirect to login
     this.router.navigate([routes.login]);
     return false;
