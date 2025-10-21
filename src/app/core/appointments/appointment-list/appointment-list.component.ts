@@ -627,27 +627,27 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         
   }
 
-  // Add a method to format date/time using dayjs and convert from UTC to local timezone
+  // Add a method to format date/time using dayjs and convert from UTC to IST
   getLocalDateTime(date: any): string {
     if (!date) return '';
-    // Assume the date comes from server as UTC, convert to user's local timezone
-    return dayjs.utc(date).local().format('DD/MM/YYYY hh:mm A');
+    // Convert UTC to IST (add 5:30 hours)
+    return dayjs.utc(date).tz('Asia/Kolkata').format('DD/MM/YYYY hh:mm A');
   }
 
   getLocalDate(date: any): string {
     if (!date) return '';
-    // Assume the date comes from server as UTC, convert to user's local timezone
-    return dayjs.utc(date).local().format('DD/MM/YYYY');
+    // Convert UTC to IST
+    return dayjs.utc(date).tz('Asia/Kolkata').format('DD/MM/YYYY');
   }
 
-  // Convert appointment date and time to local timezone for display
+  // Convert appointment date and time to IST for display
   formatDateWithTime(date: any, appointTime?: any): string {
     if (!date && !appointTime) return '';
 
     let datePart = '';
     if (date) {
-      // Assume server date is in UTC, convert to local
-      datePart = dayjs.utc(date).local().format('YYYY-MM-DD');
+      // Convert UTC date to IST
+      datePart = dayjs.utc(date).tz('Asia/Kolkata').format('YYYY-MM-DD');
     }
 
     if (appointTime) {
@@ -655,6 +655,25 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
     }
 
     return datePart;
+  }
+
+  // Convert appointment time from UTC to IST
+  formatAppointmentTime(date: any, time?: string): string {
+    if (!date) return time || '';
+    
+    try {
+      // If date contains time info, convert to IST
+      if (date.includes('T')) {
+        const istDateTime = dayjs.utc(date).tz('Asia/Kolkata');
+        return istDateTime.format('hh:mm A');
+      }
+      
+      // If only time is provided, return as-is (assuming it's already in correct format)
+      return time || '';
+    } catch (error) {
+      console.error('Error formatting appointment time:', error);
+      return time || '';
+    }
   }
 
   // New paginated search method
@@ -708,14 +727,14 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
             date: appointment.date,
             notes: appointment.notes,
             appointmentStatus: appointment.appointmentStatus,
-            fee: 0, // Fee not available in new response
-            appointTime: appointment.time,
+            fee: (appointment as any).fee || 0, // Use actual fee from API response
+            appointTime: appointment.time, // Use the IST time directly from API
             patientFname: appointment.patientName.split(' ')[0] || appointment.patientName,
             patientLname: appointment.patientName.split(' ').slice(1).join(' ') || '',
             doctorFname: appointment.doctorName.split(' ')[0] || appointment.doctorName,
             doctorLname: appointment.doctorName.split(' ').slice(1).join(' ') || '',
             displayName: appointment.hospitalName,
-            departmentName: appointment.reason || 'General', // Use reason field which contains department name
+            departmentName: (appointment as any).departmentName || appointment.reason || 'General', // Use departmentName first, then reason as fallback
             departmentid: 1, // Default department ID
             isConsultationPaid: appointment.isConsultationPaid || false // Use actual payment status from backend
           }));
@@ -746,5 +765,45 @@ export class AppointmentListComponent implements OnInit, OnDestroy {
         this.calculateTotalPages(this.totalData, this.pageSize);
       }
     });
+  }
+
+  // Return best department display for appointment row
+  getDepartmentDisplay(row: any): string {
+    if (!row) return 'NA';
+    return (row.departmentName ||
+            row.department ||
+            row.treatment ||
+            (row.departmentObj && (row.departmentObj.departmentName || row.departmentObj.name)) ||
+            'NA');
+  }
+
+  // Return the actual amount paid by patient (tries paymentDetails array/object then known fields, falls back to fee)
+  getPaidAmount(row: any): string | number {
+    if (!row) return 'NA';
+
+    let amt: any = null;
+    const pd = row.paymentDetails;
+
+    if (Array.isArray(pd) && pd.length) {
+      const last = pd[pd.length - 1];
+      amt = last.amount ?? last.paidAmount ?? last.paid ?? last.paymentAmount ?? last.price;
+    } else if (pd && typeof pd === 'object') {
+      amt = pd.amount ?? pd.paidAmount ?? pd.paid ?? pd.paymentAmount;
+    }
+
+    amt = amt ?? row.paidAmount ?? row.amountPaid ?? row.actualPaid ?? row.paid ?? row.paymentAmount ?? row.fee;
+
+    if (amt === null || amt === undefined || amt === '') return '0';
+    const num = Number(amt);
+    return isNaN(num) ? amt : num;
+  }
+
+  // return the fee/total amount for the appointment row
+  getFeeAmount(row: any): string | number {
+    if (!row) return '0';
+    const feeCandidate = row.fee ?? row.amount ?? row.totalAmount ?? row.consultationFee ?? row.feeAmount ?? row.price;
+    if (feeCandidate === null || feeCandidate === undefined || feeCandidate === '') return '0';
+    const n = Number(feeCandidate);
+    return isNaN(n) ? feeCandidate : n;
   }
 }

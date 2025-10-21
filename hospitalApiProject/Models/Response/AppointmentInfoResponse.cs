@@ -22,5 +22,8 @@ namespace hospitalApiProject.Models.Response
         public DateTime? Dob { get; set; }
         public int? Age { get; set; }
         public bool IsConsultationPaid { get; set; } = false;
-    }
+        public int? Fee { get; set; }
+        public string? DepartmentName { get; set; }
+
+  }
 }

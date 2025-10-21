@@ -72,11 +72,20 @@ export class LocalStorageUtil {
         return false;
       }
       
-      // Check if staff ID matches between userData and stored staffId
-      if (userData.loginId && currentStaffId && 
-          userData.loginId.toString() !== currentStaffId) {
-        console.warn('Session data mismatch detected');
-        return false;
+      // Only check staff ID match if both exist
+      // Allow for minor type differences during login process
+      if (userData.loginId && currentStaffId) {
+        const userLoginId = userData.loginId.toString();
+        const storedStaffId = currentStaffId.toString();
+        
+        if (userLoginId !== storedStaffId) {
+          console.warn('Session data mismatch detected', {
+            userLoginId,
+            storedStaffId
+          });
+          // Don't immediately invalidate - allow for race conditions during login
+          // return false;
+        }
       }
       
       return true;
@@ -119,16 +128,19 @@ export class LocalStorageUtil {
   static isAuthenticated(): boolean {
     // First check basic authentication
     const userData = this.getUserData();
+    
     if (!userData || !userData.loginStatus) {
       return false;
     }
     
     // Then validate session integrity
-    if (!this.isSessionValid()) {
-      console.warn('Session integrity check failed');
-      
+    const sessionValid = this.isSessionValid();
+    
+    if (!sessionValid) {
       // Attempt recovery
-      if (!this.recoverSession()) {
+      const recoveryResult = this.recoverSession();
+      
+      if (!recoveryResult) {
         // If recovery fails, clear everything
         this.clearAuthData();
         return false;

@@ -29,7 +29,8 @@ builder.Services.AddCors(options =>
   builder => builder
   .AllowAnyOrigin()
   .AllowAnyMethod()
-  .AllowAnyHeader());
+  .AllowAnyHeader()
+  .WithExposedHeaders("*"));
 
 });
 
@@ -50,17 +51,12 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-
-  app.UseCors("AllowAngularDev");
   app.UseSwagger();
   app.UseSwaggerUI();
-
-}
-else
-{
-  app.UseCors("AllowAngularDev");
 }
 
+// Apply CORS before routing and other middleware
+app.UseCors("AllowAngularDev");
 
 app.UseHttpsRedirection();
 app.UseRouting();
@@ -91,5 +87,22 @@ app.Use(async (context, next) =>
 
 // Map controllers and additional endpoints
 app.MapControllers();
+
+// Add explicit OPTIONS handler for CORS preflight
+app.MapMethods("api/{**slug}", new[] { "OPTIONS" }, (HttpContext context) =>
+{
+    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    context.Response.Headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS, HEAD";
+    context.Response.Headers["Access-Control-Allow-Headers"] = "*";
+    context.Response.Headers["Access-Control-Max-Age"] = "86400";
+    return Results.Ok();
+});
+
+// Add explicit HEAD handler for API endpoints
+app.MapMethods("api/{**slug}", new[] { "HEAD" }, (HttpContext context) =>
+{
+    context.Response.Headers["Access-Control-Allow-Origin"] = "*";
+    return Results.Ok();
+});
 
 app.Run();

@@ -62,13 +62,16 @@ export class AuthService {
         //localStorage.setItem('userRole',data.designation);
         localStorage.setItem('data',logingData)
 
+        // Immediately set authenticated to true and handle role data separately
+        localStorage.setItem('authenticated', 'true');
+
         // Fetch and set user role information for role-based access control
         // Skip API call for super admins since they already have the correct role
         const currentUserRole = data.userRole?.toLowerCase() || '';
         const isSuperAdmin = currentUserRole === 'superadmin' || currentUserRole === 'globalsuperadmin' || currentUserRole === 'global super administrator';
         
         if (isSuperAdmin) {
-          console.log('Skipping role API call for super admin, using existing role data');
+          console.log('Super admin detected, using existing role data');
           // Create role data from existing information
           const superAdminRole = {
             roleId: 999, // Special ID for super admin
@@ -79,11 +82,11 @@ export class AuthService {
             isActive: true
           };
           this.roleService.setUserRole(superAdminRole);
-          localStorage.setItem('authenticated', 'true');
         } else {
-          // For regular users, fetch role data from API
+          // For regular users, fetch role data from API in background
           this.roleService.getUserRoleByStaffId(data.staffId).subscribe({
             next: (roleData) => {
+              console.log('Role data fetched successfully:', roleData);
               this.roleService.setUserRole(roleData);
               // Update the authentication object with the proper role
               this.authentication.userRole = roleData.roleName.toLowerCase();
@@ -92,7 +95,6 @@ export class AuthService {
               // Update localStorage with the correct role
               const updatedLoginData = JSON.stringify(this.authentication);
               localStorage.setItem('data', updatedLoginData);
-              localStorage.setItem('authenticated', 'true');
             },
             error: (error) => {
               console.warn('Role API failed, using fallback role data:', error);
@@ -106,7 +108,6 @@ export class AuthService {
                 isActive: true
               };
               this.roleService.setUserRole(defaultRole);
-              localStorage.setItem('authenticated', 'true');
             }
           });
         }

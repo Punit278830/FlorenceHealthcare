@@ -28,11 +28,20 @@ export class AuthGuard implements CanActivate {
     | boolean
     | UrlTree {
      
-    // Use the utility to safely get user data
-    this.loginData = LocalStorageUtil.getUserData();
-    
-    if (this.loginData && this.loginData.loginStatus) {
-      return true;
+    // Simplified authentication check (production version with minimal logging)
+    try {
+      const userData = localStorage.getItem('data');
+      const staffId = localStorage.getItem('currentStaffId');
+      
+      if (userData && staffId) {
+        const parsedData = JSON.parse(userData);
+        
+        if (parsedData.loginStatus === true) {
+          return true;
+        }
+      }
+    } catch (error) {
+      console.error('Auth guard error:', error);
     }
     
     // If no valid login data, redirect to login
