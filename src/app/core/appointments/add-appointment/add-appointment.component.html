@@ -203,6 +203,38 @@
                                             </div>
                                         </div>
 
+                                        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="col-12 col-md-6 col-xl-6">
+                            <div class="form-group local-top-form">
+                                            <div class="documentsOuter">
+                                                <div>
+                                                    <label for="Avatar" class="local-top">Upload documents</label>
+                                                    <div
+                                                        style="display: flex;gap:20px;justify-content: start;align-items:center;">
+                                                        <input type="file" id="file" (change)=onFileSelected($event)
+                                                            class="form-control uplddoc"
+                                                            style="width: 20rem;margin-top: 5px;padding: 10px 0.85rem;">
+                                                        <button type="button" class="uploadbtn"
+                                                            (click)="onUpload()">
+                                                            Upload
+                                                            file
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                              </div>
+                             </div>
+                         </div>
+                    </div>
+                 </div>
+             </div>
+                                                   
+                                                        
+                                                    
+                                                </div>
+
                                         <div class="col-12">
                                             <div class="doctor-submit text-end">
                                                 <button type="submit" class="btn btn-primary submit-form me-2">Submit</button>
@@ -265,6 +297,9 @@
                                     </tr>
                                 </tbody>
                             </table>
+                             <div class="row">
+          
+
                             <div class="table_footer">
   <div class="col-sm-12 col-md-5">
     <div class="dataTables_info">
@@ -318,29 +353,9 @@
             </div>
 
         </div>
-        <!-- <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="col-12 col-md-6 col-xl-6">
-                            <div class="form-group local-top-form">
-                                <label for="Avatar" class="local-top">Avatar <span class="login-danger">*</span></label>
-                                <div class="settings-btn upload-files-avator">
-                                    <input type="file" name="upload" id="file" (change)=onFileSelected($event)>
-                                    <button type="submit" (click)="onUpload()" class="upload">Choose
-                                        File</button>
-
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div *ngFor="let doc of downLoadList">
-                    <a [href]="doc.downloadLink">{{ doc.fileName }}</a>
-                     <button type="button" (click)="downloadFile()">Download File</button>
-                </div>
-            </div>
-        </div> -->
+        
+       
+                                            </div>
     </div>
-</div>
+
+

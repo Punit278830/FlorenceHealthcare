@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, ElementRef, OnInit, OnDestroy, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { dA } from '@fullcalendar/core/internal-common';
 import { Subscription } from 'rxjs';
 
@@ -36,6 +37,7 @@ export class EditAppointmentComponent implements OnInit, OnDestroy {
   public searchResults: IpatientInfo[] = [];
   public patientAppointmentData: IpatientInfo[] = [];
   public appointmentDto: Iappointment = {} as Iappointment;
+  public patientInfo: IpatientInfo | null = null;
   public bookappointment!: FormGroup;
   private patientId!: number;
   private hospitalSubscription!: Subscription;
@@ -117,12 +119,19 @@ export class EditAppointmentComponent implements OnInit, OnDestroy {
 
   getAppointDetail(id: number) {
     this.appointmentService.getAppointmentById(id).subscribe(res => {
-
       this.appointmentDto = res;
+      // Fetch patient details
+      this.patientService.getPatientById(res.patientId).subscribe({
+        next: (patient: IpatientInfo) => {
+          this.patientInfo = patient;
+        },
+        error: (error: HttpErrorResponse) => {
+          console.error('Error fetching patient details:', error);
+          this.toastr.error('Could not load patient details');
+        }
+      });
       this.patchAppointmentForm(this.appointmentDto)
     });
-
-
   }
 
 
