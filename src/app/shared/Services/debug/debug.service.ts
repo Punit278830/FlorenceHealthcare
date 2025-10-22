@@ -61,7 +61,13 @@ export class DebugService {
         const testUrl = api_Url + endpoint;
         console.log(`Testing: ${testUrl}`);
         
-        const response = await fetch(testUrl, { method: 'HEAD' });
+        // Use GET instead of HEAD to avoid 405 errors on IIS
+        const response = await fetch(testUrl, { 
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         console.log(`✅ ${endpoint}: ${response.status}`);
       } catch (error) {
         console.error(`❌ ${endpoint}: ${error}`);
