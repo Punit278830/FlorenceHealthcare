@@ -52,9 +52,11 @@ export class PatientsListComponent implements OnInit, OnDestroy {
   public minToDate: Date | null = null;
   public loggedIn: any;
   private hospitalSubscription: Subscription = new Subscription();
+  role: string = '';
 
 
-  constructor(public data: DataService,
+  constructor(
+    public data: DataService,
     private patientService: PatientService,
     private hospitalService: HospitalService,
     private datePipe: DatePipe,
@@ -63,11 +65,10 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     private modalservice: ModalServiceService,
     private toaster: ToastrService,
     private loadingService: LoadingService,
-    private loaderService: LoadingService
+    private loaderService: LoadingService,
   ) {
-
-
-
+    // Initialize loggedIn in constructor
+    this.loggedIn = JSON.parse(localStorage.getItem('data') || '{}');
   }
 
   deletePatient(idhere: number) {
@@ -87,11 +88,6 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     })
 
   }
-
-
-
-
-
   initlizeDateForm() {
     this.dateForm = this.fb.group({
       from: [null],
@@ -116,6 +112,7 @@ export class PatientsListComponent implements OnInit, OnDestroy {
         this.searchDataValue = '';
         this.dateForm.reset();
         this.getTableData();
+        this.role = localStorage.getItem('role') || this.loggedIn?.role || '';
       }
     });
   }
@@ -194,11 +191,11 @@ export class PatientsListComponent implements OnInit, OnDestroy {
       })
     }
 
-  
+
   }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public searchData(value: any): void {
-  
+
     if (value != '') {
       this.dataSource.filter = value.trim().toLowerCase();
       this.patientList = this.dataSource.filteredData;
@@ -291,14 +288,36 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     }
   }
 
-  onEditPatient(id: number) {
-    this.patientService.patientId = id;
+  // Fix movetoEdit method
+  movetoEdit(patientId: number): void {
+    if (!this.canEditPatient()) {
+      this.toaster.warning('Access denied: Nurses cannot edit patients');
+      return;
+    }
+    localStorage.setItem('editPatientId', patientId.toString());
+    this.route.navigate([routes.editPatient]);
+  }
 
+  // Fix onEditPatient method
+  onEditPatient(id: number): void {
+    if (!this.canEditPatient()) {
+      this.toaster.warning('Access denied: Nurses cannot edit patients');
+      return;
+    }
+    this.patientService.patientId = id;
+    this.route.navigate([routes.editPatient]);
+  }
+
+  // Fix canEditPatient method
+  canEditPatient(): boolean {
+    const role = (localStorage.getItem('role') || this.loggedIn?.role || '').toLowerCase();
+    const designation = (localStorage.getItem('designation') || this.loggedIn?.designation || '').toLowerCase();
+    return !['nurse'].includes(role) && !['nurse'].includes(designation);
   }
 
   onBookAppointment(id: number) {
     this.patientService.patientId = id;
-    localStorage.setItem('lastPath','patientList');
+    localStorage.setItem('lastPath', 'patientList');
   }
 
   calculateDateDifference(dob: Date) {
@@ -341,23 +360,22 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     this.route.navigate([routes.profile], { queryParams: { patientId: id } });
   }
 
-  movetoBookappointment(id: number) {    
+  movetoBookappointment(id: number) {
     this.patientService.patientId = id;
     this.route.navigate([routes.addAppointment]);
   }
 
   exportPatientList() {
-      if(this.patientList.length>0)
-      {
-        const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.patientList);
-    const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
-    
-    const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-  
-    // Call saveAsExcel
-    this.saveAsExcelFile(excelBuffer, 'PatientList');
-      }  
-    
+    if (this.patientList.length > 0) {
+      const worksheet: XLSX.WorkSheet = XLSX.utils.json_to_sheet(this.patientList);
+      const workbook: XLSX.WorkBook = { Sheets: { 'Patients': worksheet }, SheetNames: ['Patients'] };
+
+      const excelBuffer: any = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+
+      // Call saveAsExcel
+      this.saveAsExcelFile(excelBuffer, 'PatientList');
+    }
+
   }
 
   downloadPatientListAsPdf(type: string) {
@@ -406,14 +424,13 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     doc.save(`PatientList${formattedDate}.pdf`);
     this.loaderService.hideLoader();
   }
-  
+
   private saveAsExcelFile(buffer: any, fileName: string): void {
     const data: Blob = new Blob([buffer], { type: 'application/octet-stream' });
     const date = new Date();
-const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
-FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
-    
-  }
-  
+    const formattedDate = `${String(date.getDate()).padStart(2, '0')}-${String(date.getMonth() + 1).padStart(2, '0')}-${date.getFullYear()}`;
+    FileSaver.saveAs(data, `${fileName}_export_${formattedDate}.xlsx`);
 
+  }
+ 
 }
