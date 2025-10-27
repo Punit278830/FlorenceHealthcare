@@ -97,6 +97,9 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       this.updatePrescriptionValidityValidators();
       this.updateDepartmentValidators();
     });
+     this.staffReg = this.fb.group({
+      email: ['', [Validators.required, Validators.email]]
+    });
   }
 
   ngOnDestroy(): void {
@@ -315,12 +318,6 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
 
   addStaff(formValues: FormGroup) {
-
-
-
-
-
-
 
     
     if (this.isSubmitting) {
