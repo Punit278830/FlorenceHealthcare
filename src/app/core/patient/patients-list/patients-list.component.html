@@ -60,13 +60,15 @@
                           <!-- </div> -->
                         </div>
                       </form>
-                      
+
                     </div>
                     <div style="margin-left: 10px;">
-                      <a href="javascript:;" (click)="exportPatientList()" class=" me-2"><img src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
-                      <a href="javascript:;" (click)="downloadPatientListAsPdf('export')" class=" me-2"><img src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
+                      <a href="javascript:;" (click)="exportPatientList()" class=" me-2"><img
+                          src="assets/img/icons/pdf-icon-03.svg" alt=""></a>
+                      <a href="javascript:;" (click)="downloadPatientListAsPdf('export')" class=" me-2"><img
+                          src="assets/img/icons/pdf-icon-01.svg" alt=""></a>
                     </div>
-                    
+
 
                   </div>
                 </div>
@@ -97,11 +99,11 @@
                     <th mat-sort-header="name">Patient Id</th>
                     <th mat-sort-header="name">Name</th>
                     <th mat-sort-header="gender">Gender</th>
-                    
+
                     <th mat-sort-header="Age">Age</th>
                     <th mat-sort-header="mobile">Mobile</th>
                     <th mat-sort-header="email">Email</th>
-                    
+
                     <th mat-sort-header="name">Registration Date</th>
                     <th></th>
                   </tr>
@@ -120,63 +122,70 @@
                         {{data.firstName}}
                         {{data.lastName}}</a>
                     </td>
-                    
+
                     <td>{{data.gender}}</td>
 
                     <!-- <td class="profile-image"> <a href="javascript:;" (click)="movetoBookappointment(data.patientId)">
                         {{data.firstName}}
                         {{data.lastName}}</a>
                     </td> -->
-                   
-                    
+
+
                     <td>{{data.ageinYear}}</td>
                     <td>{{data.mobile}}</td>
                     <td>{{data.email}}</td>
-                    <td>{{ data.regstrationDate | date:'dd/MM/yyyy' }}</td> 
+                    <td>{{ data.regstrationDate | date:'dd/MM/yyyy' }}</td>
                     <td class="text-end">
                       <div class="dropdown dropdown-action">
                         <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown"
                           aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
-                          
+
                         <div class="dropdown-menu dropdown-menu-end">
                           <a class="dropdown-item" [routerLink]="routes.addAppointment"
-                          (click)="onBookAppointment(data.patientId)"><i class=" fa-solid fa-pen-to-square m-r-5"></i>
+                            (click)="onBookAppointment(data.patientId)"><i class=" fa-solid fa-pen-to-square m-r-5"></i>
                             Book appointment</a>
-                          <a class="dropdown-item" [routerLink]="routes.editPatient"
-                            (click)="onEditPatient(data.patientId)"><i class=" fa-solid fa-pen-to-square m-r-5"></i>
-                            Edit</a>
+                           <a class="dropdown-item" *ngIf="canEditPatient()" 
+                             [routerLink]="routes.editPatient" 
+                             (click)="movetoEdit(data.patientId)">
+                            <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
+                          </a>
+                          
                           <!-- <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
                             data-bs-target="#delete_patient"><i class="fa fa-trash-alt m-r-5"></i> Delete</a> -->
-                          <a *ngIf="loggedIn.userRole === 'globalsuperadmin' || loggedIn.userRole === 'reception' " class="dropdown-item" href="javascript:void(0);"
-                            (click)="deletePatient(data.patientId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                          <a *ngIf="loggedIn.userRole === 'globalsuperadmin' || loggedIn.userRole === 'reception' "
+                            class="dropdown-item" href="javascript:void(0);" (click)="deletePatient(data.patientId)"><i
+                              class="fa fa-trash-alt m-r-5"></i> Delete</a>
                         </div>
                       </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <div class="table_footer" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0 16px;">
+              <div class="table_footer"
+                style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 0 16px;">
                 <div class="col-sm-12 col-md-5">
-                  <div *ngIf="patientList.length == 0 "   class="dataTables_info">
+                  <div *ngIf="patientList.length == 0 " class="dataTables_info">
                     No records found
                   </div>
-                  <div *ngIf="patientList.length != 0"  class="dataTables_info">
+                  <div *ngIf="patientList.length != 0" class="dataTables_info">
                     Showing {{ serialNumberArray[0] }} to
                     {{ serialNumberArray[serialNumberArray.length - 1] }} of
                     {{ totalData }} entries
                   </div>
                 </div>
                 <div class="col-sm-12 col-md-7" style="display: flex; justify-content: flex-end;">
-                   <div style="margin-right: 16px; display: flex; align-items: center;">
+                  <div style="margin-right: 16px; display: flex; align-items: center;">
                     <label for="pageSizeSelect" style="margin-right: 4px; font-weight: 500;">Page size:</label>
-                    <select id="pageSizeSelect" class="form-select" style="width: auto; display: inline-block;" [(ngModel)]="pageSize" (change)="PageSize()">
+                    <select id="pageSizeSelect" class="form-select" style="width: auto; display: inline-block;"
+                      [(ngModel)]="pageSize" (change)="PageSize()">
                       <option *ngFor="let size of [10, 25, 50, 100]" [value]="size">{{ size }}</option>
                     </select>
                   </div>
                   <div class="pagination_section">
                     <ul class="pagination">
                       <li class="page-item" [ngClass]="{disabled: currentPage === 1}">
-                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);" tabindex="-1">Previous</a>
+                        <a (click)="getMoreData('previous')" class="page-link" href="javascript:void(0);"
+                          tabindex="-1">Previous</a>
                       </li>
                       <ng-container *ngFor="let item of pageNumberArray; let i = index">
                         <ng-container *ngIf="
@@ -196,7 +205,8 @@
                           <li class="page-item disabled"><span class="page-link">...</span></li>
                         </ng-container>
                       </ng-container>
-                      <li class="page-item" [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] ||  patientList.length === 0}">
+                      <li class="page-item"
+                        [ngClass]="{disabled: currentPage === pageNumberArray[pageNumberArray.length - 1] ||  patientList.length === 0}">
                         <a (click)="getMoreData('next')" class="page-link" href="javascript:void(0);">Next</a>
                       </li>
                     </ul>

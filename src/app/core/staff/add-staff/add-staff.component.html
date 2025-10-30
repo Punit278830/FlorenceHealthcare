@@ -66,11 +66,14 @@
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
                                         <label for="mobile">Mobile <span class="login-danger">*</span></label>
-                                        <input class="form-control" type="text" formControlName="mobile">
-                                        <div *ngIf="mobile.invalid && (mobile.dirty || mobile.touched)"
+                                        <input class="form-control" type="text" id="mobile" name="mobile"
+                                            formControlName="mobile" maxlength="10" pattern="^[0-9]{10}$"
+                                            placeholder="Enter 10-digit mobile number"
+                                            oninput="this.value = this.value.replace(/[^0-9]/g, '')" required />
+                                        <div *ngIf="mobile?.invalid && (mobile?.dirty || mobile?.touched)"
                                             class="text-danger">
-                                            <div *ngIf="mobile.errors?.['required']">Mobile number is required.</div>
-                                            <div *ngIf="mobile.errors?.['pattern']">Mobile number must be exactly 10
+                                            <div *ngIf="mobile?.errors?.['required']">Mobile number is required.</div>
+                                            <div *ngIf="mobile?.errors?.['pattern']">Mobile number must be exactly 10
                                                 digits.</div>
                                         </div>
                                     </div>
@@ -78,11 +81,15 @@
 
                                 <div class="col-12 col-md-6 col-xl-6">
                                     <div class="form-group local-forms">
-                                        <label for="email">Email <span class="login-danger">*</span></label>
-                                        <input type="text" style="display:none">
+                                        <label for="new_staff_email">Email <span class="login-danger">*</span></label>
+                                        <input type="email" style="display:none">
                                         <input type="password" style="display:none">
-                                        <input class="form-control" type="email" formControlName="email"
-                                            id="new_staff_email" name="new_staff_email" autocomplete="off">
+                                        <input class="form-control" type="email" id="new_staff_email"
+                                            name="new_staff_email" formControlName="email" autocomplete="off"
+                                            placeholder="Enter your email" 
+                                           [readonly]="staffReg.get('email')?.valid && staffReg.get('email')?.touched"
+                                             required />
+
                                         <div *ngIf="staffReg.get('email')?.invalid && (staffReg.get('email')?.dirty || staffReg.get('email')?.touched)"
                                             class="text-danger">
                                             <div *ngIf="staffReg.get('email')?.errors?.['required']">Email is required.
@@ -241,13 +248,16 @@
                                         <label for="departmentId">Department
                                             <span class="login-danger" *ngIf="isDepartmentRequired()">*</span>
                                         </label>
-                                        <mat-select formControlName="departmentId" class="form-control select" placeholder="Select Department">
+                                        <mat-select formControlName="departmentId" class="form-control select"
+                                            placeholder="Select Department">
                                             <mat-option *ngFor="let d of _depDto" [value]="d.departmentId">
                                                 {{ d.departmentName || ('Department ' + d.departmentId) }}
                                             </mat-option>
                                         </mat-select>
-                                        <div *ngIf="isDepartmentRequired() && staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)" class="text-danger mt-1">
-                                            <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department is required.</div>
+                                        <div *ngIf="isDepartmentRequired() && staffReg.get('departmentId')?.invalid && (staffReg.get('departmentId')?.dirty || staffReg.get('departmentId')?.touched)"
+                                            class="text-danger mt-1">
+                                            <div *ngIf="staffReg.get('departmentId')?.errors?.['required']">Department
+                                                is required.</div>
                                         </div>
                                     </div>
                                 </div>
@@ -358,10 +368,14 @@
                                 </div>
                                 <div class="col-12 col-md-6 col-xl-4">
                                     <div class="form-group local-forms">
-                                        <label for="PrescriptionValidity">Prescription Validity <span class="login-danger">*</span></label>
-                                        <input class="form-control" type="number" formControlName="PrescriptionValidity" placeholder="Enter validity in days">
-                                        <div *ngIf="staffReg.get('PrescriptionValidity')?.invalid && (staffReg.get('PrescriptionValidity')?.dirty || staffReg.get('PrescriptionValidity')?.touched)" class="text-danger">
-                                            <div *ngIf="staffReg.get('PrescriptionValidity')?.errors?.['required']">Prescription Validity is required.</div>
+                                        <label for="PrescriptionValidity">Prescription Validity <span
+                                                class="login-danger">*</span></label>
+                                        <input class="form-control" type="number" formControlName="PrescriptionValidity"
+                                            placeholder="Enter validity in days">
+                                        <div *ngIf="staffReg.get('PrescriptionValidity')?.invalid && (staffReg.get('PrescriptionValidity')?.dirty || staffReg.get('PrescriptionValidity')?.touched)"
+                                            class="text-danger">
+                                            <div *ngIf="staffReg.get('PrescriptionValidity')?.errors?.['required']">
+                                                Prescription Validity is required.</div>
                                         </div>
                                     </div>
                                 </div>
