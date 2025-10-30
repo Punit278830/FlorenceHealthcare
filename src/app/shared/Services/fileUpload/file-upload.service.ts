@@ -59,4 +59,7 @@ export class FileUploadService {
     return this._http.get(this.apiUrl + "ConsultationFiles/file/" + fileId);
   }
 
+  uploadFileToServer(fileData: FormData): Observable<any> {
+  return this._http.post(this.apiUrl + 'file-upload', fileData);
+  }
 }

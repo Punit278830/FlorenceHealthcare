@@ -35,7 +35,10 @@ interface IdownloadFile {
 })
 export class AddAppointmentComponent implements OnInit, OnDestroy {
   // ...existing code...
+  selectedFile!: File;
+  downLoadList: any[] = [];
   private loadPatients() {
+
     this.patientService.getPatientList().subscribe((patients: any[]) => {
       this.allPatients = patients;
       this.getTableData();
@@ -569,5 +572,29 @@ searchData(data: string) {
     this.patientAppointmentData = []
     this.flag = false
     this.route.navigate([routes.appointmentList])
+  }
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  // Upload file to .NET API
+  onUpload() {
+    if (!this.selectedFile) {
+      alert('Please select a file first!');
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+    this.fileUploadService.uploadFileToServer(formData).subscribe(response => {
+      this.toater.success('File uploaded successfully!');
+      // Optionally, you can store the response or update the UI here
+    }, error => {
+      this.toater.error('File upload failed. Please try again.');
+    });
+  }
+
+  downloadFile(doc: any) {
+    window.open(doc.downloadLink, '_blank');
   }
 }
