@@ -472,12 +472,10 @@ fetchCombineData() {
       });
 
 
-      this.combinedData.map((res: any, index: number) => {
-        const serialNumber = index + 1;
-        if (index >= 0 && serialNumber <= 5) {
-          this.upcomingAppointments.push(res);          
-        }
-      });
+      // Use a simple slice to take the first 5 combined appointments.
+      // This prevents rendering placeholder/blank rows before the data is fully constructed.
+      this.combinedData = this.combinedData || [];
+      this.upcomingAppointments = this.combinedData.slice(0, 5);
 
     }
   })}

@@ -12,7 +12,7 @@
                     <ul class="breadcrumb">
                         <li class="breadcrumb-item"><a [routerLink]="routes.appointmentList">Appointment </a></li>
                         <li class="breadcrumb-item"><i class="feather icon-chevron-right"></i></li>
-                        <li class="breadcrumb-item active">Book Appointment</li>
+                        <li class="breadcrumb-item active">Edit Appointment</li>
                     </ul>
                 </div>
             </div>
@@ -97,6 +97,30 @@
 
 
                         </div> -->
+                        <!-- Patient Info Card -->
+                            <div class="card mb-4" *ngIf="patientInfo">
+                            <div class="form-heading">
+                                <h4>Patient Information</h4>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                <!-- Left Column -->
+                                <div class="col-md-6">
+                                    <div class="mb-2"><strong>Name:</strong> {{patientInfo.firstName}} {{patientInfo.lastName}}</div>
+                                    <div class="mb-2"><strong>Email:</strong> {{patientInfo.email}}</div>
+                                    <div class="mb-2"><strong>Mobile:</strong> {{patientInfo.mobile}}</div>
+                                </div>
+
+                                <!-- Right Column -->
+                                <div class="col-md-6">
+                                    <div class="mb-2"><strong>Gender:</strong> {{patientInfo.gender}}</div>
+                                    <div class="mb-2"><strong>Date of Birth:</strong> {{patientInfo.dob | date}}</div>
+                                    <div class="mb-2"><strong>Identity Type:</strong> {{patientInfo.IdentityName}}</div>
+                                </div>
+                                </div>
+                            </div>
+                            </div>
+
                         <form [formGroup]="bookappointment" (ngSubmit)="updateBookAppointment(bookappointment)">
                             <!-- <div class="row">
                                 <div class="col-12">

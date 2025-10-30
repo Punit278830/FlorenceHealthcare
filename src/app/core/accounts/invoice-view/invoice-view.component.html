@@ -158,8 +158,8 @@
                                             <td>{{ tempinvoiceDetails.tempItemName }} </td>
                                             <td>{{doctorDetails.firstName}} {{doctorDetails.lastName}}</td>
                                                         <td>{{ appointmentDetails.fee }}</td>
-                                                      <td>{{ disc === 100 ? 100 : disc }}</td>
-                                                          <td>{{ (disc === 100) ? 0 : getMainInvoiceTotal() }}</td>
+                                                      <td>{{ (disc === 100 || invoiceDetails.previousAppointmentDate || flag) ? 100 : disc }}</td>
+                                                          <td>{{ (disc === 100 || invoiceDetails.previousAppointmentDate) ? 0 : getMainInvoiceTotal() }}</td>
                                             
                     <td>
                         <button

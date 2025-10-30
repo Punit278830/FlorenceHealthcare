@@ -18,6 +18,7 @@ import { Iappointment, Idepartment, IfileUpload, IpatientInfo, IstaffInfo, Istaf
 import { routes } from '../../../shared/routes/routes';
 import { InvoiceService } from '../../../shared/Services/invoice/invoice.service';
 import dayjs from 'dayjs';
+import { NgxSpinnerService } from 'ngx-spinner';
 
 interface data {
   value: string;
@@ -42,7 +43,8 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     });
   }
   public dataSource!: MatTableDataSource<IpatientInfo>;
-  
+
+
   private initialHospitalLoad = true;
   public routes = routes;
   public selectedValue!: string;
@@ -61,13 +63,13 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
   public minDate: Date = new Date(); // sets today as the minimum selectable date
   private hospitalSubscription: Subscription = new Subscription();
 
-  // public deleteIcon=false;
-  // public selectedFile!:File
-  // private FileUploadDto:IfileUpload={}as IfileUpload;
-  // public base64String!:string;
-  // public base64StringArray:string[]=[];
-  // public downloadLink:any;
-  // public downLoadList:IdownloadFile[]=[];
+  public deleteIcon=false;
+  public selectedFile!:File
+  private FileUploadDto:IfileUpload={}as IfileUpload;
+  public base64String!:string;
+  public base64StringArray:string[]=[];
+  public downloadLink:any;
+  public downLoadList:IdownloadFile[]=[];
 
   public lastIndex = 0;
   public pageSize = 50;
@@ -98,9 +100,11 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
     private departmentService: DepartmentService,
     private fileUploadService: FileUploadService,
     private staffScheduleService: StaffScheduleService,
-    private toater: ToastrService,
+    private toaster: ToastrService,
     private modalservice: ModalServiceService,
     private hospitalService: HospitalService,
+      private spinner: NgxSpinnerService
+
 
   ) {
   this.getDepartmentLits();
@@ -123,7 +127,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
   confirmDelete(idhere: number) {
     this.patientService.deletePatient(idhere).subscribe(res => {
       if (res == null) {
-        this.toater.success("Patient is deleted!")
+        this.toaster.success("Patient is deleted!")
         this.loadPatients();
       }
     })
@@ -242,7 +246,7 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
       this.patientService.patientId = 0;
     }
     //this.updateFormattedDateTime();
-    //this.downloadPatientFile();
+    this.downloadPatientFile();
 
     this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
       this.clearOtherFields();
@@ -371,7 +375,7 @@ searchData(data: string) {
         },
         error: (error: any) => {
           console.error('Error fetching patient:', error);
-          this.toater.error('Error loading patient data');
+          this.toaster.error('Error loading patient data');
         }
       });
     }
@@ -437,7 +441,7 @@ searchData(data: string) {
       this.appointmentDto.scheduledByid = userData.loginId;
       this.appointmentService.createAppointment(this.appointmentDto).subscribe(result => {
 
-        this.toater.success("Appointment booked succesfully", "Book Appointment");
+        this.toaster.success("Appointment booked succesfully", "Book Appointment");
         this.bookappointment.reset();
         this.invoiceService.invoiceId = result.invoiceId;
         // If you want to go to profile after booking, pass vitalId and consultationId
@@ -569,5 +573,92 @@ searchData(data: string) {
     this.patientAppointmentData = []
     this.flag = false
     this.route.navigate([routes.appointmentList])
+  }
+  onUpload() {
+    if (this.selectedFile) {
+      this.spinner.show();
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.base64String = reader.result as string;
+        this.FileUploadDto.fileName = this.selectedFile.name;
+        this.FileUploadDto.FileType = this.selectedFile.type;
+        this.FileUploadDto.fileData = this.base64String;
+        //this.FileUploadDto.FileData= this.base64String;
+        this.FileUploadDto.AppointmentId = this.appointmentService.appointmentId;
+        this.fileUploadService.uploadFiletoDataBase(this.FileUploadDto).subscribe(result => {
+
+          this.spinner.hide();
+          this.toaster.success('File uploaded Successfully', 'Success');
+
+        });
+
+
+
+        this.downloadPatientFile();
+
+      },
+        reader.readAsDataURL(this.selectedFile);
+    }
+  }
+  onFileSelected(event: any): void {
+    this.selectedFile = event.target.files[0];
+    this.onUpload();
+
+
+  }
+    
+   downloadPatientFile() {
+    this.spinner.show();
+    this.base64StringArray = [];
+    this.fileUploadService.getUpodedFileByAppointment(this.appointmentService.appointmentId).subscribe((data: any) => {
+
+      JSON.parse(data).map((res: any) => {
+        //   const x=JSON.parse(res).fileData||'';
+        //    const fileName=JSON.parse(data).fileName;
+        // const type=JSON.parse(data).fileType;
+        const addDownloads = { fileName: '', downloadLink: '' };
+        const x = res.fileData || '';
+        this.downlodedFileName = res.fileName;
+        const type = res.fileType;
+        if (x) {
+          let base64Data
+          if (type == 'image/jpeg') {
+            base64Data = (x.split('jpeg;base64,'))[1]
+          }
+          if (type == 'application/pdf') {
+            base64Data = (x.split('pdf;base64,'))[1]
+          }
+
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'application/octet-stream' });
+          const objectUrl = URL.createObjectURL(blob);
+          addDownloads.fileName = this.downlodedFileName;
+          addDownloads.downloadLink = objectUrl;
+          this.downLoadList.push(addDownloads);
+
+        }
+      })
+      this.spinner.hide();
+    },
+      (error) => {
+
+        //this.toastr.error("No file available for this user");
+        this.spinner.hide();
+
+      })
+  }
+
+  downloadFile() {
+    this.downloadLink.click();
+  }
+
+  navigation() {
+    this.route.navigate([routes.appointmentList])
+
   }
 }
