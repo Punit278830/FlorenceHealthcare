@@ -121,7 +121,7 @@ export class EditAppointmentComponent implements OnInit, OnDestroy {
     this.appointmentService.getAppointmentById(id).subscribe(res => {
       this.appointmentDto = res;
       // Fetch patient details
-      this.patientService.getPatientById(res.patientId).subscribe({
+      this.patientService.getPatientData(res.patientId).subscribe({
         next: (patient: IpatientInfo) => {
           this.patientInfo = patient;
         },
