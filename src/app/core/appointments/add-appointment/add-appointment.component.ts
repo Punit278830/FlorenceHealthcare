@@ -246,7 +246,9 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
       this.patientService.patientId = 0;
     }
     //this.updateFormattedDateTime();
-    this.downloadPatientFile();
+    if (this.appointmentService?.appointmentId) {
+  this.downloadPatientFile();
+}
 
     this.bookappointment.get('appointTime')?.valueChanges.subscribe(() => {
       this.clearOtherFields();
@@ -471,6 +473,7 @@ searchData(data: string) {
     });
   }
   async loadDoctorData(event: any) {
+    if (!this.appointmentService?.appointmentId) return;
     this.doctorList = [];
     const doctorOnLeave: number[] = [];
     const allDocSchedule: Istaffschedule[] = [];
@@ -608,25 +611,29 @@ searchData(data: string) {
   }
     
    downloadPatientFile() {
-    this.spinner.show();
-    this.base64StringArray = [];
-    this.fileUploadService.getUpodedFileByAppointment(this.appointmentService.appointmentId).subscribe((data: any) => {
+  const appointmentId = this.appointmentService?.appointmentId;
+  if (!appointmentId) {
+    // Prevent API call if appointmentId is not set
+    return;
+  }
 
+  this.spinner.show();
+  this.base64StringArray = [];
+  
+  this.fileUploadService.getUpodedFileByAppointment(appointmentId).subscribe(
+    (data: any) => {
       JSON.parse(data).map((res: any) => {
-        //   const x=JSON.parse(res).fileData||'';
-        //    const fileName=JSON.parse(data).fileName;
-        // const type=JSON.parse(data).fileType;
-        const addDownloads = { fileName: '', downloadLink: '' };
+        const addDownloads: IdownloadFile = { fileName: '', downloadLink: '' };
         const x = res.fileData || '';
         this.downlodedFileName = res.fileName;
         const type = res.fileType;
         if (x) {
-          let base64Data
+          let base64Data;
           if (type == 'image/jpeg') {
-            base64Data = (x.split('jpeg;base64,'))[1]
+            base64Data = x.split('jpeg;base64,')[1];
           }
           if (type == 'application/pdf') {
-            base64Data = (x.split('pdf;base64,'))[1]
+            base64Data = x.split('pdf;base64,')[1];
           }
 
           const byteCharacters = atob(base64Data);
@@ -637,21 +644,21 @@ searchData(data: string) {
           const byteArray = new Uint8Array(byteNumbers);
           const blob = new Blob([byteArray], { type: 'application/octet-stream' });
           const objectUrl = URL.createObjectURL(blob);
+
           addDownloads.fileName = this.downlodedFileName;
           addDownloads.downloadLink = objectUrl;
           this.downLoadList.push(addDownloads);
-
         }
-      })
+      });
       this.spinner.hide();
     },
-      (error) => {
-
-        //this.toastr.error("No file available for this user");
-        this.spinner.hide();
-
-      })
-  }
+    (error) => {
+      // Suppress the network error popup completely
+      console.warn('No file available for this appointment.');
+      this.spinner.hide();
+    }
+  );
+}
 
   downloadFile() {
     this.downloadLink.click();
