@@ -254,6 +254,13 @@ export class AddAppointmentComponent implements OnInit, OnDestroy {
       this.clearOtherFields();
     });
 
+    // Subscribe to date changes to update formattedDateTime
+    this.bookappointment.get('date')?.valueChanges.subscribe((value) => {
+      if (value) {
+        this.formattedDateTime = new Date(value);
+      }
+    });
+
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
       if (this.initialHospitalLoad) {
@@ -473,7 +480,6 @@ searchData(data: string) {
     });
   }
   async loadDoctorData(event: any) {
-    if (!this.appointmentService?.appointmentId) return;
     this.doctorList = [];
     const doctorOnLeave: number[] = [];
     const allDocSchedule: Istaffschedule[] = [];

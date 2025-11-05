@@ -191,7 +191,14 @@ public partial class FlorenceDbContext : DbContext
           .IsUnicode(false)
           .HasColumnName("notes");
       entity.Property(e => e.PatientId).HasColumnName("patientId");
-      entity.Property(e => e.ScheduledByid).HasColumnName("scheduledByid");
+        entity.Property(e => e.ScheduledByid).HasColumnName("scheduledByid");
+        entity.Property(e => e.IsDeleted).HasColumnName("isDeleted");
+        entity.Property(e => e.DeletedDate).HasColumnName("deletedDate");
+        entity.Property(e => e.DeletedBy).HasColumnName("deletedBy");
+        entity.Property(e => e.HospitalId).HasColumnName("hospitalId");
+        entity.Property(e => e.PrescriptionEndDate)
+              .HasColumnName("PrescriptionEndDate")
+              .HasColumnType("datetime2");
     });
 
     modelBuilder.Entity<ConsultationDatum>(entity =>
