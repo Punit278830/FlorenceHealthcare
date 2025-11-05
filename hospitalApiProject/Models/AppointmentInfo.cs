@@ -33,4 +33,6 @@ public partial class AppointmentInfo
 
   // New nullable HospitalId for multi-tenant separation
   public int? HospitalId { get; set; }
+
+  public DateTime? PrescriptionEndDate { get; set; }
 }
