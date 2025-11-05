@@ -948,6 +948,51 @@ namespace hospitalApiProject.Migrations
                     b.ToTable("PatientMedications");
                 });
 
+            modelBuilder.Entity("hospitalApiProject.Models.PaymentModeInfo", b =>
+                {
+                    b.Property<int>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PaymentId"));
+
+                    b.Property<int?>("Amount")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("HospitalId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ItemId")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("itemId");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("itemName");
+
+                    b.Property<DateTime?>("PaymentDate")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("GETDATE()");
+
+                    b.Property<string>("PaymentMode")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("PaymentId");
+
+                    b.ToTable("PaymentModeInfo");
+                });
+
             modelBuilder.Entity("hospitalApiProject.Models.PrescriptionTemplateMaster", b =>
                 {
                     b.Property<int>("Id")
@@ -1124,49 +1169,6 @@ namespace hospitalApiProject.Migrations
                     b.ToTable("PatientVisits");
                 });
 
-            modelBuilder.Entity("hospitalApiProject.Models.Response.PaymentModeInfo", b =>
-                {
-                    b.Property<int?>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int?>("PaymentId"));
-
-                    b.Property<int?>("Amount")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("HospitalId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("InvoiceId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("PaymentDate")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<string>("PaymentMode")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("TransactionId")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("itemId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("itemName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("PaymentId");
-
-                    b.ToTable("PaymentModeInfo");
-                });
-
             modelBuilder.Entity("hospitalApiProject.Models.RoleMaster", b =>
                 {
                     b.Property<int>("RoleId")
@@ -1181,7 +1183,7 @@ namespace hospitalApiProject.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("HospitalId")
+                    b.Property<int?>("HospitalId")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsActive")
@@ -1529,9 +1531,7 @@ namespace hospitalApiProject.Migrations
                 {
                     b.HasOne("hospitalApiProject.Models.Hospital", "Hospital")
                         .WithMany()
-                        .HasForeignKey("HospitalId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("HospitalId");
 
                     b.Navigation("Hospital");
                 });
