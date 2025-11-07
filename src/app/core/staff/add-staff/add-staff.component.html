@@ -86,9 +86,9 @@
                                         <input type="password" style="display:none">
                                         <input class="form-control" type="email" id="new_staff_email"
                                             name="new_staff_email" formControlName="email" autocomplete="off"
-                                            placeholder="Enter your email" 
-                                           [readonly]="staffReg.get('email')?.valid && staffReg.get('email')?.touched"
-                                             required />
+                                            placeholder="Enter your email"
+                                            [readonly]="staffReg.get('email')?.valid && staffReg.get('email')?.touched"
+                                            required />
 
                                         <div *ngIf="staffReg.get('email')?.invalid && (staffReg.get('email')?.dirty || staffReg.get('email')?.touched)"
                                             class="text-danger">
@@ -184,7 +184,6 @@
                                     <div class="form-group local-forms">
                                         <label for="designation">Designation</label>
                                         <mat-select formControlName="designation" class="form-control select"
-                                            (selectionChange)="onSelectionChange($event)"
                                             placeholder="Select Designation">
                                             <mat-option *ngFor="let data of designationList" [value]="data.value">
                                                 {{data.value}}

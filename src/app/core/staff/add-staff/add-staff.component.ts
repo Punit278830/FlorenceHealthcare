@@ -50,15 +50,17 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private roleService: RoleAuthorizationService,
     private hospitalService: HospitalService) {
-    
+
     this.createStaffRegrestrationForm();
     this.maxDate = new Date()
   }
-  
+
   ngOnInit(): void {
+    this.createStaffRegrestrationForm();
     // Load hospitals first (not hospital-dependent)
     this.loadHospitals();
-    
+
+
     // Subscribe to hospital list changes
     this.hospitalListSubscription = this.hospitalService.hospitalListChanged$.subscribe(changed => {
       if (changed) {
@@ -68,7 +70,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         }
       }
     });
-    
+
     let initialHospitalId: any;
     // Subscribe to hospital changes
     this.hospitalSubscription = this.hospitalService.currentHospitalId$.subscribe(hospitalId => {
@@ -85,21 +87,18 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     });
 
     // ensure update validators are called once form is created
-    this.updatePrescriptionValidityValidators();
-    this.updateDepartmentValidators();
-
+    this.updateDynamicValidators();
     // subscribe to changes to update validators dynamically
     this.staffReg.get('designation')?.valueChanges.subscribe(() => {
-      this.updatePrescriptionValidityValidators();
-      this.updateDepartmentValidators();
+      this.updateDynamicValidators();
     });
     this.staffReg.get('roleId')?.valueChanges.subscribe(() => {
-      this.updatePrescriptionValidityValidators();
-      this.updateDepartmentValidators();
+      this.updateDynamicValidators();
     });
-     this.staffReg = this.fb.group({
-      email: ['', [Validators.required, Validators.email]]
+    this.staffReg.get('roleId')?.valueChanges.subscribe(() => {
+      this.updateDynamicValidators();
     });
+
   }
 
   ngOnDestroy(): void {
@@ -111,13 +110,13 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     // Clear existing data
     this._depDto = [];
     this.roles = [];
-    
+
     // Reset form selections that depend on hospital
     this.staffReg.patchValue({
       departmentId: '',
       roleId: ''
     });
-    
+
     // Reload departments and roles for the new hospital
     this.getDepartmentList();
     this.loadRoles();
@@ -143,13 +142,13 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     this.isLoadingRoles = true;
 
     const hospitalId = this.staffReg.get('hospitalId')?.value;
-    
+
     // If no hospital is selected, use the currently selected hospital for super admins
     // or the user's hospital for regular users
     const effectiveHospitalId = hospitalId || this.hospitalService.getCurrentHospitalId();
-    
+
     console.log('Loading roles for hospital ID:', effectiveHospitalId);
-    
+
     if (!effectiveHospitalId) {
       // If still no hospital ID available, show error
       console.error('No hospital ID available for loading roles');
@@ -164,8 +163,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         this.roles = roles;
         this.isLoadingRoles = false;
         // roles changed -> re-evaluate validators
-        this.updatePrescriptionValidityValidators();
-        this.updateDepartmentValidators();
+        this.updateDynamicValidators();
       },
       error: (error: any) => {
         console.error('Error loading roles:', error);
@@ -217,12 +215,12 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   ];
 
   ConsultationFeeList: number[] = [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000]
-  
+
   designationList: data[] = [
     { value: 'Doctor' },
     { value: 'Receptionist' },
     { value: 'Nurse' },
-    {value: 'Admin'}
+    { value: 'Admin' }
 
   ]
 
@@ -255,18 +253,18 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   createStaffRegrestrationForm() {
     const currentHospitalId = localStorage.getItem('currentHospitalId') || '1';
     const isSuperAdmin = this.roleService.isSuperAdmin();
-    
 
 
-    
+
+
     // Always parse hospital ID as number
     const defaultHospitalId = isSuperAdmin ? null : parseInt(currentHospitalId);
-    
 
-    
+
+
     this.staffReg = this.fb.group({
       hospitalId: [
-        defaultHospitalId, 
+        defaultHospitalId,
         [Validators.required] // Always require hospital ID
       ],
       firstName: ['', [Validators.required]],
@@ -274,9 +272,9 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       mobile: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       email: ['', [Validators.required, Validators.email]],
       address: ['', Validators.required],
-      departmentId: ['', Validators.required],
-  designation: [''],
-      consultationFee: [0, Validators.required],
+      departmentId: [''],
+      designation: [''],
+      consultationFee: [0],
       activeStatus: [null, Validators.required],
       password: ['', Validators.required],
       cpassword: ['', [Validators.required]],
@@ -285,9 +283,9 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       dob: ['', [Validators.required, this.minimumAgeValidator(21)]],
       doj: ['', Validators.required],
       IdentityNumber: ['', Validators.required],
-      registrationNumber:[''],
+      registrationNumber: [''],
       IdentityName: ['', Validators.required],
-      PrescriptionValidity: [null, Validators.required],
+      PrescriptionValidity: [0],
       roleId: [''] // Role assignment (optional)
     });
 
@@ -319,22 +317,22 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
   addStaff(formValues: FormGroup) {
 
-    
+
     if (this.isSubmitting) {
 
       return;
     }
-    
+
     if (this.staffReg.valid) {
 
-      
+
       if (formValues.value.password !== formValues.value.cpassword) {
         this.toster.error("Password do not match");
         return; // Exit the method if passwords don't match
       }
-      
+
       this.isSubmitting = true;
-      
+
       // Create a copy of the form values and remove cpassword
       let staffData = { ...formValues.getRawValue() };
       delete staffData.cpassword;
@@ -343,7 +341,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       staffData.activeStatus = (staffData.activeStatus === '' || staffData.activeStatus === null || staffData.activeStatus === undefined)
         ? null
         : (typeof staffData.activeStatus === 'number' ? staffData.activeStatus : parseInt(staffData.activeStatus.toString()));
- 
+
       // Normalize departmentId -> number or null
       if (staffData.departmentId === '' || staffData.departmentId === null || staffData.departmentId === undefined) {
         staffData.departmentId = null;
@@ -351,7 +349,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         const parsedDept = typeof staffData.departmentId === 'number' ? staffData.departmentId : parseInt(staffData.departmentId.toString());
         staffData.departmentId = isNaN(parsedDept) ? null : parsedDept;
       }
-      
+
       // Normalize PrescriptionValidity -> number or null
       if (staffData.PrescriptionValidity === '' || staffData.PrescriptionValidity === null || staffData.PrescriptionValidity === undefined) {
         staffData.PrescriptionValidity = null;
@@ -359,7 +357,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         const parsedPV = typeof staffData.PrescriptionValidity === 'number' ? staffData.PrescriptionValidity : parseInt(staffData.PrescriptionValidity.toString());
         staffData.PrescriptionValidity = isNaN(parsedPV) ? null : parsedPV;
       }
- 
+
       // If roleId is empty string, set to null so backend treats as optional
       if (staffData.roleId === '') {
         staffData.roleId = null;
@@ -394,22 +392,22 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
 
 
-      this.staffService.CreateStaff(staffData).subscribe((res:any) => {
+      this.staffService.CreateStaff(staffData).subscribe((res: any) => {
 
         this.isSubmitting = false;
         if (!res.message) {
           this.toster.success("Staff Added Successfully", 'Staff');
           this.route.navigate([routes.staffList])
-        }else{
-          this.toster.error(res.message,"Error")
+        } else {
+          this.toster.error(res.message, "Error")
         }
       },
-      (err)=>{
+        (err) => {
 
-        this.isSubmitting = false;
-        this.toster.error(err.message || "An error occurred","Error")
-      }
-    );
+          this.isSubmitting = false;
+          this.toster.error(err.message || "An error occurred", "Error")
+        }
+      );
 
     } else {
 
@@ -438,20 +436,20 @@ export class AddStaffComponent implements OnInit, OnDestroy {
   onHospitalSelectionChange(event: MatSelectChange) {
     // Ensure the value is a number
     const hospitalId = typeof event.value === 'string' ? parseInt(event.value) : event.value;
-    
+
     // Set the value in the form control
     this.staffReg.get('hospitalId')?.setValue(hospitalId);
     this.staffReg.get('hospitalId')?.markAsTouched();
-    
+
     // Clear existing departments and roles when hospital changes
     this._depDto = [];
     this.roles = [];
     this.staffReg.get('departmentId')?.reset();
     this.staffReg.get('roleId')?.reset();
-    
+
     // Reload departments for the selected hospital
     this.getDepartmentList();
-    
+
     // Update roles based on selected hospital
     if (hospitalId && !isNaN(hospitalId)) {
       this.loadRolesForHospital(hospitalId);
@@ -464,16 +462,16 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     // Roles dropdown remains unchanged since it's master data
   }
 
-  onSelectionChange(event: MatSelectChange) {
-    if ((event.value).toLowerCase() != 'doctor') {
-      this.staffReg.get('consultationFee')?.patchValue(0);
-      this.staffReg.get('consultationFee')?.disable();
+  // onSelectionChange(event: MatSelectChange) {
+  //   if ((event.value).toLowerCase() != 'doctor') {
+  //     this.staffReg.get('consultationFee')?.patchValue(0);
+  //     this.staffReg.get('consultationFee')?.disable();
 
-    }
-    else {
-      this.staffReg.get('consultationFee')?.enable();
-    }
-  }
+  //   }
+  //   else {
+  //     this.staffReg.get('consultationFee')?.enable();
+  //   }
+  // }
 
   getDepartmentList() {
     console.log('Fetching departments from API...');
@@ -523,7 +521,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
 
   get shouldShowHospitalDropdown(): boolean {
     const result = this.isSuperAdmin;
-    
+
     // Debug logging to help identify cache issues
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
       console.log('🔍 Add Staff Component - Hospital Dropdown Check:', {
@@ -533,7 +531,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
         component: 'AddStaffComponent'
       });
     }
-    
+
     return result;
   }
 
@@ -543,7 +541,7 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     const roleId = this.staffReg.get('roleId')?.value;
 
     // treat both Admin,Receptionist and Nurse as NOT requiring PrescriptionValidity
-    const isDesignationAdminOrNurseOrReceptionist = typeof designation === 'string' && ['admin', 'nurse','recptionist'].includes(designation.toLowerCase());
+    const isDesignationAdminOrNurseOrReceptionist = typeof designation === 'string' && ['admin', 'nurse', 'recptionist'].includes(designation.toLowerCase());
 
     let isRoleAdminOrNurseOrReceptionist = false;
     if (roleId !== null && roleId !== undefined && roleId !== '') {
@@ -551,10 +549,10 @@ export class AddStaffComponent implements OnInit, OnDestroy {
       const role = this.roles.find(r => r.roleId == roleId || r.roleId?.toString() === roleId?.toString());
       if (role) {
         const name = (role.roleDisplayName || role.roleName || role.name || '').toString();
-        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse','receptionist'].includes(name.toLowerCase());
+        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse', 'receptionist'].includes(name.toLowerCase());
       } else if (typeof roleId === 'string') {
         // fallback if roleId directly contains 'admin' or 'nurse'
-        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse','receptionist'].includes(roleId.toLowerCase());
+        isRoleAdminOrNurseOrReceptionist = ['admin', 'nurse', 'receptionist'].includes(roleId.toLowerCase());
       }
     }
 
@@ -584,28 +582,73 @@ export class AddStaffComponent implements OnInit, OnDestroy {
     return !(isDesignationAdminOrReceptionist || isRoleAdminOrReceptionist);
   }
 
-  // add/remove Validators.required on departmentId control
-  updateDepartmentValidators(): void {
-    const control = this.staffReg.get('departmentId');
-    if (!control) { return; }
-    if (this.isDepartmentRequired()) {
-      control.setValidators([Validators.required]);
-    } else {
-      control.clearValidators();
-    }
-    control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-  }
+  // // add/remove Validators.required on departmentId control
+  // updateDepartmentValidators(): void {
+  //   const control = this.staffReg.get('departmentId');
+  //   if (!control) { return; }
+  //   if (this.isDepartmentRequired()) {
+  //     control.setValidators([Validators.required]);
+  //   } else {
+  //     control.clearValidators();
+  //   }
+  //   control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+  // }
 
-  // add/remove Validators.required on PrescriptionValidity control
-  updatePrescriptionValidityValidators(): void {
-    const control = this.staffReg.get('PrescriptionValidity');
-    if (!control) { return; }
-    if (this.isPrescriptionRequired()) {
-      control.setValidators([Validators.required]);
-    } else {
-      control.clearValidators();
-    }
-    control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
-  }
+  // // add/remove Validators.required on PrescriptionValidity control
+  // updatePrescriptionValidityValidators(): void {
+  //   const control = this.staffReg.get('PrescriptionValidity');
+  //   if (!control) { return; }
+  //   if (this.isPrescriptionRequired()) {
+  //     control.setValidators([Validators.required]);
+  //   } else {
+  //     control.clearValidators();
+  //   }
+  //   control.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+  // }
 
+  private updateDynamicValidators(): void {
+    const designation = this.staffReg.get('designation')?.value?.toLowerCase();
+    const roleId = this.staffReg.get('roleId')?.value;
+
+    let roleName = '';
+    if (roleId) {
+      const role = this.roles.find(r => r.roleId == roleId || r.roleId?.toString() === roleId?.toString());
+      roleName = (role?.roleDisplayName || role?.roleName || role?.name || '').toLowerCase();
+    }
+
+    const isDoctor = designation === 'doctor' || roleName === 'doctor';
+    const isAdminOrReceptionist = ['admin', 'receptionist'].includes(designation) || ['admin', 'receptionist'].includes(roleName);
+    const isNurse = designation === 'nurse' || roleName === 'nurse';
+
+    //  Department
+    const departmentControl = this.staffReg.get('departmentId');
+
+    if (isDoctor || isNurse) {
+      departmentControl?.setValidators([Validators.required]);
+    } else {
+      departmentControl?.clearValidators();
+      departmentControl?.setValue(null); // reset value for non-doctors/nurses
+    }
+
+    departmentControl?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+    //  Prescription Validity
+    const prescriptionControl = this.staffReg.get('PrescriptionValidity');
+    if (!isDoctor) {
+      prescriptionControl?.patchValue(0);
+      prescriptionControl?.disable({ emitEvent: false });
+    } else {
+      prescriptionControl?.enable({ emitEvent: false });
+    }
+    prescriptionControl?.updateValueAndValidity({ onlySelf: true, emitEvent: false });
+
+    //  Consultation Fee
+    const feeControl = this.staffReg.get('consultationFee');
+    if (!isDoctor) {
+      feeControl?.patchValue(0);
+      feeControl?.disable({ emitEvent: false });
+    } else {
+      feeControl?.enable({ emitEvent: false });
+    }
+  }
 }
