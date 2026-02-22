@@ -175,6 +175,25 @@
     /* Removes bottom margin to reduce space between items */
 }
 
+/* Make question text and answer larger for preview */
+.quesansOuter li {
+    font-size: 26px;
+    line-height: 1.3;
+    margin-bottom: 6px;
+}
+.quesansOuter li strong {
+    font-weight: 700;
+    font-size: 26px;
+}
+
+/* Questionnaire group title in preview */
+.questionnaireGroup h3,
+.questionnaireGroup h3 strong {
+    font-size: 26px;
+    margin: 0 0 6px 0;
+    line-height: 1.2;
+}
+
 // .questionsOuter{
 //     display: flex;
 //     width:100%;

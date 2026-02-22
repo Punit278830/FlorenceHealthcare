@@ -63,7 +63,7 @@ app.UseRouting();
 // Note: Authentication would go here if implemented
 // app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles(); // Enables serving files from wwwroot
 
 // Enable request logging
 app.Use(async (context, next) =>

@@ -21,9 +21,10 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <div class="form-heading">
-                           
-                        </div>
+                         <div class="col-8 form-heading">
+                                <h4>Add Questionnaire</h4>
+                            </div>
+                      
 
                         <form [formGroup]="questForm" (ngSubmit)="addQustionnaireName(questForm)">
                             <div class="row">
@@ -67,87 +68,72 @@
             </div>
         </div>
 
-        <div class="container">
-  <div class="mb-4">
-    <div class="card flex-grow-1">
-      <div class="card-body d-flex flex-column">
-        <div class="row align-items-center justify-content-between">
-          <div class="col-4 form-heading">
-            <h4>Questionnaire List</h4>
-          </div>
-          <div class="col-4 text-right">
-            <div class="form-group local-forms">
-              <label for="Status">Status</label>
-              <mat-select class="form-control select text-left"
-                          (selectionChange)="onStatusChange($event)">
-                <mat-option *ngFor="let qStatus of questionnaireStatuses" [value]="qStatus">
-                  {{qStatus}}
-                </mat-option>
-              </mat-select>
-            </div>
-          </div>
-        </div>
+        <div class="row">
+            <div class="col-12 col-md-12 col-xl-6 mb-4">
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="row align-items-center justify-content-between">
+                            <div class="col-8 form-heading">
+                                <h4>Questionnaire List</h4>
+                            </div>
+                            <div class="col-4 text-right">
+                                <div class="form-group local-forms">
+                                    <label for="Status">Status</label>
+                                    <mat-select class="form-control select text-left" (selectionChange)="onStatusChange($event)">
+                                        <mat-option *ngFor="let qStatus of questionnaireStatuses" [value]="qStatus">{{qStatus}}</mat-option>
+                                    </mat-select>
+                                </div>
+                            </div>
+                        </div>
 
-        <!-- ✅ SCROLLABLE AREA -->
-        <div class="table-responsive flex-grow-1"
-             style="max-height: 350px; overflow-y: auto; overflow-x: auto;">
-          <table class="table border-0 custom-table comman-table datatable mb-0">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Mobile</th>
-                <th>Email</th>
-                <th>Status</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <ng-container *ngFor="let data of combineData; let i = index">
-                <tr [class.selectedQuest]="i === selectedRow" (click)="selectRow(i)">
-                  <td>{{i + 1}}</td>
-                  <td>{{data.name || data.questionnaireName}}</td>
-                  <td>{{data.age}}</td>
-                  <td>{{data.gender}}</td>
-                  <td>{{data.mobile}}</td>
-                  <td>{{data.email}}</td>
-                  <td>{{data.isActive ? "Active" : "Inactive"}}</td>
-                  <td class="text-end">
-                    <div class="dropdown dropdown-action">
-                      <a href="javascript:void(0);" class="action-icon dropdown-toggle"
-                         data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fa fa-ellipsis-v"></i>
-                      </a>
-                      <div class="dropdown-menu dropdown-menu-end">
-                        <a class="dropdown-item" (click)="onEditQuestionaire(data)">
-                          <i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle Status
-                        </a>
-                        <a class="dropdown-item" href="javascript:void(0);"
-                           (click)="deleteQues(data.questionnaireId)">
-                          <i class="fa fa-trash-alt m-r-5"></i> Delete
-                        </a>
-                      </div>
+                        <div class="table-responsive flex-grow-1 card-list-scroll">
+                            <table class="table border-0 custom-table comman-table datatable mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <ng-container *ngFor="let data of combineData; let i = index">
+                                        <tr [class.selectedQuest]="i === selectedRow" (click)="selectRow(i)">
+                                            <td>{{i + 1}}</td>
+                                            <td>
+                                                <a href="javascript:void(0);" (click)="OnQuestionnaireChange(data); selectRow(i); $event.stopPropagation();">
+                                                    {{data.name || data.questionnaireName}}
+                                                </a>
+                                            </td>
+                                            <td>{{data.isActive ? 'Active' : 'Inactive'}}</td>
+                                            <td class="text-end">
+                                                <div class="dropdown dropdown-action">
+                                                    <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="fa fa-ellipsis-v"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-end">
+                                                        <button class="dropdown-item" type="button" (click)="onEditQuestionaire(data)"><i class="fa-solid fa-pen-to-square m-r-5"></i> Toggle Status</button>
+                                                        <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQues(data.questionnaireId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </ng-container>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                  </td>
-                </tr>
-              </ng-container>
-            </tbody>
-          </table>
-        </div>
-        <!-- ⬆ Scrollable container ends -->
+                </div>
+            </div>
 
-      </div> <!-- card-body -->
-    </div> <!-- card -->
-  </div> <!-- col -->
-            <div class="mb-4">
-                <div class="card flex-grow-1">
+            <div class="col-12 col-md-12 col-xl-6 mb-4">
+                <div class="card h-100">
                     <div class="card-body d-flex flex-column">
                         <div class="col-12 form-heading">
                             <h4>List of Questions for the Selected Questionnaire: {{selectedQuestionnaire}}</h4>
                         </div>
-                        <div class="table-responsive flex-grow-1">
+
+                        <div class="table-responsive flex-grow-1 card-list-scroll">
                             <table class="table border-0 custom-table comman-table datatable mb-0">
                                 <thead>
                                     <tr>
@@ -166,42 +152,26 @@
                                         <td colspan="4" class="text-center">No Data Found</td>
                                     </tr>
                                     <tr *ngIf="questiontoDisplay.length === 0">
-                                        <td colspan="4" class="text-center">
-                                            <a href="javascript:void(0);" (click)="showAddQuestionSection()">Add New
-                                                Question</a>
-                                        </td>
+                                        <td colspan="4" class="text-center"><a href="javascript:void(0);" (click)="showAddQuestionSection()">Add New Question</a></td>
                                     </tr>
                                     <tr *ngFor="let data of questiontoDisplay">
                                         <td>
                                             <div class="form-check check-tables">
-                                                <input class="form-check-input" type="checkbox"
-                                                  [checked]="isQuestionSelected(data.questionId)"
-                                                  (change)="toggleQuestionSelection(data.questionId)">
+                                                <input class="form-check-input" type="checkbox" [checked]="isQuestionSelected(data.questionId)" (change)="toggleQuestionSelection(data.questionId)">
                                             </div>
                                         </td>
                                         <td class="profile-image">
-                                            <a href="javascript:void(0);"
-                                                (click)="showaddQuestion(data.questionnaireId)">
-                                                
-                                                {{data.questionText}}
-                                            </a>
+                                            <a href="javascript:void(0);" (click)="showaddQuestion(data.questionnaireId)">{{data.questionText}}</a>
                                         </td>
                                         <td>{{data.questionId}}</td>
                                         <td class="text-end">
                                             <div class="dropdown dropdown-action">
-                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle"
-                                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                                <a href="javascript:void(0);" class="action-icon dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="fa fa-ellipsis-v"></i>
                                                 </a>
                                                 <div class="dropdown-menu dropdown-menu-end">
-                                                    <a class="dropdown-item" href="javascript:void(0);"
-                                                        (click)="EditQuestionAddOptionWithMapping(data.questionId)">
-                                                        <i class="fa-solid fa-pen-to-square m-r-5"></i> Edit
-                                                    </a>
-                                                    <a class="dropdown-item" href="javascript:void(0);" 
-                                                       (click)="deleteQuestion(data.questionId)">
-                                                        <i class="fa fa-trash-alt m-r-5"></i> Delete
-                                                    </a>
+                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="EditQuestionAddOptionWithMapping(data.questionId)"><i class="fa-solid fa-pen-to-square m-r-5"></i> Edit</a>
+                                                    <a class="dropdown-item" href="javascript:void(0);" (click)="deleteQuestion(data.questionId)"><i class="fa fa-trash-alt m-r-5"></i> Delete</a>
                                                 </div>
                                             </div>
                                         </td>
@@ -284,7 +254,7 @@
                                             <div class="col-12 col-md-6 col-xl-4">
                                                 <button type="button" class="btn btn-primary submit-form me-2"
                                                     (click)="removeDynamicControl(i)">Remove
-                                                </button>
+                                                </button><br><br>
                                             </div>
 
 
@@ -307,7 +277,7 @@
                                             </div>
                                         </div>
                                         </ng-container>
-                                        <ng-container *ngIf="editQuestion">
+                                        <ng-container *ngIf="editQuestion || objectiveType">
                                             <button type="button" class="btn btn-primary submit-form me-2"
                                                 (click)="addDynamicControl()">Add Option</button>
                                         </ng-container>
@@ -346,18 +316,7 @@
                                     <h4>QUESTIONS</h4>
                                 </div>
                                 <div class="row align-items-center justify-content-between">
-                                    <div class="col-4 form-heading">
-                                        <h4 *ngIf="displayedQuestions.length > 1 && subQuestionCounter > 0">
-                                            Question {{currentQuestionIndex}}.{{subQuestionCounter}} of
-                                            {{questionLenth}}
-                                        </h4>
-                                        <h4 *ngIf="displayedQuestions.length > 1 && subQuestionCounter === 0">
-                                            Question {{currentQuestionIndex}} of {{questionLenth}}
-                                        </h4>
-                                        <h4 *ngIf="displayedQuestions.length <= 1">
-                                            Question
-                                        </h4>
-                                    </div>
+                                    
                                     <div class="col-4 text-right" *ngIf="currentQuestionData?.options?.length > 0  && optionsNotAvailable">
                                         <div class="form-group local-forms">
                                             <label for="existingOptions">Options</label>
