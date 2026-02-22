@@ -146,13 +146,8 @@ export class AddQuestionnaireComponent implements OnInit, OnDestroy {
 
   getDepartmentList() {
     this.departmentService.getDepartmentList().subscribe(data => {
-
-      data.map((res: any) => {
-        if (res.departmentName != 'admin') {
-          this._depDto.push(res)
-        }
-      })
-
+      // Replace the department list rather than pushing repeatedly
+      this._depDto = data.filter((res: any) => res.departmentName !== 'admin');
     })
   }
 
@@ -205,19 +200,21 @@ export class AddQuestionnaireComponent implements OnInit, OnDestroy {
 
       this.combineData = filteredQuestionaire.map((questName: any) => {
         const departmentName = depName.find((dep: any) => questName.questinaryDeptId === dep.departmentId);
-
-        this.loadingService.hideLoader();
-
         return {
           ...questName,
           deptName: departmentName ? departmentName.departmentName : 'Unknown Name',
         };
       });
 
-      // Select the top questionnaire by default if available
+      // Hide loader once after processing
+      this.loadingService.hideLoader();
+
+      // Select the top questionnaire by default — only if it's different from currently loaded
       if (this.combineData.length > 0) {
         const topQuestionnaire = this.combineData[0];
-        this.OnQuestionnaireChange(topQuestionnaire);
+        if (!this.questionnaireId || topQuestionnaire.questionnaireId !== this.questionnaireId) {
+          this.OnQuestionnaireChange(topQuestionnaire);
+        }
       }
     });
   }
@@ -311,10 +308,11 @@ export class AddQuestionnaireComponent implements OnInit, OnDestroy {
     this.mapQuestionAndOptions(this.questionnaireId);
     //this.dispalyPatientQuiz();
     const len = this.combindQuestionOption.length;
+    // Reset answer form before adding controls to avoid duplicate controls on repeated calls
+    this.answerForm = this.fb.group({});
     for (let i = 1; i <= len; i++) {
       const str = String(i)
       this.addFormControlNametoFormGroup(str)
-
     }
   }
 
@@ -357,24 +355,29 @@ export class AddQuestionnaireComponent implements OnInit, OnDestroy {
     forkJoin([question$, options$]).subscribe(([question, options]) => {
 
       this.combindQuestionOption = question.map((quest: any) => {
-        options.map(e => {
+        // Ensure an options array exists so we can push into it safely
+        quest.options = quest.options || [];
+        options.forEach(e => {
           if (e.questionId == quest.questionId) {
-            const optData: any = {};
-            optData.optionId = e.optionId;
-            optData.optionText = e.optionText;
-            optData.mapQuestionId = e.mapQuestionId;
+            const optData: any = {
+              optionId: e.optionId,
+              optionText: e.optionText,
+              mapQuestionId: e.mapQuestionId
+            };
             quest.options.push(optData);
           }
-        })
+        });
 
         const opt = options.find(e => e.questionId == quest.questionId);
 
         return {
           ...quest,
           mapQuestionId: opt ? opt.mapQuestionId : 0,
+        };
+      });
 
-        }
-      })
+      // If the user already selected questions, refresh the displayed set so options appear
+      this.updateDisplayedQuestions();
       this.dispalyPatientQuiz();
     })
 
@@ -441,6 +444,26 @@ export class AddQuestionnaireComponent implements OnInit, OnDestroy {
       this.questionForm.get('questionType')?.patchValue(res.questionType);
       this.questionForm.get("questionMapping")?.patchValue(270);
       this.showOption(res.questionType);
+
+      // If editing an objective/optional question, load its existing options
+      if (res.questionType === 1) {
+        // ensure form array empty before populating
+        this.optionControls.clear();
+        this.question.getAllOptions().subscribe(opts => {
+          const qopts = opts.filter((o: any) => o.questionId === this.questionId);
+          qopts.forEach((o: any) => {
+            this.optionControls.push(
+              this.fb.group({
+                option: [o.optionText || '', Validators.required],
+                mapQuestionId: [o.mapQuestionId || '', Validators.required]
+              })
+            );
+          });
+        });
+      } else {
+        // clear any leftover option controls for non-objective types
+        this.optionControls.clear();
+      }
     })
   }
 

@@ -19,6 +19,13 @@
     overflow-x: auto;
     -ms-overflow-style: -ms-autohiding-scrollbar;
   }
+
+/* Limit list height to ~5 rows and show internal scrollbar */
+.card-list-scroll {
+	max-height: 300px; /* roughly fits 5 rows + header; adjust if row height differs */
+	overflow-y: auto;
+	overflow-x: auto;
+}
   
 .align-right {
   margin-left: auto;
